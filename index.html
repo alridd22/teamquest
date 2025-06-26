@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Register Your Team</title>
+    <title>TeamQuest Registration</title>
     <style>
         * {
             margin: 0;
@@ -22,88 +22,149 @@
         }
 
         .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            background: white;
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             max-width: 500px;
             width: 100%;
-            text-align: center;
         }
 
         .logo {
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-
-        .title {
-            color: #4a5568;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            color: #718096;
-            font-size: 1.1rem;
+            text-align: center;
             margin-bottom: 30px;
         }
 
-        .team-code-display {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+        .puzzle-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .team-code {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 15px;
             border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
+            text-align: center;
+            font-size: 1.2em;
             font-weight: bold;
+            margin-bottom: 30px;
+        }
+
+        .instructions {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions p {
+            color: #555;
+            line-height: 1.6;
         }
 
         .form-group {
             margin-bottom: 25px;
-            text-align: left;
         }
 
         label {
             display: block;
-            color: #4a5568;
-            font-weight: 600;
             margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="number"] {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e1e5e9;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 16px;
             transition: all 0.3s ease;
-            background: white;
+            background: #f8f9ff;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus {
             outline: none;
             border-color: #667eea;
+            background: white;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        .char-count {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .pin-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .pin-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 0.9em;
+            color: #8b6914;
+        }
+
+        .pin-info strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #6c5400;
+        }
+
         .submit-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 15px 40px;
+            padding: 18px;
             border-radius: 10px;
-            font-size: 1.1rem;
+            font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
 
         .submit-btn:disabled {
@@ -113,50 +174,21 @@
         }
 
         .error-message {
-            color: #e53e3e;
-            font-size: 0.9rem;
-            margin-top: 10px;
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 8px;
+            border: 1px solid #f5c6cb;
             display: none;
         }
 
         .loading {
             display: none;
+            text-align: center;
             margin-top: 15px;
-        }
-
-        .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .instructions {
-            background: #f7fafc;
-            border-left: 4px solid #4299e1;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-            text-align: left;
-        }
-
-        .instructions h3 {
-            color: #2d3748;
-            margin-bottom: 8px;
-        }
-
-        .instructions p {
-            color: #4a5568;
-            font-size: 0.9rem;
-            line-height: 1.4;
+            color: #667eea;
         }
 
         @media (max-width: 600px) {
@@ -164,110 +196,126 @@
                 padding: 30px 20px;
             }
             
-            .title {
-                font-size: 2rem;
+            h1 {
+                font-size: 2em;
             }
             
-            .logo {
-                font-size: 2.5rem;
+            .pin-group {
+                grid-template-columns: 1fr;
+                gap: 15px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🧩</div>
-        <h1 class="title">TeamQuest</h1>
-        <p class="subtitle">Register Your Team Name</p>
-
-        <!-- Team Code Display -->
-        <div class="team-code-display" id="team-code-display">
-            <span id="team-code-text">Loading team code...</span>
+        <div class="logo">
+            <div class="puzzle-icon">🧩</div>
+            <h1>TeamQuest</h1>
+            <p class="subtitle">Register Your Team Name</p>
         </div>
 
-        <!-- Instructions -->
+        <div class="team-code" id="teamCodeDisplay">
+            Team Code: Loading...
+        </div>
+
         <div class="instructions">
-            <h3>📝 Instructions</h3>
-            <p>Choose a creative team name that represents your group. This name will be displayed on the leaderboard and used throughout your TeamQuest adventure!</p>
+            <h3>🎯 Instructions</h3>
+            <p>Choose a creative team name that represents your group and a 4-digit PIN code. This name will be displayed on the leaderboard and the PIN will be used to access activities throughout your TeamQuest adventure!</p>
         </div>
 
-        <!-- Registration Form -->
-        <form id="registration-form">
+        <form id="registrationForm">
             <div class="form-group">
-                <label for="team-name">Team Name</label>
-                <input 
-                    type="text" 
-                    id="team-name" 
-                    name="teamName" 
-                    placeholder="Enter your awesome team name..." 
-                    required 
-                    maxlength="50"
-                    autocomplete="off"
-                >
+                <label for="teamName">Team Name</label>
+                <input type="text" id="teamName" name="teamName" maxlength="50" required>
+                <div class="char-count">
+                    <span id="charCount">50</span> characters remaining
+                </div>
             </div>
 
-            <button type="submit" class="submit-btn" id="submit-btn">
+            <div class="form-group">
+                <label for="teamPin">Team PIN Code</label>
+                <div class="pin-group">
+                    <div>
+                        <input type="number" id="teamPin" name="teamPin" min="1000" max="9999" placeholder="1234" required>
+                    </div>
+                    <div class="pin-info">
+                        <strong>Important:</strong>
+                        Choose a 4-digit number that your team will remember. You'll need this PIN to access activities during the competition.
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
                 🚀 Register Team
             </button>
 
-            <div class="error-message" id="error-message"></div>
-            
             <div class="loading" id="loading">
-                <div class="spinner"></div>
-                <p>Registering your team...</p>
+                Registering your team...
             </div>
+
+            <div class="error-message" id="errorMessage"></div>
         </form>
     </div>
 
     <script>
         // Get team code from URL parameter
         const urlParams = new URLSearchParams(window.location.search);
-        const teamCode = urlParams.get('team');
+        const teamCode = urlParams.get('team') || 'UNKNOWN';
+        
+        // Display team code
+        document.getElementById('teamCodeDisplay').textContent = `Team Code: ${teamCode.toUpperCase()}`;
 
-        // Display team code or error
-        const teamCodeDisplay = document.getElementById('team-code-text');
-        const registrationForm = document.getElementById('registration-form');
-        const errorMessage = document.getElementById('error-message');
+        // Character counter
+        const teamNameInput = document.getElementById('teamName');
+        const charCount = document.getElementById('charCount');
+        
+        teamNameInput.addEventListener('input', function() {
+            const remaining = 50 - this.value.length;
+            charCount.textContent = remaining;
+            charCount.style.color = remaining < 10 ? '#e74c3c' : '#666';
+        });
 
-        if (teamCode) {
-            teamCodeDisplay.textContent = `Team Code: ${teamCode.toUpperCase()}`;
-        } else {
-            teamCodeDisplay.textContent = 'Error: No team code provided';
-            teamCodeDisplay.style.background = 'linear-gradient(135deg, #e53e3e, #c53030)';
-            registrationForm.style.display = 'none';
-            
-            const instructions = document.querySelector('.instructions');
-            instructions.innerHTML = `
-                <h3>❌ Access Error</h3>
-                <p>This page requires a valid team code. Please scan your team's QR code or contact the organizer for assistance.</p>
-            `;
-            instructions.style.borderLeftColor = '#e53e3e';
-            instructions.style.background = '#fed7d7';
-        }
+        // PIN validation
+        const teamPinInput = document.getElementById('teamPin');
+        teamPinInput.addEventListener('input', function() {
+            // Ensure it's exactly 4 digits
+            if (this.value.length > 4) {
+                this.value = this.value.slice(0, 4);
+            }
+        });
 
-        // Handle form submission
-        registrationForm.addEventListener('submit', async function(e) {
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const teamName = document.getElementById('team-name').value.trim();
-            const submitBtn = document.getElementById('submit-btn');
+            const teamName = document.getElementById('teamName').value.trim();
+            const teamPin = document.getElementById('teamPin').value;
+            const submitBtn = document.getElementById('submitBtn');
             const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('errorMessage');
             
+            // Validation
             if (!teamName) {
-                showError('Please enter a team name');
+                showError('Please enter a team name.');
                 return;
             }
-
-            if (!teamCode) {
-                showError('Team code is missing');
+            
+            if (!teamPin || teamPin.length !== 4) {
+                showError('Please enter exactly 4 digits for your PIN.');
                 return;
             }
-
-            // Show loading state
+            
+            if (teamName.length > 50) {
+                showError('Team name must be 50 characters or less.');
+                return;
+            }
+            
+            // Show loading
             submitBtn.disabled = true;
             loading.style.display = 'block';
             errorMessage.style.display = 'none';
-
+            
             try {
                 const response = await fetch('/.netlify/functions/register-team', {
                     method: 'POST',
@@ -275,55 +323,34 @@
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        teamCode: teamCode,
-                        teamName: teamName
+                        teamCode: teamCode.toUpperCase(),
+                        teamName: teamName,
+                        teamPin: teamPin
                     })
                 });
-
+                
                 const result = await response.json();
-
-                if (response.ok && result.success) {
-                    // Success! Redirect to thank you page
-                    window.location.href = `/team-registration-success?team=${encodeURIComponent(teamCode)}&name=${encodeURIComponent(teamName)}`;
+                
+                if (result.success) {
+                    // Redirect to success page
+                    window.location.href = `team-registration-success.html?team=${encodeURIComponent(teamName)}&code=${encodeURIComponent(teamCode.toUpperCase())}`;
                 } else {
-                    showError(result.message || 'Registration failed. Please try again.');
+                    showError(result.error || 'Registration failed. Please try again.');
                 }
             } catch (error) {
                 console.error('Registration error:', error);
-                showError('Network error. Please check your connection and try again.');
+                showError('Registration failed. Please try again.');
             } finally {
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
             }
         });
-
+        
         function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
             errorMessage.textContent = message;
             errorMessage.style.display = 'block';
         }
-
-        // Add character counter for team name
-        const teamNameInput = document.getElementById('team-name');
-        teamNameInput.addEventListener('input', function() {
-            const remaining = 50 - this.value.length;
-            
-            // Create or update character counter
-            let counter = document.getElementById('char-counter');
-            if (!counter) {
-                counter = document.createElement('div');
-                counter.id = 'char-counter';
-                counter.style.cssText = 'font-size: 0.8rem; color: #718096; margin-top: 5px; text-align: right;';
-                this.parentNode.appendChild(counter);
-            }
-            
-            counter.textContent = `${remaining} characters remaining`;
-            
-            if (remaining < 10) {
-                counter.style.color = '#e53e3e';
-            } else {
-                counter.style.color = '#718096';
-            }
-        });
     </script>
 </body>
 </html>
