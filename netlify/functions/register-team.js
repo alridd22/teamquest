@@ -111,41 +111,17 @@ exports.handler = async (event, context) => {
     
     if (!sheet.headerValues || sheet.headerValues.length === 0) {
       console.log('Setting up headers');
-      if (teamPin) {
-        await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
-      } else {
-        await sheet.setHeaderRow(['Team Code', 'Team Name', 'Registration Time']);
-      }
+      await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
     }
 
-    // Check for duplicate PIN if PIN is provided
-    if (teamPin) {
-      console.log('Checking for duplicate PIN');
-      const rows = await sheet.getRows();
-      const existingPin = rows.find(row => {
-        const pin = row.get('Team PIN') || row._rawData[2]; // Try both methods to get PIN
-        return pin === teamPin;
-      });
-      
-      if (existingPin) {
-        throw new Error(`PIN ${teamPin} is already in use by another team. Please choose a different PIN.`);
-      }
-    }
-
-    // Add the team data
+    // Add the team data - EXACTLY like before but with PIN
     console.log('Adding team data to sheet');
-    const rowData = {
+    const newRow = await sheet.addRow({
       'Team Code': teamCode,
       'Team Name': teamName,
+      'Team PIN': teamPin,
       'Registration Time': new Date().toISOString(),
-    };
-
-    // Add PIN if provided
-    if (teamPin) {
-      rowData['Team PIN'] = teamPin;
-    }
-
-    const newRow = await sheet.addRow(rowData);
+    });
 
     console.log('Team registered successfully:', newRow.rowNumber);
 
