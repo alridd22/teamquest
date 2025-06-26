@@ -34,44 +34,38 @@ exports.handler = async (event, context) => {
     console.log('Team data received:', { teamCode, teamName, teamPin: teamPin ? '****' : undefined });
 
     // Get environment variables
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+const sheetId = process.env.GOOGLE_SHEET_ID;
+let privateKey = process.env.GOOGLE_PRIVATE_KEY;
+const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
 
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKey: !!privateKey,
-      privateKeyLength: privateKey ? privateKey.length : 0
-    });
+console.log('Environment variables check:', {
+  hasEmail: !!serviceAccountEmail,
+  hasSheetId: !!sheetId,
+  hasPrivateKey: !!privateKey,
+  privateKeyLength: privateKey ? privateKey.length : 0
+});
 
-    if (!serviceAccountEmail || !privateKey || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
+if (!serviceAccountEmail || !(privateKey || privateKeyBase64) || !sheetId) {
+  throw new Error('Missing required environment variables');
+}
 
-    // Handle different private key formats
-    console.log('Processing private key');
-    
-    // If it's base64 encoded, decode it first
-    if (!privateKey.includes('-----BEGIN')) {
-      console.log('Decoding base64 private key');
-      try {
-        privateKey = Buffer.from(privateKey, 'base64').toString('utf8');
-      } catch (e) {
-        console.log('Base64 decode failed, treating as raw key');
-      }
-    }
+// Decode if needed
+console.log('Processing private key');
 
-    // Replace \\n with actual newlines if needed
-    let privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
+if (!privateKey && privateKeyBase64) {
+  console.log('Decoding from base64');
+  privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
+}
 
-    privateKey = privateKey.replace(/\\n/g, '\n');
+if (privateKey.includes('\\n')) {
+  privateKey = privateKey.replace(/\\n/g, '\n');
+}
 
-    // Ensure proper formatting
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Private key format invalid - missing BEGIN header');
-    }
+if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+  throw new Error('Private key format invalid - missing BEGIN header');
+}
+
 
     console.log('Private key processed, length:', privateKey.length);
 
