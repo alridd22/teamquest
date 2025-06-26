@@ -43,9 +43,8 @@ exports.handler = async (event, context) => {
       throw new Error('Missing environment variables');
     }
 
-    console.log('Using compact service account authentication');
+    console.log('Setting up authentication');
     
-    // Reconstruct the private key from the original JSON
     const privateKey = `-----BEGIN PRIVATE KEY-----
 MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCGw+YMg87AxUpz
 smaLvaq2ojIWpp0RRo1mTmk/grfaa4Mb4FOvAQdQy/4dWwat8lWe/HIG8kOLJzUD
@@ -75,40 +74,25 @@ KBWnf3uAzsOnnYBflkMy6XzjOf4hs7a4hN3zLQaQf1wl3HJoCcbmWi9epQTTnZPb
 xGMKYlytcRo0Hb0f9UTUmg==
 -----END PRIVATE KEY-----`;
 
-    console.log('Authenticating with Google Sheets');
-    
-    // Use the simpler GoogleSpreadsheet authentication
     const doc = new GoogleSpreadsheet(sheetId);
     
-    try {
-      await doc.useServiceAccountAuth({
-        client_email: serviceAccountEmail,
-        private_key: privateKey,
-      });
-      console.log('Authentication successful');
-    } catch (authError) {
-      console.error('Auth failed:', authError.message);
-      throw new Error(`Authentication failed: ${authError.message}`);
-    }
+    console.log('Authenticating with Google Sheets');
+    await doc.useServiceAccountAuth({
+      client_email: serviceAccountEmail,
+      private_key: privateKey,
+    });
 
-    try {
-      await doc.loadInfo();
-      console.log('Sheet loaded:', doc.title);
-    } catch (loadError) {
-      console.error('Sheet load failed:', loadError.message);
-      throw new Error(`Sheet access failed: ${loadError.message}`);
-    }
-
+    console.log('Loading sheet info');
+    await doc.loadInfo();
+    
     const sheet = doc.sheetsByIndex[0];
     await sheet.loadHeaderRow();
     
-    // Set headers if needed
     if (!sheet.headerValues || sheet.headerValues.length === 0) {
       console.log('Setting up headers');
       await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
     }
 
-    // Check for duplicate PINs
     console.log('Checking for duplicate PIN');
     const rows = await sheet.getRows();
     const existingPin = rows.find(row => row.get('Team PIN') === teamPin);
@@ -117,8 +101,7 @@ xGMKYlytcRo0Hb0f9UTUmg==
       throw new Error(`PIN ${teamPin} is already in use. Please choose a different PIN.`);
     }
 
-    // Add new team
-    console.log('Adding team data');
+    console.log('Adding new team');
     await sheet.addRow({
       'Team Code': teamCode,
       'Team Name': teamName,
@@ -155,6 +138,6 @@ xGMKYlytcRo0Hb0f9UTUmg==
         success: false,
         error: error.message,
       }),
-    );
+    };
   }
 };
