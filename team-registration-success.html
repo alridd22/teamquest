@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Complete - TeamQuest</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1.5s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .title {
+            color: #2d3748;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .team-name {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: #4a5568;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        .info-section {
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .info-section h3 {
+            color: #2d3748;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .info-section ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-section li {
+            color: #4a5568;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section li::before {
+            content: "✅";
+            font-size: 1.1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .competition-status {
+            background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+
+        .competition-status h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .competition-status p {
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .team-name {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="success-icon">🎉</div>
+        <h1 class="title">Registration Complete!</h1>
+        
+        <div class="team-name" id="team-name-display">
+            Loading team name...
+        </div>
+        
+        <p class="subtitle">Your team is now officially registered for TeamQuest!</p>
+
+        <div class="competition-status">
+            <h3>⏰ Competition Status</h3>
+            <p>The competition hasn't started yet. Wait for the organizer to begin the 90-minute challenge. When it starts, you'll be able to access all activities and begin earning points!</p>
+        </div>
+
+        <div class="info-section">
+            <h3>🚀 What Happens Next?</h3>
+            <ul>
+                <li>Wait for the organizer to start the competition</li>
+                <li>You'll have 90 minutes to complete challenges</li>
+                <li>Earn points through various fun activities</li>
+                <li>Watch your progress on the live leaderboard</li>
+                <li>Return to the starting point before time runs out!</li>
+            </ul>
+        </div>
+
+        <div class="info-section">
+            <h3>🏆 Challenge Categories</h3>
+            <ul>
+                <li>Random Acts of Kindness (with photo evidence)</li>
+                <li>Creative Limerick Writing</li>
+                <li>Scavenger Hunt Challenges</li>
+                <li>Quiz Questions</li>
+                <li>Clue Solving Adventures</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="/leaderboard" class="btn btn-primary">
+                🏆 View Live Leaderboard
+            </a>
+            <a href="/" class="btn btn-secondary">
+                🏠 Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Get team information from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const teamCode = urlParams.get('team');
+        const teamName = urlParams.get('name');
+
+        // Display team name
+        const teamNameDisplay = document.getElementById('team-name-display');
+        
+        if (teamName) {
+            teamNameDisplay.textContent = teamName;
+        } else if (teamCode) {
+            teamNameDisplay.textContent = `Team ${teamCode.toUpperCase()}`;
+        } else {
+            teamNameDisplay.textContent = 'Your Team';
+        }
+
+        // Add some confetti effect
+        function createConfetti() {
+            const colors = ['#667eea', '#764ba2', '#ffd89b', '#19547b'];
+            
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.style.cssText = `
+                        position: fixed;
+                        width: 10px;
+                        height: 10px;
+                        background: ${colors[Math.floor(Math.random() * colors.length)]};
+                        top: -10px;
+                        left: ${Math.random() * 100}vw;
+                        border-radius: 50%;
+                        pointer-events: none;
+                        animation: fall 3s linear forwards;
+                        z-index: 1000;
+                    `;
+                    
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+
+        // Add CSS for confetti animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Trigger confetti on page load
+        setTimeout(createConfetti, 500);
+    </script>
+</body>
+</html>

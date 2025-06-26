@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamQuest - Register Your Team</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .title {
+            color: #4a5568;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .team-code-display {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            color: #4a5568;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 15px;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .instructions {
+            background: #f7fafc;
+            border-left: 4px solid #4299e1;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .instructions p {
+            color: #4a5568;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🧩</div>
+        <h1 class="title">TeamQuest</h1>
+        <p class="subtitle">Register Your Team Name</p>
+
+        <!-- Team Code Display -->
+        <div class="team-code-display" id="team-code-display">
+            <span id="team-code-text">Loading team code...</span>
+        </div>
+
+        <!-- Instructions -->
+        <div class="instructions">
+            <h3>📝 Instructions</h3>
+            <p>Choose a creative team name that represents your group. This name will be displayed on the leaderboard and used throughout your TeamQuest adventure!</p>
+        </div>
+
+        <!-- Registration Form -->
+        <form id="registration-form">
+            <div class="form-group">
+                <label for="team-name">Team Name</label>
+                <input 
+                    type="text" 
+                    id="team-name" 
+                    name="teamName" 
+                    placeholder="Enter your awesome team name..." 
+                    required 
+                    maxlength="50"
+                    autocomplete="off"
+                >
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn">
+                🚀 Register Team
+            </button>
+
+            <div class="error-message" id="error-message"></div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Registering your team...</p>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Get team code from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const teamCode = urlParams.get('team');
+
+        // Display team code or error
+        const teamCodeDisplay = document.getElementById('team-code-text');
+        const registrationForm = document.getElementById('registration-form');
+        const errorMessage = document.getElementById('error-message');
+
+        if (teamCode) {
+            teamCodeDisplay.textContent = `Team Code: ${teamCode.toUpperCase()}`;
+        } else {
+            teamCodeDisplay.textContent = 'Error: No team code provided';
+            teamCodeDisplay.style.background = 'linear-gradient(135deg, #e53e3e, #c53030)';
+            registrationForm.style.display = 'none';
+            
+            const instructions = document.querySelector('.instructions');
+            instructions.innerHTML = `
+                <h3>❌ Access Error</h3>
+                <p>This page requires a valid team code. Please scan your team's QR code or contact the organizer for assistance.</p>
+            `;
+            instructions.style.borderLeftColor = '#e53e3e';
+            instructions.style.background = '#fed7d7';
+        }
+
+        // Handle form submission
+        registrationForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const teamName = document.getElementById('team-name').value.trim();
+            const submitBtn = document.getElementById('submit-btn');
+            const loading = document.getElementById('loading');
+            
+            if (!teamName) {
+                showError('Please enter a team name');
+                return;
+            }
+
+            if (!teamCode) {
+                showError('Team code is missing');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            errorMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/.netlify/functions/register-team', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: teamCode,
+                        teamName: teamName
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    // Success! Redirect to thank you page
+                    window.location.href = `/team-registration-success?team=${encodeURIComponent(teamCode)}&name=${encodeURIComponent(teamName)}`;
+                } else {
+                    showError(result.message || 'Registration failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
+
+        // Add character counter for team name
+        const teamNameInput = document.getElementById('team-name');
+        teamNameInput.addEventListener('input', function() {
+            const remaining = 50 - this.value.length;
+            
+            // Create or update character counter
+            let counter = document.getElementById('char-counter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.id = 'char-counter';
+                counter.style.cssText = 'font-size: 0.8rem; color: #718096; margin-top: 5px; text-align: right;';
+                this.parentNode.appendChild(counter);
+            }
+            
+            counter.textContent = `${remaining} characters remaining`;
+            
+            if (remaining < 10) {
+                counter.style.color = '#e53e3e';
+            } else {
+                counter.style.color = '#718096';
+            }
+        });
+    </script>
+</body>
+</html>
