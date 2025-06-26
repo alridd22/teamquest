@@ -1,4 +1,5 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
 
 exports.handler = async (event, context) => {
   console.log('Function started');
@@ -74,14 +75,16 @@ KBWnf3uAzsOnnYBflkMy6XzjOf4hs7a4hN3zLQaQf1wl3HJoCcbmWi9epQTTnZPb
 xGMKYlytcRo0Hb0f9UTUmg==
 -----END PRIVATE KEY-----`;
 
-    const doc = new GoogleSpreadsheet(sheetId);
-    
-    console.log('Authenticating with Google Sheets');
-    await doc.useServiceAccountAuth({
-      client_email: serviceAccountEmail,
-      private_key: privateKey,
+    console.log('Creating JWT client');
+    const serviceAccountAuth = new JWT({
+      email: serviceAccountEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
+    console.log('Initializing Google Sheet');
+    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+    
     console.log('Loading sheet info');
     await doc.loadInfo();
     
