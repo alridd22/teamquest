@@ -33,16 +33,6 @@ exports.handler = async (event, context) => {
     
     console.log('Team data received:', { teamCode, teamName, teamPin: teamPin ? '****' : undefined });
 
-    // Validation
-    if (!teamCode || !teamName || !teamPin) {
-      throw new Error('Missing required fields: teamCode, teamName, or teamPin');
-    }
-
-    // Validate PIN is exactly 4 digits
-    if (!/^\d{4}$/.test(teamPin)) {
-      throw new Error('PIN must be exactly 4 digits');
-    }
-
     // Get environment variables
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const sheetId = process.env.GOOGLE_SHEET_ID;
@@ -120,33 +110,42 @@ exports.handler = async (event, context) => {
     await sheet.loadHeaderRow();
     
     if (!sheet.headerValues || sheet.headerValues.length === 0) {
-      console.log('Setting up headers with PIN column');
-      await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
-    } else if (!sheet.headerValues.includes('Team PIN')) {
-      console.log('Adding Team PIN column to existing headers');
-      // If PIN column doesn't exist, we need to add it
-      const currentHeaders = sheet.headerValues;
-      currentHeaders.splice(2, 0, 'Team PIN'); // Insert PIN column after Team Name
-      await sheet.setHeaderRow(currentHeaders);
+      console.log('Setting up headers');
+      if (teamPin) {
+        await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
+      } else {
+        await sheet.setHeaderRow(['Team Code', 'Team Name', 'Registration Time']);
+      }
     }
 
-    // Check for duplicate PIN
-    console.log('Checking for duplicate PIN');
-    const rows = await sheet.getRows();
-    const existingPin = rows.find(row => row.get('Team PIN') === teamPin);
-    
-    if (existingPin) {
-      throw new Error(`PIN ${teamPin} is already in use by another team. Please choose a different PIN.`);
+    // Check for duplicate PIN if PIN is provided
+    if (teamPin) {
+      console.log('Checking for duplicate PIN');
+      const rows = await sheet.getRows();
+      const existingPin = rows.find(row => {
+        const pin = row.get('Team PIN') || row._rawData[2]; // Try both methods to get PIN
+        return pin === teamPin;
+      });
+      
+      if (existingPin) {
+        throw new Error(`PIN ${teamPin} is already in use by another team. Please choose a different PIN.`);
+      }
     }
 
     // Add the team data
     console.log('Adding team data to sheet');
-    const newRow = await sheet.addRow({
+    const rowData = {
       'Team Code': teamCode,
       'Team Name': teamName,
-      'Team PIN': teamPin,
       'Registration Time': new Date().toISOString(),
-    });
+    };
+
+    // Add PIN if provided
+    if (teamPin) {
+      rowData['Team PIN'] = teamPin;
+    }
+
+    const newRow = await sheet.addRow(rowData);
 
     console.log('Team registered successfully:', newRow.rowNumber);
 
@@ -161,7 +160,6 @@ exports.handler = async (event, context) => {
         message: 'Team registered successfully',
         teamCode,
         teamName,
-        teamPin: teamPin,
       }),
     };
 
