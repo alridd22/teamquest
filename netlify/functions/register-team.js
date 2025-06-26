@@ -1,10 +1,6 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
-
 exports.handler = async (event, context) => {
   console.log('Function started');
   
-  // Handle preflight CORS requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -20,110 +16,64 @@ exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: {'Access-Control-Allow-Origin': '*'},
       body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
   try {
-    console.log('Parsing request body');
     const { teamCode, teamName, teamPin } = JSON.parse(event.body);
     
     console.log('Team data received:', { teamCode, teamName, teamPin: teamPin ? '****' : undefined });
 
-    // Get environment variables
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
-
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKey: !!privateKey,
-      privateKeyLength: privateKey ? privateKey.length : 0
-    });
-
-    if (!serviceAccountEmail || !privateKey || !sheetId) {
-      throw new Error('Missing required environment variables');
+    if (!teamCode || !teamName || !teamPin) {
+      throw new Error('Missing required fields');
     }
 
-    // Handle different private key formats
-    console.log('Processing private key');
+    if (!/^\d{4}$/.test(teamPin)) {
+      throw new Error('PIN must be exactly 4 digits');
+    }
+
+    const sheetId = process.env.GOOGLE_SHEET_ID;
+    const apiKey = process.env.GOOGLE_API_KEY;
+
+    if (!sheetId || !apiKey) {
+      throw new Error('Missing environment variables');
+    }
+
+    // Check for duplicate PINs
+    const getUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1?key=${apiKey}`;
+    const getResponse = await fetch(getUrl);
     
-    // If it's base64 encoded, decode it first
-    if (!privateKey.includes('-----BEGIN')) {
-      console.log('Decoding base64 private key');
-      try {
-        privateKey = Buffer.from(privateKey, 'base64').toString('utf8');
-      } catch (e) {
-        console.log('Base64 decode failed, treating as raw key');
+    if (!getResponse.ok) {
+      throw new Error(`Sheet access failed: ${getResponse.statusText}`);
+    }
+    
+    const sheetData = await getResponse.json();
+    
+    // Check existing PINs (column C = index 2)
+    if (sheetData.values && sheetData.values.length > 1) {
+      const existingPins = sheetData.values.slice(1).map(row => row[2]).filter(pin => pin);
+      if (existingPins.includes(teamPin)) {
+        throw new Error(`PIN ${teamPin} is already in use. Please choose a different PIN.`);
       }
     }
-
-    // Replace \\n with actual newlines if needed
-    privateKey = privateKey.replace(/\\n/g, '\n');
-
-    // Ensure proper formatting
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Private key format invalid - missing BEGIN header');
-    }
-
-    console.log('Private key processed, length:', privateKey.length);
-
-    // Create JWT client with more explicit error handling
-    console.log('Creating JWT client');
-    let serviceAccountAuth;
     
-    try {
-      serviceAccountAuth = new JWT({
-        email: serviceAccountEmail,
-        key: privateKey,
-        scopes: [
-          'https://www.googleapis.com/auth/spreadsheets',
-        ],
-      });
-      console.log('JWT client created successfully');
-    } catch (jwtError) {
-      console.error('JWT creation failed:', jwtError.message);
-      throw new Error(`JWT creation failed: ${jwtError.message}`);
-    }
-
-    // Initialize the sheet Document
-    console.log('Initializing Google Sheet');
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-    
-    try {
-      await doc.loadInfo();
-      console.log('Sheet loaded successfully:', doc.title);
-    } catch (loadError) {
-      console.error('Sheet load failed:', loadError.message);
-      throw new Error(`Sheet access failed: ${loadError.message}`);
-    }
-
-    // Get the first sheet
-    const sheet = doc.sheetsByIndex[0];
-    console.log('Using sheet:', sheet.title);
-
-    // Check if sheet has headers, if not add them
-    await sheet.loadHeaderRow();
-    
-    if (!sheet.headerValues || sheet.headerValues.length === 0) {
-      console.log('Setting up headers');
-      await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
-    }
-
-    // Add the team data - EXACTLY like before but with PIN
-    console.log('Adding team data to sheet');
-    const newRow = await sheet.addRow({
-      'Team Code': teamCode,
-      'Team Name': teamName,
-      'Team PIN': teamPin,
-      'Registration Time': new Date().toISOString(),
+    // Add new row
+    const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1:append?valueInputOption=RAW&key=${apiKey}`;
+    const appendResponse = await fetch(appendUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        values: [[teamCode, teamName, teamPin, new Date().toISOString()]]
+      })
     });
-
-    console.log('Team registered successfully:', newRow.rowNumber);
+    
+    if (!appendResponse.ok) {
+      throw new Error(`Failed to save data: ${appendResponse.statusText}`);
+    }
+    
+    console.log('Team registered successfully');
 
     return {
       statusCode: 200,
