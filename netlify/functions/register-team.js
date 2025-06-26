@@ -63,6 +63,9 @@ exports.handler = async (event, context) => {
     }
 
     // Replace \\n with actual newlines if needed
+    let privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
+let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
+
     privateKey = privateKey.replace(/\\n/g, '\n');
 
     // Ensure proper formatting
