@@ -456,7 +456,7 @@
                 console.log('Loading leaderboard data...');
                 
                 // Fetch data from our secure Netlify function
-                const response = await fetch('/.netlify/functions/get-leaderboard');
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
