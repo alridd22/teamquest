@@ -616,7 +616,6 @@
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
                 // Call a function to verify the PIN against the registration data
-                // This would check the original registration sheet with PINs
                 const response = await fetch('/.netlify/functions/verify-team-pin', {
                     method: 'POST',
                     headers: {
@@ -628,35 +627,70 @@
                     })
                 });
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
-                return result.success && result.valid;
+                
+                if (result.success) {
+                    return result.valid;
+                } else {
+                    throw new Error(result.error || 'Verification failed');
+                }
                 
             } catch (error) {
                 console.error('Error verifying team and PIN:', error);
-                
-                // Fallback: For development/testing, accept any 4-digit PIN
-                console.log('Using fallback PIN verification');
-                return /^\d{4}$/.test(enteredPin);
+                // Don't use fallback - return false for security
+                return false;
             }
         }
 
         async function simulateSubmission(photoFile, description, location) {
-            // Simulate upload and processing time
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            
-            // In real implementation:
-            // 1. Upload photo to Uploadcare
-            // 2. Call Netlify function with photo URL + description
-            // 3. Function calls Zapier webhook
-            // 4. Zapier sends to OpenAI for scoring
-            // 5. Score returned and saved to Google Sheets
-            
-            console.log('Simulated submission:', {
-                team: currentTeam?.teamName,
-                description,
-                location,
-                photoSize: photoFile.size,
-                photoType: photoFile.type
+            try {
+                // Convert photo to base64 for submission
+                const photoData = await convertFileToBase64(photoFile);
+                
+                // Submit to backend function
+                const response = await fetch('/.netlify/functions/submit-kindness', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: currentTeam.teamCode,
+                        teamName: currentTeam.teamName,
+                        description: description,
+                        location: location,
+                        photoData: photoData
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+                console.log('Kindness submission successful:', result);
+                return result;
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                throw error;
+            }
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
             });
         }
 
