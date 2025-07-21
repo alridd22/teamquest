@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamQuest - Admin Panel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            color: #ffd700;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 10px;
+        }
+
+        .timer-control {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .timer-display {
+            font-size: 3em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        .timer-status {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .status-stopped { background: rgba(220, 53, 69, 0.2); border: 1px solid #dc3545; }
+        .status-running { background: rgba(40, 167, 69, 0.2); border: 1px solid #28a745; }
+        .status-paused { background: rgba(255, 193, 7, 0.2); border: 1px solid #ffc107; }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-start { background: #28a745; color: white; }
+        .btn-pause { background: #ffc107; color: #333; }
+        .btn-stop { background: #dc3545; color: white; }
+        .btn-reset { background: #6c757d; color: white; }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .emergency-controls {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid #dc3545;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .teams-panel {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .teams-grid {
+            display: grid;
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .team-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .team-card:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .team-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .team-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .team-score {
+            font-size: 1.4em;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .team-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(0,0,0,0.3);
+            color: white;
+            font-size: 0.9em;
+        }
+
+        .return-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+        }
+
+        .return-checkbox input[type="checkbox"] {
+            transform: scale(1.2);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .activity-summary {
+            margin-top: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .activity-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .loading {
+            text-align: center;
+            opacity: 0.8;
+            padding: 20px;
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .success-message {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+            color: #d4edda;
+        }
+
+        .error-message {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+            color: #f8d7da;
+        }
+
+        @media (max-width: 1200px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .control-buttons {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .activity-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">⚙️</div>
+        <h1>TeamQuest Admin Panel</h1>
+        <p class="subtitle">Competition Control Center</p>
+    </div>
+
+    <div class="admin-container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <h2 class="section-title">Competition Control</h2>
+            
+            <div class="timer-control">
+                <div class="timer-display" id="timerDisplay">01:30:00</div>
+                <div class="timer-status status-stopped" id="timerStatus">
+                    Competition Stopped
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="btn btn-start" id="startBtn" onclick="startCompetition()">
+                        🚀 Start Competition
+                    </button>
+                    <button class="btn btn-pause" id="pauseBtn" onclick="pauseCompetition()" disabled>
+                        ⏸️ Pause
+                    </button>
+                    <button class="btn btn-stop" id="stopBtn" onclick="stopCompetition()" disabled>
+                        ⏹️ Stop
+                    </button>
+                    <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">
+                        🔄 Reset Timer
+                    </button>
+                </div>
+            </div>
+
+            <div class="emergency-controls">
+                <h3>Emergency Controls</h3>
+                <button class="btn btn-stop" onclick="emergencyStop()" style="width: 100%; margin-top: 10px;">
+                    🚨 Emergency Stop All
+                </button>
+            </div>
+
+            <div class="activity-summary">
+                <h3>Activity Overview</h3>
+                <div class="activity-grid">
+                    <div class="activity-item">
+                        <div style="font-weight: bold;">Registration</div>
+                        <div id="regCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div style="font-weight: bold;">Clue Hunt</div>
+                        <div id="clueCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div style="font-weight: bold;">Quiz</div>
+                        <div id="quizCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div style="font-weight: bold;">Kindness</div>
+                        <div id="kindnessCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div style="font-weight: bold;">Limerick</div>
+                        <div id="limerickCount">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Teams Panel -->
+        <div class="teams-panel">
+            <h2 class="section-title">Team Management</h2>
+            
+            <div id="loading" class="loading">
+                Loading team data...
+            </div>
+            
+            <div id="teamsContent" style="display: none;">
+                <div class="teams-grid" id="teamsGrid">
+                    <!-- Team cards will be populated here -->
+                </div>
+            </div>
+            
+            <div id="messages"></div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-number" id="totalTeams">-</div>
+            <div class="stat-label">Total Teams</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activeTeams">-</div>
+            <div class="stat-label">Active Teams</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="returnedTeams">-</div>
+            <div class="stat-label">Returned Teams</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="avgScore">-</div>
+            <div class="stat-label">Average Score</div>
+        </div>
+    </div>
+
+    <script>
+        // Competition state
+        let competitionState = {
+            isRunning: false,
+            isPaused: false,
+            timeRemaining: 90 * 60, // 90 minutes in seconds
+            startTime: null,
+            teams: []
+        };
+
+        let timerInterval = null;
+        let dataRefreshInterval = null;
+
+        // Initialize admin panel
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamData();
+            updateTimerDisplay();
+            updateButtonStates();
+            
+            // Auto-refresh team data every 30 seconds
+            dataRefreshInterval = setInterval(loadTeamData, 30000);
+        });
+
+        function formatTime(seconds) {
+            if (seconds <= 0) return "TIME'S UP!";
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const status = document.getElementById('timerStatus');
+            
+            display.textContent = formatTime(competitionState.timeRemaining);
+            
+            if (competitionState.isRunning && !competitionState.isPaused) {
+                status.textContent = 'Competition Running';
+                status.className = 'timer-status status-running';
+                display.style.color = '#28a745';
+            } else if (competitionState.isPaused) {
+                status.textContent = 'Competition Paused';
+                status.className = 'timer-status status-paused';
+                display.style.color = '#ffc107';
+            } else {
+                status.textContent = 'Competition Stopped';
+                status.className = 'timer-status status-stopped';
+                display.style.color = '#ffd700';
+            }
+
+            // Change color based on time remaining
+            if (competitionState.timeRemaining <= 300 && competitionState.isRunning) { // Last 5 minutes
+                display.style.color = '#dc3545';
+            } else if (competitionState.timeRemaining <= 900 && competitionState.isRunning) { // Last 15 minutes
+                display.style.color = '#ffc107';
+            }
+        }
+
+        function updateButtonStates() {
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            if (competitionState.isRunning && !competitionState.isPaused) {
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                resetBtn.disabled = true;
+            } else if (competitionState.isPaused) {
+                startBtn.disabled = false;
+                startBtn.textContent = '▶️ Resume';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = false;
+                resetBtn.disabled = true;
+            } else {
+                startBtn.disabled = false;
+                startBtn.textContent = '🚀 Start Competition';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+            }
+        }
+
+        function startCompetition() {
+            if (competitionState.isPaused) {
+                // Resume from pause
+                competitionState.isPaused = false;
+            } else {
+                // Start fresh
+                competitionState.isRunning = true;
+                competitionState.startTime = new Date();
+            }
+
+            competitionState.isRunning = true;
+            
+            // Start timer countdown
+            timerInterval = setInterval(() => {
+                if (competitionState.isRunning && !competitionState.isPaused) {
+                    competitionState.timeRemaining--;
+                    
+                    if (competitionState.timeRemaining <= 0) {
+                        stopCompetition();
+                        showMessage('Competition time has ended!', 'success');
+                    }
+                    
+                    updateTimerDisplay();
+                }
+            }, 1000);
+
+            updateButtonStates();
+            updateTimerDisplay();
+            showMessage('Competition started!', 'success');
+        }
+
+        function pauseCompetition() {
+            competitionState.isPaused = true;
+            updateButtonStates();
+            updateTimerDisplay();
+            showMessage('Competition paused.', 'success');
+        }
+
+        function stopCompetition() {
+            competitionState.isRunning = false;
+            competitionState.isPaused = false;
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            updateButtonStates();
+            updateTimerDisplay();
+            showMessage('Competition stopped.', 'success');
+        }
+
+        function resetTimer() {
+            stopCompetition();
+            competitionState.timeRemaining = 90 * 60; // Reset to 90 minutes
+            updateTimerDisplay();
+            showMessage('Timer reset to 90 minutes.', 'success');
+        }
+
+        function emergencyStop() {
+            if (confirm('Are you sure you want to emergency stop the competition? This will immediately stop all activities.')) {
+                stopCompetition();
+                showMessage('EMERGENCY STOP activated. Competition halted.', 'error');
+            }
+        }
+
+        async function loadTeamData() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                const data = await response.json();
+                
+                if (data.success) {
+                    competitionState.teams = data.teams;
+                    renderTeams(data.teams);
+                    updateStatistics(data.teams);
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('teamsContent').style.display = 'block';
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Error loading team data:', error);
+                showMessage('Failed to load team data. ' + error.message, 'error');
+            }
+        }
+
+        function renderTeams(teams) {
+            const container = document.getElementById('teamsGrid');
+            container.innerHTML = '';
+
+            teams.forEach(team => {
+                const teamCard = document.createElement('div');
+                teamCard.className = 'team-card';
+                
+                teamCard.innerHTML = `
+                    <div class="team-header">
+                        <div class="team-name">${team.teamName}</div>
+                        <div class="team-score">${team.totalScore}</div>
+                    </div>
+                    <div class="team-controls">
+                        <select class="status-select" onchange="updateTeamStatus('${team.teamCode}', this.value)">
+                            <option value="active" ${team.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="returned" ${team.status === 'returned' ? 'selected' : ''}>Returned</option>
+                            <option value="late" ${team.status === 'late' ? 'selected' : ''}>Late</option>
+                        </select>
+                        <label class="return-checkbox">
+                            <input type="checkbox" ${team.locked ? 'checked' : ''} 
+                                   onchange="toggleTeamLock('${team.teamCode}', this.checked)">
+                            Lock Score
+                        </label>
+                    </div>
+                    <div style="margin-top: 10px; font-size: 0.9em; opacity: 0.8;">
+                        ${team.teamCode} | Reg: ${team.registration} | Clue: ${team.clueHunt} | Quiz: ${team.quiz}
+                    </div>
+                `;
+                
+                container.appendChild(teamCard);
+            });
+        }
+
+        function updateStatistics(teams) {
+            const totalTeams = teams.length;
+            const activeTeams = teams.filter(t => t.status === 'active').length;
+            const returnedTeams = teams.filter(t => t.status === 'returned').length;
+            const avgScore = totalTeams > 0 ? Math.round(teams.reduce((sum, t) => sum + t.totalScore, 0) / totalTeams) : 0;
+
+            document.getElementById('totalTeams').textContent = totalTeams;
+            document.getElementById('activeTeams').textContent = activeTeams;
+            document.getElementById('returnedTeams').textContent = returnedTeams;
+            document.getElementById('avgScore').textContent = avgScore;
+
+            // Update activity counts
+            document.getElementById('regCount').textContent = teams.filter(t => t.registration > 0).length;
+            document.getElementById('clueCount').textContent = teams.filter(t => t.clueHunt > 0).length;
+            document.getElementById('quizCount').textContent = teams.filter(t => t.quiz > 0).length;
+            document.getElementById('kindnessCount').textContent = teams.filter(t => t.kindness > 0).length;
+            document.getElementById('limerickCount').textContent = teams.filter(t => t.limerick > 0).length;
+        }
+
+        function updateTeamStatus(teamCode, newStatus) {
+            // In a real implementation, this would update the Google Sheet
+            console.log(`Updating ${teamCode} status to ${newStatus}`);
+            showMessage(`Team ${teamCode} status updated to ${newStatus}`, 'success');
+            
+            // Update local state
+            const team = competitionState.teams.find(t => t.teamCode === teamCode);
+            if (team) {
+                team.status = newStatus;
+            }
+        }
+
+        function toggleTeamLock(teamCode, isLocked) {
+            // In a real implementation, this would update the Google Sheet
+            console.log(`${isLocked ? 'Locking' : 'Unlocking'} ${teamCode} score`);
+            showMessage(`Team ${teamCode} score ${isLocked ? 'locked' : 'unlocked'}`, 'success');
+            
+            // Update local state
+            const team = competitionState.teams.find(t => t.teamCode === teamCode);
+            if (team) {
+                team.locked = isLocked;
+            }
+        }
+
+        function showMessage(text, type) {
+            const messagesContainer = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = type === 'error' ? 'error-message' : 'success-message';
+            message.textContent = text;
+            
+            messagesContainer.appendChild(message);
+            
+            // Auto-remove message after 5 seconds
+            setTimeout(() => {
+                messagesContainer.removeChild(message);
+            }, 5000);
+        }
+
+        // Cleanup intervals when page is unloaded
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (dataRefreshInterval) clearInterval(dataRefreshInterval);
+        });
+    </script>
+</body>
+</html>
