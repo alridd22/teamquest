@@ -660,7 +660,7 @@
                 const photoData = await convertFileToBase64(photoFile);
                 
                 // Submit to backend function
-                const response = await fetch('/.netlify/functions/submit-kindness', {
+                const response = await fetch('/.netlify/functions/submit_kindness_function', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
