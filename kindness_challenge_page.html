@@ -618,7 +618,7 @@
                 console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
                 
                 // Call a function to verify the PIN against the registration data
-                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                const response = await fetch('/.netlify/functions/verify_team_pin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
