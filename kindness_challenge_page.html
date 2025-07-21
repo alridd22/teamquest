@@ -615,8 +615,10 @@
 
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
+                console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
+                
                 // Call a function to verify the PIN against the registration data
-                const response = await fetch('/.netlify/functions/verify-team-pin', {
+                const response = await fetch('/.netlify/functions/verify_team_pin', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -627,11 +629,17 @@
                     })
                 });
                 
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
                 if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP error response:', errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const result = await response.json();
+                console.log('Verification result:', result);
                 
                 if (result.success) {
                     return result.valid;
