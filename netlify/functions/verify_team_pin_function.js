@@ -66,6 +66,7 @@ exports.handler = async (event, context) => {
     // Expected format: [Team Code, Team Name, Team PIN, Registration Time]
     let teamFound = false;
     let pinMatches = false;
+    let foundTeamData = null;
     
     for (let i = 1; i < rows.length; i++) {
       const row = rows[i];
@@ -73,16 +74,21 @@ exports.handler = async (event, context) => {
       const rowTeamName = row[1];
       const rowTeamPin = row[2];
       
+      console.log(`Row ${i}: Code="${rowTeamCode}", Name="${rowTeamName}", PIN="${rowTeamPin}"`);
+      
       if (rowTeamCode === teamCode) {
         teamFound = true;
-        console.log('Team found:', rowTeamName);
+        foundTeamData = { code: rowTeamCode, name: rowTeamName, pin: rowTeamPin };
+        console.log('Team found:', rowTeamName, 'Expected PIN:', rowTeamPin, 'Received PIN:', pin);
         
-        if (rowTeamPin === pin) {
+        // Convert both to strings for comparison
+        if (String(rowTeamPin).trim() === String(pin).trim()) {
           pinMatches = true;
           console.log('PIN matches for team:', teamCode);
           break;
         } else {
-          console.log('PIN does not match. Expected:', rowTeamPin, 'Got:', pin);
+          console.log('PIN does not match. Expected:', `"${rowTeamPin}"`, 'Got:', `"${pin}"`);
+          console.log('Types - Expected:', typeof rowTeamPin, 'Got:', typeof pin);
         }
         break;
       }
@@ -90,6 +96,7 @@ exports.handler = async (event, context) => {
     
     if (!teamFound) {
       console.log('Team code not found:', teamCode);
+      console.log('Available teams:', rows.slice(1).map(row => row[0]).join(', '));
       return {
         statusCode: 200,
         headers: {
@@ -99,7 +106,8 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           success: true,
           valid: false,
-          message: 'Team not found'
+          message: 'Team not found',
+          debug: { searchedFor: teamCode, availableTeams: rows.slice(1).map(row => row[0]) }
         }),
       };
     }
@@ -115,7 +123,12 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({
           success: true,
           valid: false,
-          message: 'Incorrect PIN'
+          message: 'Incorrect PIN',
+          debug: { 
+            foundTeam: foundTeamData,
+            receivedPin: pin,
+            pinComparison: `Expected: "${foundTeamData?.pin}" vs Received: "${pin}"`
+          }
         }),
       };
     }
