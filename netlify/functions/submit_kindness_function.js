@@ -34,26 +34,26 @@ exports.handler = async (event, context) => {
     const sheetId = process.env.GOOGLE_SHEET_ID;
     const apiKey = process.env.GOOGLE_API_KEY;
 
+    console.log('Sheet ID:', sheetId);
+    console.log('API Key present:', !!apiKey);
+
     if (!sheetId || !apiKey) {
       throw new Error('Missing environment variables');
     }
 
-    // For now, we'll save to a "Kindness" sheet in Google Sheets
-    // In a full implementation, you'd also:
-    // 1. Upload photo to cloud storage (Uploadcare/Cloudinary)
-    // 2. Send to Zapier webhook for AI scoring
-    // 3. Update leaderboard when score is returned
-
     console.log('Saving kindness submission to Google Sheets');
     
-    // First, check if Kindness sheet exists, if not we'll append to a new range
+    // Save submission data to Kindness sheet
     const timestamp = new Date().toISOString();
     const submissionData = [
       [teamCode, teamName, description, location || '', 'Photo uploaded', timestamp, 'Pending AI Score']
     ];
 
+    console.log('Submission data:', submissionData);
+
     // Try to append to Kindness sheet
     const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Kindness!A:G:append?valueInputOption=RAW&key=${apiKey}`;
+    console.log('Google Sheets URL:', appendUrl);
     
     const appendResponse = await fetch(appendUrl, {
       method: 'POST',
@@ -65,29 +65,18 @@ exports.handler = async (event, context) => {
       })
     });
 
-    if (!appendResponse.ok) {
-      // If Kindness sheet doesn't exist, the append will fail
-      console.log('Kindness sheet might not exist, submission logged but not saved to sheets');
-    } else {
-      console.log('Kindness submission saved to Google Sheets');
-    }
+    console.log('Google Sheets response status:', appendResponse.status);
+    console.log('Google Sheets response ok:', appendResponse.ok);
 
-    // TODO: In full implementation, trigger Zapier webhook here
-    // const zapierWebhook = process.env.ZAPIER_KINDNESS_WEBHOOK;
-    // if (zapierWebhook) {
-    //   await fetch(zapierWebhook, {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //       teamCode,
-    //       teamName,
-    //       description,
-    //       location,
-    //       photoUrl: 'placeholder-url',
-    //       timestamp
-    //     })
-    //   });
-    // }
+    if (appendResponse.ok) {
+      const responseData = await appendResponse.json();
+      console.log('Google Sheets response data:', responseData);
+      console.log('Kindness submission saved to Google Sheets successfully!');
+    } else {
+      const errorText = await appendResponse.text();
+      console.error('Google Sheets error response:', errorText);
+      console.log('Could not save to Kindness sheet - API error:', appendResponse.status);
+    }
 
     // Simulate AI scoring for demo (normally done by Zapier + OpenAI)
     const simulatedScore = Math.floor(Math.random() * 30) + 20; // 20-50 points
