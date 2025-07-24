@@ -127,27 +127,10 @@ exports.handler = async (event, context) => {
     });
 
     console.log('Kindness submission saved successfully:', newRow.rowNumber);
+    console.log('AI scoring will be processed automatically via Google Sheets trigger');
 
-    // Trigger AI scoring via Zapier webhook
-    try {
-      console.log('Triggering AI scoring webhook');
-      await triggerAIScoring({
-        teamCode,
-        teamName, 
-        description,
-        location: location || '',
-        photoUrl,
-        submissionTime,
-        rowNumber: newRow.rowNumber
-      });
-      console.log('AI scoring webhook triggered successfully');
-    } catch (webhookError) {
-      console.error('AI scoring webhook failed:', webhookError);
-      // Don't fail the entire submission if webhook fails
-    }
-
-    // Return simulated score for immediate feedback (real score will come from webhook)
-    const simulatedScore = Math.floor(Math.random() * 30) + 20; // 20-50 points
+    // Return success - AI scoring will happen automatically
+    const estimatedScore = 'Will be scored by AI within 1-2 minutes';
     
     console.log('Kindness submission processed successfully');
 
@@ -159,8 +142,8 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         success: true,
-        message: 'Kindness act submitted successfully with AI scoring',
-        simulatedScore: simulatedScore,
+        message: 'Kindness act submitted successfully! AI will score your submission within 1-2 minutes.',
+        estimatedScore: estimatedScore,
         teamCode,
         teamName,
         photoUrl
@@ -183,40 +166,3 @@ exports.handler = async (event, context) => {
     };
   }
 };
-
-async function triggerAIScoring(submissionData) {
-  const zapierWebhookUrl = process.env.ZAPIER_KINDNESS_WEBHOOK_URL;
-  
-  if (!zapierWebhookUrl) {
-    console.log('No Zapier webhook URL configured, skipping AI scoring');
-    return;
-  }
-
-  try {
-    const response = await fetch(zapierWebhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        teamCode: submissionData.teamCode,
-        teamName: submissionData.teamName,
-        description: submissionData.description,
-        location: submissionData.location,
-        photoUrl: submissionData.photoUrl,
-        submissionTime: submissionData.submissionTime,
-        rowNumber: submissionData.rowNumber,
-        sheetId: process.env.GOOGLE_SHEET_ID
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Zapier webhook failed: ${response.status}`);
-    }
-
-    console.log('Zapier webhook called successfully');
-  } catch (error) {
-    console.error('Error calling Zapier webhook:', error);
-    throw error;
-  }
-}
