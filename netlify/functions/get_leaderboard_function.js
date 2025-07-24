@@ -38,13 +38,9 @@ exports.handler = async (event, context) => {
     // Fetch scores from all activity sheets
     console.log('Fetching scores from all activity sheets');
     
-    const activitySheets = ['Kindness', 'Clue Hunt', 'Quiz', 'Scavenger', 'Limerick'];
+    const activitySheets = ['Kindness']; // Start with just Kindness for now
     const activityScores = {
-      kindness: {},
-      clueHunt: {},
-      quiz: {},
-      scavenger: {},
-      limerick: {}
+      kindness: {}
     };
 
     // Fetch scores from each activity sheet
@@ -64,18 +60,14 @@ exports.handler = async (event, context) => {
             // Process activity scores (skip header row)
             for (let i = 1; i < activityRows.length; i++) {
               const row = activityRows[i];
+              if (!row || row.length === 0) continue;
+              
               const teamCode = row[0]; // Team Code
               
-              // Different sheets might have score in different columns
-              // Try common positions: column F (index 5) or G (index 6)
+              // For Kindness sheet, score is in column G (index 6)
               let score = null;
-              
-              // Look for numeric score in last few columns
-              for (let j = row.length - 1; j >= 4; j--) {
-                if (row[j] && !isNaN(parseFloat(row[j])) && row[j] !== 'Pending AI Score') {
-                  score = parseFloat(row[j]);
-                  break;
-                }
+              if (sheetName === 'Kindness' && row[6] && !isNaN(parseFloat(row[6])) && row[6] !== 'Pending AI Score') {
+                score = parseFloat(row[6]);
               }
               
               if (teamCode && score !== null) {
@@ -133,16 +125,19 @@ exports.handler = async (event, context) => {
       const scavenger = parseFloat(row[scavengerIndex]) || 0;
       const limerick = parseFloat(row[limerickIndex]) || 0;
       
-      // Get scores from activity sheets (overrides leaderboard sheet if available)
+      // Get scores from leaderboard sheet and activity sheets
+      const registration = parseFloat(row[registrationIndex]) || 0;
+      const clueHunt = parseFloat(row[clueHuntIndex]) || 0;
+      const quiz = parseFloat(row[quizIndex]) || 0;
+      const scavenger = parseFloat(row[scavengerIndex]) || 0;
+      const limerick = parseFloat(row[limerickIndex]) || 0;
+      
+      // Get kindness score from kindness sheet (overrides leaderboard sheet if available)
       const kindness = activityScores.kindness[teamCode] || parseFloat(row[kindnessIndex]) || 0;
-      const clueHuntActivity = activityScores.cluehunt[teamCode] || parseFloat(row[clueHuntIndex]) || 0;
-      const quizActivity = activityScores.quiz[teamCode] || parseFloat(row[quizIndex]) || 0;
-      const scavengerActivity = activityScores.scavenger[teamCode] || parseFloat(row[scavengerIndex]) || 0;
-      const limerickActivity = activityScores.limerick[teamCode] || parseFloat(row[limerickIndex]) || 0;
       
       const status = row[statusIndex] || 'active';
       
-      const totalScore = registration + clueHuntActivity + quizActivity + kindness + scavengerActivity + limerickActivity;
+      const totalScore = registration + clueHunt + quiz + kindness + scavenger + limerick;
 
       teams.push({
         teamCode,
@@ -162,7 +157,7 @@ exports.handler = async (event, context) => {
     // Sort by total score (highest first)
     teams.sort((a, b) => b.totalScore - a.totalScore);
 
-    console.log(`Processed ${teams.length} teams with kindness integration`);
+    console.log(`Processed ${teams.length} teams with all activity scores integrated`);
 
     return {
       statusCode: 200,
