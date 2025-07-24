@@ -30,6 +30,7 @@ exports.handler = async (event, context) => {
     const { teamCode, teamName, description, location, photoUrl } = JSON.parse(event.body);
     
     console.log('Processing kindness submission for team:', teamCode);
+    console.log('Photo URL received:', photoUrl);
 
     if (!teamCode || !teamName || !description || !photoUrl) {
       throw new Error('Missing required fields');
@@ -158,10 +159,11 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         success: true,
-        message: 'Kindness act submitted successfully',
+        message: 'Kindness act submitted successfully with AI scoring',
         simulatedScore: simulatedScore,
         teamCode,
-        teamName
+        teamName,
+        photoUrl
       }),
     };
 
@@ -217,3 +219,4 @@ async function triggerAIScoring(submissionData) {
     console.error('Error calling Zapier webhook:', error);
     throw error;
   }
+}
