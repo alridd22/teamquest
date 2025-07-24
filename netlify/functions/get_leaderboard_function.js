@@ -168,6 +168,11 @@ exports.handler = async (event, context) => {
     // Sort by total score (highest first)
     teams.sort((a, b) => b.totalScore - a.totalScore);
 
+    // Add rank to each team
+    teams.forEach((team, index) => {
+      team.rank = index + 1;
+    });
+
     console.log(`Processed ${teams.length} teams with kindness integration`);
 
     return {
