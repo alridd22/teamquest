@@ -27,11 +27,11 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('Parsing request body');
-    const { teamCode, teamName, description, location, photoData } = JSON.parse(event.body);
+    const { teamCode, teamName, description, location, photoUrl } = JSON.parse(event.body);
     
     console.log('Processing kindness submission for team:', teamCode);
 
-    if (!teamCode || !teamName || !description || !photoData) {
+    if (!teamCode || !teamName || !description || !photoUrl) {
       throw new Error('Missing required fields');
     }
 
@@ -114,19 +114,38 @@ exports.handler = async (event, context) => {
     }
 
     console.log('Adding kindness submission to sheet');
+    const submissionTime = new Date().toISOString();
     const newRow = await kindnessSheet.addRow({
       'Team Code': teamCode,
       'Team Name': teamName,
       'Description': description,
       'Location': location || '',
-      'Photo Status': 'Photo uploaded',
-      'Submission Time': new Date().toISOString(),
+      'Photo Status': photoUrl, // Store the actual photo URL
+      'Submission Time': submissionTime,
       'AI Score': 'Pending AI Score'
     });
 
     console.log('Kindness submission saved successfully:', newRow.rowNumber);
 
-    // Simulate AI scoring for demo (normally done by Zapier + OpenAI)
+    // Trigger AI scoring via Zapier webhook
+    try {
+      console.log('Triggering AI scoring webhook');
+      await triggerAIScoring({
+        teamCode,
+        teamName, 
+        description,
+        location: location || '',
+        photoUrl,
+        submissionTime,
+        rowNumber: newRow.rowNumber
+      });
+      console.log('AI scoring webhook triggered successfully');
+    } catch (webhookError) {
+      console.error('AI scoring webhook failed:', webhookError);
+      // Don't fail the entire submission if webhook fails
+    }
+
+    // Return simulated score for immediate feedback (real score will come from webhook)
     const simulatedScore = Math.floor(Math.random() * 30) + 20; // 20-50 points
     
     console.log('Kindness submission processed successfully');
@@ -162,3 +181,39 @@ exports.handler = async (event, context) => {
     };
   }
 };
+
+async function triggerAIScoring(submissionData) {
+  const zapierWebhookUrl = process.env.ZAPIER_KINDNESS_WEBHOOK_URL;
+  
+  if (!zapierWebhookUrl) {
+    console.log('No Zapier webhook URL configured, skipping AI scoring');
+    return;
+  }
+
+  try {
+    const response = await fetch(zapierWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        teamCode: submissionData.teamCode,
+        teamName: submissionData.teamName,
+        description: submissionData.description,
+        location: submissionData.location,
+        photoUrl: submissionData.photoUrl,
+        submissionTime: submissionData.submissionTime,
+        rowNumber: submissionData.rowNumber,
+        sheetId: process.env.GOOGLE_SHEET_ID
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Zapier webhook failed: ${response.status}`);
+    }
+
+    console.log('Zapier webhook called successfully');
+  } catch (error) {
+    console.error('Error calling Zapier webhook:', error);
+    throw error;
+  }
