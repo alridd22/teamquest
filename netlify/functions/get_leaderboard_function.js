@@ -35,57 +35,42 @@ exports.handler = async (event, context) => {
     const leaderboardData = await leaderboardResponse.json();
     const leaderboardRows = leaderboardData.values;
 
-    // Fetch scores from all activity sheets
-    console.log('Fetching scores from all activity sheets');
+    // Fetch kindness scores
+    console.log('Fetching Kindness scores');
+    let kindnessScores = {};
     
-    const activitySheets = ['Kindness']; // Start with just Kindness for now
-    const activityScores = {
-      kindness: {}
-    };
-
-    // Fetch scores from each activity sheet
-    for (const sheetName of activitySheets) {
-      try {
-        console.log(`Fetching ${sheetName} scores`);
-        const activityUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${sheetName}!A:G?key=${apiKey}`;
-        const activityResponse = await fetch(activityUrl);
+    try {
+      const kindnessUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Kindness!A:G?key=${apiKey}`;
+      const kindnessResponse = await fetch(kindnessUrl);
+      
+      if (kindnessResponse.ok) {
+        const kindnessData = await kindnessResponse.json();
+        const kindnessRows = kindnessData.values;
         
-        if (activityResponse.ok) {
-          const activityData = await activityResponse.json();
-          const activityRows = activityData.values;
-          
-          if (activityRows && activityRows.length > 1) {
-            const scoreKey = sheetName.toLowerCase().replace(' ', '');
+        if (kindnessRows && kindnessRows.length > 1) {
+          // Process kindness scores (skip header row)
+          for (let i = 1; i < kindnessRows.length; i++) {
+            const row = kindnessRows[i];
+            if (!row || row.length === 0) continue;
             
-            // Process activity scores (skip header row)
-            for (let i = 1; i < activityRows.length; i++) {
-              const row = activityRows[i];
-              if (!row || row.length === 0) continue;
-              
-              const teamCode = row[0]; // Team Code
-              
-              // For Kindness sheet, score is in column G (index 6)
-              let score = null;
-              if (sheetName === 'Kindness' && row[6] && !isNaN(parseFloat(row[6])) && row[6] !== 'Pending AI Score') {
-                score = parseFloat(row[6]);
+            const teamCode = row[0]; // Team Code
+            const aiScore = row[6];   // AI Score column
+            
+            // Only count numeric scores (ignore "Pending AI Score")
+            if (teamCode && aiScore && !isNaN(parseFloat(aiScore)) && aiScore !== 'Pending AI Score') {
+              if (!kindnessScores[teamCode]) {
+                kindnessScores[teamCode] = 0;
               }
-              
-              if (teamCode && score !== null) {
-                if (!activityScores[scoreKey][teamCode]) {
-                  activityScores[scoreKey][teamCode] = 0;
-                }
-                activityScores[scoreKey][teamCode] += score;
-              }
+              kindnessScores[teamCode] += parseFloat(aiScore);
             }
-            console.log(`${sheetName} scores processed:`, activityScores[scoreKey]);
           }
-        } else {
-          console.log(`${sheetName} sheet not found or not accessible`);
+          console.log('Kindness scores processed:', kindnessScores);
         }
-      } catch (error) {
-        console.error(`Error fetching ${sheetName} scores:`, error.message);
-        // Continue with other sheets even if one fails
+      } else {
+        console.log('Kindness sheet not found or not accessible');
       }
+    } catch (kindnessError) {
+      console.error('Error fetching kindness scores:', kindnessError.message);
     }
 
     if (!leaderboardRows || leaderboardRows.length < 2) {
@@ -97,67 +82,93 @@ exports.handler = async (event, context) => {
     const teams = [];
     const headers = leaderboardRows[0];
     
-    // Find column indices
-    const teamCodeIndex = headers.findIndex(h => h.toLowerCase().includes('team') && h.toLowerCase().includes('code'));
-    const teamNameIndex = headers.findIndex(h => h.toLowerCase().includes('team') && h.toLowerCase().includes('name'));
-    const registrationIndex = headers.findIndex(h => h.toLowerCase().includes('registration'));
-    const clueHuntIndex = headers.findIndex(h => h.toLowerCase().includes('clue'));
-    const quizIndex = headers.findIndex(h => h.toLowerCase().includes('quiz'));
-    const kindnessIndex = headers.findIndex(h => h.toLowerCase().includes('kindness'));
-    const scavengerIndex = headers.findIndex(h => h.toLowerCase().includes('scavenger'));
-    const limerickIndex = headers.findIndex(h => h.toLowerCase().includes('limerick'));
-    const statusIndex = headers.findIndex(h => h.toLowerCase().includes('status'));
+    // Find column indices safely
+    const teamCodeCol = headers.findIndex(h => h && h.toLowerCase().includes('team') && h.toLowerCase().includes('code'));
+    const teamNameCol = headers.findIndex(h => h && h.toLowerCase().includes('team') && h.toLowerCase().includes('name'));
+    const regCol = headers.findIndex(h => h && h.toLowerCase().includes('registration'));
+    const clueCol = headers.findIndex(h => h && h.toLowerCase().includes('clue'));
+    const quizCol = headers.findIndex(h => h && h.toLowerCase().includes('quiz'));
+    const kindCol = headers.findIndex(h => h && h.toLowerCase().includes('kindness'));
+    const scavCol = headers.findIndex(h => h && h.toLowerCase().includes('scavenger'));
+    const limCol = headers.findIndex(h => h && h.toLowerCase().includes('limerick'));
+    const statusCol = headers.findIndex(h => h && h.toLowerCase().includes('status'));
 
-    // Process each team
+    console.log('Column indices found:', {
+      teamCodeCol,
+      teamNameCol,
+      regCol,
+      kindCol
+    });
+
+    // Process each team from leaderboard
     for (let i = 1; i < leaderboardRows.length; i++) {
       const row = leaderboardRows[i];
       if (!row || row.length === 0) continue;
       
-      const teamCode = row[teamCodeIndex] || '';
-      const teamName = row[teamNameIndex] || '';
+      const teamCode = row[teamCodeCol] || '';
+      const teamName = row[teamNameCol] || '';
       
-      if (!teamCode || !teamName) continue;
+      if (!teamCode || !teamName) {
+        console.log(`Skipping row ${i}: missing team code or name`);
+        continue;
+      }
 
-      // Get scores from leaderboard sheet
-      const registration = parseFloat(row[registrationIndex]) || 0;
-      const clueHunt = parseFloat(row[clueHuntIndex]) || 0;
-      const quiz = parseFloat(row[quizIndex]) || 0;
-      const scavenger = parseFloat(row[scavengerIndex]) || 0;
-      const limerick = parseFloat(row[limerickIndex]) || 0;
+      console.log(`Processing team: ${teamCode} - ${teamName}`);
+
+      // Get scores safely
+      const regScore = parseFloat(row[regCol]) || 0;
+      const clueScore = parseFloat(row[clueCol]) || 0;
+      const quizScore = parseFloat(row[quizCol]) || 0;
+      const scavScore = parseFloat(row[scavCol]) || 0;
+      const limScore = parseFloat(row[limCol]) || 0;
       
-      // Get scores from leaderboard sheet and activity sheets
-      const registration = parseFloat(row[registrationIndex]) || 0;
-      const clueHunt = parseFloat(row[clueHuntIndex]) || 0;
-      const quiz = parseFloat(row[quizIndex]) || 0;
-      const scavenger = parseFloat(row[scavengerIndex]) || 0;
-      const limerick = parseFloat(row[limerickIndex]) || 0;
+      // Use kindness score from activity sheet if available, otherwise from leaderboard
+      const kindScore = kindnessScores[teamCode] || parseFloat(row[kindCol]) || 0;
       
-      // Get kindness score from kindness sheet (overrides leaderboard sheet if available)
-      const kindness = activityScores.kindness[teamCode] || parseFloat(row[kindnessIndex]) || 0;
-      
-      const status = row[statusIndex] || 'active';
-      
-      const totalScore = registration + clueHunt + quiz + kindness + scavenger + limerick;
+      const teamStatus = row[statusCol] || 'active';
+      const total = regScore + clueScore + quizScore + kindScore + scavScore + limScore;
 
       teams.push({
-        teamCode,
-        teamName,
-        registration,
-        clueHunt: clueHuntActivity,
-        quiz: quizActivity,
-        kindness,
-        scavenger: scavengerActivity,
-        limerick: limerickActivity,
-        totalScore,
-        status: status.toLowerCase(),
-        locked: status.toLowerCase() === 'returned'
+        teamCode: teamCode,
+        teamName: teamName,
+        registration: regScore,
+        clueHunt: clueScore,
+        quiz: quizScore,
+        kindness: kindScore,
+        scavenger: scavScore,
+        limerick: limScore,
+        totalScore: total,
+        status: teamStatus.toLowerCase(),
+        locked: teamStatus.toLowerCase() === 'returned'
       });
+    }
+
+    // Add any teams that are only in kindness sheet but not in leaderboard
+    const existingTeamCodes = new Set(teams.map(t => t.teamCode));
+    
+    for (const [teamCode, kindScore] of Object.entries(kindnessScores)) {
+      if (!existingTeamCodes.has(teamCode)) {
+        console.log(`Adding team from kindness sheet: ${teamCode}`);
+        teams.push({
+          teamCode: teamCode,
+          teamName: teamCode, // Use team code as name if no name available
+          registration: 0,
+          clueHunt: 0,
+          quiz: 0,
+          kindness: kindScore,
+          scavenger: 0,
+          limerick: 0,
+          totalScore: kindScore,
+          status: 'active',
+          locked: false
+        });
+      }
     }
 
     // Sort by total score (highest first)
     teams.sort((a, b) => b.totalScore - a.totalScore);
 
-    console.log(`Processed ${teams.length} teams with all activity scores integrated`);
+    console.log(`Processed ${teams.length} teams with kindness integration`);
 
     return {
       statusCode: 200,
