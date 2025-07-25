@@ -551,17 +551,44 @@ Now [ending] all over the place!"
 
         async function loadTeamsList() {
             try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                const data = await response.json();
+                console.log('Loading teams from registration sheet...');
                 
-                if (data.success && data.teams) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
+                // Fetch teams directly from registration sheet (Sheet1)
+                const sheetId = '1aNG_LtiQFL_W3jHpgNfdR3-pJZ6-FDqKfzMCF8nOy9I';
+                const apiKey = 'AIzaSyCTTdxMQWuuedcLSQkSES182Pcaa8AG9j8';
+                const registrationUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Sheet1!A:D?key=${apiKey}`;
+                
+                const response = await fetch(registrationUrl);
+                console.log('Registration response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Registration data received:', data);
+                
+                if (data.values && data.values.length > 1) {
+                    // Process registration data (skip header row)
+                    const teams = [];
+                    for (let i = 1; i < data.values.length; i++) {
+                        const row = data.values[i];
+                        if (row && row.length >= 2) {
+                            teams.push({
+                                teamCode: row[0], // Team Code
+                                teamName: row[1]  // Team Name
+                            });
+                        }
+                    }
+                    
+                    allTeams = teams;
+                    populateTeamDropdown(teams);
+                    console.log('Teams loaded from registration sheet:', teams.length);
                 } else {
-                    showMessage('loginMessage', 'Failed to load teams list. Please refresh the page.', 'error');
+                    throw new Error('No registration data found');
                 }
             } catch (error) {
-                console.error('Error loading teams:', error);
+                console.error('Error loading teams from registration:', error);
                 showMessage('loginMessage', 'Failed to load teams list. Please refresh the page.', 'error');
             }
         }
