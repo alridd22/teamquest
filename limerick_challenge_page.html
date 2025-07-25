@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamQuest - Limerick Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 700px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .poem-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .team-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-section, .challenge-section {
+            display: none;
+        }
+
+        .login-section.active, .challenge-section.active {
+            display: block;
+        }
+
+        .instructions {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ff;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fefefe;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .limerick-textarea {
+            min-height: 180px;
+            resize: vertical;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .char-count {
+            text-align: right;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .pin-input {
+            text-align: center;
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .examples {
+            background: #f0f8ff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .examples h4 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .example-limerick {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-family: 'Georgia', serif;
+            font-style: italic;
+            line-height: 1.6;
+            border-left: 3px solid #667eea;
+        }
+
+        .example-limerick:last-child {
+            margin-bottom: 0;
+        }
+
+        .rhyme-helper {
+            background: #fff5f0;
+            border: 1px solid #ffd4a3;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .rhyme-helper h4 {
+            color: #d2691e;
+            margin-bottom: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+        }
+
+        .topic-select {
+            margin-bottom: 20px;
+        }
+
+        .topic-ideas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .topic-idea {
+            background: #f8f9ff;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .topic-idea:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .topic-idea.selected {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .topic-ideas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div class="login-section active" id="loginSection">
+            <div class="logo">
+                <div class="poem-icon">📝</div>
+                <h1>Limerick Challenge</h1>
+                <p class="subtitle">Write a witty limerick and earn points!</p>
+            </div>
+
+            <div class="instructions">
+                <h3>📜 Limerick Rules</h3>
+                <ul>
+                    <li><strong>5 lines total:</strong> Lines 1, 2, 5 rhyme (A-A-A pattern)</li>
+                    <li><strong>Lines 3, 4 rhyme:</strong> Shorter lines (B-B pattern)</li>
+                    <li><strong>Rhythm matters:</strong> Bouncy, musical flow</li>
+                    <li><strong>Be creative:</strong> Funny, clever, or surprising endings work best!</li>
+                    <li><strong>Earn up to 50 points</strong> based on creativity, humor, and technique</li>
+                </ul>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="teamSelect">Select Your Team</label>
+                    <select id="teamSelect" name="teamSelect" required>
+                        <option value="">Choose your team...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="teamPin">Enter Your Team PIN</label>
+                    <input type="number" id="teamPin" name="teamPin" class="pin-input" 
+                           min="1000" max="9999" placeholder="1234" required>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    🔓 Access Challenge
+                </button>
+            </form>
+
+            <div class="message" id="loginMessage"></div>
+        </div>
+
+        <!-- Challenge Section -->
+        <div class="challenge-section" id="challengeSection">
+            <div class="team-info" id="teamInfo">
+                Team: Loading...
+            </div>
+
+            <div class="examples">
+                <h4>📚 Limerick Examples</h4>
+                <div class="example-limerick">
+                    There once was a cat from Peru,<br>
+                    Who dreamed of sailing canoe,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;He packed up his fish,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Made a nautical wish,<br>
+                    And sailed off into the blue!
+                </div>
+                <div class="example-limerick">
+                    A programmer who lived in the cloud,<br>
+                    Wrote code that was fast and quite loud,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;His functions would sing,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Like a bell they would ring,<br>
+                    And made him exceedingly proud!
+                </div>
+            </div>
+
+            <form id="limerickForm">
+                <div class="form-group topic-select">
+                    <label for="limerickTopic">Choose Your Topic (Optional)</label>
+                    <input type="text" id="limerickTopic" name="limerickTopic" 
+                           placeholder="Or create your own topic...">
+                    
+                    <div class="topic-ideas">
+                        <div class="topic-idea" onclick="selectTopic('Animals')">🐾 Animals</div>
+                        <div class="topic-idea" onclick="selectTopic('Travel')">✈️ Travel</div>
+                        <div class="topic-idea" onclick="selectTopic('Food')">🍕 Food</div>
+                        <div class="topic-idea" onclick="selectTopic('Technology')">💻 Technology</div>
+                        <div class="topic-idea" onclick="selectTopic('Weather')">🌦️ Weather</div>
+                        <div class="topic-idea" onclick="selectTopic('Sports')">⚽ Sports</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="limerickText">✍️ Write Your Limerick</label>
+                    <div class="rhyme-helper">
+                        <h4>💡 Rhyme Pattern Reminder:</h4>
+                        Line 1: _____ A<br>
+                        Line 2: _____ A<br>
+                        Line 3: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
+                        Line 4: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
+                        Line 5: _____ A
+                    </div>
+                    <textarea id="limerickText" name="limerickText" class="limerick-textarea"
+                              placeholder="There once was a [person] from [place],
+Who [did something] with [unusual] grace,
+    They [action] so [adjective],
+    And [something] effective,
+Now [ending] all over the place!"
+                              maxlength="500" required></textarea>
+                    <div class="char-count">
+                        <span id="charCount">500</span> characters remaining
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🎭 Submit Limerick
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                ✨ Analyzing your limerick and calculating score...
+            </div>
+
+            <div class="message" id="challengeMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTeam = null;
+        let allTeams = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamsList();
+        });
+
+        // Character counter for limerick
+        document.getElementById('limerickText').addEventListener('input', function() {
+            const remaining = 500 - this.value.length;
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = remaining;
+            charCount.style.color = remaining < 50 ? '#dc3545' : '#666';
+        });
+
+        // Topic selection
+        function selectTopic(topic) {
+            document.getElementById('limerickTopic').value = topic;
+            
+            // Update visual selection
+            document.querySelectorAll('.topic-idea').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const selectedTeamCode = document.getElementById('teamSelect').value;
+            const enteredPin = document.getElementById('teamPin').value;
+            
+            if (!selectedTeamCode) {
+                showMessage('loginMessage', 'Please select your team from the list.', 'error');
+                return;
+            }
+            
+            if (!/^\d{4}$/.test(enteredPin)) {
+                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
+                return;
+            }
+
+            try {
+                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
+                
+                if (isValid) {
+                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
+                    currentTeam = selectedTeam;
+                    document.getElementById('teamInfo').textContent = `Team: ${selectedTeam.teamName}`;
+                    
+                    // Switch to challenge section
+                    document.getElementById('loginSection').classList.remove('active');
+                    document.getElementById('challengeSection').classList.add('active');
+                } else {
+                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
+            }
+        });
+
+        // Limerick form submission
+        document.getElementById('limerickForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const topic = document.getElementById('limerickTopic').value.trim();
+            const limerickText = document.getElementById('limerickText').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+
+            // Validation
+            if (!limerickText) {
+                showMessage('challengeMessage', 'Please write your limerick.', 'error');
+                return;
+            }
+
+            if (limerickText.length < 50) {
+                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters).', 'error');
+                return;
+            }
+
+            // Check for line breaks (limericks should have multiple lines)
+            const lines = limerickText.split('\n').filter(line => line.trim().length > 0);
+            if (lines.length < 3) {
+                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines).', 'error');
+                return;
+            }
+
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            document.getElementById('challengeMessage').style.display = 'none';
+
+            try {
+                const result = await submitLimerick(topic, limerickText);
+                
+                showMessage('challengeMessage', 
+                    '🎉 Your limerick has been submitted! Our AI is analyzing your creativity, humor, and poetic technique. Check the leaderboard in a few minutes to see your score!', 
+                    'success');
+                
+                // Disable form after successful submission
+                document.getElementById('limerickForm').style.opacity = '0.5';
+                document.getElementById('limerickForm').style.pointerEvents = 'none';
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('challengeMessage', 'Failed to submit your limerick. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        async function loadTeamsList() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                const data = await response.json();
+                
+                if (data.success && data.teams) {
+                    allTeams = data.teams;
+                    populateTeamDropdown(data.teams);
+                } else {
+                    showMessage('loginMessage', 'Failed to load teams list. Please refresh the page.', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading teams:', error);
+                showMessage('loginMessage', 'Failed to load teams list. Please refresh the page.', 'error');
+            }
+        }
+
+        function populateTeamDropdown(teams) {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">Choose your team...</option>';
+            
+            teams
+                .sort((a, b) => a.teamName.localeCompare(b.teamName))
+                .forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.teamCode;
+                    option.textContent = team.teamName;
+                    select.appendChild(option);
+                });
+        }
+
+        async function verifyTeamAndPin(teamCode, enteredPin) {
+            try {
+                console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
+                
+                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: teamCode,
+                        pin: enteredPin
+                    })
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP error response:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Verification result:', result);
+                
+                if (result.success) {
+                    return result.valid;
+                } else {
+                    throw new Error(result.error || 'Verification failed');
+                }
+                
+            } catch (error) {
+                console.error('Error verifying team and PIN:', error);
+                return false;
+            }
+        }
+
+        async function submitLimerick(topic, limerickText) {
+            try {
+                console.log('Starting limerick submission...');
+                
+                const submissionData = {
+                    teamCode: currentTeam.teamCode,
+                    teamName: currentTeam.teamName,
+                    topic: topic,
+                    limerickText: limerickText
+                };
+                
+                console.log('Submitting limerick data:', submissionData);
+                
+                const response = await fetch('/.netlify/functions/submit_limerick_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submissionData)
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('HTTP error response:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Submission result:', result);
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('Limerick submission error:', error);
+                throw error;
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
+            container.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
