@@ -164,6 +164,18 @@ exports.handler = async (event, context) => {
     });
 
     console.log(`Processed ${teams.length} teams with activity scores integrated`);
+    
+    // Log a sample of the teams data for debugging
+    console.log('Sample team data:', teams.slice(0, 2));
+
+    const response = {
+      success: true,
+      teams: teams,
+      lastUpdated: new Date().toISOString(),
+      totalTeams: teams.length
+    };
+    
+    console.log('Sending response with', teams.length, 'teams');
 
     return {
       statusCode: 200,
@@ -171,11 +183,7 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        success: true,
-        teams: teams,
-        lastUpdated: new Date().toISOString()
-      }),
+      body: JSON.stringify(response),
     };
 
   } catch (error) {
