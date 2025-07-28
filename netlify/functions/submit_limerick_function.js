@@ -1,3 +1,6 @@
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
+
 exports.handler = async (event, context) => {
   console.log('Limerick submission started');
   
@@ -23,6 +26,7 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('Parsing request body');
     const { teamCode, teamName, topic, limerickText } = JSON.parse(event.body);
     
     console.log('Processing limerick submission for team:', teamCode);
@@ -31,41 +35,102 @@ exports.handler = async (event, context) => {
       throw new Error('Missing required fields');
     }
 
+    // Get environment variables (same as kindness function)
+    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const sheetId = process.env.GOOGLE_SHEET_ID;
-    const apiKey = process.env.GOOGLE_API_KEY;
+    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
 
-    if (!sheetId || !apiKey) {
-      throw new Error('Missing environment variables');
+    console.log('Environment variables check:', {
+      hasEmail: !!serviceAccountEmail,
+      hasSheetId: !!sheetId,
+      hasPrivateKeyB64: !!privateKeyBase64,
+    });
+
+    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
+      throw new Error('Missing required environment variables');
     }
 
-    // Check what environment variables are actually available
-    console.log('=== ENVIRONMENT VARIABLES DIAGNOSTIC ===');
-    console.log('GOOGLE_API_KEY exists:', !!process.env.GOOGLE_API_KEY);
-    console.log('GOOGLE_SHEET_ID exists:', !!process.env.GOOGLE_SHEET_ID);
-    console.log('GOOGLE_SERVICE_ACCOUNT_EMAIL exists:', !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL);
-    console.log('GOOGLE_PRIVATE_KEY_B64 exists:', !!process.env.GOOGLE_PRIVATE_KEY_B64);
-    
-    // List all environment variables that start with GOOGLE
-    const googleEnvVars = Object.keys(process.env).filter(key => key.startsWith('GOOGLE'));
-    console.log('All GOOGLE environment variables:', googleEnvVars);
-    console.log('=== END DIAGNOSTIC ===');
+    // Decode private key from base64 (same as kindness function)
+    console.log('Decoding GOOGLE_PRIVATE_KEY_B64');
+    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
 
-    // Log the submission data
-    console.log('=== LIMERICK SUBMISSION DATA ===');
-    console.log('Team Code:', teamCode);
-    console.log('Team Name:', teamName);
-    console.log('Topic:', topic || 'No topic specified');
-    console.log('Limerick Text:', limerickText);
-    console.log('Submission Time:', new Date().toISOString());
-    console.log('=== END SUBMISSION DATA ===');
+    if (privateKey.includes('\\n')) {
+      privateKey = privateKey.replace(/\\n/g, '\n');
+    }
+
+    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
+      throw new Error('Private key format invalid – missing BEGIN header');
+    }
+
+    console.log('Private key successfully decoded, length:', privateKey.length);
+
+    // Create JWT client (same as kindness function)
+    console.log('Creating JWT client');
+    const serviceAccountAuth = new JWT({
+      email: serviceAccountEmail,
+      key: privateKey,
+      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+    });
+
+    // Initialize Google Sheet (same as kindness function)
+    console.log('Initializing Google Sheet');
+    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+
+    try {
+      await doc.loadInfo();
+      console.log('Sheet loaded successfully:', doc.title);
+    } catch (loadError) {
+      console.error('Sheet load failed:', loadError.message);
+      throw new Error(`Sheet access failed: ${loadError.message}`);
+    }
+
+    // Find the Limerick sheet
+    console.log('Looking for Limerick sheet');
+    let limerickSheet = null;
     
-    // Since API key can't write to sheets, we'll return success but note the limitation
-    console.log('Note: API key authentication cannot write to sheets. Consider adding service account variables.');
+    // Try to find existing Limerick sheet
+    for (const sheet of Object.values(doc.sheetsByTitle)) {
+      if (sheet.title === 'Limerick') {
+        limerickSheet = sheet;
+        break;
+      }
+    }
+
+    if (!limerickSheet) {
+      console.log('Limerick sheet not found, creating it');
+      limerickSheet = await doc.addSheet({ 
+        title: 'Limerick',
+        headerValues: ['Team Code', 'Team Name', 'Topic', 'Limerick Text', 'Submission Time', 'AI Score']
+      });
+    } else {
+      console.log('Using existing Limerick sheet');
+      await limerickSheet.loadHeaderRow();
+      
+      // Set headers if they don't exist
+      if (!limerickSheet.headerValues || limerickSheet.headerValues.length === 0) {
+        console.log('Setting up Limerick sheet headers');
+        await limerickSheet.setHeaderRow(['Team Code', 'Team Name', 'Topic', 'Limerick Text', 'Submission Time', 'AI Score']);
+      }
+    }
+
+    console.log('Adding limerick submission to sheet');
+    const submissionTime = new Date().toISOString();
+    const newRow = await limerickSheet.addRow({
+      'Team Code': teamCode,
+      'Team Name': teamName,
+      'Topic': topic || 'No topic specified',
+      'Limerick Text': limerickText,
+      'Submission Time': submissionTime,
+      'AI Score': 'Pending AI Score'
+    });
+
+    console.log('Limerick submission saved successfully:', newRow.rowNumber);
+    console.log('AI scoring will be processed automatically via Google Sheets trigger');
+
+    // Return success - AI scoring will happen automatically
+    const estimatedScore = 'Will be scored by AI within 1-2 minutes';
     
-    // Simulate AI scoring for demo (normally done by Zapier + OpenAI)
-    const simulatedScore = Math.floor(Math.random() * 30) + 20; // 20-50 points
-    
-    console.log('Limerick submission processed (logged only)');
+    console.log('Limerick submission processed successfully');
 
     return {
       statusCode: 200,
@@ -75,11 +140,10 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         success: true,
-        message: 'Limerick submitted successfully',
-        simulatedScore: simulatedScore,
+        message: 'Limerick submitted successfully! AI will score your submission within 1-2 minutes.',
+        estimatedScore: estimatedScore,
         teamCode,
-        teamName,
-        note: 'Submission logged - sheet writing requires service account authentication'
+        teamName
       }),
     };
 
