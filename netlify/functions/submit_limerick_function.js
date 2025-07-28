@@ -50,7 +50,48 @@ exports.handler = async (event, context) => {
       [teamCode, teamName, topic || 'No topic specified', limerickText, timestamp, 'Pending AI Score']
     ];
 
-    // Try to append to Limerick sheet
+    // First, try to create the Limerick sheet if it doesn't exist
+    try {
+      const createSheetUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}:batchUpdate?key=${apiKey}`;
+      
+      const createSheetResponse = await fetch(createSheetUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          requests: [{
+            addSheet: {
+              properties: {
+                title: 'Limerick'
+              }
+            }
+          }]
+        })
+      });
+
+      if (createSheetResponse.ok) {
+        console.log('Created Limerick sheet');
+        
+        // Add headers to the new sheet
+        const headerUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Limerick!A1:F1?valueInputOption=RAW&key=${apiKey}`;
+        await fetch(headerUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            values: [['Team Code', 'Team Name', 'Topic', 'Limerick Text', 'Submission Time', 'AI Score']]
+          })
+        });
+      } else {
+        console.log('Limerick sheet already exists or creation failed');
+      }
+    } catch (error) {
+      console.log('Sheet creation error (probably already exists):', error.message);
+    }
+
+    // Now try to append to Limerick sheet
     const appendUrl = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Limerick!A:F:append?valueInputOption=RAW&key=${apiKey}`;
     
     const appendResponse = await fetch(appendUrl, {
@@ -64,10 +105,11 @@ exports.handler = async (event, context) => {
     });
 
     if (!appendResponse.ok) {
-      // If Limerick sheet doesn't exist, the append will fail
-      console.log('Limerick sheet might not exist, submission logged but not saved to sheets');
+      const errorText = await appendResponse.text();
+      console.error('Failed to save to Limerick sheet:', errorText);
+      throw new Error('Failed to save limerick to sheets: ' + errorText);
     } else {
-      console.log('Limerick submission saved to Google Sheets');
+      console.log('Limerick submission saved to Google Sheets successfully');
     }
 
     // Simulate AI scoring for demo (normally done by Zapier + OpenAI)
