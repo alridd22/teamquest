@@ -551,25 +551,15 @@ Now [ending] all over the place!"
 
         async function loadTeamsList() {
             try {
-                console.log('Loading teams from backend function...');
-                
-                // Use the same safe approach as kindness challenge
+                // Get all teams from the leaderboard - same as kindness challenge
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                console.log('Teams response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
                 const data = await response.json();
-                console.log('Teams data received:', data);
                 
                 if (data.success && data.teams) {
                     allTeams = data.teams;
                     populateTeamDropdown(data.teams);
-                    console.log('Teams loaded successfully:', allTeams.length);
                 } else {
-                    throw new Error(data.error || 'No teams data');
+                    showMessage('loginMessage', 'Failed to load teams list. Please refresh the page.', 'error');
                 }
             } catch (error) {
                 console.error('Error loading teams:', error);
@@ -593,8 +583,6 @@ Now [ending] all over the place!"
 
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
-                console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
-                
                 const response = await fetch('/.netlify/functions/verify_team_pin_function', {
                     method: 'POST',
                     headers: {
@@ -606,17 +594,11 @@ Now [ending] all over the place!"
                     })
                 });
                 
-                console.log('Response status:', response.status);
-                console.log('Response ok:', response.ok);
-                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('HTTP error response:', errorText);
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const result = await response.json();
-                console.log('Verification result:', result);
                 
                 if (result.success) {
                     return result.valid;
@@ -632,16 +614,12 @@ Now [ending] all over the place!"
 
         async function submitLimerick(topic, limerickText) {
             try {
-                console.log('Starting limerick submission...');
-                
                 const submissionData = {
                     teamCode: currentTeam.teamCode,
                     teamName: currentTeam.teamName,
                     topic: topic,
                     limerickText: limerickText
                 };
-                
-                console.log('Submitting limerick data:', submissionData);
                 
                 const response = await fetch('/.netlify/functions/submit_limerick_function', {
                     method: 'POST',
@@ -651,16 +629,11 @@ Now [ending] all over the place!"
                     body: JSON.stringify(submissionData)
                 });
                 
-                console.log('Response status:', response.status);
-                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('HTTP error response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const result = await response.json();
-                console.log('Submission result:', result);
                 
                 if (!result.success) {
                     throw new Error(result.error || 'Submission failed');
