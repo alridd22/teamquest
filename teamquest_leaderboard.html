@@ -1,4 +1,380 @@
-async function loadLeaderboard() {
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamQuest - Live Leaderboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .timer-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .timer {
+            font-size: 3em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #ffd700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .timer-label {
+            font-size: 1.2em;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .leaderboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            background: rgba(255,255,255,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.1em;
+        }
+
+        th, td {
+            padding: 15px 12px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        th {
+            background: rgba(255,255,255,0.1);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.9em;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.1);
+            transform: scale(1.01);
+            transition: all 0.3s ease;
+        }
+
+        .rank {
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .rank-1 { color: #FFD700; }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+
+        .team-name {
+            font-weight: bold;
+            text-align: left;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .team-name:hover {
+            color: #ffd700;
+        }
+
+        .total-score {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #ffd700;
+        }
+
+        .activity-score {
+            font-family: 'Courier New', monospace;
+        }
+
+        .locked {
+            opacity: 0.7;
+        }
+
+        .locked::after {
+            content: " 🔒";
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+
+        .status-active { background: #4CAF50; }
+        .status-returned { background: #FFC107; }
+        .status-late { background: #F44336; }
+
+        .refresh-info {
+            text-align: center;
+            margin-top: 20px;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        .team-details {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 10px;
+            font-size: 0.9em;
+        }
+
+        .team-details.show {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #F44336;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .timer {
+                font-size: 2em;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                font-size: 0.9em;
+            }
+
+            .leaderboard-container {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🏆</div>
+        <h1>TeamQuest Leaderboard</h1>
+        
+        <div class="timer-container">
+            <div class="timer" id="timer">01:30:00</div>
+            <div class="timer-label">Time Remaining</div>
+        </div>
+    </div>
+
+    <div class="leaderboard-container">
+        <div id="loading" class="loading">
+            Loading leaderboard data...
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            Failed to load leaderboard data. <button onclick="loadLeaderboard()">Retry</button>
+        </div>
+
+        <div id="leaderboard-content" style="display: none;">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Team Name</th>
+                            <th>Registration</th>
+                            <th>Clue Hunt</th>
+                            <th>Quiz</th>
+                            <th>Kindness</th>
+                            <th>Scavenger</th>
+                            <th>Limerick</th>
+                            <th>Total Score</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Team rows will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="refresh-info">
+            Last updated: <span id="lastUpdate">--</span> | 
+            Auto-refresh every 30 seconds
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const REFRESH_INTERVAL = 30000; // 30 seconds
+        
+        // Timer configuration (1.5 hours = 90 minutes)
+        let totalTimeInSeconds = 90 * 60; // 90 minutes
+        let timerInterval;
+        let refreshInterval;
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimer() {
+            const timerElement = document.getElementById('timer');
+            
+            if (totalTimeInSeconds <= 0) {
+                timerElement.textContent = "TIME'S UP!";
+                timerElement.style.color = '#F44336';
+                clearInterval(timerInterval);
+                return;
+            }
+
+            timerElement.textContent = formatTime(totalTimeInSeconds);
+            
+            // Change color based on remaining time
+            if (totalTimeInSeconds <= 300) { // Last 5 minutes
+                timerElement.style.color = '#F44336';
+            } else if (totalTimeInSeconds <= 900) { // Last 15 minutes
+                timerElement.style.color = '#FF9800';
+            } else {
+                timerElement.style.color = '#ffd700';
+            }
+            
+            totalTimeInSeconds--;
+        }
+
+        function getStatusIndicator(status) {
+            switch(status) {
+                case 'active': return '<span class="status-indicator status-active"></span>';
+                case 'returned': return '<span class="status-indicator status-returned"></span>';
+                case 'late': return '<span class="status-indicator status-late"></span>';
+                default: return '';
+            }
+        }
+
+        function getRankClass(rank) {
+            switch(rank) {
+                case 1: return 'rank-1';
+                case 2: return 'rank-2';
+                case 3: return 'rank-3';
+                default: return '';
+            }
+        }
+
+        function toggleTeamDetails(teamName) {
+            const detailsElement = document.getElementById(`details-${teamName.replace(/\s+/g, '-')}`);
+            if (detailsElement) {
+                detailsElement.classList.toggle('show');
+            }
+        }
+
+        function renderLeaderboard(data) {
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = '';
+
+            data.forEach(team => {
+                const row = document.createElement('tr');
+                if (team.locked) row.classList.add('locked');
+                
+                row.innerHTML = `
+                    <td class="rank ${getRankClass(team.rank)}">#${team.rank}</td>
+                    <td class="team-name" onclick="toggleTeamDetails('${team.teamName}')">
+                        ${team.teamName}
+                    </td>
+                    <td class="activity-score">${team.registration}</td>
+                    <td class="activity-score">${team.clueHunt}</td>
+                    <td class="activity-score">${team.quiz}</td>
+                    <td class="activity-score">${team.kindness}</td>
+                    <td class="activity-score">${team.scavenger}</td>
+                    <td class="activity-score">${team.limerick}</td>
+                    <td class="total-score">${team.totalScore}</td>
+                    <td>${getStatusIndicator(team.status || 'active')} ${team.status || 'active'}</td>
+                `;
+                
+                tbody.appendChild(row);
+
+                // Add details row
+                const detailsRow = document.createElement('tr');
+                detailsRow.innerHTML = `
+                    <td colspan="10">
+                        <div class="team-details" id="details-${team.teamName.replace(/\s+/g, '-')}">
+                            <strong>Activity Breakdown:</strong><br>
+                            Registration: ${team.registration} pts | 
+                            Clue Hunt: ${team.clueHunt} pts | 
+                            Quiz: ${team.quiz} pts | 
+                            Kindness: ${team.kindness} pts | 
+                            Scavenger: ${team.scavenger} pts | 
+                            Limerick: ${team.limerick} pts
+                            <br><strong>Total:</strong> ${team.totalScore} points
+                            ${team.locked ? '<br><strong>Status:</strong> Score Locked' : ''}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(detailsRow);
+            });
+        }
+
+        async function loadLeaderboard() {
             const loadingElement = document.getElementById('loading');
             const errorElement = document.getElementById('error');
             const contentElement = document.getElementById('leaderboard-content');
@@ -62,3 +438,28 @@ async function loadLeaderboard() {
                 `;
             }
         }
+
+        function startTimer() {
+            timerInterval = setInterval(updateTimer, 1000);
+            updateTimer(); // Initial call
+        }
+
+        function startAutoRefresh() {
+            refreshInterval = setInterval(loadLeaderboard, REFRESH_INTERVAL);
+        }
+
+        // Initialize the leaderboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLeaderboard();
+            startTimer();
+            startAutoRefresh();
+        });
+
+        // Cleanup intervals when page is unloaded
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (refreshInterval) clearInterval(refreshInterval);
+        });
+    </script>
+</body>
+</html>
