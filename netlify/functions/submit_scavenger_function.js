@@ -86,7 +86,7 @@ exports.handler = async (event, context) => {
       throw new Error(`Sheet access failed: ${loadError.message}`);
     }
 
-    // Find the Scavenger sheet
+    // Find or create the Scavenger sheet
     console.log('Looking for Scavenger sheet');
     let scavengerSheet = null;
     
@@ -99,24 +99,41 @@ exports.handler = async (event, context) => {
     }
 
     if (!scavengerSheet) {
-      console.log('Scavenger sheet not found, creating it');
+      console.log('Scavenger sheet not found, creating it with headers');
       scavengerSheet = await doc.addSheet({ 
         title: 'Scavenger',
         headerValues: ['Team Code', 'Team Name', 'Item ID', 'Item Title', 'Item Description', 'Photo URL', 'Max Points', 'Submission Time', 'AI Score', 'Verified']
       });
+      console.log('Scavenger sheet created successfully');
     } else {
       console.log('Using existing Scavenger sheet');
-      await scavengerSheet.loadHeaderRow();
       
-      // Set headers if they don't exist
+      // Load the sheet to check headers
+      await scavengerSheet.loadHeaderRow();
+      console.log('Current header values:', scavengerSheet.headerValues);
+      
+      // Check if headers exist and are correct
       if (!scavengerSheet.headerValues || scavengerSheet.headerValues.length === 0) {
-        console.log('Setting up Scavenger sheet headers');
-        await scavengerSheet.setHeaderRow(['Team Code', 'Team Name', 'Item ID', 'Item Title', 'Item Description', 'Photo URL', 'Max Points', 'Submission Time', 'AI Score', 'Verified']);
+        console.log('No headers found, setting up headers manually');
+        
+        // Clear the sheet first
+        await scavengerSheet.clear();
+        
+        // Set headers using updateCells
+        await scavengerSheet.updateCells('A1:J1', [
+          ['Team Code', 'Team Name', 'Item ID', 'Item Title', 'Item Description', 'Photo URL', 'Max Points', 'Submission Time', 'AI Score', 'Verified']
+        ]);
+        
+        // Reload to get the headers
+        await scavengerSheet.loadHeaderRow();
+        console.log('Headers set manually, new header values:', scavengerSheet.headerValues);
       }
     }
 
     console.log('Adding scavenger item submission to sheet');
     const submissionTime = new Date().toISOString();
+    
+    // Add the row using the header mapping
     const newRow = await scavengerSheet.addRow({
       'Team Code': teamCode,
       'Team Name': teamName,
@@ -130,7 +147,7 @@ exports.handler = async (event, context) => {
       'Verified': 'Pending'
     });
 
-    console.log('Scavenger item submission saved successfully:', newRow.rowNumber);
+    console.log('Scavenger item submission saved successfully to row:', newRow.rowNumber);
     console.log('AI verification will be processed automatically via Google Sheets trigger');
 
     // Simulate AI verification for immediate feedback (real scoring happens via Zapier)
