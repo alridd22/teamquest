@@ -149,10 +149,6 @@ exports.handler = async (event, context) => {
 
     console.log('Scavenger item submission saved successfully to row:', newRow.rowNumber);
     console.log('AI verification will be processed automatically via Google Sheets trigger');
-
-    // Simulate AI verification for immediate feedback (real scoring happens via Zapier)
-    const simulatedVerified = Math.random() > 0.2; // 80% success rate simulation
-    const simulatedScore = simulatedVerified ? Math.floor(Math.random() * 3) + (maxPoints - 2) : 0; // Near max points if verified
     
     console.log('Scavenger item submission processed successfully');
 
@@ -164,14 +160,15 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         success: true,
-        message: `${itemTitle} submitted successfully! AI verification in progress.`,
-        verified: simulatedVerified,
-        score: simulatedScore,
+        message: `${itemTitle} submitted successfully! AI is now analyzing your photo...`,
+        verified: false, // Always false until real AI verification
+        score: 0, // Always 0 until real AI scoring
+        status: 'pending_verification',
         teamCode,
         teamName,
         itemTitle,
         submissionTime,
-        note: 'Final verification and scoring via AI will update in 1-2 minutes'
+        note: 'Check back in 1-2 minutes for AI verification results, or refresh the leaderboard to see updated scores.'
       }),
     };
 
