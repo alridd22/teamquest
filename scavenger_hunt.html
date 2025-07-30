@@ -666,26 +666,39 @@
             try {
                 const result = await submitScavengerItem(photoFile, currentItem);
                 
-                showMessage('submitMessage', 
-                    '🎉 Item submitted! AI verified: ' + (result.verified ? 'CORRECT' : 'INCORRECT') + ' item. Score: ' + result.score + ' points. ' + (completedItems[currentItem.id] ? 'Return to the list to submit more items!' : ''), 
-                    result.verified ? 'success' : 'error');
-                
-                // Update completed items
-                completedItems[currentItem.id] = {
-                    score: result.score,
-                    verified: result.verified,
-                    submittedAt: new Date().toISOString()
-                };
+                // Handle pending verification state
+                if (result.status === 'pending_verification') {
+                    showMessage('submitMessage', 
+                        '📤 ' + result.message + ' Your submission is being processed by our AI. Check the leaderboard in 1-2 minutes for verification results!', 
+                        'success');
+                    
+                    // Mark as submitted but not yet verified
+                    completedItems[currentItem.id] = {
+                        score: 0,
+                        verified: false,
+                        submittedAt: new Date().toISOString(),
+                        status: 'pending'
+                    };
+                } else {
+                    // Handle other result types
+                    showMessage('submitMessage', 
+                        '🎉 Item submitted! AI verified: ' + (result.verified ? 'CORRECT' : 'INCORRECT') + ' item. Score: ' + result.score + ' points.', 
+                        result.verified ? 'success' : 'error');
+                    
+                    completedItems[currentItem.id] = {
+                        score: result.score,
+                        verified: result.verified,
+                        submittedAt: new Date().toISOString()
+                    };
+                }
                 
                 // Update progress
                 updateProgress();
                 
                 // Reset form for next submission
                 setTimeout(() => {
-                    if (result.verified) {
-                        showItemGrid();
-                    }
-                }, 3000);
+                    showItemGrid();
+                }, 4000); // Longer delay to read the message
                 
             } catch (error) {
                 console.error('Submission error:', error);
