@@ -17,55 +17,46 @@ exports.handler = async (event, context) => {
     };
   }
 
-  if (event.httpMethod !== 'GET') {
-    return {
-      statusCode: 405,
-      headers: {'Access-Control-Allow-Origin': '*'},
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
   try {
-    console.log('Setting up Google Sheets authentication');
-
-    // Get environment variables (same as working functions)
+    // Get environment variables
     const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
     const sheetId = process.env.GOOGLE_SHEET_ID;
     const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
+
+    console.log('Environment variables check:', {
+      hasEmail: !!serviceAccountEmail,
+      hasSheetId: !!sheetId,
+      hasPrivateKeyB64: !!privateKeyBase64,
+    });
 
     if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
       throw new Error('Missing required environment variables');
     }
 
-    // Decode private key from base64 (same as working functions)
+    // Decode private key
     let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
     if (privateKey.includes('\\n')) {
       privateKey = privateKey.replace(/\\n/g, '\n');
     }
 
-    // Create JWT authentication
+    // Create JWT client
     const serviceAccountAuth = new JWT({
       email: serviceAccountEmail,
       key: privateKey,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    // Initialize the sheet
+    // Initialize Google Sheet
     const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
     await doc.loadInfo();
-    console.log('Google Sheet loaded:', doc.title);
-
-    // Get the main leaderboard/registration sheet (first sheet)
-    const mainSheet = doc.sheetsByIndex[0];
-    await mainSheet.loadHeaderRow();
-    const mainRows = await mainSheet.getRows();
-    console.log(`Found ${mainRows.length} teams in main sheet`);
+    console.log('Sheet loaded successfully:', doc.title);
 
     // Get activity scores
     const activityScores = {
       kindness: {},
       limerick: {},
-      scavenger: {}
+      scavenger: {},
+      quiz: {}
     };
 
     // Load Kindness scores
@@ -74,23 +65,23 @@ exports.handler = async (event, context) => {
       if (kindnessSheet) {
         await kindnessSheet.loadHeaderRow();
         const kindnessRows = await kindnessSheet.getRows();
-        
+        console.log('Kindness rows loaded:', kindnessRows.length);
+
         kindnessRows.forEach(row => {
           const teamCode = row.get('Team Code');
-          const score = row.get('AI Score');
-          
-          if (teamCode && score && !isNaN(parseFloat(score))) {
+          const score = parseInt(row.get('AI Score')) || 0;
+          const verified = row.get('Verified') === 'TRUE';
+
+          if (teamCode && verified && score > 0) {
             if (!activityScores.kindness[teamCode]) {
               activityScores.kindness[teamCode] = 0;
             }
-            activityScores.kindness[teamCode] += parseFloat(score);
+            activityScores.kindness[teamCode] += score;
           }
         });
-        
-        console.log('Kindness scores loaded:', activityScores.kindness);
       }
     } catch (error) {
-      console.log('Could not load Kindness sheet:', error.message);
+      console.log('Kindness sheet not found or error:', error.message);
     }
 
     // Load Limerick scores
@@ -99,23 +90,23 @@ exports.handler = async (event, context) => {
       if (limerickSheet) {
         await limerickSheet.loadHeaderRow();
         const limerickRows = await limerickSheet.getRows();
-        
+        console.log('Limerick rows loaded:', limerickRows.length);
+
         limerickRows.forEach(row => {
           const teamCode = row.get('Team Code');
-          const score = row.get('AI Score');
-          
-          if (teamCode && score && !isNaN(parseFloat(score))) {
+          const score = parseInt(row.get('AI Score')) || 0;
+          const verified = row.get('Verified') === 'TRUE';
+
+          if (teamCode && verified && score > 0) {
             if (!activityScores.limerick[teamCode]) {
               activityScores.limerick[teamCode] = 0;
             }
-            activityScores.limerick[teamCode] += parseFloat(score);
+            activityScores.limerick[teamCode] += score;
           }
         });
-        
-        console.log('Limerick scores loaded:', activityScores.limerick);
       }
     } catch (error) {
-      console.log('Could not load Limerick sheet:', error.message);
+      console.log('Limerick sheet not found or error:', error.message);
     }
 
     // Load Scavenger scores
@@ -124,86 +115,114 @@ exports.handler = async (event, context) => {
       if (scavengerSheet) {
         await scavengerSheet.loadHeaderRow();
         const scavengerRows = await scavengerSheet.getRows();
-        
+        console.log('Scavenger rows loaded:', scavengerRows.length);
+
         scavengerRows.forEach(row => {
           const teamCode = row.get('Team Code');
-          const score = row.get('AI Score');
-          const verified = row.get('Verified');
-          
-          // Only count verified scavenger items
-          if (teamCode && score && !isNaN(parseFloat(score)) && verified === 'Yes') {
+          const score = parseInt(row.get('AI Score')) || 0;
+          const verified = row.get('Verified') === 'TRUE';
+
+          if (teamCode && verified && score > 0) {
             if (!activityScores.scavenger[teamCode]) {
               activityScores.scavenger[teamCode] = 0;
             }
-            activityScores.scavenger[teamCode] += parseFloat(score);
+            activityScores.scavenger[teamCode] += score;
           }
         });
-        
-        console.log('Scavenger scores loaded:', activityScores.scavenger);
       }
     } catch (error) {
-      console.log('Could not load Scavenger sheet:', error.message);
+      console.log('Scavenger sheet not found or error:', error.message);
     }
 
-    // Process teams data
-    const teams = [];
-    
-    mainRows.forEach(row => {
-      try {
-        const teamCode = row.get('Team Code') || row.get('teamCode') || '';
-        const teamName = row.get('Team Name') || row.get('teamName') || '';
-        
-        if (!teamCode || !teamName) {
-          return; // Skip invalid rows
-        }
+    // Load Quiz scores  
+    try {
+      const quizSheet = doc.sheetsByTitle['Quiz'];
+      if (quizSheet) {
+        await quizSheet.loadHeaderRow();
+        const quizRows = await quizSheet.getRows();
+        console.log('Quiz rows loaded:', quizRows.length);
 
-        // Get scores (defaulting to 0 if not found)
-        const registration = 10; // Fixed registration score
-        const clueHunt = 0; // Not implemented yet
-        const quiz = 0; // Not implemented yet
-        const kindness = activityScores.kindness[teamCode] || 0;
-        const scavenger = activityScores.scavenger[teamCode] || 0;
-        const limerick = activityScores.limerick[teamCode] || 0;
+        quizRows.forEach(row => {
+          const teamCode = row.get('Team Code');
+          const totalScore = parseInt(row.get('Total Score')) || 0;
 
-        const totalScore = registration + clueHunt + quiz + kindness + scavenger + limerick;
+          if (teamCode && totalScore > 0) {
+            // Quiz scores are final - no verification needed
+            activityScores.quiz[teamCode] = totalScore;
+          }
+        });
+      }
+    } catch (error) {
+      console.log('Quiz sheet not found or error:', error.message);
+    }
 
-        teams.push({
-          teamCode,
-          teamName,
+    console.log('Activity scores loaded:', activityScores);
+
+    // Get all teams from registration sheet
+    let allTeams = [];
+    try {
+      const registrationSheet = doc.sheetsByTitle['Team Registration'];
+      if (registrationSheet) {
+        await registrationSheet.loadHeaderRow();
+        const teamRows = await registrationSheet.getRows();
+        console.log('Team registration rows loaded:', teamRows.length);
+
+        allTeams = teamRows.map(row => ({
+          teamCode: row.get('Team Code'),
+          teamName: row.get('Team Name'),
+          members: row.get('Team Members') || '',
+          registrationTime: row.get('Registration Time') || ''
+        })).filter(team => team.teamCode && team.teamName);
+      }
+    } catch (error) {
+      console.log('Team registration sheet not found:', error.message);
+      // Fallback to hardcoded teams if registration sheet not available
+      allTeams = [
+        { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+        { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+        { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+        { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+        { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+        { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+        { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+      ];
+    }
+
+    // Calculate leaderboard
+    const leaderboard = allTeams.map(team => {
+      // Get scores (defaulting to 0 if not found)
+      const registration = 10; // Fixed registration score
+      const clueHunt = 0; // Not implemented yet
+      const kindness = activityScores.kindness[team.teamCode] || 0;
+      const scavenger = activityScores.scavenger[team.teamCode] || 0;
+      const limerick = activityScores.limerick[team.teamCode] || 0;
+      const quiz = activityScores.quiz[team.teamCode] || 0;
+
+      const totalScore = registration + clueHunt + kindness + scavenger + limerick + quiz;
+
+      return {
+        teamCode: team.teamCode,
+        teamName: team.teamName,
+        totalScore,
+        activities: {
           registration,
           clueHunt,
           quiz,
           kindness,
           scavenger,
-          limerick,
-          totalScore
-        });
-      } catch (rowError) {
-        console.log('Error processing row:', rowError.message);
-      }
+          limerick
+        },
+        members: team.members,
+        registrationTime: team.registrationTime
+      };
     });
 
-    // Sort by total score (highest first)
-    teams.sort((a, b) => b.totalScore - a.totalScore);
+    // Sort by total score (descending)
+    leaderboard.sort((a, b) => b.totalScore - a.totalScore);
 
-    // Add rank to each team
-    teams.forEach((team, index) => {
-      team.rank = index + 1;
-    });
-
-    console.log(`Processed ${teams.length} teams with activity scores integrated`);
-    
-    // Log a sample of the teams data for debugging
-    console.log('Sample team data:', teams.slice(0, 2));
-
-    const response = {
-      success: true,
-      teams: teams,
-      lastUpdated: new Date().toISOString(),
-      totalTeams: teams.length
-    };
-    
-    console.log('Sending response with', teams.length, 'teams');
+    console.log('Leaderboard calculated:', leaderboard.map(team => 
+      `${team.teamName}: ${team.totalScore} points`
+    ));
 
     return {
       statusCode: 200,
@@ -211,7 +230,12 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(response),
+      body: JSON.stringify({
+        success: true,
+        teams: allTeams,
+        leaderboard,
+        lastUpdated: new Date().toISOString()
+      }),
     };
 
   } catch (error) {
