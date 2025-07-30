@@ -13,100 +13,114 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            color: white;
             padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
         }
 
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
-        .logo {
-            font-size: 3em;
-            margin-bottom: 10px;
+        .trophy-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
 
         h1 {
+            color: #333;
             font-size: 2.5em;
-            font-weight: 700;
+            font-weight: 600;
             margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        .timer-container {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 400px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
         }
 
-        .timer {
-            font-size: 3em;
+        .timer-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            display: inline-block;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
-            color: #ffd700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
         }
 
-        .timer-label {
-            font-size: 1.2em;
-            margin-top: 10px;
-            opacity: 0.9;
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .leaderboard-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: rgba(255,255,255,0.1);
-            border-radius: 20px;
-            padding: 30px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        }
-
-        .table-container {
-            overflow-x: auto;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.05);
-        }
-
-        table {
+        .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 1.1em;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        th, td {
-            padding: 15px 12px;
+        .leaderboard-table th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 15px;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        th {
-            background: rgba(255,255,255,0.1);
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9em;
+            font-size: 1em;
         }
 
-        tr:hover {
-            background: rgba(255,255,255,0.1);
-            transform: scale(1.01);
+        .leaderboard-table td {
+            padding: 20px 15px;
+            text-align: center;
+            border-bottom: 1px solid #e0e7ff;
             transition: all 0.3s ease;
         }
 
-        .rank {
+        .leaderboard-table tr:hover {
+            background: #f8f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .rank-cell {
             font-weight: bold;
-            font-size: 1.3em;
+            font-size: 1.2em;
+            width: 80px;
         }
 
         .rank-1 { color: #FFD700; }
@@ -114,351 +128,331 @@
         .rank-3 { color: #CD7F32; }
 
         .team-name {
-            font-weight: bold;
             text-align: left;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .team-name:hover {
-            color: #ffd700;
-        }
-
-        .total-score {
             font-weight: bold;
-            font-size: 1.2em;
-            color: #ffd700;
+            color: #333;
+            min-width: 200px;
+        }
+
+        .score-cell {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1em;
+            min-width: 80px;
         }
 
         .activity-score {
-            font-family: 'Courier New', monospace;
-        }
-
-        .locked {
-            opacity: 0.7;
-        }
-
-        .locked::after {
-            content: " 🔒";
-        }
-
-        .status-indicator {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-left: 8px;
-        }
-
-        .status-active { background: #4CAF50; }
-        .status-returned { background: #FFC107; }
-        .status-late { background: #F44336; }
-
-        .refresh-info {
-            text-align: center;
-            margin-top: 20px;
-            opacity: 0.8;
             font-size: 0.9em;
+            color: #666;
+            min-width: 80px;
         }
 
-        .team-details {
-            display: none;
-            background: rgba(255,255,255,0.1);
-            padding: 15px;
-            margin-top: 10px;
+        .activity-score.completed {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .total-score {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #667eea;
+            background: #f0f4ff;
             border-radius: 10px;
-            font-size: 0.9em;
+            padding: 10px;
+            min-width: 100px;
         }
 
-        .team-details.show {
-            display: block;
+        .rank-1 .total-score {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: white;
+        }
+
+        .rank-2 .total-score {
+            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
+            color: white;
+        }
+
+        .rank-3 .total-score {
+            background: linear-gradient(135deg, #CD7F32, #8B4513);
+            color: white;
+        }
+
+        .loading, .error {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
         }
 
         .loading {
-            text-align: center;
-            font-size: 1.2em;
-            opacity: 0.8;
+            color: #667eea;
         }
 
         .error {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid #F44336;
-            padding: 15px;
+            color: #ef4444;
+            background: #fef2f2;
+            border: 2px solid #fecaca;
             border-radius: 10px;
-            text-align: center;
             margin: 20px 0;
         }
 
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+        .refresh-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
 
+        .team-details {
+            cursor: pointer;
+        }
+
+        .team-details:hover {
+            background: #f0f4ff;
+        }
+
+        .expanded-details {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+        }
+
+        .expanded-details td {
+            padding: 10px 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        @media (max-width: 1200px) {
+            .leaderboard-table {
+                font-size: 0.9em;
+            }
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 15px 10px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                padding: 20px;
+            }
+            
             h1 {
                 font-size: 2em;
             }
-
-            .timer {
-                font-size: 2em;
+            
+            .leaderboard-table {
+                font-size: 0.8em;
             }
-
-            th, td {
-                padding: 10px 8px;
-                font-size: 0.9em;
+            
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 12px 8px;
             }
+        }
 
-            .leaderboard-container {
-                padding: 20px 15px;
+        @media (max-width: 600px) {
+            .leaderboard-table th,
+            .leaderboard-table td {
+                padding: 10px 5px;
+            }
+            
+            .team-name {
+                min-width: 120px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">🏆</div>
-        <h1>TeamQuest Leaderboard</h1>
-        
-        <div class="timer-container">
-            <div class="timer" id="timer">01:30:00</div>
-            <div class="timer-label">Time Remaining</div>
-        </div>
-    </div>
-
-    <div class="leaderboard-container">
-        <div id="loading" class="loading">
-            Loading leaderboard data...
-        </div>
-        
-        <div id="error" class="error" style="display: none;">
-            Failed to load leaderboard data. <button onclick="loadLeaderboard()">Retry</button>
-        </div>
-
-        <div id="leaderboard-content" style="display: none;">
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Team Name</th>
-                            <th>Registration</th>
-                            <th>Clue Hunt</th>
-                            <th>Quiz</th>
-                            <th>Kindness</th>
-                            <th>Scavenger</th>
-                            <th>Limerick</th>
-                            <th>Total Score</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        <!-- Team rows will be populated here -->
-                    </tbody>
-                </table>
+    <div class="container">
+        <div class="header">
+            <div class="trophy-icon">🏆</div>
+            <h1>TeamQuest Leaderboard</h1>
+            <p class="subtitle">Live competition standings</p>
+            <div class="timer-info" id="timerInfo">
+                Competition in progress...
             </div>
         </div>
 
+        <div class="loading" id="loading">
+            🔄 Loading leaderboard data...
+        </div>
+
+        <div class="error" id="error" style="display: none;">
+            ❌ Failed to load leaderboard data. <button onclick="loadLeaderboard()" style="margin-left: 10px; padding: 5px 10px; border: none; background: #667eea; color: white; border-radius: 5px; cursor: pointer;">Retry</button>
+        </div>
+
+        <div id="leaderboardContent" style="display: none;">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Team Name</th>
+                        <th>Registration</th>
+                        <th>Clue Hunt</th>
+                        <th>Quiz</th>
+                        <th>Kindness</th>
+                        <th>Scavenger</th>
+                        <th>Limerick</th>
+                        <th>Total Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Leaderboard content will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+
         <div class="refresh-info">
-            Last updated: <span id="lastUpdate">--</span> | 
-            Auto-refresh every 30 seconds
+            <p>🔄 Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">--</span></p>
         </div>
     </div>
 
     <script>
-        // Configuration
-        const REFRESH_INTERVAL = 30000; // 30 seconds
-        
-        // Timer configuration (1.5 hours = 90 minutes)
-        let totalTimeInSeconds = 90 * 60; // 90 minutes
-        let timerInterval;
         let refreshInterval;
 
-        function formatTime(seconds) {
-            const hours = Math.floor(seconds / 3600);
-            const minutes = Math.floor((seconds % 3600) / 60);
-            const secs = seconds % 60;
-            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function updateTimer() {
-            const timerElement = document.getElementById('timer');
+        // Start loading leaderboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLeaderboard();
             
-            if (totalTimeInSeconds <= 0) {
-                timerElement.textContent = "TIME'S UP!";
-                timerElement.style.color = '#F44336';
-                clearInterval(timerInterval);
-                return;
-            }
-
-            timerElement.textContent = formatTime(totalTimeInSeconds);
-            
-            // Change color based on remaining time
-            if (totalTimeInSeconds <= 300) { // Last 5 minutes
-                timerElement.style.color = '#F44336';
-            } else if (totalTimeInSeconds <= 900) { // Last 15 minutes
-                timerElement.style.color = '#FF9800';
-            } else {
-                timerElement.style.color = '#ffd700';
-            }
-            
-            totalTimeInSeconds--;
-        }
-
-        function getStatusIndicator(status) {
-            switch(status) {
-                case 'active': return '<span class="status-indicator status-active"></span>';
-                case 'returned': return '<span class="status-indicator status-returned"></span>';
-                case 'late': return '<span class="status-indicator status-late"></span>';
-                default: return '';
-            }
-        }
-
-        function getRankClass(rank) {
-            switch(rank) {
-                case 1: return 'rank-1';
-                case 2: return 'rank-2';
-                case 3: return 'rank-3';
-                default: return '';
-            }
-        }
-
-        function toggleTeamDetails(teamName) {
-            const detailsElement = document.getElementById(`details-${teamName.replace(/\s+/g, '-')}`);
-            if (detailsElement) {
-                detailsElement.classList.toggle('show');
-            }
-        }
-
-        function renderLeaderboard(data) {
-            const tbody = document.getElementById('leaderboard-body');
-            tbody.innerHTML = '';
-
-            data.forEach(team => {
-                const row = document.createElement('tr');
-                if (team.locked) row.classList.add('locked');
-                
-                row.innerHTML = `
-                    <td class="rank ${getRankClass(team.rank)}">#${team.rank}</td>
-                    <td class="team-name" onclick="toggleTeamDetails('${team.teamName}')">
-                        ${team.teamName}
-                    </td>
-                    <td class="activity-score">${team.registration}</td>
-                    <td class="activity-score">${team.clueHunt}</td>
-                    <td class="activity-score">${team.quiz}</td>
-                    <td class="activity-score">${team.kindness}</td>
-                    <td class="activity-score">${team.scavenger}</td>
-                    <td class="activity-score">${team.limerick}</td>
-                    <td class="total-score">${team.totalScore}</td>
-                    <td>${getStatusIndicator(team.status || 'active')} ${team.status || 'active'}</td>
-                `;
-                
-                tbody.appendChild(row);
-
-                // Add details row
-                const detailsRow = document.createElement('tr');
-                detailsRow.innerHTML = `
-                    <td colspan="10">
-                        <div class="team-details" id="details-${team.teamName.replace(/\s+/g, '-')}">
-                            <strong>Activity Breakdown:</strong><br>
-                            Registration: ${team.registration} pts | 
-                            Clue Hunt: ${team.clueHunt} pts | 
-                            Quiz: ${team.quiz} pts | 
-                            Kindness: ${team.kindness} pts | 
-                            Scavenger: ${team.scavenger} pts | 
-                            Limerick: ${team.limerick} pts
-                            <br><strong>Total:</strong> ${team.totalScore} points
-                            ${team.locked ? '<br><strong>Status:</strong> Score Locked' : ''}
-                        </div>
-                    </td>
-                `;
-                tbody.appendChild(detailsRow);
-            });
-        }
+            // Set up auto-refresh every 30 seconds
+            refreshInterval = setInterval(loadLeaderboard, 30000);
+        });
 
         async function loadLeaderboard() {
+            console.log('Loading leaderboard data...');
+            
             const loadingElement = document.getElementById('loading');
             const errorElement = document.getElementById('error');
-            const contentElement = document.getElementById('leaderboard-content');
-
+            const contentElement = document.getElementById('leaderboardContent');
+            
             try {
                 loadingElement.style.display = 'block';
                 errorElement.style.display = 'none';
                 contentElement.style.display = 'none';
-
-                console.log('Loading leaderboard data...');
                 
-                // Fetch data from our secure Netlify function
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
                 
                 console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
+                console.log('Response headers:', [...response.headers.entries()]);
                 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('HTTP error response:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const responseText = await response.text();
-                console.log('Raw response text:', responseText.substring(0, 500) + '...');
+                const rawText = await response.text();
+                console.log('Raw response (first 500 chars):', rawText.substring(0, 500));
                 
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('JSON parse error:', parseError);
-                    console.error('Response that failed to parse:', responseText);
-                    throw new Error(`Failed to parse JSON response: ${parseError.message}`);
+                const data = JSON.parse(rawText);
+                console.log('Parsed JSON result:', data);
+                
+                if (data && data.success && data.leaderboard && Array.isArray(data.leaderboard)) {
+                    console.log('Number of teams loaded:', data.leaderboard.length);
+                    displayLeaderboard(data.leaderboard);
+                    updateLastUpdated(data.lastUpdated);
+                    
+                    loadingElement.style.display = 'none';
+                    contentElement.style.display = 'block';
+                } else {
+                    throw new Error('Invalid response structure: ' + JSON.stringify(data));
                 }
                 
-                console.log('Parsed result:', result);
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Unknown error from server');
-                }
-                
-                if (!result.teams || !Array.isArray(result.teams)) {
-                    throw new Error('Invalid response format: missing teams array');
-                }
-                
-                console.log('Loaded', result.teams.length, 'teams');
-                renderLeaderboard(result.teams);
-                
-                loadingElement.style.display = 'none';
-                contentElement.style.display = 'block';
-                
-                document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString();
-
             } catch (error) {
-                console.error('Error loading leaderboard:', error);
+                console.error('Leaderboard loading error:', error);
+                
                 loadingElement.style.display = 'none';
                 errorElement.style.display = 'block';
-                errorElement.innerHTML = `
-                    Failed to load leaderboard data: ${error.message}
-                    <br><button onclick="loadLeaderboard()" style="margin-top: 10px; padding: 5px 10px;">Retry</button>
-                `;
+                errorElement.innerHTML = `❌ ${error.message} <button onclick="loadLeaderboard()" style="margin-left: 10px; padding: 5px 10px; border: none; background: #667eea; color: white; border-radius: 5px; cursor: pointer;">Retry</button>`;
             }
         }
 
-        function startTimer() {
-            timerInterval = setInterval(updateTimer, 1000);
-            updateTimer(); // Initial call
+        function displayLeaderboard(teams) {
+            const tbody = document.getElementById('leaderboardBody');
+            tbody.innerHTML = '';
+            
+            teams.forEach((team, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                
+                const row = document.createElement('tr');
+                row.className = `team-details ${rankClass}`;
+                row.onclick = () => toggleTeamDetails(row, team);
+                
+                row.innerHTML = `
+                    <td class="rank-cell ${rankClass}">${getRankDisplay(rank)}</td>
+                    <td class="team-name">${escapeHtml(team.teamName)}</td>
+                    <td class="activity-score ${team.activities.registration > 0 ? 'completed' : ''}">${team.activities.registration}</td>
+                    <td class="activity-score ${team.activities.clueHunt > 0 ? 'completed' : ''}">${team.activities.clueHunt}</td>
+                    <td class="activity-score ${team.activities.quiz > 0 ? 'completed' : ''}">${team.activities.quiz}</td>
+                    <td class="activity-score ${team.activities.kindness > 0 ? 'completed' : ''}">${team.activities.kindness}</td>
+                    <td class="activity-score ${team.activities.scavenger > 0 ? 'completed' : ''}">${team.activities.scavenger}</td>
+                    <td class="activity-score ${team.activities.limerick > 0 ? 'completed' : ''}">${team.activities.limerick}</td>
+                    <td class="total-score">${team.totalScore}</td>
+                `;
+                
+                tbody.appendChild(row);
+            });
         }
 
-        function startAutoRefresh() {
-            refreshInterval = setInterval(loadLeaderboard, REFRESH_INTERVAL);
+        function getRankDisplay(rank) {
+            switch(rank) {
+                case 1: return '🥇';
+                case 2: return '🥈';
+                case 3: return '🥉';
+                default: return rank;
+            }
         }
 
-        // Initialize the leaderboard
-        document.addEventListener('DOMContentLoaded', function() {
-            loadLeaderboard();
-            startTimer();
-            startAutoRefresh();
-        });
+        function toggleTeamDetails(row, team) {
+            const existingDetails = row.nextElementSibling;
+            
+            if (existingDetails && existingDetails.classList.contains('expanded-details')) {
+                existingDetails.remove();
+                return;
+            }
+            
+            // Remove any other expanded details
+            document.querySelectorAll('.expanded-details').forEach(el => el.remove());
+            
+            const detailsRow = document.createElement('tr');
+            detailsRow.className = 'expanded-details';
+            detailsRow.innerHTML = `
+                <td colspan="9">
+                    <strong>Team Code:</strong> ${escapeHtml(team.teamCode)} | 
+                    <strong>Members:</strong> ${escapeHtml(team.members || 'Not specified')} | 
+                    <strong>Registered:</strong> ${team.registrationTime ? new Date(team.registrationTime).toLocaleString() : 'Unknown'}
+                </td>
+            `;
+            
+            row.parentNode.insertBefore(detailsRow, row.nextSibling);
+        }
 
-        // Cleanup intervals when page is unloaded
-        window.addEventListener('beforeunload', function() {
-            if (timerInterval) clearInterval(timerInterval);
-            if (refreshInterval) clearInterval(refreshInterval);
+        function updateLastUpdated(timestamp) {
+            const element = document.getElementById('lastUpdated');
+            if (timestamp) {
+                const date = new Date(timestamp);
+                element.textContent = date.toLocaleTimeString();
+            } else {
+                element.textContent = new Date().toLocaleTimeString();
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Pause auto-refresh when page is not visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                }
+            } else {
+                loadLeaderboard();
+                refreshInterval = setInterval(loadLeaderboard, 30000);
+            }
         });
     </script>
 </body>
