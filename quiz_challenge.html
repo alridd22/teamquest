@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamQuest - Quiz Challenge</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .quiz-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .team-info {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-section, .quiz-section, .results-section {
+            display: none;
+        }
+
+        .login-section.active, .quiz-section.active, .results-section.active {
+            display: block;
+        }
+
+        .instructions {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .instructions h3 {
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.1em;
+        }
+
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #bdc8ff;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fefefe;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .pin-input {
+            text-align: center;
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 15px;
+        }
+
+        .question-counter {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .timer {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .timer-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(#667eea 0deg, #e0e7ff 0deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+            transition: all 0.1s ease;
+        }
+
+        .timer-circle.warning {
+            background: conic-gradient(#f59e0b 0deg, #fef3c7 0deg);
+            animation: shake 0.5s infinite;
+        }
+
+        .timer-circle.danger {
+            background: conic-gradient(#ef4444 0deg, #fecaca 0deg);
+            animation: shake 0.2s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
+        }
+
+        .question-card {
+            background: white;
+            border: 2px solid #e0e7ff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+        }
+
+        .question-number {
+            color: #667eea;
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .question-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 15px;
+            margin: 20px 0;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .audio-player {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .audio-player audio {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .play-instruction {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: #f8f9ff;
+            border: 2px solid #e0e7ff;
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            background: #e0e7ff;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option.correct {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
+        }
+
+        .option.incorrect {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .option-letter {
+            background: white;
+            color: #667eea;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: #f0f4ff;
+        }
+
+        .option.correct .option-letter {
+            background: #065f46;
+            color: white;
+        }
+
+        .option.incorrect .option-letter {
+            background: #991b1b;
+            color: white;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e7ff;
+            border-radius: 10px;
+            font-size: 1.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .results-summary {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .final-score {
+            font-size: 3em;
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .score-breakdown {
+            background: #f8f9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e7ff;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .quiz-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .timer-circle {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Section -->
+        <div class="login-section active" id="loginSection">
+            <div class="logo">
+                <div class="quiz-icon">🧠</div>
+                <h1>TeamQuest Quiz</h1>
+                <p class="subtitle">10 questions, 10 seconds each. Test your knowledge!</p>
+            </div>
+
+            <div class="instructions">
+                <h3>⏱️ Quiz Rules</h3>
+                <ul>
+                    <li>10 questions total - mix of multiple choice and text answers</li>
+                    <li>10 seconds per question (timer counts down automatically)</li>
+                    <li>Some questions include audio clips - listen carefully!</li>
+                    <li>Select your answer before time runs out</li>
+                    <li>No going back once you've answered or time expires</li>
+                    <li>Score based on correct answers - maximum 100 points!</li>
+                </ul>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="teamSelect">Select Your Team</label>
+                    <select id="teamSelect" name="teamSelect" required>
+                        <option value="">Choose your team...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="teamPin">Enter Your Team PIN</label>
+                    <input type="number" id="teamPin" name="teamPin" class="pin-input" 
+                           min="1000" max="9999" placeholder="1234" required>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    🧠 Start Quiz Challenge
+                </button>
+            </form>
+
+            <div class="message" id="loginMessage"></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="quiz-section" id="quizSection">
+            <div class="team-info" id="teamInfo">
+                Team: Loading...
+            </div>
+
+            <div class="quiz-header">
+                <div class="question-counter" id="questionCounter">
+                    Question 1 of 10
+                </div>
+                <div class="timer">
+                    <div class="timer-circle" id="timerCircle">10</div>
+                    <div style="color: #667eea; font-weight: bold;">seconds</div>
+                </div>
+            </div>
+
+            <div class="question-card" id="questionCard">
+                <!-- Question content will be inserted here -->
+            </div>
+
+            <button class="submit-btn" id="nextBtn" style="display: none;" onclick="nextQuestion()">
+                Next Question →
+            </button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div class="team-info" id="resultsTeamInfo">
+                Team: Loading...
+            </div>
+
+            <div class="results-summary">
+                <h2>🎉 Quiz Complete!</h2>
+                <div class="final-score" id="finalScore">0/10</div>
+                <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">
+                    Points earned: <span id="pointsEarned" style="color: #667eea; font-weight: bold;">0</span>
+                </p>
+
+                <div class="score-breakdown" id="scoreBreakdown">
+                    <!-- Score breakdown will be inserted here -->
+                </div>
+
+                <p style="color: #666; margin-top: 30px;">
+                    Check the leaderboard to see how your team is performing overall!
+                </p>
+
+                <button class="submit-btn" onclick="location.reload()">
+                    🔄 Take Quiz Again
+                </button>
+            </div>
+
+            <div class="loading" id="submitLoading">
+                📊 Submitting your quiz results...
+            </div>
+
+            <div class="message" id="submitMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentTeam = null;
+        let allTeams = [];
+        let currentQuestionIndex = 0;
+        let timeLeft = 10;
+        let timerInterval = null;
+        let userAnswers = [];
+        let quizStartTime = null;
+
+        // Quiz questions data
+        const quizQuestions = [
+            {
+                id: 1,
+                type: 'multiple_choice',
+                question: 'What 3 letter animal makes this noise?',
+                audioUrl: '', // ADD YOUR AUDIO URL HERE
+                audioDescription: 'Animal sound clip',
+                options: [
+                    { letter: 'A', text: 'Pig' },
+                    { letter: 'B', text: 'Cow' },
+                    { letter: 'C', text: 'Yak' },
+                    { letter: 'D', text: 'Elk' }
+                ],
+                correctAnswer: 'C',
+                points: 10
+            },
+            {
+                id: 2,
+                type: 'multiple_choice',
+                question: 'What is the meaning of the word: Gambado?',
+                options: [
+                    { letter: 'A', text: 'Colourful Hat' },
+                    { letter: 'B', text: 'Native of Gambia' },
+                    { letter: 'C', text: 'Prank' },
+                    { letter: 'D', text: 'Foolish bet' }
+                ],
+                correctAnswer: 'C',
+                points: 10
+            },
+            {
+                id: 3,
+                type: 'multiple_choice',
+                question: 'How far away from the centre of Leamington Spa, is there another city called Leamington in Ontario, Canada?',
+                options: [
+                    { letter: 'A', text: '3,668 miles' },
+                    { letter: 'B', text: '2,964 miles' },
+                    { letter: 'C', text: '4,312 miles' },
+                    { letter: 'D', text: '5,095 miles' }
+                ],
+                correctAnswer: 'A',
+                points: 10
+            },
+            {
+                id: 4,
+                type: 'multiple_choice',
+                question: 'Answer this riddle: What gets wetter the more it dries?',
+                options: [
+                    { letter: 'A', text: '___s_' },
+                    { letter: 'B', text: '__w__' },
+                    { letter: 'C', text: '___t' },
+                    { letter: 'D', text: '_a__' }
+                ],
+                correctAnswer: 'B',
+                explanation: 'Answer: Towel',
+                points: 10
+            },
+            {
+                id: 5,
+                type: 'text_input',
+                question: 'Name the one-word sport depicted in this image?',
+                imageUrl: '', // ADD YOUR IMAGE URL HERE
+                imageDescription: 'Sports image',
+                correctAnswer: 'tennis',
+                acceptableAnswers: ['tennis', 'Tennis'],
+                points: 10
+            },
+            {
+                id: 6,
+                type: 'multiple_choice',
+                question: 'Who is this talking in this clip?',
+                audioUrl: '', // ADD YOUR AUDIO URL HERE
+                audioDescription: 'Voice clip',
+                options: [
+                    { letter: 'A', text: 'Ed Sheeran' },
+                    { letter: 'B', text: 'Harry Styles' },
+                    { letter: 'C', text: 'Tom Holland' },
+                    { letter: 'D', text: 'Taron Egerton' }
+                ],
+                correctAnswer: 'C',
+                points: 10
+            },
+            {
+                id: 7,
+                type: 'text_input',
+                question: 'What is the number of the only other month, after August (8), for Augustus, to be named after a mortal man?',
+                correctAnswer: '7',
+                acceptableAnswers: ['7', 'seven', 'Seven', 'july', 'July'],
+                explanation: 'Answer: 7 (July)',
+                points: 10
+            },
+            {
+                id: 8,
+                type: 'text_input',
+                question: 'Which one-word car manufacturer uses this logo?',
+                imageUrl: '', // ADD YOUR IMAGE URL HERE
+                imageDescription: 'Car manufacturer logo',
+                correctAnswer: 'smart',
+                acceptableAnswers: ['smart', 'Smart', 'SMART'],
+                points: 10
+            },
+            {
+                id: 9,
+                type: 'multiple_choice',
+                question: 'Listen to this intro. Which band had a huge hit with this song?',
+                audioUrl: '', // ADD YOUR AUDIO URL HERE
+                audioDescription: 'Song intro',
+                options: [
+                    { letter: 'A', text: 'Red Hot Chilli Peppers' },
+                    { letter: 'B', text: 'The Killers' },
+                    { letter: 'C', text: 'The Foo Fighters' },
+                    { letter: 'D', text: 'Kings of Leon' }
+                ],
+                correctAnswer: 'B', // UPDATE WITH CORRECT ANSWER
+                points: 10
+            },
+            {
+                id: 10,
+                type: 'multiple_choice',
+                question: 'Five friends are waiting in line to get coffee. Ross is behind Joey but not last. Chandler is behind Monica, who is in front of both Ross and Joey. Rachel is second. Who is at the front of the line?',
+                options: [
+                    { letter: 'A', text: 'Ross' },
+                    { letter: 'B', text: 'Joey' },
+                    { letter: 'C', text: 'Chandler' },
+                    { letter: 'D', text: 'Monica' },
+                    { letter: 'E', text: 'Rachel' }
+                ],
+                correctAnswer: 'D',
+                points: 10
+            }
+        ];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTeamsList();
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const selectedTeamCode = document.getElementById('teamSelect').value;
+            const enteredPin = document.getElementById('teamPin').value;
+            
+            if (!selectedTeamCode) {
+                showMessage('loginMessage', 'Please select your team from the list.', 'error');
+                return;
+            }
+            
+            if (!/^\d{4}$/.test(enteredPin)) {
+                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
+                return;
+            }
+
+            try {
+                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
+                
+                if (isValid) {
+                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
+                    currentTeam = selectedTeam;
+                    document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
+                    
+                    // Start quiz
+                    startQuiz();
+                } else {
+                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
+            }
+        });
+
+        function startQuiz() {
+            quizStartTime = new Date();
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            
+            // Switch to quiz section
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('quizSection').classList.add('active');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = quizQuestions[currentQuestionIndex];
+            const questionCard = document.getElementById('questionCard');
+            
+            // Update question counter
+            document.getElementById('questionCounter').textContent = 
+                'Question ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length;
+            
+            // Reset timer
+            timeLeft = 10;
+            updateTimer();
+            startTimer();
+            
+            // Build question HTML
+            let questionHTML = '<div class="question-number">Question ' + (currentQuestionIndex + 1) + '</div>';
+            questionHTML += '<div class="question-text">' + question.question + '</div>';
+            
+            // Add audio player if question has audio
+            if (question.audioUrl) {
+                questionHTML += '<div class="audio-player">';
+                questionHTML += '<div class="play-instruction">🎵 Listen to the audio clip:</div>';
+                questionHTML += '<audio controls preload="auto" id="questionAudio">';
+                questionHTML += '<source src="' + question.audioUrl + '" type="audio/mpeg">';
+                questionHTML += 'Your browser does not support the audio element.';
+                questionHTML += '</audio>';
+                questionHTML += '</div>';
+            }
+            
+            // Add image if question has image
+            if (question.imageUrl) {
+                questionHTML += '<img src="' + question.imageUrl + '" alt="' + question.imageDescription + '" class="question-image">';
+            }
+            
+            // Add options or text input based on question type
+            if (question.type === 'multiple_choice') {
+                questionHTML += '<div class="options-grid">';
+                question.options.forEach(option => {
+                    questionHTML += '<div class="option" onclick="selectOption(\'' + option.letter + '\')">';
+                    questionHTML += '<div class="option-letter">' + option.letter + '</div>';
+                    questionHTML += '<div>' + option.text + '</div>';
+                    questionHTML += '</div>';
+                });
+                questionHTML += '</div>';
+            } else if (question.type === 'text_input') {
+                questionHTML += '<input type="text" class="text-input" id="textAnswer" placeholder="Type your answer here..." maxlength="50">';
+            }
+            
+            questionCard.innerHTML = questionHTML;
+            
+            // Auto-play audio if available
+            const audio = document.getElementById('questionAudio');
+            if (audio) {
+                audio.play().catch(e => console.log('Audio autoplay blocked'));
+            }
+        }
+
+        function selectOption(letter) {
+            // Clear previous selections
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select clicked option
+            event.target.closest('.option').classList.add('selected');
+            
+            // Submit answer
+            submitAnswer(letter);
+        }
+
+        function submitAnswer(answer) {
+            clearInterval(timerInterval);
+            
+            const question = quizQuestions[currentQuestionIndex];
+            let isCorrect = false;
+            
+            if (question.type === 'multiple_choice') {
+                isCorrect = (answer === question.correctAnswer);
+            } else if (question.type === 'text_input') {
+                if (!answer) {
+                    answer = document.getElementById('textAnswer').value.trim();
+                }
+                isCorrect = question.acceptableAnswers.includes(answer);
+            }
+            
+            // Store answer
+            userAnswers.push({
+                questionId: question.id,
+                userAnswer: answer,
+                correctAnswer: question.correctAnswer,
+                isCorrect: isCorrect,
+                points: isCorrect ? question.points : 0,
+                timeLeft: timeLeft
+            });
+            
+            // Show correct answer
+            showAnswerFeedback(isCorrect, question);
+            
+            // Show next button or finish quiz
+            setTimeout(() => {
+                if (currentQuestionIndex < quizQuestions.length - 1) {
+                    currentQuestionIndex++;
+                    showQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 2000);
+        }
+
+        function showAnswerFeedback(isCorrect, question) {
+            if (question.type === 'multiple_choice') {
+                document.querySelectorAll('.option').forEach(opt => {
+                    const letter = opt.querySelector('.option-letter').textContent;
+                    if (letter === question.correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                    opt.style.pointerEvents = 'none';
+                });
+            }
+            
+            // Show explanation if available
+            if (question.explanation) {
+                const questionCard = document.getElementById('questionCard');
+                questionCard.innerHTML += '<div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 10px; color: #667eea; font-weight: bold;">' + question.explanation + '</div>';
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimer();
+                
+                if (timeLeft <= 0) {
+                    // Time's up - submit empty answer
+                    submitAnswer('');
+                }
+            }, 1000);
+        }
+
+        function updateTimer() {
+            const timerCircle = document.getElementById('timerCircle');
+            timerCircle.textContent = timeLeft;
+            
+            // Update timer appearance
+            timerCircle.classList.remove('warning', 'danger');
+            if (timeLeft <= 3) {
+                timerCircle.classList.add('danger');
+            } else if (timeLeft <= 5) {
+                timerCircle.classList.add('warning');
+            }
+            
+            // Update conic gradient
+            const percentage = (timeLeft / 10) * 360;
+            if (timeLeft <= 3) {
+                timerCircle.style.background = 'conic-gradient(#ef4444 ' + percentage + 'deg, #fecaca ' + percentage + 'deg)';
+            } else if (timeLeft <= 5) {
+                timerCircle.style.background = 'conic-gradient(#f59e0b ' + percentage + 'deg, #fef3c7 ' + percentage + 'deg)';
+            } else {
+                timerCircle.style.background = 'conic-gradient(#667eea ' + percentage + 'deg, #e0e7ff ' + percentage + 'deg)';
+            }
+        }
+
+        function finishQuiz() {
+            // Calculate final score
+            const totalCorrect = userAnswers.filter(answer => answer.isCorrect).length;
+            const totalPoints = userAnswers.reduce((sum, answer) => sum + answer.points, 0);
+            
+            // Show results
+            document.getElementById('quizSection').classList.remove('active');
+            document.getElementById('resultsSection').classList.add('active');
+            document.getElementById('resultsTeamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            document.getElementById('finalScore').textContent = totalCorrect + '/' + quizQuestions.length;
+            document.getElementById('pointsEarned').textContent = totalPoints;
+            
+            // Build score breakdown
+            let breakdownHTML = '';
+            userAnswers.forEach((answer, index) => {
+                const question = quizQuestions[index];
+                breakdownHTML += '<div class="breakdown-item">';
+                breakdownHTML += '<div>Question ' + (index + 1) + ': ' + question.question.substring(0, 50) + '...</div>';
+                breakdownHTML += '<div style="color: ' + (answer.isCorrect ? '#10b981' : '#ef4444') + '; font-weight: bold;">';
+                breakdownHTML += answer.isCorrect ? '✓ +' + answer.points + ' pts' : '✗ 0 pts';
+                breakdownHTML += '</div>';
+                breakdownHTML += '</div>';
+            });
+            document.getElementById('scoreBreakdown').innerHTML = breakdownHTML;
+            
+            // Submit results to backend
+            submitQuizResults(totalPoints, userAnswers);
+        }
+
+        async function submitQuizResults(totalPoints, answers) {
+            const submitLoading = document.getElementById('submitLoading');
+            const submitMessage = document.getElementById('submitMessage');
+            
+            submitLoading.style.display = 'block';
+            
+            try {
+                const quizData = {
+                    teamCode: currentTeam.teamCode,
+                    teamName: currentTeam.teamName,
+                    totalScore: totalPoints,
+                    questionsCorrect: answers.filter(a => a.isCorrect).length,
+                    totalQuestions: quizQuestions.length,
+                    completionTime: new Date().toISOString(),
+                    quizStartTime: quizStartTime.toISOString(),
+                    answers: answers
+                };
+                
+                const response = await fetch('/.netlify/functions/submit_quiz_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(quizData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showMessage('submitMessage', '🎉 Quiz results submitted successfully! Check the leaderboard to see your ranking.', 'success');
+                } else {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+            } catch (error) {
+                console.error('Quiz submission error:', error);
+                showMessage('submitMessage', 'Failed to submit quiz results. Your score: ' + totalPoints + ' points.', 'error');
+            } finally {
+                submitLoading.style.display = 'none';
+            }
+        }
+
+        // Handle text input submission on Enter key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.getElementById('textAnswer')) {
+                const answer = document.getElementById('textAnswer').value.trim();
+                if (answer) {
+                    submitAnswer(answer);
+                }
+            }
+        });
+
+        async function loadTeamsList() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.success && data.teams && Array.isArray(data.teams)) {
+                    allTeams = data.teams;
+                    populateTeamDropdown(data.teams);
+                    return;
+                }
+                
+                throw new Error('Invalid response structure from leaderboard');
+                
+            } catch (error) {
+                console.error('Leaderboard function failed:', error);
+                
+                // Use fallback teams
+                const fallbackTeams = [
+                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+                ];
+                
+                allTeams = fallbackTeams;
+                populateTeamDropdown(fallbackTeams);
+                showMessage('loginMessage', 'Teams loaded. You can select your team and continue.', 'success');
+            }
+        }
+
+        function populateTeamDropdown(teams) {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">Choose your team...</option>';
+            
+            teams
+                .sort((a, b) => a.teamName.localeCompare(b.teamName))
+                .forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.teamCode;
+                    option.textContent = team.teamName;
+                    select.appendChild(option);
+                });
+        }
+
+        async function verifyTeamAndPin(teamCode, enteredPin) {
+            try {
+                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: teamCode,
+                        pin: enteredPin
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.valid;
+                } else {
+                    throw new Error(result.error || 'Verification failed');
+                }
+                
+            } catch (error) {
+                console.error('Error verifying team and PIN:', error);
+                return false;
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
+            container.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
