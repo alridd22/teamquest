@@ -86,11 +86,11 @@
             box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .login-section, .quiz-section, .results-section {
+        .login-section, .ready-section, .quiz-section, .results-section {
             display: none;
         }
 
-        .login-section.active, .quiz-section.active, .results-section.active {
+        .login-section.active, .ready-section.active, .quiz-section.active, .results-section.active {
             display: block;
         }
 
@@ -434,7 +434,70 @@
             color: #667eea;
         }
 
-        @media (max-width: 600px) {
+        .ready-countdown {
+            font-size: 4em;
+            color: #667eea;
+            font-weight: bold;
+            text-align: center;
+            margin: 30px 0;
+            animation: pulse 1s infinite;
+        }
+
+        .ready-instructions {
+            background: #f0f4ff;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .ready-instructions h3 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .ready-instructions ul {
+            text-align: left;
+            margin: 20px 0;
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+
+        .ready-instructions li {
+            margin-bottom: 10px;
+        }
+
+        .start-quiz-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+            animation: glow 2s infinite;
+        }
+
+        .start-quiz-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+            50% { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); }
+        }
             .container {
                 padding: 30px 20px;
             }
@@ -498,6 +561,38 @@
             </form>
 
             <div class="message" id="loginMessage"></div>
+        </div>
+
+        <!-- Ready Section -->
+        <div class="ready-section" id="readySection">
+            <div class="team-info" id="readyTeamInfo">
+                Team: Loading...
+            </div>
+
+            <div class="logo">
+                <div class="quiz-icon">🧠</div>
+                <h1>Ready to Start?</h1>
+            </div>
+
+            <div class="ready-instructions">
+                <h3>⚡ Quiz Challenge Rules</h3>
+                <ul>
+                    <li><strong>10 questions</strong> total - mix of multiple choice and text answers</li>
+                    <li><strong>10 seconds per question</strong> - timer counts down automatically</li>
+                    <li><strong>No going back</strong> - once you answer or time runs out, you move to the next question</li>
+                    <li><strong>Audio questions</strong> - some questions have sound clips, make sure your volume is up!</li>
+                    <li><strong>One attempt only</strong> - your score will be final and recorded on the leaderboard</li>
+                    <li><strong>Maximum 100 points</strong> - 10 points per correct answer</li>
+                </ul>
+                
+                <div style="margin-top: 25px; padding: 15px; background: #fef3c7; border-radius: 10px; color: #92400e;">
+                    <strong>⚠️ Important:</strong> Once you start, you cannot pause or restart the quiz. Make sure you're ready and in a quiet environment!
+                </div>
+            </div>
+
+            <button class="start-quiz-btn" onclick="startQuizCountdown()">
+                🚀 Start Quiz Challenge
+            </button>
         </div>
 
         <!-- Quiz Section -->
@@ -632,7 +727,7 @@
                 imageUrl: '', // ADD YOUR IMAGE URL HERE
                 imageDescription: 'Sports image',
                 correctAnswer: 'tennis',
-                acceptableAnswers: ['tennis', 'Tennis'],
+                acceptableAnswers: ['tennis', 'Tennis', 'TENNIS'],
                 points: 10
             },
             {
@@ -655,7 +750,7 @@
                 type: 'text_input',
                 question: 'What is the number of the only other month, after August (8), for Augustus, to be named after a mortal man?',
                 correctAnswer: '7',
-                acceptableAnswers: ['7', 'seven', 'Seven', 'july', 'July'],
+                acceptableAnswers: ['7', 'seven', 'Seven', 'SEVEN', 'july', 'July', 'JULY', 'Jul', 'jul', 'JUL'],
                 explanation: 'Answer: 7 (July)',
                 points: 10
             },
@@ -666,7 +761,7 @@
                 imageUrl: '', // ADD YOUR IMAGE URL HERE
                 imageDescription: 'Car manufacturer logo',
                 correctAnswer: 'smart',
-                acceptableAnswers: ['smart', 'Smart', 'SMART'],
+                acceptableAnswers: ['smart', 'Smart', 'SMART', 'SmArt', 'sMaRt'],
                 points: 10
             },
             {
@@ -735,10 +830,9 @@
                 if (isValid) {
                     const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
                     currentTeam = selectedTeam;
-                    document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
                     
-                    // Start quiz
-                    startQuiz();
+                    // Show ready screen instead of starting quiz immediately
+                    showReadyScreen();
                 } else {
                     showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
                 }
@@ -747,13 +841,58 @@
             }
         });
 
+        function showReadyScreen() {
+            // Update team info on ready screen
+            document.getElementById('readyTeamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            
+            // Switch to ready section
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('readySection').classList.add('active');
+        }
+
+        function startQuizCountdown() {
+            // Show countdown before starting quiz
+            const readySection = document.getElementById('readySection');
+            
+            readySection.innerHTML = `
+                <div class="team-info">Team: ${currentTeam.teamName}</div>
+                <div class="logo">
+                    <div class="quiz-icon">🧠</div>
+                    <h1>Get Ready!</h1>
+                </div>
+                <div class="ready-countdown" id="countdownNumber">3</div>
+                <div style="text-align: center; font-size: 1.2em; color: #667eea;">
+                    Quiz starting in...
+                </div>
+            `;
+            
+            let countdown = 3;
+            const countdownElement = document.getElementById('countdownNumber');
+            
+            const countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownElement.textContent = countdown;
+                } else if (countdown === 0) {
+                    countdownElement.textContent = 'GO!';
+                    countdownElement.style.color = '#10b981';
+                } else {
+                    clearInterval(countdownInterval);
+                    startQuiz();
+                }
+            }, 1000);
+        }
+
         function startQuiz() {
             quizStartTime = new Date();
             currentQuestionIndex = 0;
             userAnswers = [];
             
+            // Update team info on quiz section
+            document.getElementById('teamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            
             // Switch to quiz section
-            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('readySection').classList.remove('active');
             document.getElementById('quizSection').classList.add('active');
             
             showQuestion();
@@ -840,7 +979,7 @@
                 if (!answer) {
                     answer = document.getElementById('textAnswer').value.trim();
                 }
-                isCorrect = question.acceptableAnswers.includes(answer);
+                isCorrect = checkTextAnswer(answer, question);
             }
             
             // Store answer
@@ -865,6 +1004,40 @@
                     finishQuiz();
                 }
             }, 2000);
+        }
+
+        function checkTextAnswer(userAnswer, question) {
+            if (!userAnswer || typeof userAnswer !== 'string') {
+                return false;
+            }
+            
+            // Normalize user answer
+            const normalizedUser = normalizeText(userAnswer);
+            
+            // Check against all acceptable answers
+            if (question.acceptableAnswers) {
+                return question.acceptableAnswers.some(acceptable => {
+                    const normalizedAcceptable = normalizeText(acceptable);
+                    return normalizedUser === normalizedAcceptable;
+                });
+            }
+            
+            // Fallback to direct comparison with main correct answer
+            const normalizedCorrect = normalizeText(question.correctAnswer);
+            return normalizedUser === normalizedCorrect;
+        }
+
+        function normalizeText(text) {
+            if (!text || typeof text !== 'string') {
+                return '';
+            }
+            
+            return text
+                .toLowerCase()                    // Convert to lowercase
+                .trim()                          // Remove leading/trailing spaces
+                .replace(/[^\w\s]/g, '')         // Remove punctuation
+                .replace(/\s+/g, ' ')            // Normalize multiple spaces to single space
+                .replace(/\s/g, '');             // Remove all remaining spaces for tight matching
         }
 
         function showAnswerFeedback(isCorrect, question) {
