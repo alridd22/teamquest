@@ -543,11 +543,11 @@
                 </div>
 
                 <p style="color: #666; margin-top: 30px;">
-                    Check the leaderboard to see how your team is performing overall!
+                    Quiz completed! Your final score has been recorded. Check the leaderboard to see how your team is performing overall!
                 </p>
 
-                <button class="submit-btn" onclick="location.reload()">
-                    🔄 Take Quiz Again
+                <button class="submit-btn" onclick="window.location.href='/teamquest_leaderboard.html'">
+                    📊 View Leaderboard
                 </button>
             </div>
 
@@ -723,6 +723,13 @@
             }
 
             try {
+                // Check if team has already completed the quiz
+                const hasCompleted = await checkIfQuizCompleted(selectedTeamCode);
+                if (hasCompleted) {
+                    showMessage('loginMessage', 'This team has already completed the quiz. Scores are final and cannot be retaken.', 'error');
+                    return;
+                }
+
                 const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
                 
                 if (isValid) {
@@ -1088,6 +1095,32 @@
             container.textContent = message;
             container.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
             container.style.display = 'block';
+        }
+
+        async function checkIfQuizCompleted(teamCode) {
+            try {
+                // Check if team has already completed quiz by calling the backend
+                const response = await fetch('/.netlify/functions/check_quiz_completion', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ teamCode: teamCode })
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    return result.completed;
+                }
+                
+                // If function doesn't exist yet, allow quiz (backward compatibility)
+                return false;
+                
+            } catch (error) {
+                console.log('Quiz completion check failed (allowing quiz):', error);
+                // If check fails, allow quiz to proceed
+                return false;
+            }
         }
     </script>
 </body>
