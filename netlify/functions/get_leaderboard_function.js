@@ -155,46 +155,19 @@ exports.handler = async (event, context) => {
 
     console.log('Activity scores loaded:', activityScores);
 
-    // Get all teams from registration sheet
-    let allTeams = [];
-    try {
-      const registrationSheet = doc.sheetsByTitle['Team Registration'];
-      if (registrationSheet) {
-        await registrationSheet.loadHeaderRow();
-        const teamRows = await registrationSheet.getRows();
-        console.log('Team registration rows loaded:', teamRows.length);
-        console.log('Sample team row headers:', registrationSheet.headerValues);
-
-        allTeams = teamRows.map(row => ({
-          teamCode: row.get('Team Code'),
-          teamName: row.get('Team Name'),
-          members: row.get('Team Members') || '',
-          registrationTime: row.get('Registration Time') || ''
-        })).filter(team => team.teamCode && team.teamName);
-        
-        console.log('Processed teams:', allTeams);
-      }
-    } catch (error) {
-      console.log('Team registration sheet not found:', error.message);
-      // Use teams from activity data instead of hardcoded fallback
-      const allTeamCodes = new Set([
-        ...Object.keys(activityScores.kindness),
-        ...Object.keys(activityScores.limerick),
-        ...Object.keys(activityScores.scavenger),
-        ...Object.keys(activityScores.quiz)
-      ]);
-      
-      console.log('Team codes from activities:', [...allTeamCodes]);
-      
-      allTeams = [...allTeamCodes].map(teamCode => ({
-        teamCode,
-        teamName: teamCode, // Use team code as name for now
-        members: '',
-        registrationTime: ''
-      }));
-      
-      console.log('Fallback teams created:', allTeams);
-    }
+    // Use hardcoded teams for now to get leaderboard working
+    console.log('Using hardcoded teams');
+    const allTeams = [
+      { teamCode: 'TEAM-C', teamName: 'The Clue Hunters', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-I', teamName: 'AaronTeam2', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-E', teamName: 'Emma is great', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-F', teamName: 'CHTeam Best', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name', members: '', registrationTime: '' },
+      { teamCode: 'TEAM-H', teamName: 'AaronTeam', members: '', registrationTime: '' }
+    ];
+    
+    console.log('Teams to process:', allTeams);
 
     // Calculate leaderboard
     const leaderboard = allTeams.map(team => {
