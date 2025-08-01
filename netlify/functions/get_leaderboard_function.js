@@ -70,9 +70,8 @@ exports.handler = async (event, context) => {
         kindnessRows.forEach(row => {
           const teamCode = row.get('Team Code');
           const score = parseInt(row.get('AI Score')) || 0;
-          const verified = row.get('Verified') === 'TRUE';
-
-          if (teamCode && verified && score > 0) {
+          
+          if (teamCode && score > 0) {
             if (!activityScores.kindness[teamCode]) {
               activityScores.kindness[teamCode] = 0;
             }
@@ -95,9 +94,8 @@ exports.handler = async (event, context) => {
         limerickRows.forEach(row => {
           const teamCode = row.get('Team Code');
           const score = parseInt(row.get('AI Score')) || 0;
-          const verified = row.get('Verified') === 'TRUE';
 
-          if (teamCode && verified && score > 0) {
+          if (teamCode && score > 0) {
             if (!activityScores.limerick[teamCode]) {
               activityScores.limerick[teamCode] = 0;
             }
@@ -120,9 +118,8 @@ exports.handler = async (event, context) => {
         scavengerRows.forEach(row => {
           const teamCode = row.get('Team Code');
           const score = parseInt(row.get('AI Score')) || 0;
-          const verified = row.get('Verified') === 'TRUE';
 
-          if (teamCode && verified && score > 0) {
+          if (teamCode && score > 0) {
             if (!activityScores.scavenger[teamCode]) {
               activityScores.scavenger[teamCode] = 0;
             }
