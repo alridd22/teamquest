@@ -163,6 +163,7 @@ exports.handler = async (event, context) => {
         await registrationSheet.loadHeaderRow();
         const teamRows = await registrationSheet.getRows();
         console.log('Team registration rows loaded:', teamRows.length);
+        console.log('Sample team row headers:', registrationSheet.headerValues);
 
         allTeams = teamRows.map(row => ({
           teamCode: row.get('Team Code'),
@@ -170,19 +171,29 @@ exports.handler = async (event, context) => {
           members: row.get('Team Members') || '',
           registrationTime: row.get('Registration Time') || ''
         })).filter(team => team.teamCode && team.teamName);
+        
+        console.log('Processed teams:', allTeams);
       }
     } catch (error) {
       console.log('Team registration sheet not found:', error.message);
-      // Fallback to hardcoded teams if registration sheet not available
-      allTeams = [
-        { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-        { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-        { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-        { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-        { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-        { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-        { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-      ];
+      // Use teams from activity data instead of hardcoded fallback
+      const allTeamCodes = new Set([
+        ...Object.keys(activityScores.kindness),
+        ...Object.keys(activityScores.limerick),
+        ...Object.keys(activityScores.scavenger),
+        ...Object.keys(activityScores.quiz)
+      ]);
+      
+      console.log('Team codes from activities:', [...allTeamCodes]);
+      
+      allTeams = [...allTeamCodes].map(teamCode => ({
+        teamCode,
+        teamName: teamCode, // Use team code as name for now
+        members: '',
+        registrationTime: ''
+      }));
+      
+      console.log('Fallback teams created:', allTeams);
     }
 
     // Calculate leaderboard
