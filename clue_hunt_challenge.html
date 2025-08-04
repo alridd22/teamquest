@@ -650,11 +650,13 @@
             var isCorrect = checkAnswer(userAnswer, currentClue);
             
             if (isCorrect) {
+                // Correct answer - award points
                 completedClues[currentClue.id] = {
                     points: currentClue.points,
                     answer: userAnswer,
                     correctAnswer: currentClue.answer,
-                    completedAt: new Date().toISOString()
+                    completedAt: new Date().toISOString(),
+                    wasCorrect: true
                 };
                 
                 currentScore += currentClue.points;
@@ -664,20 +666,33 @@
                 updateScore();
                 updateProgress();
                 
-                submitClueToBackend(currentClue, userAnswer, currentClue.points);
-                
-                setTimeout(function() {
-                    showClueGrid();
-                    
-                    if (Object.keys(completedClues).length === clueHuntData.length) {
-                        showCompletionCelebration();
-                    }
-                }, 2000);
+                submitClueToBackend(currentClue, userAnswer, currentClue.points, true);
                 
             } else {
-                showResultMessage('❌ Incorrect answer. Try again!', 'error');
-                document.getElementById('answerInput').focus();
+                // Incorrect answer - no points, show correct answer
+                completedClues[currentClue.id] = {
+                    points: 0,
+                    answer: userAnswer,
+                    correctAnswer: currentClue.answer,
+                    completedAt: new Date().toISOString(),
+                    wasCorrect: false
+                };
+                
+                showResultMessage('❌ Incorrect! The correct answer was: ' + currentClue.answer, 'error');
+                
+                updateProgress();
+                
+                submitClueToBackend(currentClue, userAnswer, 0, false);
             }
+            
+            // Always return to grid after showing result (whether correct or incorrect)
+            setTimeout(function() {
+                showClueGrid();
+                
+                if (Object.keys(completedClues).length === clueHuntData.length) {
+                    showCompletionCelebration();
+                }
+            }, 3000); // Longer delay to read the message
         }
 
         function checkAnswer(userAnswer, clue) {
@@ -732,7 +747,7 @@
             celebration.classList.add('show');
         }
 
-        function submitClueToBackend(clue, userAnswer, points) {
+        function submitClueToBackend(clue, userAnswer, points, wasCorrect) {
             if (!currentTeam) return;
             
             var submissionData = {
@@ -743,7 +758,8 @@
                 userAnswer: userAnswer,
                 correctAnswer: clue.answer,
                 points: points,
-                currentScore: currentScore
+                currentScore: currentScore,
+                wasCorrect: wasCorrect
             };
             
             fetch('/.netlify/functions/submit_cluehunt_function', {
