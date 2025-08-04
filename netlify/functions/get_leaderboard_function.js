@@ -56,7 +56,8 @@ exports.handler = async (event, context) => {
       kindness: {},
       limerick: {},
       scavenger: {},
-      quiz: {}
+      quiz: {},
+      clueHunt: {}
     };
 
     // Load Kindness scores
@@ -153,6 +154,30 @@ exports.handler = async (event, context) => {
       console.log('Quiz sheet not found or error:', error.message);
     }
 
+    // Load Clue Hunt scores
+    try {
+      const clueHuntSheet = doc.sheetsByTitle['Clue Hunt'];
+      if (clueHuntSheet) {
+        await clueHuntSheet.loadHeaderRow();
+        const clueHuntRows = await clueHuntSheet.getRows();
+        console.log('Clue Hunt rows loaded:', clueHuntRows.length);
+
+        clueHuntRows.forEach(row => {
+          const teamCode = row.get('Team Code');
+          const points = parseInt(row.get('Points')) || 0;
+
+          if (teamCode && points > 0) {
+            if (!activityScores.clueHunt[teamCode]) {
+              activityScores.clueHunt[teamCode] = 0;
+            }
+            activityScores.clueHunt[teamCode] += points;
+          }
+        });
+      }
+    } catch (error) {
+      console.log('Clue Hunt sheet not found or error:', error.message);
+    }
+
     console.log('Activity scores loaded:', activityScores);
 
     // Use hardcoded teams for now to get leaderboard working
@@ -173,13 +198,13 @@ exports.handler = async (event, context) => {
     const leaderboard = allTeams.map(team => {
       // Get scores (defaulting to 0 if not found)
       const registration = 10; // Fixed registration score
-      const clueHunt = 0; // Not implemented yet
+      const clueHunt = activityScores.clueHunt[team.teamCode] || 0;
+      const quiz = activityScores.quiz[team.teamCode] || 0;
       const kindness = activityScores.kindness[team.teamCode] || 0;
       const scavenger = activityScores.scavenger[team.teamCode] || 0;
       const limerick = activityScores.limerick[team.teamCode] || 0;
-      const quiz = activityScores.quiz[team.teamCode] || 0;
 
-      const totalScore = registration + clueHunt + kindness + scavenger + limerick + quiz;
+      const totalScore = registration + clueHunt + quiz + kindness + scavenger + limerick;
 
       return {
         teamCode: team.teamCode,
