@@ -345,19 +345,6 @@
             color: #991b1b;
         }
 
-        .points-reveal {
-            font-size: 2em;
-            color: #10b981;
-            margin-top: 10px;
-            animation: bounce 0.6s ease;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
         .completion-celebration {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
             color: white;
@@ -521,14 +508,16 @@
     </div>
 
     <script>
-        let currentTeam = null;
-        let allTeams = [];
-        let currentClue = null;
-        let completedClues = {};
-        let currentScore = 0;
+        console.log('Script starting...');
+        
+        var currentTeam = null;
+        var allTeams = [];
+        var currentClue = null;
+        var completedClues = {};
+        var currentScore = 0;
 
-        // Clue Hunt data - UPDATE WITH YOUR REAL CLUES
-        const clueHuntData = [
+        // Clue Hunt data
+        var clueHuntData = [
             { id: 1, clue: "What comes after zero?", answer: "one", acceptableAnswers: ["one", "1", "One"], points: 5 },
             { id: 2, clue: "What number comes after one?", answer: "two", acceptableAnswers: ["two", "2", "Two"], points: 8 },
             { id: 3, clue: "What number comes after two?", answer: "three", acceptableAnswers: ["three", "3", "Three"], points: 12 },
@@ -553,78 +542,75 @@
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Clue Hunt page loaded, loading teams...');
+            console.log('DOM loaded, loading teams...');
             loadTeamsList();
             renderClueGrid();
         });
 
-        // Handle Enter key for answer submission
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.getElementById('answerInput') === document.activeElement) {
-                submitAnswer();
-            }
-        });
+        function loadTeamsList() {
+            console.log('Loading teams - starting...');
+            
+            var fallbackTeams = [
+                { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+                { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+                { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+                { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+                { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+                { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+                { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+            ];
+            
+            console.log('Setting fallback teams:', fallbackTeams);
+            allTeams = fallbackTeams;
+            populateTeamDropdown(fallbackTeams);
+            console.log('Teams should now be in dropdown');
+        }
 
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        function populateTeamDropdown(teams) {
+            console.log('Populating dropdown with teams:', teams);
+            var select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">Choose your team...</option>';
             
-            const selectedTeamCode = document.getElementById('teamSelect').value;
-            const enteredPin = document.getElementById('teamPin').value;
-            
-            if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your team from the list.', 'error');
-                return;
+            for (var i = 0; i < teams.length; i++) {
+                var team = teams[i];
+                var option = document.createElement('option');
+                option.value = team.teamCode;
+                option.textContent = team.teamName;
+                select.appendChild(option);
             }
-            
-            if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
-                return;
-            }
-
-            try {
-                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
-                
-                if (isValid) {
-                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
-                    currentTeam = selectedTeam;
-                    document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
-                    
-                    // Load completed clues for this team
-                    await loadCompletedClues();
-                    
-                    // Switch to hunt section
-                    document.getElementById('loginSection').classList.remove('active');
-                    document.getElementById('huntSection').classList.add('active');
-                    
-                    updateProgress();
-                    updateScore();
-                } else {
-                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
-            }
-        });
+            console.log('Dropdown populated');
+        }
 
         function renderClueGrid() {
-            const grid = document.getElementById('clueGrid');
+            var grid = document.getElementById('clueGrid');
             grid.innerHTML = '';
 
-            clueHuntData.forEach(clue => {
-                const isCompleted = completedClues[clue.id];
+            for (var i = 0; i < clueHuntData.length; i++) {
+                var clue = clueHuntData[i];
+                var isCompleted = completedClues[clue.id];
                 
-                const button = document.createElement('button');
+                var button = document.createElement('button');
                 button.className = 'clue-button' + (isCompleted ? ' completed' : '');
                 button.textContent = 'Clue ' + clue.id;
                 button.disabled = isCompleted;
                 
                 if (!isCompleted) {
-                    button.onclick = () => selectClue(clue);
+                    button.setAttribute('data-clue-id', clue.id);
+                    button.onclick = function() {
+                        var clueId = parseInt(this.getAttribute('data-clue-id'));
+                        var clueData = null;
+                        for (var j = 0; j < clueHuntData.length; j++) {
+                            if (clueHuntData[j].id === clueId) {
+                                clueData = clueHuntData[j];
+                                break;
+                            }
+                        }
+                        if (clueData) selectClue(clueData);
+                    };
                 }
                 
                 grid.appendChild(button);
-            });
+            }
         }
 
         function selectClue(clue) {
@@ -634,12 +620,10 @@
             document.getElementById('answerInput').value = '';
             document.getElementById('resultMessage').style.display = 'none';
             
-            // Switch to clue section
             document.getElementById('clueGridSection').style.display = 'none';
             document.getElementById('clueSection').classList.add('active');
             
-            // Focus on answer input
-            setTimeout(() => {
+            setTimeout(function() {
                 document.getElementById('answerInput').focus();
             }, 100);
         }
@@ -651,8 +635,7 @@
         }
 
         function submitAnswer() {
-            const userAnswer = document.getElementById('answerInput').value.trim();
-            const resultMessage = document.getElementById('resultMessage');
+            var userAnswer = document.getElementById('answerInput').value.trim();
             
             if (!userAnswer) {
                 showResultMessage('Please enter an answer!', 'error');
@@ -664,11 +647,9 @@
                 return;
             }
             
-            // Check answer using fuzzy logic
-            const isCorrect = checkAnswer(userAnswer, currentClue);
+            var isCorrect = checkAnswer(userAnswer, currentClue);
             
             if (isCorrect) {
-                // Mark clue as completed
                 completedClues[currentClue.id] = {
                     points: currentClue.points,
                     answer: userAnswer,
@@ -676,30 +657,18 @@
                     completedAt: new Date().toISOString()
                 };
                 
-                // Update current score
                 currentScore += currentClue.points;
                 
-                // Save to localStorage
-                localStorage.setItem('cluehunt_' + currentTeam.teamCode, JSON.stringify(completedClues));
+                showResultMessage('🎉 Correct! You earned ' + currentClue.points + ' points!', 'success');
                 
-                // Show success message with points
-                showResultMessage(
-                    '🎉 Correct! You earned ' + currentClue.points + ' points!', 
-                    'success'
-                );
-                
-                // Update displays
                 updateScore();
                 updateProgress();
                 
-                // Submit to backend
                 submitClueToBackend(currentClue, userAnswer, currentClue.points);
                 
-                // Return to grid after delay
-                setTimeout(() => {
+                setTimeout(function() {
                     showClueGrid();
                     
-                    // Check if all clues completed
                     if (Object.keys(completedClues).length === clueHuntData.length) {
                         showCompletionCelebration();
                     }
@@ -714,12 +683,15 @@
         function checkAnswer(userAnswer, clue) {
             if (!userAnswer || !clue) return false;
             
-            const normalizedUser = normalizeText(userAnswer);
+            var normalizedUser = normalizeText(userAnswer);
             
-            return clue.acceptableAnswers.some(acceptable => {
-                const normalizedAcceptable = normalizeText(acceptable);
-                return normalizedUser === normalizedAcceptable;
-            });
+            for (var i = 0; i < clue.acceptableAnswers.length; i++) {
+                var normalizedAcceptable = normalizeText(clue.acceptableAnswers[i]);
+                if (normalizedUser === normalizedAcceptable) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         function normalizeText(text) {
@@ -734,7 +706,7 @@
         }
 
         function showResultMessage(message, type) {
-            const resultMessage = document.getElementById('resultMessage');
+            var resultMessage = document.getElementById('resultMessage');
             resultMessage.textContent = message;
             resultMessage.className = 'result-message ' + type;
             resultMessage.style.display = 'block';
@@ -745,101 +717,96 @@
         }
 
         function updateProgress() {
-            const completed = Object.keys(completedClues).length;
-            const total = clueHuntData.length;
-            const percentage = (completed / total) * 100;
+            var completed = Object.keys(completedClues).length;
+            var total = clueHuntData.length;
+            var percentage = (completed / total) * 100;
             
-            const progressFill = document.getElementById('progressFill');
+            var progressFill = document.getElementById('progressFill');
             progressFill.style.width = percentage + '%';
             progressFill.textContent = completed + '/' + total + ' Clues Solved';
         }
 
         function showCompletionCelebration() {
-            const celebration = document.getElementById('completionCelebration');
+            var celebration = document.getElementById('completionCelebration');
             document.getElementById('finalScore').textContent = 'Final Score: ' + currentScore + ' points';
             celebration.classList.add('show');
         }
 
-        async function loadCompletedClues() {
-            // Load from localStorage
-            const stored = localStorage.getItem('cluehunt_' + currentTeam.teamCode);
-            if (stored) {
-                try {
-                    completedClues = JSON.parse(stored);
-                    // Recalculate current score
-                    currentScore = Object.values(completedClues).reduce((sum, clue) => sum + (clue.points || 0), 0);
-                } catch (e) {
-                    console.error('Error parsing stored clues:', e);
-                    completedClues = {};
-                    currentScore = 0;
-                }
-            } else {
-                completedClues = {};
-                currentScore = 0;
-            }
-        }
-
-        async function submitClueToBackend(clue, userAnswer, points) {
-            try {
-                const submissionData = {
-                    teamCode: currentTeam.teamCode,
-                    teamName: currentTeam.teamName,
-                    clueId: clue.id,
-                    clueText: clue.clue,
-                    userAnswer: userAnswer,
-                    correctAnswer: clue.answer,
-                    points: points,
-                    currentScore: currentScore
-                };
-                
-                const response = await fetch('/.netlify/functions/submit_cluehunt_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(submissionData)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
+        function submitClueToBackend(clue, userAnswer, points) {
+            if (!currentTeam) return;
+            
+            var submissionData = {
+                teamCode: currentTeam.teamCode,
+                teamName: currentTeam.teamName,
+                clueId: clue.id,
+                clueText: clue.clue,
+                userAnswer: userAnswer,
+                correctAnswer: clue.answer,
+                points: points,
+                currentScore: currentScore
+            };
+            
+            fetch('/.netlify/functions/submit_cluehunt_function', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(submissionData)
+            }).then(function(response) {
+                return response.json();
+            }).then(function(result) {
                 console.log('Clue submitted successfully:', result);
-                
-            } catch (error) {
+            }).catch(function(error) {
                 console.error('Failed to submit clue to backend:', error);
-                // Don't block the user experience if backend fails
-            }
+            });
         }
 
-        async function loadTeamsList() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            var selectedTeamCode = document.getElementById('teamSelect').value;
+            var enteredPin = document.getElementById('teamPin').value;
+            
+            if (!selectedTeamCode) {
+                showMessage('loginMessage', 'Please select your team from the list.', 'error');
+                return;
+            }
+            
+            if (!/^\d{4}$/.test(enteredPin)) {
+                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
+                return;
+            }
+
+            // Find selected team
+            var selectedTeam = null;
+            for (var i = 0; i < allTeams.length; i++) {
+                if (allTeams[i].teamCode === selectedTeamCode) {
+                    selectedTeam = allTeams[i];
+                    break;
                 }
+            }
+            
+            if (selectedTeam) {
+                currentTeam = selectedTeam;
+                document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
                 
-                const data = await response.json();
+                document.getElementById('loginSection').classList.remove('active');
+                document.getElementById('huntSection').classList.add('active');
                 
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
-                }
-                
-                throw new Error('Invalid response structure from leaderboard');
-                
-            } catch (error) {
-                console.error('Leaderboard function failed:', error);
-                
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: '
+                updateProgress();
+                updateScore();
+            }
+        });
+
+        function showMessage(containerId, message, type) {
+            var container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
+            container.style.display = 'block';
+        }
+
+        console.log('Script loaded successfully');
+    </script>
+</body>
+</html>
