@@ -191,11 +191,12 @@
             border-radius: 10px;
             padding: 3px;
             margin-bottom: 30px;
+            min-height: 35px;
         }
 
         .progress-fill {
             background: linear-gradient(135deg, #f093fb, #f5576c);
-            height: 20px;
+            height: 26px;
             border-radius: 8px;
             transition: width 0.3s ease;
             display: flex;
@@ -203,7 +204,12 @@
             justify-content: center;
             color: white;
             font-weight: bold;
-            font-size: 0.9em;
+            font-size: 0.85em;
+            text-align: center;
+            padding: 0 10px;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
         .score-display {
@@ -769,8 +775,8 @@
             var percentage = (attempted / total) * 100;
             
             var progressFill = document.getElementById('progressFill');
-            progressFill.style.width = percentage + '%';
-            progressFill.textContent = correct + ' Correct / ' + attempted + ' Attempted / ' + total + ' Total';
+            progressFill.style.width = Math.max(percentage, 15) + '%'; // Minimum 15% width to show text
+            progressFill.textContent = correct + ' Correct • ' + attempted + ' Attempted • ' + total + ' Total';
         }
 
         function showCompletionCelebration() {
