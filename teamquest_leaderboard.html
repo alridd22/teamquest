@@ -228,13 +228,14 @@
             
             .leaderboard-table th,
             .leaderboard-table td {
-                padding: 15px 10px;
+                padding: 15px 8px;
             }
         }
 
         @media (max-width: 900px) {
             .container {
                 padding: 20px;
+                margin: 10px;
             }
             
             h1 {
@@ -247,18 +248,107 @@
             
             .leaderboard-table th,
             .leaderboard-table td {
-                padding: 12px 8px;
+                padding: 12px 6px;
+            }
+            
+            .team-name {
+                min-width: 100px;
             }
         }
 
         @media (max-width: 600px) {
-            .leaderboard-table th,
-            .leaderboard-table td {
-                padding: 10px 5px;
+            .container {
+                padding: 15px;
+                margin: 5px;
             }
             
-            .team-name {
-                min-width: 120px;
+            h1 {
+                font-size: 1.8em;
+            }
+            
+            .subtitle {
+                font-size: 1em;
+            }
+            
+            .timer-info {
+                font-size: 0.9em;
+                padding: 12px 20px;
+            }
+            
+            .leaderboard-table {
+                font-size: 0.75em;
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .leaderboard-table thead,
+            .leaderboard-table tbody,
+            .leaderboard-table th,
+            .leaderboard-table td,
+            .leaderboard-table tr {
+                display: block;
+            }
+            
+            .leaderboard-table thead tr {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            
+            .leaderboard-table tr {
+                background: white;
+                border: 1px solid #e0e7ff;
+                border-radius: 10px;
+                margin-bottom: 15px;
+                padding: 15px;
+                position: relative;
+            }
+            
+            .leaderboard-table td {
+                border: none;
+                padding: 8px 0;
+                text-align: left !important;
+                white-space: normal;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .leaderboard-table td:before {
+                content: attr(data-label) ": ";
+                font-weight: bold;
+                color: #667eea;
+                flex-shrink: 0;
+                margin-right: 10px;
+            }
+            
+            .rank-cell:before {
+                content: "Rank: ";
+            }
+            
+            .team-name:before {
+                content: "Team: ";
+            }
+            
+            .activity-score:before {
+                content: attr(data-activity) ": ";
+            }
+            
+            .total-score {
+                font-size: 1.4em;
+                text-align: center !important;
+                margin-top: 10px;
+                padding: 15px;
+            }
+            
+            .total-score:before {
+                content: "Total Score: ";
+            }
+            
+            .refresh-info {
+                font-size: 0.8em;
+                padding: 0 10px;
             }
         }
     </style>
@@ -379,15 +469,15 @@
                 row.onclick = () => toggleTeamDetails(row, team);
                 
                 row.innerHTML = `
-                    <td class="rank-cell ${rankClass}">${getRankDisplay(rank)}</td>
-                    <td class="team-name">${escapeHtml(team.teamName)}</td>
-                    <td class="activity-score ${team.activities.registration > 0 ? 'completed' : ''}">${team.activities.registration}</td>
-                    <td class="activity-score ${team.activities.clueHunt > 0 ? 'completed' : ''}">${team.activities.clueHunt}</td>
-                    <td class="activity-score ${team.activities.quiz > 0 ? 'completed' : ''}">${team.activities.quiz}</td>
-                    <td class="activity-score ${team.activities.kindness > 0 ? 'completed' : ''}">${team.activities.kindness}</td>
-                    <td class="activity-score ${team.activities.scavenger > 0 ? 'completed' : ''}">${team.activities.scavenger}</td>
-                    <td class="activity-score ${team.activities.limerick > 0 ? 'completed' : ''}">${team.activities.limerick}</td>
-                    <td class="total-score">${team.totalScore}</td>
+                    <td class="rank-cell ${rankClass}" data-label="Rank">${getRankDisplay(rank)}</td>
+                    <td class="team-name" data-label="Team">${escapeHtml(team.teamName)}</td>
+                    <td class="activity-score ${team.activities.registration > 0 ? 'completed' : ''}" data-label="Registration" data-activity="Registration">${team.activities.registration}</td>
+                    <td class="activity-score ${team.activities.clueHunt > 0 ? 'completed' : ''}" data-label="Clue Hunt" data-activity="Clue Hunt">${team.activities.clueHunt}</td>
+                    <td class="activity-score ${team.activities.quiz > 0 ? 'completed' : ''}" data-label="Quiz" data-activity="Quiz">${team.activities.quiz}</td>
+                    <td class="activity-score ${team.activities.kindness > 0 ? 'completed' : ''}" data-label="Kindness" data-activity="Kindness">${team.activities.kindness}</td>
+                    <td class="activity-score ${team.activities.scavenger > 0 ? 'completed' : ''}" data-label="Scavenger" data-activity="Scavenger">${team.activities.scavenger}</td>
+                    <td class="activity-score ${team.activities.limerick > 0 ? 'completed' : ''}" data-label="Limerick" data-activity="Limerick">${team.activities.limerick}</td>
+                    <td class="total-score" data-label="Total Score">${team.totalScore}</td>
                 `;
                 
                 tbody.appendChild(row);
