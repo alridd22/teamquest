@@ -523,7 +523,7 @@
 
         async function loadKindnessActs() {
             try {
-                const response = await fetch('/.netlify/functions/get_gallery_data', {
+                const response = await fetch('/.netlify/functions/get_gallery_data_function', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -553,7 +553,7 @@
 
         async function loadLimericks() {
             try {
-                const response = await fetch('/.netlify/functions/get_gallery_data', {
+                const response = await fetch('/.netlify/functions/get_gallery_data_function', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
