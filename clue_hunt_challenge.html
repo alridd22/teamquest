@@ -256,6 +256,19 @@
             font-size: 1.5em;
         }
 
+        .clue-button.incorrect {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            cursor: not-allowed;
+        }
+
+        .clue-button.incorrect::after {
+            content: '✗';
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            font-size: 1.5em;
+        }
+
         .clue-section {
             display: none;
             background: #fef7ff;
@@ -587,14 +600,21 @@
 
             for (var i = 0; i < clueHuntData.length; i++) {
                 var clue = clueHuntData[i];
-                var isCompleted = completedClues[clue.id];
+                var clueStatus = completedClues[clue.id];
                 
                 var button = document.createElement('button');
-                button.className = 'clue-button' + (isCompleted ? ' completed' : '');
-                button.textContent = 'Clue ' + clue.id;
-                button.disabled = isCompleted;
+                var buttonClass = 'clue-button';
                 
-                if (!isCompleted) {
+                if (clueStatus) {
+                    // Clue has been attempted
+                    if (clueStatus.wasCorrect) {
+                        buttonClass += ' completed';  // Green with checkmark
+                    } else {
+                        buttonClass += ' incorrect';  // Red with cross
+                    }
+                    button.disabled = true;
+                } else {
+                    // Clue not yet attempted - allow clicking
                     button.setAttribute('data-clue-id', clue.id);
                     button.onclick = function() {
                         var clueId = parseInt(this.getAttribute('data-clue-id'));
@@ -608,6 +628,9 @@
                         if (clueData) selectClue(clueData);
                     };
                 }
+                
+                button.className = buttonClass;
+                button.textContent = 'Clue ' + clue.id;
                 
                 grid.appendChild(button);
             }
@@ -732,13 +755,22 @@
         }
 
         function updateProgress() {
-            var completed = Object.keys(completedClues).length;
+            var attempted = Object.keys(completedClues).length;
+            var correct = 0;
+            
+            // Count correct answers
+            for (var clueId in completedClues) {
+                if (completedClues[clueId].wasCorrect) {
+                    correct++;
+                }
+            }
+            
             var total = clueHuntData.length;
-            var percentage = (completed / total) * 100;
+            var percentage = (attempted / total) * 100;
             
             var progressFill = document.getElementById('progressFill');
             progressFill.style.width = percentage + '%';
-            progressFill.textContent = completed + '/' + total + ' Clues Solved';
+            progressFill.textContent = correct + ' Correct / ' + attempted + ' Attempted / ' + total + ' Total';
         }
 
         function showCompletionCelebration() {
