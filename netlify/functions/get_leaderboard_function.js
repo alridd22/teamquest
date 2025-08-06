@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
     // Load teams from Registration sheet (DYNAMIC LOADING)
     let allTeams = [];
     try {
-      const registrationSheet = doc.sheetsByTitle['Registration'];
+      const registrationSheet = doc.sheetsByTitle['Sheet1'];
       if (registrationSheet) {
         await registrationSheet.loadHeaderRow();
         const registrationRows = await registrationSheet.getRows();
@@ -70,15 +70,15 @@ exports.handler = async (event, context) => {
           registrationTime: row.get('Timestamp') || ''
         })).filter(team => team.teamCode && team.teamName);
 
-        console.log('Teams loaded from Registration sheet:', allTeams.length);
+        console.log('Teams loaded from Sheet1:', allTeams.length);
       }
     } catch (error) {
-      console.log('Registration sheet error:', error.message);
+      console.log('Sheet1 error:', error.message);
     }
 
     // Only use teams from Registration sheet - no fallback
     if (allTeams.length === 0) {
-      console.log('No teams found in Registration sheet - returning empty teams list');
+      console.log('No teams found in Sheet1 - returning empty teams list');
     }
 
     console.log('Teams to process:', allTeams.map(t => `${t.teamCode}: ${t.teamName}`));
@@ -270,7 +270,7 @@ exports.handler = async (event, context) => {
         timestamp: timestamp,
         debugInfo: {
           teamsCount: allTeams.length,
-          teamsSource: allTeams.length > 0 ? 'Registration Sheet' : 'Fallback',
+          teamsSource: allTeams.length > 0 ? 'Sheet1' : 'None Found',
           scoresLoaded: {
             kindness: Object.keys(activityScores.kindness).length,
             limerick: Object.keys(activityScores.limerick).length,
