@@ -566,23 +566,37 @@
             renderClueGrid();
         });
 
-        function loadTeamsList() {
-            console.log('Loading teams - starting...');
-            
-            var fallbackTeams = [
-                { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-            ];
-            
-            console.log('Setting fallback teams:', fallbackTeams);
-            allTeams = fallbackTeams;
-            populateTeamDropdown(fallbackTeams);
-            console.log('Teams should now be in dropdown');
+        async function loadTeamsList() {
+            try {
+                console.log('Loading teams from leaderboard function...');
+                
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Leaderboard response:', data);
+                
+                if (data && data.success && data.teams && Array.isArray(data.teams)) {
+                    console.log('Found', data.teams.length, 'teams');
+                    allTeams = data.teams;
+                    populateTeamDropdown(data.teams);
+                    return;
+                }
+                
+                throw new Error('Invalid response structure');
+                
+            } catch (error) {
+                console.error('Failed to load teams:', error);
+                
+                // No fallback - use empty teams if API fails
+                allTeams = [];
+                populateTeamDropdown([]);
+                showMessage('loginMessage', 'Unable to load teams. Please try refreshing the page.', 'error');
+            }
         }
 
         function populateTeamDropdown(teams) {
@@ -816,7 +830,7 @@
         }
 
         // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             var selectedTeamCode = document.getElementById('teamSelect').value;
@@ -832,26 +846,76 @@
                 return;
             }
 
-            // Find selected team
-            var selectedTeam = null;
-            for (var i = 0; i < allTeams.length; i++) {
-                if (allTeams[i].teamCode === selectedTeamCode) {
-                    selectedTeam = allTeams[i];
-                    break;
+            try {
+                // Verify team selection and PIN
+                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
+                
+                if (isValid) {
+                    // Find selected team
+                    var selectedTeam = null;
+                    for (var i = 0; i < allTeams.length; i++) {
+                        if (allTeams[i].teamCode === selectedTeamCode) {
+                            selectedTeam = allTeams[i];
+                            break;
+                        }
+                    }
+                    
+                    if (selectedTeam) {
+                        currentTeam = selectedTeam;
+                        document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
+                        
+                        document.getElementById('loginSection').classList.remove('active');
+                        document.getElementById('huntSection').classList.add('active');
+                        
+                        updateProgress();
+                        updateScore();
+                    }
+                } else {
+                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
                 }
-            }
-            
-            if (selectedTeam) {
-                currentTeam = selectedTeam;
-                document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
-                
-                document.getElementById('loginSection').classList.remove('active');
-                document.getElementById('huntSection').classList.add('active');
-                
-                updateProgress();
-                updateScore();
+            } catch (error) {
+                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
             }
         });
+
+        async function verifyTeamAndPin(teamCode, enteredPin) {
+            try {
+                console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
+                
+                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: teamCode,
+                        pin: enteredPin
+                    })
+                });
+                
+                console.log('PIN verification response status:', response.status);
+                console.log('PIN verification response ok:', response.ok);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('PIN verification HTTP error:', errorText);
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('PIN verification result:', result);
+                
+                if (result.success) {
+                    return result.valid;
+                } else {
+                    throw new Error(result.error || 'Verification failed');
+                }
+                
+            } catch (error) {
+                console.error('Error verifying team and PIN:', error);
+                return false;
+            }
+        }
 
         function showMessage(containerId, message, type) {
             var container = document.getElementById(containerId);
