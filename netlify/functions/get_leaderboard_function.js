@@ -76,18 +76,9 @@ exports.handler = async (event, context) => {
       console.log('Registration sheet error:', error.message);
     }
 
-    // Fallback to hardcoded teams if registration sheet is empty/missing
+    // Only use teams from Registration sheet - no fallback
     if (allTeams.length === 0) {
-      console.log('No teams found in Registration sheet, using fallback teams');
-      allTeams = [
-        { teamCode: 'TEAM-C', teamName: 'The Clue Hunters', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-I', teamName: 'AaronTeam2', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-E', teamName: 'Emma is great', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-F', teamName: 'CHTeam Best', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name', members: '', registrationTime: '' },
-        { teamCode: 'TEAM-H', teamName: 'AaronTeam', members: '', registrationTime: '' }
-      ];
+      console.log('No teams found in Registration sheet - returning empty teams list');
     }
 
     console.log('Teams to process:', allTeams.map(t => `${t.teamCode}: ${t.teamName}`));
