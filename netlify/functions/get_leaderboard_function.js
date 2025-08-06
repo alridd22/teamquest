@@ -2,9 +2,9 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 
 exports.handler = async (event, context) => {
-  console.log('Leaderboard request started');
+  console.log('Leaderboard request started at:', new Date().toISOString());
 
-  // Handle CORS
+  // Handle CORS with cache busting headers
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -12,6 +12,9 @@ exports.handler = async (event, context) => {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
       body: '',
     };
@@ -50,6 +53,44 @@ exports.handler = async (event, context) => {
     const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
     await doc.loadInfo();
     console.log('Sheet loaded successfully:', doc.title);
+
+    // Load teams from Registration sheet (DYNAMIC LOADING)
+    let allTeams = [];
+    try {
+      const registrationSheet = doc.sheetsByTitle['Registration'];
+      if (registrationSheet) {
+        await registrationSheet.loadHeaderRow();
+        const registrationRows = await registrationSheet.getRows();
+        console.log('Registration rows loaded:', registrationRows.length);
+
+        allTeams = registrationRows.map(row => ({
+          teamCode: row.get('Team Code'),
+          teamName: row.get('Team Name'),
+          members: row.get('Members') || '',
+          registrationTime: row.get('Timestamp') || ''
+        })).filter(team => team.teamCode && team.teamName);
+
+        console.log('Teams loaded from Registration sheet:', allTeams.length);
+      }
+    } catch (error) {
+      console.log('Registration sheet error:', error.message);
+    }
+
+    // Fallback to hardcoded teams if registration sheet is empty/missing
+    if (allTeams.length === 0) {
+      console.log('No teams found in Registration sheet, using fallback teams');
+      allTeams = [
+        { teamCode: 'TEAM-C', teamName: 'The Clue Hunters', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-I', teamName: 'AaronTeam2', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-E', teamName: 'Emma is great', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-F', teamName: 'CHTeam Best', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name', members: '', registrationTime: '' },
+        { teamCode: 'TEAM-H', teamName: 'AaronTeam', members: '', registrationTime: '' }
+      ];
+    }
+
+    console.log('Teams to process:', allTeams.map(t => `${t.teamCode}: ${t.teamName}`));
 
     // Get activity scores
     const activityScores = {
@@ -180,20 +221,6 @@ exports.handler = async (event, context) => {
 
     console.log('Activity scores loaded:', activityScores);
 
-    // Use hardcoded teams for now to get leaderboard working
-    console.log('Using hardcoded teams');
-    const allTeams = [
-      { teamCode: 'TEAM-C', teamName: 'The Clue Hunters', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-I', teamName: 'AaronTeam2', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-E', teamName: 'Emma is great', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-F', teamName: 'CHTeam Best', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name', members: '', registrationTime: '' },
-      { teamCode: 'TEAM-H', teamName: 'AaronTeam', members: '', registrationTime: '' }
-    ];
-    
-    console.log('Teams to process:', allTeams);
-
     // Calculate leaderboard
     const leaderboard = allTeams.map(team => {
       // Get scores (defaulting to 0 if not found)
@@ -226,21 +253,41 @@ exports.handler = async (event, context) => {
     // Sort by total score (descending)
     leaderboard.sort((a, b) => b.totalScore - a.totalScore);
 
-    console.log('Leaderboard calculated:', leaderboard.map(team => 
+    console.log('Final leaderboard:', leaderboard.map(team => 
       `${team.teamName}: ${team.totalScore} points`
     ));
+
+    // Add cache-busting timestamp
+    const timestamp = Date.now();
+    console.log('Returning response with timestamp:', timestamp);
 
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'X-Timestamp': timestamp.toString(),
       },
       body: JSON.stringify({
         success: true,
         teams: allTeams,
         leaderboard,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
+        timestamp: timestamp,
+        debugInfo: {
+          teamsCount: allTeams.length,
+          teamsSource: allTeams.length > 0 ? 'Registration Sheet' : 'Fallback',
+          scoresLoaded: {
+            kindness: Object.keys(activityScores.kindness).length,
+            limerick: Object.keys(activityScores.limerick).length,
+            scavenger: Object.keys(activityScores.scavenger).length,
+            quiz: Object.keys(activityScores.quiz).length,
+            clueHunt: Object.keys(activityScores.clueHunt).length
+          }
+        }
       }),
     };
 
@@ -252,10 +299,14 @@ exports.handler = async (event, context) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
       body: JSON.stringify({
         success: false,
         error: error.message,
+        timestamp: Date.now()
       }),
     };
   }
