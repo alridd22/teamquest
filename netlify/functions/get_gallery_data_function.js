@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
             teamCode: row.get('Team Code'),
             teamName: row.get('Team Name'),
             description: row.get('Description'),
-            photoUrl: row.get('Photo URL'),
+            photoUrl: row.get('Photo Status'), // Your photos are in the Photo Status column
             aiScore: row.get('AI Score'),
             verified: row.get('Verified'),
             submissionTime: row.get('Submission Time')
@@ -85,7 +85,8 @@ exports.handler = async (event, context) => {
             item.teamName && 
             item.description && 
             item.photoUrl &&
-            item.submissionTime
+            item.submissionTime &&
+            item.photoUrl.startsWith('https://') // Only include entries with valid photo URLs
           );
 
           // Sort by submission time (newest first)
