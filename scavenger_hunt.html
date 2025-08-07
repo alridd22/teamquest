@@ -663,6 +663,9 @@
                     // Load completed items for this team
                     await loadCompletedItems();
                     
+                    // Re-render the grid to show submitted items as greyed out
+                    renderScavengerGrid();
+                    
                     // Switch to hunt section
                     document.getElementById('loginSection').classList.remove('active');
                     document.getElementById('huntSection').classList.add('active');
