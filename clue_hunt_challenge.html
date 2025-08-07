@@ -864,6 +864,12 @@
                         currentTeam = selectedTeam;
                         document.getElementById('teamInfo').textContent = 'Team: ' + selectedTeam.teamName;
                         
+                        // Load previous clue attempts for this team
+                        await loadPreviousAttempts();
+                        
+                        // Re-render grid to show completed clues
+                        renderClueGrid();
+                        
                         document.getElementById('loginSection').classList.remove('active');
                         document.getElementById('huntSection').classList.add('active');
                         
@@ -914,6 +920,56 @@
             } catch (error) {
                 console.error('Error verifying team and PIN:', error);
                 return false;
+            }
+        }
+
+        async function loadPreviousAttempts() {
+            // Clear current state
+            completedClues = {};
+            currentScore = 0;
+
+            try {
+                console.log('Loading previous clue attempts for team:', currentTeam.teamCode);
+                
+                const response = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: currentTeam.teamCode
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Clue hunt submissions response:', data);
+                    
+                    if (data.success && data.submissions) {
+                        // Restore completed clues and score
+                        data.submissions.forEach(submission => {
+                            completedClues[submission.clueId] = {
+                                points: submission.points,
+                                answer: submission.userAnswer,
+                                correctAnswer: submission.correctAnswer,
+                                completedAt: submission.attemptTime,
+                                wasCorrect: submission.wasCorrect
+                            };
+                        });
+                        
+                        // Restore total score
+                        currentScore = data.totalScore || 0;
+                        
+                        console.log('Loaded previous clue attempts:', Object.keys(completedClues).length);
+                        console.log('Restored score:', currentScore);
+                    }
+                } else {
+                    console.log('No previous clue attempts found or API error');
+                }
+                
+            } catch (error) {
+                console.error('Error loading previous clue attempts:', error);
+                // Continue with empty data if API fails
             }
         }
 
