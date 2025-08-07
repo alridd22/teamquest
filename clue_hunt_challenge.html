@@ -567,6 +567,10 @@
         });
 
         async function loadTeamsList() {
+            // Show loading indicator
+            const loadingIndicator = document.getElementById('teamsLoadingIndicator');
+            loadingIndicator.style.display = 'block';
+            
             try {
                 console.log('Loading teams from leaderboard function...');
                 
@@ -596,6 +600,9 @@
                 allTeams = [];
                 populateTeamDropdown([]);
                 showMessage('loginMessage', 'Unable to load teams. Please try refreshing the page.', 'error');
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
             }
         }
 
