@@ -180,9 +180,27 @@
         }
 
         .scavenger-item.completed {
-            background: #e8f5e8;
-            border-color: #4caf50;
+            background: #f5f5f5;
+            border-color: #d0d0d0;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .scavenger-item.completed:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .scavenger-item.submitted {
+            background: #fff3cd;
+            border-color: #ffc107;
             opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .scavenger-item.submitted:hover {
+            transform: none;
+            box-shadow: none;
         }
 
         .scavenger-item.selected {
@@ -205,6 +223,11 @@
             color: #333;
         }
 
+        .scavenger-item.completed .item-title,
+        .scavenger-item.submitted .item-title {
+            color: #888;
+        }
+
         .item-status {
             font-size: 24px;
         }
@@ -215,10 +238,22 @@
             line-height: 1.4;
         }
 
+        .scavenger-item.completed .item-description,
+        .scavenger-item.submitted .item-description {
+            color: #aaa;
+        }
+
         .item-score {
             margin-top: 10px;
             font-weight: bold;
             color: #4caf50;
+        }
+
+        .item-submitted-text {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ff9800;
+            font-style: italic;
         }
 
         .photo-frame {
@@ -515,6 +550,7 @@
         let allTeams = [];
         let currentItem = null;
         let completedItems = {};
+        let submittedItems = new Set(); // Track submitted items (even if pending verification)
 
         // Scavenger hunt items
         const scavengerItems = [
@@ -666,6 +702,9 @@
             try {
                 const result = await submitScavengerItem(photoFile, currentItem);
                 
+                // Mark item as submitted (even if pending verification)
+                submittedItems.add(currentItem.id);
+                
                 // Handle pending verification state
                 if (result.status === 'pending_verification') {
                     showMessage('submitMessage', 
@@ -695,10 +734,14 @@
                 // Update progress
                 updateProgress();
                 
-                // Reset form for next submission
+                // Store locally for persistence
+                localStorage.setItem('scavenger_' + currentTeam.teamCode, JSON.stringify(completedItems));
+                localStorage.setItem('submitted_' + currentTeam.teamCode, JSON.stringify([...submittedItems]));
+                
+                // Return to grid after longer delay to read the message
                 setTimeout(() => {
                     showItemGrid();
-                }, 4000); // Longer delay to read the message
+                }, 8000); // Changed from 4000 to 8000 (8 seconds)
                 
             } catch (error) {
                 console.error('Submission error:', error);
@@ -715,34 +758,57 @@
 
             scavengerItems.forEach(item => {
                 const isCompleted = completedItems[item.id] && completedItems[item.id].verified;
+                const isSubmitted = submittedItems.has(item.id); // Check if submitted (even if pending)
                 const itemScore = completedItems[item.id] ? completedItems[item.id].score : 0;
 
                 const itemDiv = document.createElement('div');
-                itemDiv.className = 'scavenger-item' + (isCompleted ? ' completed' : '');
-                itemDiv.onclick = () => selectItem(item);
+                let itemClass = 'scavenger-item';
+                
+                if (isCompleted) {
+                    itemClass += ' completed';
+                } else if (isSubmitted) {
+                    itemClass += ' submitted';
+                }
+                
+                itemDiv.className = itemClass;
+                
+                // Only allow clicking if not submitted
+                if (!isSubmitted && !isCompleted) {
+                    itemDiv.onclick = () => selectItem(item);
+                }
+
+                let statusIcon = '🔍'; // Default searching icon
+                let statusText = '';
+                
+                if (isCompleted) {
+                    statusIcon = '✅';
+                    statusText = '<div class="item-score">Scored: ' + itemScore + ' points</div>';
+                } else if (isSubmitted) {
+                    statusIcon = '⏳';
+                    statusText = '<div class="item-submitted-text">Submitted - Awaiting AI Verification</div>';
+                }
 
                 itemDiv.innerHTML = 
                     '<div class="item-header">' +
                         '<div class="item-title">' + item.title + '</div>' +
-                        '<div class="item-status">' + (isCompleted ? '✅' : '🔍') + '</div>' +
+                        '<div class="item-status">' + statusIcon + '</div>' +
                     '</div>' +
                     '<div class="item-description">' + item.description + '</div>' +
                     '<div style="font-size: 0.8em; color: #888; margin-top: 5px;">' + item.details + '</div>' +
                     '<div style="font-size: 0.8em; color: #4facfe; margin-top: 5px;">Max: ' + item.maxPoints + ' points</div>' +
-                    (isCompleted ? '<div class="item-score">Scored: ' + itemScore + ' points</div>' : '');
+                    statusText;
 
                 grid.appendChild(itemDiv);
             });
         }
 
         function selectItem(item) {
+            const isSubmitted = submittedItems.has(item.id);
             const isCompleted = completedItems[item.id] && completedItems[item.id].verified;
             
-            if (isCompleted) {
-                // Allow resubmission with confirmation
-                if (!confirm('You\'ve already completed "' + item.title + '" with ' + completedItems[item.id].score + ' points. Resubmit anyway?')) {
-                    return;
-                }
+            // Prevent selection of submitted or completed items
+            if (isSubmitted || isCompleted) {
+                return;
             }
 
             currentItem = item;
@@ -806,20 +872,10 @@
             } catch (error) {
                 console.error('Leaderboard function failed:', error);
                 
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Teams loaded. You can select your team and continue.', 'success');
+                // No fallback - teams will be empty if API fails
+                allTeams = [];
+                populateTeamDropdown([]);
+                showMessage('loginMessage', 'Unable to load teams. Please try refreshing the page.', 'error');
             }
         }
 
@@ -881,6 +937,19 @@
             } else {
                 completedItems = {};
             }
+
+            // Load submitted items from localStorage
+            const storedSubmitted = localStorage.getItem('submitted_' + currentTeam.teamCode);
+            if (storedSubmitted) {
+                try {
+                    submittedItems = new Set(JSON.parse(storedSubmitted));
+                } catch (e) {
+                    console.error('Error parsing stored submitted items:', e);
+                    submittedItems = new Set();
+                }
+            } else {
+                submittedItems = new Set();
+            }
         }
 
         async function submitScavengerItem(photoFile, item) {
@@ -919,9 +988,6 @@
                 if (!result.success) {
                     throw new Error(result.error || 'Submission failed');
                 }
-                
-                // Store locally for persistence
-                localStorage.setItem('scavenger_' + currentTeam.teamCode, JSON.stringify(completedItems));
                 
                 return result;
                 
