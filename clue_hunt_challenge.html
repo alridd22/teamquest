@@ -562,15 +562,17 @@
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, loading teams...');
+            // Show loading indicator immediately
+            const loadingIndicator = document.getElementById('teamsLoadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'block';
+            }
+            
             loadTeamsList();
             renderClueGrid();
         });
 
         async function loadTeamsList() {
-            // Show loading indicator
-            const loadingIndicator = document.getElementById('teamsLoadingIndicator');
-            loadingIndicator.style.display = 'block';
-            
             try {
                 console.log('Loading teams from leaderboard function...');
                 
@@ -602,7 +604,10 @@
                 showMessage('loginMessage', 'Unable to load teams. Please try refreshing the page.', 'error');
             } finally {
                 // Hide loading indicator
-                loadingIndicator.style.display = 'none';
+                const loadingIndicator = document.getElementById('teamsLoadingIndicator');
+                if (loadingIndicator) {
+                    loadingIndicator.style.display = 'none';
+                }
             }
         }
 
