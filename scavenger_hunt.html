@@ -925,30 +925,55 @@
         }
 
         async function loadCompletedItems() {
-            // Load completed items from localStorage for persistence
-            const stored = localStorage.getItem('scavenger_' + currentTeam.teamCode);
-            if (stored) {
-                try {
-                    completedItems = JSON.parse(stored);
-                } catch (e) {
-                    console.error('Error parsing stored items:', e);
-                    completedItems = {};
-                }
-            } else {
-                completedItems = {};
-            }
+            // Clear local storage to ensure fresh data from sheets
+            completedItems = {};
+            submittedItems = new Set();
 
-            // Load submitted items from localStorage
-            const storedSubmitted = localStorage.getItem('submitted_' + currentTeam.teamCode);
-            if (storedSubmitted) {
-                try {
-                    submittedItems = new Set(JSON.parse(storedSubmitted));
-                } catch (e) {
-                    console.error('Error parsing stored submitted items:', e);
-                    submittedItems = new Set();
+            try {
+                // Load submitted items from Google Sheets for this team
+                console.log('Loading submitted items for team:', currentTeam.teamCode);
+                
+                const response = await fetch('/.netlify/functions/get_scavenger_submissions_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: currentTeam.teamCode
+                    })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Scavenger submissions response:', data);
+                    
+                    if (data.success && data.submissions) {
+                        data.submissions.forEach(submission => {
+                            const itemId = submission.itemId;
+                            
+                            // Mark as submitted regardless of verification status
+                            submittedItems.add(itemId);
+                            
+                            // If verified, add to completed items
+                            if (submission.verified && submission.score > 0) {
+                                completedItems[itemId] = {
+                                    score: submission.score,
+                                    verified: true,
+                                    submittedAt: submission.submissionTime
+                                };
+                            }
+                        });
+                        
+                        console.log('Loaded submitted items:', [...submittedItems]);
+                        console.log('Loaded completed items:', completedItems);
+                    }
+                } else {
+                    console.log('No previous submissions found or API error');
                 }
-            } else {
-                submittedItems = new Set();
+                
+            } catch (error) {
+                console.error('Error loading previous submissions:', error);
+                // Continue with empty data if API fails
             }
         }
 
