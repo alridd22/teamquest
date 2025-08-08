@@ -698,6 +698,7 @@ Now [treasure/doubloons/riches] fill up the space!"
 
         async function loadTeamsList() {
             try {
+                console.log('Loading teams for limerick challenge...');
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
                 
                 if (!response.ok) {
@@ -705,16 +706,46 @@ Now [treasure/doubloons/riches] fill up the space!"
                 }
                 
                 const data = await response.json();
+                console.log('Teams data received:', data);
                 
                 if (data && data.success && data.teams && Array.isArray(data.teams)) {
                     allTeams = data.teams;
                     populateTeamDropdown(data.teams);
+                    console.log('Teams populated successfully');
                     return;
                 }
                 
                 throw new Error('Invalid response structure from leaderboard');
                 
             } catch (error) {
+                console.error('Leaderboard function failed:', error);
+                showMessage('loginMessage', 'Failed to load crews. Please refresh the page and try again.', 'error');
+            }
+        }
+
+        function populateTeamDropdown(teams) {
+            console.log('Populating dropdown with teams:', teams);
+            const select = document.getElementById('teamSelect');
+            
+            if (!select) {
+                console.error('Team select element not found!');
+                return;
+            }
+            
+            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
+            
+            teams
+                .sort((a, b) => a.teamName.localeCompare(b.teamName))
+                .forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.teamCode;
+                    option.textContent = team.teamName;
+                    select.appendChild(option);
+                    console.log('Added team:', team.teamName);
+                });
+            
+            console.log('Dropdown population complete');
+        } catch (error) {
                 console.error('Leaderboard function failed:', error);
                 
                 // Use fallback teams
