@@ -573,7 +573,7 @@ Now [treasure/doubloons/riches] fill up the space!"
             </form>
 
             <div class="loading" id="loading">
-                ✨ Terry is analyzing your verse craftsmanship and calculating doubloons...
+                ✨ Terry is analysing your verse craftsmanship and calculating doubloons...
             </div>
 
             <div class="message" id="challengeMessage"></div>
@@ -589,12 +589,91 @@ Now [treasure/doubloons/riches] fill up the space!"
             loadTeamsList();
         });
 
+        async function loadTeamsList() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('Limerick submission error:', error);
+                throw error;
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
+            container.style.display = 'block';
+        }
+    </script>
+</body>
+</html>HTTP ' + response.status + ': ' + response.statusText);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.success && data.teams && Array.isArray(data.teams)) {
+                    allTeams = data.teams;
+                    populateTeamDropdown(data.teams);
+                    return;
+                }
+                
+                throw new Error('Invalid response structure from leaderboard');
+                
+            } catch (error) {
+                console.error('Leaderboard function failed:', error);
+                
+                // Use fallback teams
+                const fallbackTeams = [
+                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+                ];
+                
+                allTeams = fallbackTeams;
+                populateTeamDropdown(fallbackTeams);
+                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
+            }
+        }
+
+        function populateTeamDropdown(teams) {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
+            
+            teams
+                .sort((a, b) => a.teamName.localeCompare(b.teamName))
+                .forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.teamCode;
+                    option.textContent = team.teamName;
+                    select.appendChild(option);
+                });
+        }
+
         // Character counter for limerick
-        document.getElementById('limerickText').addEventListener('input', function() {
-            const remaining = 500 - this.value.length;
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = remaining;
-            charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('limerickText').addEventListener('input', function() {
+                const remaining = 500 - this.value.length;
+                const charCount = document.getElementById('charCount');
+                charCount.textContent = remaining;
+                charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+            });
         });
 
         // Topic selection
@@ -696,90 +775,6 @@ Now [treasure/doubloons/riches] fill up the space!"
             }
         });
 
-        async function loadTeamsList() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                
-                const data = await response.json();
-                
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
-                }
-                
-                throw new Error('Invalid response structure from leaderboard');
-                
-            } catch (error) {
-                console.error('Leaderboard function failed:', error);
-                
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
-            }
-        }
-
-        function populateTeamDropdown(teams) {
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
-            
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-        } catch (error) {
-                console.error('Leaderboard function failed:', error);
-                
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
-            }
-        }
-
-        function populateTeamDropdown(teams) {
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
-            
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-        }
-
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
                 const response = await fetch('/.netlify/functions/verify_team_pin_function', {
@@ -829,18 +824,4 @@ Now [treasure/doubloons/riches] fill up the space!"
                 });
                 
                 if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Submission failed');
-                }
-                
-                return result;
-                
-            } catch (error) {
-                console.error('Limerick submission error:', error);
-                throw error;
-            }
+                    throw new Error('
