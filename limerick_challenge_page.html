@@ -717,7 +717,7 @@ Now [treasure/doubloons/riches] fill up the space!"
             } catch (error) {
                 console.error('Leaderboard function failed:', error);
                 
-                // Use fallback teams like in quiz
+                // Use fallback teams
                 const fallbackTeams = [
                     { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
                     { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
@@ -735,14 +735,7 @@ Now [treasure/doubloons/riches] fill up the space!"
         }
 
         function populateTeamDropdown(teams) {
-            console.log('Populating dropdown with teams:', teams);
             const select = document.getElementById('teamSelect');
-            
-            if (!select) {
-                console.error('Team select element not found!');
-                return;
-            }
-            
             select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
             
             teams
@@ -752,10 +745,7 @@ Now [treasure/doubloons/riches] fill up the space!"
                     option.value = team.teamCode;
                     option.textContent = team.teamName;
                     select.appendChild(option);
-                    console.log('Added team:', team.teamName);
                 });
-            
-            console.log('Dropdown population complete');
         } catch (error) {
                 console.error('Leaderboard function failed:', error);
                 
