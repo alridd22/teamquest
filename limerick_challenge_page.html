@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Limerick Challenge</title>
+    <title>TeamQuest - Terry's Verse Vault</title>
     <style>
         * {
             margin: 0;
@@ -13,23 +13,43 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,140,0,0.1) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            background: white;
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
             border-radius: 25px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
             max-width: 700px;
             width: 100%;
             position: relative;
             overflow: hidden;
+            z-index: 1;
+            border: 3px solid #8B4513;
         }
 
         .container::before {
@@ -38,19 +58,34 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            height: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 2px solid #DAA520;
+            border-radius: 20px;
+            pointer-events: none;
         }
 
         .logo {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
         }
 
         .poem-icon {
             font-size: 48px;
             margin-bottom: 20px;
             animation: bounce 2s infinite;
+            filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
         }
 
         @keyframes bounce {
@@ -60,22 +95,24 @@
         }
 
         h1 {
-            color: #333;
+            color: #8B4513;
             text-align: center;
             margin-bottom: 10px;
             font-size: 2.5em;
-            font-weight: 600;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
+            color: #A0522D;
             margin-bottom: 30px;
             font-size: 1.1em;
+            font-weight: 500;
         }
 
         .team-info {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #8B4513, #A0522D);
             color: white;
             padding: 20px;
             border-radius: 15px;
@@ -83,11 +120,16 @@
             font-size: 1.2em;
             font-weight: bold;
             margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
+            border: 2px solid #DAA520;
+            position: relative;
+            z-index: 2;
         }
 
         .login-section, .challenge-section {
             display: none;
+            position: relative;
+            z-index: 2;
         }
 
         .login-section.active, .challenge-section.active {
@@ -95,24 +137,29 @@
         }
 
         .instructions {
-            background: #f8f9ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border-left: 6px solid #DAA520;
+            padding: 25px;
             margin-bottom: 30px;
-            border-radius: 0 10px 10px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
+            border: 2px solid #DAA520;
+            border-left: 6px solid #FF8C00;
         }
 
         .instructions h3 {
-            color: #333;
+            color: #8B4513;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.3em;
+            font-weight: 700;
         }
 
         .instructions ul {
             margin-left: 20px;
-            color: #555;
+            color: #654321;
             line-height: 1.8;
         }
 
@@ -127,27 +174,28 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+            color: #8B4513;
+            font-weight: 600;
             font-size: 1.1em;
         }
 
         input[type="text"], input[type="number"], select, textarea {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e1e8ff;
-            border-radius: 10px;
+            border: 3px solid #DAA520;
+            border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: #fefefe;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
             font-family: inherit;
         }
 
         input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #FF8C00;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
+            transform: translateY(-1px);
         }
 
         .limerick-textarea {
@@ -161,8 +209,9 @@
         .char-count {
             text-align: right;
             font-size: 0.9em;
-            color: #666;
+            color: #8B4513;
             margin-top: 5px;
+            font-weight: 500;
         }
 
         .pin-input {
@@ -173,27 +222,33 @@
         }
 
         .examples {
-            background: #f0f8ff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 2px solid #DAA520;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
         }
 
         .examples h4 {
-            color: #333;
+            color: #8B4513;
             margin-bottom: 15px;
             text-align: center;
+            font-size: 1.2em;
+            font-weight: 700;
         }
 
         .example-limerick {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 15px;
             font-family: 'Georgia', serif;
             font-style: italic;
             line-height: 1.6;
-            border-left: 3px solid #667eea;
+            border-left: 4px solid #FF8C00;
+            border: 2px solid #DAA520;
+            color: #654321;
         }
 
         .example-limerick:last-child {
@@ -201,38 +256,42 @@
         }
 
         .rhyme-helper {
-            background: #fff5f0;
-            border: 1px solid #ffd4a3;
-            border-radius: 10px;
-            padding: 15px;
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 2px solid #DAA520;
+            border-radius: 12px;
+            padding: 20px;
             margin-bottom: 20px;
         }
 
         .rhyme-helper h4 {
-            color: #d2691e;
+            color: #8B4513;
             margin-bottom: 10px;
+            font-weight: 700;
         }
 
         .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
             color: white;
             border: none;
             padding: 18px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
+            border: 2px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
         }
 
         .submit-btn:disabled {
@@ -243,29 +302,31 @@
 
         .message {
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin: 20px 0;
             text-align: center;
             display: none;
+            border: 2px solid;
         }
 
         .success-message {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            color: #155724;
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            border-color: #32CD32;
+            color: #006400;
         }
 
         .error-message {
-            background: #f8d7da;
-            border: 1px solid #f5c6cb;
-            color: #721c24;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+            border-color: #DC143C;
+            color: #8B0000;
         }
 
         .loading {
             display: none;
             text-align: center;
             margin-top: 15px;
-            color: #667eea;
+            color: #8B4513;
+            font-weight: 600;
         }
 
         .topic-select {
@@ -275,29 +336,89 @@
         .topic-ideas {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 15px;
         }
 
         .topic-idea {
-            background: #f8f9ff;
-            padding: 10px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            padding: 12px;
+            border-radius: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            border: 2px solid #DAA520;
+            font-weight: 500;
         }
 
         .topic-idea:hover {
-            background: #667eea;
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,140,0,0.3);
         }
 
         .topic-idea.selected {
-            background: #667eea;
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
             color: white;
-            border-color: #764ba2;
+            border-color: #8B4513;
+        }
+
+        .terry-greeting {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border-radius: 20px;
+            padding: 25px;
+            border: 3px solid #DAA520;
+            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
+        }
+
+        .terry-character {
+            flex-shrink: 0;
+        }
+
+        .terry-character img {
+            width: 120px !important;
+            height: 120px !important;
+            border-radius: 15px !important;
+            border: 4px solid #DAA520;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.3);
+            object-fit: cover;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
+            display: block;
+        }
+
+        .terry-speech {
+            flex: 1;
+            position: relative;
+        }
+
+        .terry-speech::before {
+            content: '';
+            position: absolute;
+            left: -15px;
+            top: 20px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 15px 15px 15px 0;
+            border-color: transparent #FFD700 transparent transparent;
+        }
+
+        .terry-note {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 0;
+            border: 3px solid #DAA520;
+            position: relative;
+            font-weight: 500;
+            line-height: 1.6;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
         }
 
         @media (max-width: 600px) {
@@ -312,6 +433,21 @@
             .topic-ideas {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .terry-greeting {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .terry-speech::before {
+                display: none;
+            }
+
+            .terry-character img {
+                width: 100px !important;
+                height: 100px !important;
+            }
         }
     </style>
 </head>
@@ -321,37 +457,48 @@
         <div class="login-section active" id="loginSection">
             <div class="logo">
                 <div class="poem-icon">📝</div>
-                <h1>Limerick Challenge</h1>
-                <p class="subtitle">Write a witty limerick and earn points!</p>
+                <h1>Terry's Verse Vault</h1>
+                <p class="subtitle">Craft clever limericks and earn doubloons for your wit!</p>
+            </div>
+
+            <div class="terry-greeting">
+                <div class="terry-character">
+                    <img src="/terry-thoughtful.png" alt="Terry Quest" class="terry-image">
+                </div>
+                <div class="terry-speech">
+                    <div class="terry-note">
+                        <strong>Ah, a poet approaches!</strong> Welcome to me verse vault, where words be worth their weight in doubloons! Craft me a limerick that tickles the funny bone and shows yer creative spirit. The wittier and more clever, the greater yer treasure reward shall be!
+                    </div>
+                </div>
             </div>
 
             <div class="instructions">
-                <h3>📜 Limerick Rules</h3>
+                <h3>📜 Limerick Treasure Rules</h3>
                 <ul>
-                    <li><strong>5 lines total:</strong> Lines 1, 2, 5 rhyme (A-A-A pattern)</li>
-                    <li><strong>Lines 3, 4 rhyme:</strong> Shorter lines (B-B pattern)</li>
-                    <li><strong>Rhythm matters:</strong> Bouncy, musical flow</li>
-                    <li><strong>Be creative:</strong> Funny, clever, or surprising endings work best!</li>
-                    <li><strong>Earn up to 50 points</strong> based on creativity, humor, and technique</li>
+                    <li><strong>5 lines total:</strong> Lines 1, 2, 5 must rhyme together (A-A-A pattern)</li>
+                    <li><strong>Lines 3, 4 rhyme:</strong> Shorter lines that rhyme with each other (B-B pattern)</li>
+                    <li><strong>Rhythm matters:</strong> Bouncy, musical flow like a sea shanty!</li>
+                    <li><strong>Be creative:</strong> Funny, clever, or surprising endings earn the most treasure!</li>
+                    <li><strong>Earn up to 60 doubloons</strong> based on creativity, humour, and poetic technique</li>
                 </ul>
             </div>
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="teamSelect">Select Your Team</label>
+                    <label for="teamSelect">Select Your Crew</label>
                     <select id="teamSelect" name="teamSelect" required>
-                        <option value="">Choose your team...</option>
+                        <option value="">Choose your treasure hunting crew...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="teamPin">Enter Your Team PIN</label>
+                    <label for="teamPin">Enter Your Crew's Secret Code</label>
                     <input type="number" id="teamPin" name="teamPin" class="pin-input" 
                            min="1000" max="9999" placeholder="1234" required>
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    🔓 Access Challenge
+                    🏴‍☠️ Enter the Verse Vault
                 </button>
             </form>
 
@@ -361,59 +508,59 @@
         <!-- Challenge Section -->
         <div class="challenge-section" id="challengeSection">
             <div class="team-info" id="teamInfo">
-                Team: Loading...
+                Crew: Loading...
             </div>
 
             <div class="examples">
-                <h4>📚 Limerick Examples</h4>
+                <h4>📚 Terry's Treasure Limericks</h4>
                 <div class="example-limerick">
-                    There once was a cat from Peru,<br>
-                    Who dreamed of sailing canoe,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;He packed up his fish,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;Made a nautical wish,<br>
-                    And sailed off into the blue!
+                    There once was a pirate named Pete,<br>
+                    Who buried his gold in the street,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;He drew a rough map,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;Took a well-earned nap,<br>
+                    And woke to find treasure complete!
                 </div>
                 <div class="example-limerick">
-                    A programmer who lived in the cloud,<br>
-                    Wrote code that was fast and quite loud,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;His functions would sing,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;Like a bell they would ring,<br>
-                    And made him exceedingly proud!
+                    An adventurer sailed the blue sea,<br>
+                    In search of doubloons, one, two, three,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;With compass in hand,<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;She reached distant land,<br>
+                    And found all the treasure was free!
                 </div>
             </div>
 
             <form id="limerickForm">
                 <div class="form-group topic-select">
-                    <label for="limerickTopic">Choose Your Topic (Optional)</label>
+                    <label for="limerickTopic">Choose Your Adventure Topic (Optional)</label>
                     <input type="text" id="limerickTopic" name="limerickTopic" 
-                           placeholder="Or create your own topic...">
+                           placeholder="Or create your own treasure tale topic...">
                     
                     <div class="topic-ideas">
-                        <div class="topic-idea" onclick="selectTopic('Animals')">🐾 Animals</div>
-                        <div class="topic-idea" onclick="selectTopic('Travel')">✈️ Travel</div>
-                        <div class="topic-idea" onclick="selectTopic('Food')">🍕 Food</div>
-                        <div class="topic-idea" onclick="selectTopic('Technology')">💻 Technology</div>
-                        <div class="topic-idea" onclick="selectTopic('Weather')">🌦️ Weather</div>
-                        <div class="topic-idea" onclick="selectTopic('Sports')">⚽ Sports</div>
+                        <div class="topic-idea" onclick="selectTopic('Pirates & Treasure')">🏴‍☠️ Pirates & Treasure</div>
+                        <div class="topic-idea" onclick="selectTopic('Sea Adventures')">⚓ Sea Adventures</div>
+                        <div class="topic-idea" onclick="selectTopic('Mysterious Islands')">🏝️ Mysterious Islands</div>
+                        <div class="topic-idea" onclick="selectTopic('Ancient Maps')">🗺️ Ancient Maps</div>
+                        <div class="topic-idea" onclick="selectTopic('Lost Expeditions')">🧭 Lost Expeditions</div>
+                        <div class="topic-idea" onclick="selectTopic('Buried Gold')">💰 Buried Gold</div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="limerickText">✍️ Write Your Limerick</label>
+                    <label for="limerickText">✍️ Craft Your Treasure Limerick</label>
                     <div class="rhyme-helper">
-                        <h4>💡 Rhyme Pattern Reminder:</h4>
-                        Line 1: _____ A<br>
-                        Line 2: _____ A<br>
+                        <h4>💡 Verse Pattern Guide:</h4>
+                        Line 1: _____ A (long line)<br>
+                        Line 2: _____ A (long line)<br>
                         Line 3: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
                         Line 4: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
-                        Line 5: _____ A
+                        Line 5: _____ A (long line)
                     </div>
                     <textarea id="limerickText" name="limerickText" class="limerick-textarea"
                               placeholder="There once was a [person] from [place],
-Who [did something] with [unusual] grace,
+Who [searched/found/discovered] with [unusual] grace,
     They [action] so [adjective],
     And [something] effective,
-Now [ending] all over the place!"
+Now [treasure/doubloons/riches] fill up the space!"
                               maxlength="500" required></textarea>
                     <div class="char-count">
                         <span id="charCount">500</span> characters remaining
@@ -421,12 +568,12 @@ Now [ending] all over the place!"
                 </div>
 
                 <button type="submit" class="submit-btn" id="submitBtn">
-                    🎭 Submit Limerick
+                    🪙 Submit for Doubloons
                 </button>
             </form>
 
             <div class="loading" id="loading">
-                ✨ Analyzing your limerick and calculating score...
+                ✨ Terry is analyzing your verse craftsmanship and calculating doubloons...
             </div>
 
             <div class="message" id="challengeMessage"></div>
@@ -447,7 +594,7 @@ Now [ending] all over the place!"
             const remaining = 500 - this.value.length;
             const charCount = document.getElementById('charCount');
             charCount.textContent = remaining;
-            charCount.style.color = remaining < 50 ? '#dc3545' : '#666';
+            charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
         });
 
         // Topic selection
@@ -469,12 +616,12 @@ Now [ending] all over the place!"
             const enteredPin = document.getElementById('teamPin').value;
             
             if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your team from the list.', 'error');
+                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
                 return;
             }
             
             if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
+                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
                 return;
             }
 
@@ -484,16 +631,16 @@ Now [ending] all over the place!"
                 if (isValid) {
                     const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
                     currentTeam = selectedTeam;
-                    document.getElementById('teamInfo').textContent = `Team: ${selectedTeam.teamName}`;
+                    document.getElementById('teamInfo').textContent = `Crew: ${selectedTeam.teamName}`;
                     
                     // Switch to challenge section
                     document.getElementById('loginSection').classList.remove('active');
                     document.getElementById('challengeSection').classList.add('active');
                 } else {
-                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
+                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
                 }
             } catch (error) {
-                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
+                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
             }
         });
 
@@ -508,19 +655,19 @@ Now [ending] all over the place!"
 
             // Validation
             if (!limerickText) {
-                showMessage('challengeMessage', 'Please write your limerick.', 'error');
+                showMessage('challengeMessage', 'Please craft your treasure limerick.', 'error');
                 return;
             }
 
             if (limerickText.length < 50) {
-                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters).', 'error');
+                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters) worthy of doubloons.', 'error');
                 return;
             }
 
             // Check for line breaks (limericks should have multiple lines)
             const lines = limerickText.split('\n').filter(line => line.trim().length > 0);
             if (lines.length < 3) {
-                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines).', 'error');
+                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines) as befits a proper verse.', 'error');
                 return;
             }
 
@@ -533,7 +680,7 @@ Now [ending] all over the place!"
                 const result = await submitLimerick(topic, limerickText);
                 
                 showMessage('challengeMessage', 
-                    '🎉 Your limerick has been submitted! Our AI is analyzing your creativity, humor, and poetic technique. Check the leaderboard in a few minutes to see your score!', 
+                    '🎉 Your limerick has sailed into Terry\'s verse vault! Our master poet is analysing your creativity, humour, and technique. Check the treasure map in a few minutes to see your doubloons!', 
                     'success');
                 
                 // Disable form after successful submission
@@ -542,7 +689,7 @@ Now [ending] all over the place!"
                 
             } catch (error) {
                 console.error('Submission error:', error);
-                showMessage('challengeMessage', 'Failed to submit your limerick. Please try again.', 'error');
+                showMessage('challengeMessage', 'Failed to submit your limerick to the verse vault. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
                 loading.style.display = 'none';
@@ -551,36 +698,26 @@ Now [ending] all over the place!"
 
         async function loadTeamsList() {
             try {
-                console.log('Loading teams from leaderboard function...');
-                
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                console.log('Response status:', response.status);
                 
                 if (!response.ok) {
-                    console.log('Leaderboard function returned error, trying to parse anyway...');
-                    const errorText = await response.text();
-                    console.log('Error response:', errorText);
-                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
                 }
                 
                 const data = await response.json();
-                console.log('Leaderboard response:', data);
                 
                 if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    console.log('Found', data.teams.length, 'teams');
                     allTeams = data.teams;
                     populateTeamDropdown(data.teams);
                     return;
                 }
                 
-                // If we get here, the response structure is wrong
                 throw new Error('Invalid response structure from leaderboard');
                 
             } catch (error) {
                 console.error('Leaderboard function failed:', error);
                 
-                // Use known teams as fallback since PIN verification works
-                console.log('Using fallback teams - PIN verification will still work');
+                // Use fallback teams
                 const fallbackTeams = [
                     { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
                     { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
@@ -593,17 +730,13 @@ Now [ending] all over the place!"
                 
                 allTeams = fallbackTeams;
                 populateTeamDropdown(fallbackTeams);
-                
-                // Show a less alarming message since the system will still work
-                showMessage('loginMessage', 'Teams loaded. You can select your team and continue.', 'success');
+                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
             }
         }
 
-
-
         function populateTeamDropdown(teams) {
             const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your team...</option>';
+            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
             
             teams
                 .sort((a, b) => a.teamName.localeCompare(b.teamName))
@@ -617,8 +750,6 @@ Now [ending] all over the place!"
 
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
-                console.log('Attempting to verify team:', teamCode, 'with PIN:', enteredPin);
-                
                 const response = await fetch('/.netlify/functions/verify_team_pin_function', {
                     method: 'POST',
                     headers: {
@@ -630,17 +761,11 @@ Now [ending] all over the place!"
                     })
                 });
                 
-                console.log('PIN verification response status:', response.status);
-                console.log('PIN verification response ok:', response.ok);
-                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('PIN verification HTTP error:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
                 
                 const result = await response.json();
-                console.log('PIN verification result:', result);
                 
                 if (result.success) {
                     return result.valid;
@@ -672,7 +797,7 @@ Now [ending] all over the place!"
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
                 
                 const result = await response.json();
@@ -687,14 +812,3 @@ Now [ending] all over the place!"
                 console.error('Limerick submission error:', error);
                 throw error;
             }
-        }
-
-        function showMessage(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
-            container.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
