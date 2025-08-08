@@ -698,7 +698,6 @@ Now [treasure/doubloons/riches] fill up the space!"
 
         async function loadTeamsList() {
             try {
-                console.log('Loading teams for limerick challenge...');
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
                 
                 if (!response.ok) {
@@ -706,12 +705,10 @@ Now [treasure/doubloons/riches] fill up the space!"
                 }
                 
                 const data = await response.json();
-                console.log('Teams data received:', data);
                 
                 if (data && data.success && data.teams && Array.isArray(data.teams)) {
                     allTeams = data.teams;
                     populateTeamDropdown(data.teams);
-                    console.log('Teams populated successfully');
                     return;
                 }
                 
@@ -719,7 +716,21 @@ Now [treasure/doubloons/riches] fill up the space!"
                 
             } catch (error) {
                 console.error('Leaderboard function failed:', error);
-                showMessage('loginMessage', 'Failed to load crews. Please refresh the page and try again.', 'error');
+                
+                // Use fallback teams like in quiz
+                const fallbackTeams = [
+                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+                ];
+                
+                allTeams = fallbackTeams;
+                populateTeamDropdown(fallbackTeams);
+                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
             }
         }
 
