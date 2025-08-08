@@ -589,37 +589,32 @@ Now [treasure/doubloons/riches] fill up the space!"
             loadTeamsList();
         });
 
+        // Character counter for limerick
+        document.getElementById('limerickText').addEventListener('input', function() {
+            const remaining = 500 - this.value.length;
+            const charCount = document.getElementById('charCount');
+            charCount.textContent = remaining;
+            charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+        });
+
+        // Topic selection
+        function selectTopic(topic) {
+            document.getElementById('limerickTopic').value = topic;
+            
+            // Update visual selection
+            document.querySelectorAll('.topic-idea').forEach(el => {
+                el.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // EXACT TEAM LOADING CODE FROM WORKING QUIZ
         async function loadTeamsList() {
             try {
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
                 
                 if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Submission failed');
-                }
-                
-                return result;
-                
-            } catch (error) {
-                console.error('Limerick submission error:', error);
-                throw error;
-            }
-        }
-
-        function showMessage(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
-            container.style.display = 'block';
-        }
-    </script>
-</body>
-</html>HTTP ' + response.status + ': ' + response.statusText);
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
                 }
                 
                 const data = await response.json();
@@ -664,27 +659,6 @@ Now [treasure/doubloons/riches] fill up the space!"
                     option.textContent = team.teamName;
                     select.appendChild(option);
                 });
-        }
-
-        // Character counter for limerick
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('limerickText').addEventListener('input', function() {
-                const remaining = 500 - this.value.length;
-                const charCount = document.getElementById('charCount');
-                charCount.textContent = remaining;
-                charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
-            });
-        });
-
-        // Topic selection
-        function selectTopic(topic) {
-            document.getElementById('limerickTopic').value = topic;
-            
-            // Update visual selection
-            document.querySelectorAll('.topic-idea').forEach(el => {
-                el.classList.remove('selected');
-            });
-            event.target.classList.add('selected');
         }
 
         // Login form submission
@@ -775,6 +749,7 @@ Now [treasure/doubloons/riches] fill up the space!"
             }
         });
 
+        // EXACT VERIFICATION CODE FROM WORKING QUIZ
         async function verifyTeamAndPin(teamCode, enteredPin) {
             try {
                 const response = await fetch('/.netlify/functions/verify_team_pin_function', {
@@ -824,4 +799,29 @@ Now [treasure/doubloons/riches] fill up the space!"
                 });
                 
                 if (!response.ok) {
-                    throw new Error('
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('Limerick submission error:', error);
+                throw error;
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
+            container.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
