@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Quiz Challenge</title>
+    <title>TeamQuest - The Quiz Challenge</title>
     <style>
         * {
             margin: 0;
@@ -13,23 +13,43 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255,140,0,0.1) 0%, transparent 50%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
-            background: white;
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
             border-radius: 25px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
             max-width: 900px;
             width: 100%;
             position: relative;
             overflow: hidden;
+            z-index: 1;
+            border: 3px solid #8B4513;
         }
 
         .container::before {
@@ -38,19 +58,34 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #667eea, #764ba2, #667eea);
+            height: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+        }
+
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            right: 15px;
+            bottom: 15px;
+            border: 2px solid #DAA520;
+            border-radius: 20px;
+            pointer-events: none;
         }
 
         .logo {
             text-align: center;
             margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
         }
 
         .quiz-icon {
             font-size: 48px;
             margin-bottom: 20px;
             animation: pulse 2s infinite;
+            filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
         }
 
         @keyframes pulse {
@@ -60,22 +95,24 @@
         }
 
         h1 {
-            color: #333;
+            color: #8B4513;
             text-align: center;
             margin-bottom: 10px;
             font-size: 2.5em;
-            font-weight: 600;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .subtitle {
             text-align: center;
-            color: #666;
+            color: #A0522D;
             margin-bottom: 30px;
             font-size: 1.1em;
+            font-weight: 500;
         }
 
         .team-info {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #8B4513, #A0522D);
             color: white;
             padding: 20px;
             border-radius: 15px;
@@ -83,11 +120,14 @@
             font-size: 1.2em;
             font-weight: bold;
             margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
+            border: 2px solid #DAA520;
         }
 
         .login-section, .ready-section, .quiz-section, .results-section {
             display: none;
+            position: relative;
+            z-index: 2;
         }
 
         .login-section.active, .ready-section.active, .quiz-section.active, .results-section.active {
@@ -95,24 +135,29 @@
         }
 
         .instructions {
-            background: #f0f4ff;
-            border-left: 4px solid #667eea;
-            padding: 20px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border-left: 6px solid #DAA520;
+            padding: 25px;
             margin-bottom: 30px;
-            border-radius: 0 10px 10px 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
+            border: 2px solid #DAA520;
+            border-left: 6px solid #FF8C00;
         }
 
         .instructions h3 {
-            color: #333;
+            color: #8B4513;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 1.3em;
+            font-weight: 700;
         }
 
         .instructions ul {
             margin-left: 20px;
-            color: #555;
+            color: #654321;
             line-height: 1.8;
         }
 
@@ -127,27 +172,28 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
+            color: #8B4513;
+            font-weight: 600;
             font-size: 1.1em;
         }
 
         input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 15px;
-            border: 2px solid #bdc8ff;
-            border-radius: 10px;
+            border: 3px solid #DAA520;
+            border-radius: 12px;
             font-size: 16px;
             transition: all 0.3s ease;
-            background: #fefefe;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
             font-family: inherit;
         }
 
         input[type="text"]:focus, input[type="number"]:focus, select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: #FF8C00;
             background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
+            transform: translateY(-1px);
         }
 
         .pin-input {
@@ -159,13 +205,13 @@
 
         .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
             color: white;
             border: none;
             padding: 18px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 1.1em;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -173,11 +219,14 @@
             justify-content: center;
             gap: 10px;
             margin-top: 20px;
+            border: 2px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
         }
 
         .submit-btn:disabled {
@@ -192,14 +241,15 @@
             align-items: center;
             margin-bottom: 30px;
             padding: 20px;
-            background: #f8f9ff;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
             border-radius: 15px;
+            border: 2px solid #DAA520;
         }
 
         .question-counter {
             font-size: 1.2em;
             font-weight: bold;
-            color: #667eea;
+            color: #8B4513;
         }
 
         .timer {
@@ -212,23 +262,24 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: conic-gradient(#667eea 0deg, #e0e7ff 0deg);
+            background: conic-gradient(#DAA520 0deg, #F5E6D3 0deg);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5em;
             font-weight: bold;
-            color: #333;
+            color: #8B4513;
             transition: all 0.1s ease;
+            border: 3px solid #8B4513;
         }
 
         .timer-circle.warning {
-            background: conic-gradient(#f59e0b 0deg, #fef3c7 0deg);
+            background: conic-gradient(#FF8C00 0deg, #FFE4B5 0deg);
             animation: shake 0.5s infinite;
         }
 
         .timer-circle.danger {
-            background: conic-gradient(#ef4444 0deg, #fecaca 0deg);
+            background: conic-gradient(#DC143C 0deg, #FFB6C1 0deg);
             animation: shake 0.2s infinite;
         }
 
@@ -239,16 +290,16 @@
         }
 
         .question-card {
-            background: white;
-            border: 2px solid #e0e7ff;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
+            border: 3px solid #DAA520;
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 10px 25px rgba(139,69,19,0.15);
         }
 
         .question-number {
-            color: #667eea;
+            color: #FF8C00;
             font-size: 1.1em;
             font-weight: bold;
             margin-bottom: 15px;
@@ -256,9 +307,10 @@
 
         .question-text {
             font-size: 1.3em;
-            color: #333;
+            color: #654321;
             margin-bottom: 25px;
             line-height: 1.4;
+            font-weight: 500;
         }
 
         .question-image {
@@ -269,11 +321,12 @@
             display: block;
             margin-left: auto;
             margin-right: auto;
+            border: 3px solid #DAA520;
         }
 
         .audio-player {
-            background: #f0f4ff;
-            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
             border-radius: 15px;
             padding: 20px;
             margin: 20px 0;
@@ -286,9 +339,10 @@
         }
 
         .play-instruction {
-            color: #667eea;
+            color: #8B4513;
             font-weight: bold;
             margin-bottom: 15px;
+            font-size: 1.1em;
         }
 
         .options-grid {
@@ -298,8 +352,8 @@
         }
 
         .option {
-            background: #f8f9ff;
-            border: 2px solid #e0e7ff;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
             border-radius: 15px;
             padding: 20px;
             cursor: pointer;
@@ -311,31 +365,32 @@
         }
 
         .option:hover {
-            background: #e0e7ff;
+            background: linear-gradient(135deg, #FFE4B5 0%, #DDD3C2 100%);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
         }
 
         .option.selected {
-            background: #667eea;
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
             color: white;
-            border-color: #667eea;
+            border-color: #8B4513;
         }
 
         .option.correct {
-            background: #10b981;
+            background: linear-gradient(135deg, #32CD32, #228B22);
             color: white;
-            border-color: #10b981;
+            border-color: #006400;
         }
 
         .option.incorrect {
-            background: #ef4444;
+            background: linear-gradient(135deg, #DC143C, #B22222);
             color: white;
-            border-color: #ef4444;
+            border-color: #8B0000;
         }
 
         .option-letter {
             background: white;
-            color: #667eea;
+            color: #8B4513;
             width: 35px;
             height: 35px;
             border-radius: 50%;
@@ -344,36 +399,41 @@
             justify-content: center;
             font-weight: bold;
             flex-shrink: 0;
+            border: 2px solid #DAA520;
         }
 
         .option.selected .option-letter {
-            background: #f0f4ff;
+            background: #FFF8DC;
+            color: #8B4513;
         }
 
         .option.correct .option-letter {
-            background: #065f46;
+            background: #006400;
             color: white;
+            border-color: #004000;
         }
 
         .option.incorrect .option-letter {
-            background: #991b1b;
+            background: #8B0000;
             color: white;
+            border-color: #600000;
         }
 
         .text-input {
             width: 100%;
             padding: 15px;
-            border: 2px solid #e0e7ff;
-            border-radius: 10px;
+            border: 3px solid #DAA520;
+            border-radius: 12px;
             font-size: 1.2em;
             text-align: center;
             margin-bottom: 20px;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
         }
 
         .text-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #FF8C00;
+            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
         }
 
         .results-summary {
@@ -383,16 +443,18 @@
 
         .final-score {
             font-size: 3em;
-            color: #667eea;
+            color: #FF8C00;
             font-weight: bold;
             margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
         .score-breakdown {
-            background: #f8f9ff;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
             border-radius: 15px;
             padding: 30px;
             margin: 30px 0;
+            border: 2px solid #DAA520;
         }
 
         .breakdown-item {
@@ -400,7 +462,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #e0e7ff;
+            border-bottom: 1px solid #DAA520;
         }
 
         .breakdown-item:last-child {
@@ -409,43 +471,46 @@
 
         .message {
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 12px;
             margin: 20px 0;
             text-align: center;
             display: none;
+            border: 2px solid;
         }
 
         .success-message {
-            background: #d1fae5;
-            border: 1px solid #a7f3d0;
-            color: #065f46;
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            border-color: #32CD32;
+            color: #006400;
         }
 
         .error-message {
-            background: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+            border-color: #DC143C;
+            color: #8B0000;
         }
 
         .loading {
             display: none;
             text-align: center;
             margin-top: 15px;
-            color: #667eea;
+            color: #8B4513;
+            font-weight: 600;
         }
 
         .ready-countdown {
             font-size: 4em;
-            color: #667eea;
+            color: #FF8C00;
             font-weight: bold;
             text-align: center;
             margin: 30px 0;
             animation: pulse 1s infinite;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
 
         .ready-instructions {
-            background: #f0f4ff;
-            border: 2px solid #667eea;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
             border-radius: 20px;
             padding: 30px;
             margin: 30px 0;
@@ -453,7 +518,7 @@
         }
 
         .ready-instructions h3 {
-            color: #667eea;
+            color: #8B4513;
             margin-bottom: 20px;
             font-size: 1.5em;
         }
@@ -461,7 +526,7 @@
         .ready-instructions ul {
             text-align: left;
             margin: 20px 0;
-            color: #555;
+            color: #654321;
             font-size: 1.1em;
             line-height: 1.8;
         }
@@ -472,13 +537,13 @@
 
         .start-quiz-btn {
             width: 100%;
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #32CD32, #228B22);
             color: white;
             border: none;
             padding: 20px;
             border-radius: 15px;
             font-size: 1.3em;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
@@ -487,17 +552,47 @@
             gap: 15px;
             margin-top: 30px;
             animation: glow 2s infinite;
+            border: 2px solid #006400;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
         }
 
         .start-quiz-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 15px 30px rgba(50,205,50,0.4);
+            background: linear-gradient(135deg, #50C878, #32CD32);
         }
 
         @keyframes glow {
-            0%, 100% { box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
-            50% { box-shadow: 0 10px 25px rgba(16, 185, 129, 0.5); }
+            0%, 100% { box-shadow: 0 5px 15px rgba(50,205,50,0.3); }
+            50% { box-shadow: 0 10px 25px rgba(50,205,50,0.5); }
         }
+
+        .terry-note {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #DAA520;
+            position: relative;
+            font-weight: 500;
+            line-height: 1.6;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+        }
+
+        .terry-note::before {
+            content: '🏴‍☠️';
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: white;
+            padding: 8px 12px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            border: 2px solid #DAA520;
+        }
+
+        @media (max-width: 768px) {
             .container {
                 padding: 30px 20px;
             }
@@ -525,38 +620,42 @@
         <div class="login-section active" id="loginSection">
             <div class="logo">
                 <div class="quiz-icon">🧠</div>
-                <h1>TeamQuest Quiz</h1>
-                <p class="subtitle">10 questions, 15 seconds each. Test your knowledge!</p>
+                <h1>The Quiz Challenge</h1>
+                <p class="subtitle">10 riddles from Terry's archives! Prove your wit and claim doubloons!</p>
+            </div>
+
+            <div class="terry-note">
+                <strong>Greetings, brave adventurers!</strong> I am Terry Quest, keeper of these treasure vaults. Before ye may claim yer doubloons, ye must prove yer knowledge worthy of a true treasure hunter! Answer me riddles ten, and riches shall be yours!
             </div>
 
             <div class="instructions">
-                <h3>⏱️ Quiz Rules</h3>
+                <h3>📜 Challenge Rules</h3>
                 <ul>
-                    <li>10 questions total - mix of multiple choice and text answers</li>
-                    <li>10 seconds per question (timer counts down automatically)</li>
-                    <li>Some questions include audio clips - listen carefully!</li>
-                    <li>Select your answer before time runs out</li>
-                    <li>No going back once you've answered or time expires</li>
-                    <li>Score based on correct answers - maximum 100 points!</li>
+                    <li>10 challenging riddles from Terry's ancient archives</li>
+                    <li>15 seconds per question - the treasure waits for no one!</li>
+                    <li>Some riddles include mysterious audio clues - listen well!</li>
+                    <li>Choose wisely before time runs out</li>
+                    <li>No turning back once answered - fortune favors the bold!</li>
+                    <li>Earn up to 100 doubloons for perfect knowledge mastery!</li>
                 </ul>
             </div>
 
             <form id="loginForm">
                 <div class="form-group">
-                    <label for="teamSelect">Select Your Team</label>
+                    <label for="teamSelect">Select Your Crew</label>
                     <select id="teamSelect" name="teamSelect" required>
-                        <option value="">Choose your team...</option>
+                        <option value="">Choose your treasure hunting crew...</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label for="teamPin">Enter Your Team PIN</label>
+                    <label for="teamPin">Enter Your Crew's Secret Code</label>
                     <input type="number" id="teamPin" name="teamPin" class="pin-input" 
                            min="1000" max="9999" placeholder="1234" required>
                 </div>
 
                 <button type="submit" class="submit-btn">
-                    🧠 Start Quiz Challenge
+                    🏴‍☠️ Begin the Knowledge Trial
                 </button>
             </form>
 
@@ -566,48 +665,48 @@
         <!-- Ready Section -->
         <div class="ready-section" id="readySection">
             <div class="team-info" id="readyTeamInfo">
-                Team: Loading...
+                Crew: Loading...
             </div>
 
             <div class="logo">
                 <div class="quiz-icon">🧠</div>
-                <h1>Ready to Start?</h1>
+                <h1>Prepare for the Trial!</h1>
             </div>
 
             <div class="ready-instructions">
-                <h3>⚡ Quiz Challenge Rules</h3>
+                <h3>⚡ Terry's Knowledge Trial</h3>
                 <ul>
-                    <li><strong>10 questions</strong> total - mix of multiple choice and text answers</li>
-                    <li><strong>15 seconds per question</strong> - timer counts down automatically</li>
-                    <li><strong>No going back</strong> - once you answer or time runs out, you move to the next question</li>
-                    <li><strong>Audio questions</strong> - some questions have sound clips, make sure your volume is up!</li>
-                    <li><strong>One attempt only</strong> - your score will be final and recorded on the leaderboard</li>
-                    <li><strong>Maximum 100 points</strong> - 10 points per correct answer</li>
+                    <li><strong>10 riddles</strong> total - mix of ancient puzzles and modern mysteries</li>
+                    <li><strong>15 seconds per riddle</strong> - time is precious as doubloons!</li>
+                    <li><strong>No turning back</strong> - once answered or time expires, ye sail forward</li>
+                    <li><strong>Audio clues</strong> - some riddles contain mystical sound traces</li>
+                    <li><strong>One trial only</strong> - your wit will be tested and your doubloons earned</li>
+                    <li><strong>Maximum 100 doubloons</strong> - 10 doubloons per correct answer</li>
                 </ul>
                 
-                <div style="margin-top: 25px; padding: 15px; background: #fef3c7; border-radius: 10px; color: #92400e;">
-                    <strong>⚠️ Important:</strong> Once you start, you cannot pause or restart the quiz. Make sure you're ready and in a quiet environment!
+                <div style="margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%); border-radius: 10px; color: #8B4513; border: 2px solid #DAA520;">
+                    <strong>⚠️ Heed this warning:</strong> Once the trial begins, there be no stopping or restarting. Prepare your mind and find a quiet harbor before ye proceed!
                 </div>
             </div>
 
             <button class="start-quiz-btn" onclick="startQuizCountdown()">
-                🚀 Start Quiz Challenge
+                🚀 Accept the Challenge
             </button>
         </div>
 
         <!-- Quiz Section -->
         <div class="quiz-section" id="quizSection">
             <div class="team-info" id="teamInfo">
-                Team: Loading...
+                Crew: Loading...
             </div>
 
             <div class="quiz-header">
                 <div class="question-counter" id="questionCounter">
-                    Question 1 of 10
+                    Riddle 1 of 10
                 </div>
                 <div class="timer">
-                    <div class="timer-circle" id="timerCircle">10</div>
-                    <div style="color: #667eea; font-weight: bold;">seconds</div>
+                    <div class="timer-circle" id="timerCircle">15</div>
+                    <div style="color: #8B4513; font-weight: bold;">seconds</div>
                 </div>
             </div>
 
@@ -616,38 +715,42 @@
             </div>
 
             <button class="submit-btn" id="nextBtn" style="display: none;" onclick="nextQuestion()">
-                Next Question →
+                Next Riddle →
             </button>
         </div>
 
         <!-- Results Section -->
         <div class="results-section" id="resultsSection">
             <div class="team-info" id="resultsTeamInfo">
-                Team: Loading...
+                Crew: Loading...
             </div>
 
             <div class="results-summary">
-                <h2>🎉 Quiz Complete!</h2>
+                <h2>🎉 Trial Complete!</h2>
                 <div class="final-score" id="finalScore">0/10</div>
-                <p style="font-size: 1.2em; color: #666; margin-bottom: 30px;">
-                    Points earned: <span id="pointsEarned" style="color: #667eea; font-weight: bold;">0</span>
+                <p style="font-size: 1.2em; color: #8B4513; margin-bottom: 30px;">
+                    Doubloons earned: <span id="doubloonsEarned" style="color: #FF8C00; font-weight: bold;">0</span> 🪙
                 </p>
+
+                <div class="terry-note">
+                    <strong>Well done, brave soul!</strong> Ye have completed me trial of knowledge. Your doubloons have been added to your crew's treasure chest. Check the treasure map to see how ye fare against other adventurers!
+                </div>
 
                 <div class="score-breakdown" id="scoreBreakdown">
                     <!-- Score breakdown will be inserted here -->
                 </div>
 
-                <p style="color: #666; margin-top: 30px;">
-                    Quiz completed! Your final score has been recorded. Check the leaderboard to see how your team is performing overall!
+                <p style="color: #8B4513; margin-top: 30px;">
+                    Your knowledge has been tested and your doubloons claimed! Return to the treasure map to continue your quest for riches!
                 </p>
 
                 <button class="submit-btn" onclick="window.location.href='/teamquest_leaderboard.html'">
-                    📊 View Leaderboard
+                    🗺️ View Treasure Map
                 </button>
             </div>
 
             <div class="loading" id="submitLoading">
-                📊 Submitting your quiz results...
+                🪙 Recording your doubloons in the treasure ledger...
             </div>
 
             <div class="message" id="submitMessage"></div>
@@ -669,7 +772,7 @@
                 id: 1,
                 type: 'multiple_choice',
                 question: 'What 3 letter animal makes this noise?',
-                audioUrl: '/animal-sound', // Your uploaded file
+                audioUrl: '/animal-sound',
                 audioDescription: 'Animal sound clip',
                 options: [
                     { letter: 'A', text: 'Pig' },
@@ -678,7 +781,7 @@
                     { letter: 'D', text: 'Elk' }
                 ],
                 correctAnswer: 'C',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 2,
@@ -691,7 +794,7 @@
                     { letter: 'D', text: 'Foolish bet' }
                 ],
                 correctAnswer: 'C',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 3,
@@ -704,7 +807,7 @@
                     { letter: 'D', text: '5,095 miles' }
                 ],
                 correctAnswer: 'A',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 4,
@@ -718,23 +821,23 @@
                 ],
                 correctAnswer: 'B',
                 explanation: 'Answer: Towel',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 5,
                 type: 'text_input',
                 question: 'Name the one-word sport depicted in this image?',
-                imageUrl: '/tennis-sport.png', // Your uploaded file
+                imageUrl: '/tennis-sport.png',
                 imageDescription: 'Sports image showing tennis',
                 correctAnswer: 'tennis',
                 acceptableAnswers: ['tennis', 'Tennis', 'TENNIS'],
-                points: 10
+                doubloons: 10
             },
             {
                 id: 6,
                 type: 'multiple_choice',
                 question: 'Who is this talking in this clip?',
-                audioUrl: '/voice-clip.mp3', // Your uploaded file
+                audioUrl: '/voice-clip.mp3',
                 audioDescription: 'Voice identification clip',
                 options: [
                     { letter: 'A', text: 'Ed Sheeran' },
@@ -743,7 +846,7 @@
                     { letter: 'D', text: 'Taron Egerton' }
                 ],
                 correctAnswer: 'C',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 7,
@@ -752,23 +855,23 @@
                 correctAnswer: '7',
                 acceptableAnswers: ['7', 'seven', 'Seven', 'SEVEN', 'july', 'July', 'JULY', 'Jul', 'jul', 'JUL'],
                 explanation: 'Answer: 7 (July)',
-                points: 10
+                doubloons: 10
             },
             {
                 id: 8,
                 type: 'text_input',
                 question: 'Which one-word car manufacturer uses this logo?',
-                imageUrl: '/smart-logo.png', // Your uploaded file
+                imageUrl: '/smart-logo.png',
                 imageDescription: 'Smart car manufacturer logo',
                 correctAnswer: 'smart',
                 acceptableAnswers: ['smart', 'Smart', 'SMART', 'SmArt', 'sMaRt'],
-                points: 10
+                doubloons: 10
             },
             {
                 id: 9,
                 type: 'multiple_choice',
                 question: 'Listen to this intro. Which band had a huge hit with this song?',
-                audioUrl: '/song-intro.mp3', // Your uploaded file
+                audioUrl: '/song-intro.mp3',
                 audioDescription: 'Song intro clip',
                 options: [
                     { letter: 'A', text: 'Red Hot Chilli Peppers' },
@@ -776,8 +879,8 @@
                     { letter: 'C', text: 'The Foo Fighters' },
                     { letter: 'D', text: 'Kings of Leon' }
                 ],
-                correctAnswer: 'B', // UPDATE WITH CORRECT ANSWER IF NEEDED
-                points: 10
+                correctAnswer: 'B',
+                doubloons: 10
             },
             {
                 id: 10,
@@ -791,7 +894,7 @@
                     { letter: 'E', text: 'Rachel' }
                 ],
                 correctAnswer: 'D',
-                points: 10
+                doubloons: 10
             }
         ];
 
@@ -808,12 +911,12 @@
             const enteredPin = document.getElementById('teamPin').value;
             
             if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your team from the list.', 'error');
+                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
                 return;
             }
             
             if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit PIN.', 'error');
+                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
                 return;
             }
 
@@ -821,7 +924,7 @@
                 // Check if team has already completed the quiz
                 const hasCompleted = await checkIfQuizCompleted(selectedTeamCode);
                 if (hasCompleted) {
-                    showMessage('loginMessage', 'This team has already completed the quiz. Scores are final and cannot be retaken.', 'error');
+                    showMessage('loginMessage', 'This crew has already completed the knowledge trial. Doubloons are final and cannot be earned again.', 'error');
                     return;
                 }
 
@@ -834,16 +937,16 @@
                     // Show ready screen instead of starting quiz immediately
                     showReadyScreen();
                 } else {
-                    showMessage('loginMessage', 'Incorrect PIN for the selected team. Please check your PIN and try again.', 'error');
+                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
                 }
             } catch (error) {
-                showMessage('loginMessage', 'Error verifying team credentials. Please try again.', 'error');
+                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
             }
         });
 
         function showReadyScreen() {
             // Update team info on ready screen
-            document.getElementById('readyTeamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            document.getElementById('readyTeamInfo').textContent = 'Crew: ' + currentTeam.teamName;
             
             // Switch to ready section
             document.getElementById('loginSection').classList.remove('active');
@@ -855,14 +958,14 @@
             const readySection = document.getElementById('readySection');
             
             readySection.innerHTML = `
-                <div class="team-info">Team: ${currentTeam.teamName}</div>
+                <div class="team-info">Crew: ${currentTeam.teamName}</div>
                 <div class="logo">
                     <div class="quiz-icon">🧠</div>
-                    <h1>Get Ready!</h1>
+                    <h1>Prepare Yourself!</h1>
                 </div>
                 <div class="ready-countdown" id="countdownNumber">3</div>
-                <div style="text-align: center; font-size: 1.2em; color: #667eea;">
-                    Quiz starting in...
+                <div style="text-align: center; font-size: 1.2em; color: #8B4513;">
+                    Trial begins in...
                 </div>
             `;
             
@@ -874,8 +977,8 @@
                 if (countdown > 0) {
                     countdownElement.textContent = countdown;
                 } else if (countdown === 0) {
-                    countdownElement.textContent = 'GO!';
-                    countdownElement.style.color = '#10b981';
+                    countdownElement.textContent = 'FORTH!';
+                    countdownElement.style.color = '#32CD32';
                 } else {
                     clearInterval(countdownInterval);
                     startQuiz();
@@ -889,7 +992,7 @@
             userAnswers = [];
             
             // Update team info on quiz section
-            document.getElementById('teamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            document.getElementById('teamInfo').textContent = 'Crew: ' + currentTeam.teamName;
             
             // Switch to quiz section
             document.getElementById('readySection').classList.remove('active');
@@ -904,21 +1007,21 @@
             
             // Update question counter
             document.getElementById('questionCounter').textContent = 
-                'Question ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length;
+                'Riddle ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length;
             
             // Reset timer
-            timeLeft = 10;
+            timeLeft = 15;
             updateTimer();
             startTimer();
             
             // Build question HTML
-            let questionHTML = '<div class="question-number">Question ' + (currentQuestionIndex + 1) + '</div>';
+            let questionHTML = '<div class="question-number">Riddle ' + (currentQuestionIndex + 1) + '</div>';
             questionHTML += '<div class="question-text">' + question.question + '</div>';
             
             // Add audio player if question has audio
             if (question.audioUrl) {
                 questionHTML += '<div class="audio-player">';
-                questionHTML += '<div class="play-instruction">🎵 Listen to the audio clip:</div>';
+                questionHTML += '<div class="play-instruction">🎵 Listen to this mysterious clue:</div>';
                 questionHTML += '<audio controls preload="auto" id="questionAudio">';
                 questionHTML += '<source src="' + question.audioUrl + '" type="audio/mpeg">';
                 questionHTML += 'Your browser does not support the audio element.';
@@ -988,7 +1091,7 @@
                 userAnswer: answer,
                 correctAnswer: question.correctAnswer,
                 isCorrect: isCorrect,
-                points: isCorrect ? question.points : 0,
+                doubloons: isCorrect ? question.doubloons : 0,
                 timeLeft: timeLeft
             });
             
@@ -1033,11 +1136,11 @@
             }
             
             return text
-                .toLowerCase()                    // Convert to lowercase
-                .trim()                          // Remove leading/trailing spaces
-                .replace(/[^\w\s]/g, '')         // Remove punctuation
-                .replace(/\s+/g, ' ')            // Normalize multiple spaces to single space
-                .replace(/\s/g, '');             // Remove all remaining spaces for tight matching
+                .toLowerCase()
+                .trim()
+                .replace(/[^\w\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .replace(/\s/g, '');
         }
 
         function showAnswerFeedback(isCorrect, question) {
@@ -1056,7 +1159,7 @@
             // Show explanation if available
             if (question.explanation) {
                 const questionCard = document.getElementById('questionCard');
-                questionCard.innerHTML += '<div style="margin-top: 20px; padding: 15px; background: #f0f4ff; border-radius: 10px; color: #667eea; font-weight: bold;">' + question.explanation + '</div>';
+                questionCard.innerHTML += '<div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%); border-radius: 10px; color: #8B4513; font-weight: bold; border: 2px solid #DAA520;">' + question.explanation + '</div>';
             }
         }
 
@@ -1085,46 +1188,46 @@
             }
             
             // Update conic gradient
-            const percentage = (timeLeft / 10) * 360;
+            const percentage = (timeLeft / 15) * 360;
             if (timeLeft <= 3) {
-                timerCircle.style.background = 'conic-gradient(#ef4444 ' + percentage + 'deg, #fecaca ' + percentage + 'deg)';
+                timerCircle.style.background = 'conic-gradient(#DC143C ' + percentage + 'deg, #FFB6C1 ' + percentage + 'deg)';
             } else if (timeLeft <= 5) {
-                timerCircle.style.background = 'conic-gradient(#f59e0b ' + percentage + 'deg, #fef3c7 ' + percentage + 'deg)';
+                timerCircle.style.background = 'conic-gradient(#FF8C00 ' + percentage + 'deg, #FFE4B5 ' + percentage + 'deg)';
             } else {
-                timerCircle.style.background = 'conic-gradient(#667eea ' + percentage + 'deg, #e0e7ff ' + percentage + 'deg)';
+                timerCircle.style.background = 'conic-gradient(#DAA520 ' + percentage + 'deg, #F5E6D3 ' + percentage + 'deg)';
             }
         }
 
         function finishQuiz() {
             // Calculate final score
             const totalCorrect = userAnswers.filter(answer => answer.isCorrect).length;
-            const totalPoints = userAnswers.reduce((sum, answer) => sum + answer.points, 0);
+            const totalDoubloons = userAnswers.reduce((sum, answer) => sum + answer.doubloons, 0);
             
             // Show results
             document.getElementById('quizSection').classList.remove('active');
             document.getElementById('resultsSection').classList.add('active');
-            document.getElementById('resultsTeamInfo').textContent = 'Team: ' + currentTeam.teamName;
+            document.getElementById('resultsTeamInfo').textContent = 'Crew: ' + currentTeam.teamName;
             document.getElementById('finalScore').textContent = totalCorrect + '/' + quizQuestions.length;
-            document.getElementById('pointsEarned').textContent = totalPoints;
+            document.getElementById('doubloonsEarned').textContent = totalDoubloons;
             
             // Build score breakdown
             let breakdownHTML = '';
             userAnswers.forEach((answer, index) => {
                 const question = quizQuestions[index];
                 breakdownHTML += '<div class="breakdown-item">';
-                breakdownHTML += '<div>Question ' + (index + 1) + ': ' + question.question.substring(0, 50) + '...</div>';
-                breakdownHTML += '<div style="color: ' + (answer.isCorrect ? '#10b981' : '#ef4444') + '; font-weight: bold;">';
-                breakdownHTML += answer.isCorrect ? '✓ +' + answer.points + ' pts' : '✗ 0 pts';
+                breakdownHTML += '<div>Riddle ' + (index + 1) + ': ' + question.question.substring(0, 50) + '...</div>';
+                breakdownHTML += '<div style="color: ' + (answer.isCorrect ? '#32CD32' : '#DC143C') + '; font-weight: bold;">';
+                breakdownHTML += answer.isCorrect ? '✓ +' + answer.doubloons + ' doubloons' : '✗ 0 doubloons';
                 breakdownHTML += '</div>';
                 breakdownHTML += '</div>';
             });
             document.getElementById('scoreBreakdown').innerHTML = breakdownHTML;
             
             // Submit results to backend
-            submitQuizResults(totalPoints, userAnswers);
+            submitQuizResults(totalDoubloons, userAnswers);
         }
 
-        async function submitQuizResults(totalPoints, answers) {
+        async function submitQuizResults(totalDoubloons, answers) {
             const submitLoading = document.getElementById('submitLoading');
             const submitMessage = document.getElementById('submitMessage');
             
@@ -1134,7 +1237,7 @@
                 const quizData = {
                     teamCode: currentTeam.teamCode,
                     teamName: currentTeam.teamName,
-                    totalScore: totalPoints,
+                    totalScore: totalDoubloons,
                     questionsCorrect: answers.filter(a => a.isCorrect).length,
                     totalQuestions: quizQuestions.length,
                     completionTime: new Date().toISOString(),
@@ -1157,14 +1260,14 @@
                 const result = await response.json();
                 
                 if (result.success) {
-                    showMessage('submitMessage', '🎉 Quiz results submitted successfully! Check the leaderboard to see your ranking.', 'success');
+                    showMessage('submitMessage', '🎉 Doubloons successfully added to your treasure chest! Check the treasure map to see your crew\'s standing.', 'success');
                 } else {
                     throw new Error(result.error || 'Submission failed');
                 }
                 
             } catch (error) {
                 console.error('Quiz submission error:', error);
-                showMessage('submitMessage', 'Failed to submit quiz results. Your score: ' + totalPoints + ' points.', 'error');
+                showMessage('submitMessage', 'Failed to record doubloons. Your score: ' + totalDoubloons + ' doubloons.', 'error');
             } finally {
                 submitLoading.style.display = 'none';
             }
@@ -1214,13 +1317,13 @@
                 
                 allTeams = fallbackTeams;
                 populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Teams loaded. You can select your team and continue.', 'success');
+                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
             }
         }
 
         function populateTeamDropdown(teams) {
             const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your team...</option>';
+            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
             
             teams
                 .sort((a, b) => a.teamName.localeCompare(b.teamName))
