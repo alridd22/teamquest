@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Terry's Treasure Map</title>
+    <title>TeamQuest - Terry's Treasure Hunt</title>
     <style>
         * {
             margin: 0;
@@ -646,14 +646,13 @@
                     <li><strong>Mystery doubloons:</strong> Each treasure chest contains a different bounty (5-10 doubloons) - only revealed when solved!</li>
                     <li><strong>One chance per clue:</strong> Once attempted, each clue location is marked on your map</li>
                     <li><strong>Track your progress:</strong> Your running treasure total is displayed as ye explore</li>
-                    <li><strong>Complete the map:</strong> Solve all 20 clues to claim the full treasure hoard!</li>
                 </ul>
             </div>
 
             <div class="treasure-explainer">
                 <h4>💰 How Doubloon Rewards Work</h4>
                 <p><strong>Mystery Treasures:</strong> Each clue location contains a hidden treasure chest with 5-10 doubloons. You won't know the value until you solve the clue correctly!</p>
-                <p><strong>Risk & Reward:</strong> Choose your clues wisely - some chests contain more doubloons than others, so keep those fingers crossed.</p>
+                <p><strong>Risk & Reward:</strong> Choose your clues wisely - some chests contain more doubloons than others, so keep your fingers crossed.</p>
                 <p><strong>One Attempt:</strong> Whether you solve a clue correctly or incorrectly, that location becomes marked on your map and cannot be attempted again.</p>
             </div>
 
@@ -908,7 +907,7 @@
             }
             
             if (!currentClue) {
-                showResultMessage('No riddle selected!', 'error');
+                showResultMessage('No clue selected!', 'error');
                 return;
             }
             
@@ -1012,7 +1011,7 @@
             
             var progressFill = document.getElementById('progressFill');
             progressFill.style.width = Math.max(percentage, 15) + '%'; // Minimum 15% width to show text
-            progressFill.textContent = correct + ' Treasures • ' + attempted + ' Explored • ' + total + ' Total';
+            progressFill.textContent = correct + '/' + total + ' Solved • ' + attempted + ' Explored';
         }
 
         function showCompletionCelebration() {
@@ -1045,9 +1044,9 @@
             }).then(function(response) {
                 return response.json();
             }).then(function(result) {
-                console.log('Riddle submitted successfully:', result);
+                console.log('Clue submitted successfully:', result);
             }).catch(function(error) {
-                console.error('Failed to submit riddle to backend:', error);
+                console.error('Failed to submit clue to backend:', error);
             });
         }
 
@@ -1086,10 +1085,10 @@
                         currentTeam = selectedTeam;
                         document.getElementById('teamInfo').textContent = 'Crew: ' + selectedTeam.teamName;
                         
-                        // Load previous riddle attempts for this crew
+                        // Load previous clue attempts for this crew
                         await loadPreviousAttempts();
                         
-                        // Re-render grid to show completed riddles
+                        // Re-render grid to show completed clues
                         renderClueGrid();
                         
                         document.getElementById('loginSection').classList.remove('active');
@@ -1151,7 +1150,7 @@
             currentScore = 0;
 
             try {
-                console.log('Loading previous riddle attempts for crew:', currentTeam.teamCode);
+                console.log('Loading previous clue attempts for crew:', currentTeam.teamCode);
                 
                 const response = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
                     method: 'POST',
@@ -1168,7 +1167,7 @@
                     console.log('Treasure hunt submissions response:', data);
                     
                     if (data.success && data.submissions) {
-                        // Restore completed riddles and score
+                        // Restore completed clues and score
                         data.submissions.forEach(submission => {
                             completedClues[submission.clueId] = {
                                 points: submission.points,
@@ -1182,15 +1181,15 @@
                         // Restore total score
                         currentScore = data.totalScore || 0;
                         
-                        console.log('Loaded previous riddle attempts:', Object.keys(completedClues).length);
+                        console.log('Loaded previous clue attempts:', Object.keys(completedClues).length);
                         console.log('Restored treasure:', currentScore);
                     }
                 } else {
-                    console.log('No previous riddle attempts found or API error');
+                    console.log('No previous clue attempts found or API error');
                 }
                 
             } catch (error) {
-                console.error('Error loading previous riddle attempts:', error);
+                console.error('Error loading previous clue attempts:', error);
                 // Continue with empty data if API fails
             }
         }
