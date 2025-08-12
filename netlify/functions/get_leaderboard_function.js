@@ -54,6 +54,35 @@ exports.handler = async (event, context) => {
     await doc.loadInfo();
     console.log('Sheet loaded successfully:', doc.title);
 
+    // Load competition status and start time
+    let competitionStartTime = null;
+    try {
+      const competitionSheet = doc.sheetsByTitle['Competition'];
+      if (competitionSheet) {
+        await competitionSheet.loadHeaderRow();
+        const competitionRows = await competitionSheet.getRows();
+        console.log('Competition rows loaded:', competitionRows.length);
+
+        // Get the first row (should be the current competition status)
+        if (competitionRows.length > 0) {
+          const competitionRow = competitionRows[0];
+          const status = competitionRow.get('Status');
+          const startTime = competitionRow.get('Start Time');
+          
+          console.log('Competition status:', status, 'Start time:', startTime);
+          
+          if (status === 'started' && startTime) {
+            competitionStartTime = startTime;
+            console.log('Competition is active, started at:', competitionStartTime);
+          }
+        }
+      } else {
+        console.log('Competition sheet not found - competition not started');
+      }
+    } catch (error) {
+      console.log('Competition sheet error:', error.message);
+    }
+
     // Load teams from Registration sheet (DYNAMIC LOADING)
     let allTeams = [];
     try {
@@ -267,10 +296,12 @@ exports.handler = async (event, context) => {
         teams: allTeams,
         leaderboard,
         lastUpdated: new Date().toISOString(),
+        competitionStartTime: competitionStartTime, // ← ADDED THIS FIELD
         timestamp: timestamp,
         debugInfo: {
           teamsCount: allTeams.length,
           teamsSource: allTeams.length > 0 ? 'Sheet1' : 'None Found',
+          competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
           scoresLoaded: {
             kindness: Object.keys(activityScores.kindness).length,
             limerick: Object.keys(activityScores.limerick).length,
