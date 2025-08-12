@@ -11,324 +11,170 @@ exports.handler = async (event, context) => {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'Expires': '0',
+        'Expires': '0'
       },
-      body: '',
+      body: ''
     };
   }
 
   try {
-    // Get environment variables
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKeyB64: !!privateKeyBase64,
-    });
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
-
-    // Decode private key
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    // Create JWT client
+    // Initialize Google Sheets authentication
     const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
+      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+      key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    // Initialize Google Sheet
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SPREADSHEET_ID, serviceAccountAuth);
     await doc.loadInfo();
-    console.log('Sheet loaded successfully:', doc.title);
+    console.log('Spreadsheet loaded:', doc.title);
 
-    // Load competition status and start time
-    let competitionStartTime = null;
-    try {
-      const competitionSheet = doc.sheetsByTitle['Competition'];
-      if (competitionSheet) {
-        await competitionSheet.loadHeaderRow();
-        const competitionRows = await competitionSheet.getRows();
-        console.log('Competition rows loaded:', competitionRows.length);
+    // Load the main sheet (assuming first sheet contains team data)
+    const sheet = doc.sheetsByIndex[0];
+    await sheet.loadHeaderRow();
+    await sheet.loadCells();
+    
+    console.log('Sheet headers:', sheet.headerValues);
+    const rows = await sheet.getRows();
+    console.log('Total rows found:', rows.length);
 
-        // Get the first row (should be the current competition status)
-        if (competitionRows.length > 0) {
-          const competitionRow = competitionRows[0];
-          const status = competitionRow.get('Status');
-          const startTime = competitionRow.get('Start Time');
-          
-          console.log('Competition status:', status, 'Start time:', startTime);
-          
-          if (status === 'started' && startTime) {
-            competitionStartTime = startTime;
-            console.log('Competition is active, started at:', competitionStartTime);
-          }
+    // Process team data
+    const allTeams = [];
+    const leaderboard = [];
+
+    rows.forEach((row, index) => {
+      try {
+        const teamData = {
+          teamCode: row['Team Code'] || row['teamCode'] || '',
+          teamName: row['Team Name'] || row['teamName'] || '',
+          registration: parseInt(row['Registration'] || row['registration'] || 0),
+          clueHunt: parseInt(row['Clue Hunt'] || row['clueHunt'] || 0),
+          quiz: parseInt(row['Quiz'] || row['quiz'] || 0),
+          kindness: parseInt(row['Kindness'] || row['kindness'] || 0),
+          limerick: parseInt(row['Limerick'] || row['limerick'] || 0),
+          scavenger: parseInt(row['Scavenger'] || row['scavenger'] || 0),
+          status: row['Status'] || row['status'] || 'active',
+          locked: row['Locked'] || row['locked'] || false
+        };
+
+        // Calculate total score
+        teamData.totalScore = teamData.registration + teamData.clueHunt + teamData.quiz + 
+                             teamData.kindness + teamData.limerick + teamData.scavenger;
+
+        // Add to teams array
+        allTeams.push(teamData);
+
+        // Add to leaderboard if team has activity
+        if (teamData.totalScore > 0) {
+          leaderboard.push({
+            position: 0, // Will be set after sorting
+            teamName: teamData.teamName,
+            teamCode: teamData.teamCode,
+            totalScore: teamData.totalScore,
+            registration: teamData.registration,
+            clueHunt: teamData.clueHunt,
+            quiz: teamData.quiz,
+            kindness: teamData.kindness,
+            limerick: teamData.limerick,
+            scavenger: teamData.scavenger
+          });
         }
-      } else {
-        console.log('Competition sheet not found - competition not started');
+      } catch (error) {
+        console.error(`Error processing row ${index}:`, error);
       }
-    } catch (error) {
-      console.log('Competition sheet error:', error.message);
-    }
-
-    // Load teams from Registration sheet (DYNAMIC LOADING)
-    let allTeams = [];
-    try {
-      const registrationSheet = doc.sheetsByTitle['Sheet1'];
-      if (registrationSheet) {
-        await registrationSheet.loadHeaderRow();
-        const registrationRows = await registrationSheet.getRows();
-        console.log('Registration rows loaded:', registrationRows.length);
-
-        allTeams = registrationRows.map(row => ({
-          teamCode: row.get('Team Code'),
-          teamName: row.get('Team Name'),
-          members: row.get('Members') || '',
-          registrationTime: row.get('Timestamp') || ''
-        })).filter(team => team.teamCode && team.teamName);
-
-        console.log('Teams loaded from Sheet1:', allTeams.length);
-      }
-    } catch (error) {
-      console.log('Sheet1 error:', error.message);
-    }
-
-    // Only use teams from Registration sheet - no fallback
-    if (allTeams.length === 0) {
-      console.log('No teams found in Sheet1 - returning empty teams list');
-    }
-
-    console.log('Teams to process:', allTeams.map(t => `${t.teamCode}: ${t.teamName}`));
-
-    // Get activity scores
-    const activityScores = {
-      kindness: {},
-      limerick: {},
-      scavenger: {},
-      quiz: {},
-      clueHunt: {}
-    };
-
-    // Load Kindness scores
-    try {
-      const kindnessSheet = doc.sheetsByTitle['Kindness'];
-      if (kindnessSheet) {
-        await kindnessSheet.loadHeaderRow();
-        const kindnessRows = await kindnessSheet.getRows();
-        console.log('Kindness rows loaded:', kindnessRows.length);
-
-        kindnessRows.forEach(row => {
-          const teamCode = row.get('Team Code');
-          const score = parseInt(row.get('AI Score')) || 0;
-          
-          if (teamCode && score > 0) {
-            if (!activityScores.kindness[teamCode]) {
-              activityScores.kindness[teamCode] = 0;
-            }
-            activityScores.kindness[teamCode] += score;
-          }
-        });
-      }
-    } catch (error) {
-      console.log('Kindness sheet not found or error:', error.message);
-    }
-
-    // Load Limerick scores
-    try {
-      const limerickSheet = doc.sheetsByTitle['Limerick'];
-      if (limerickSheet) {
-        await limerickSheet.loadHeaderRow();
-        const limerickRows = await limerickSheet.getRows();
-        console.log('Limerick rows loaded:', limerickRows.length);
-
-        limerickRows.forEach(row => {
-          const teamCode = row.get('Team Code');
-          const score = parseInt(row.get('AI Score')) || 0;
-
-          if (teamCode && score > 0) {
-            if (!activityScores.limerick[teamCode]) {
-              activityScores.limerick[teamCode] = 0;
-            }
-            activityScores.limerick[teamCode] += score;
-          }
-        });
-      }
-    } catch (error) {
-      console.log('Limerick sheet not found or error:', error.message);
-    }
-
-    // Load Scavenger scores
-    try {
-      const scavengerSheet = doc.sheetsByTitle['Scavenger'];
-      if (scavengerSheet) {
-        await scavengerSheet.loadHeaderRow();
-        const scavengerRows = await scavengerSheet.getRows();
-        console.log('Scavenger rows loaded:', scavengerRows.length);
-
-        scavengerRows.forEach(row => {
-          const teamCode = row.get('Team Code');
-          const score = parseInt(row.get('AI Score')) || 0;
-
-          if (teamCode && score > 0) {
-            if (!activityScores.scavenger[teamCode]) {
-              activityScores.scavenger[teamCode] = 0;
-            }
-            activityScores.scavenger[teamCode] += score;
-          }
-        });
-      }
-    } catch (error) {
-      console.log('Scavenger sheet not found or error:', error.message);
-    }
-
-    // Load Quiz scores  
-    try {
-      const quizSheet = doc.sheetsByTitle['Quiz'];
-      if (quizSheet) {
-        await quizSheet.loadHeaderRow();
-        const quizRows = await quizSheet.getRows();
-        console.log('Quiz rows loaded:', quizRows.length);
-
-        quizRows.forEach(row => {
-          const teamCode = row.get('Team Code');
-          const totalScore = parseInt(row.get('Total Score')) || 0;
-
-          if (teamCode && totalScore > 0) {
-            // Quiz scores are final - no verification needed
-            activityScores.quiz[teamCode] = totalScore;
-          }
-        });
-      }
-    } catch (error) {
-      console.log('Quiz sheet not found or error:', error.message);
-    }
-
-    // Load Clue Hunt scores
-    try {
-      const clueHuntSheet = doc.sheetsByTitle['Clue Hunt'];
-      if (clueHuntSheet) {
-        await clueHuntSheet.loadHeaderRow();
-        const clueHuntRows = await clueHuntSheet.getRows();
-        console.log('Clue Hunt rows loaded:', clueHuntRows.length);
-
-        clueHuntRows.forEach(row => {
-          const teamCode = row.get('Team Code');
-          const points = parseInt(row.get('Points')) || 0;
-
-          if (teamCode && points > 0) {
-            if (!activityScores.clueHunt[teamCode]) {
-              activityScores.clueHunt[teamCode] = 0;
-            }
-            activityScores.clueHunt[teamCode] += points;
-          }
-        });
-      }
-    } catch (error) {
-      console.log('Clue Hunt sheet not found or error:', error.message);
-    }
-
-    console.log('Activity scores loaded:', activityScores);
-
-    // Calculate leaderboard
-    const leaderboard = allTeams.map(team => {
-      // Get scores (defaulting to 0 if not found)
-      const registration = 10; // Fixed registration score
-      const clueHunt = activityScores.clueHunt[team.teamCode] || 0;
-      const quiz = activityScores.quiz[team.teamCode] || 0;
-      const kindness = activityScores.kindness[team.teamCode] || 0;
-      const scavenger = activityScores.scavenger[team.teamCode] || 0;
-      const limerick = activityScores.limerick[team.teamCode] || 0;
-
-      const totalScore = registration + clueHunt + quiz + kindness + scavenger + limerick;
-
-      return {
-        teamCode: team.teamCode,
-        teamName: team.teamName,
-        totalScore,
-        activities: {
-          registration,
-          clueHunt,
-          quiz,
-          kindness,
-          scavenger,
-          limerick
-        },
-        members: team.members,
-        registrationTime: team.registrationTime
-      };
     });
 
-    // Sort by total score (descending)
+    // Sort leaderboard by total score (descending)
     leaderboard.sort((a, b) => b.totalScore - a.totalScore);
 
-    console.log('Final leaderboard:', leaderboard.map(team => 
-      `${team.teamName}: ${team.totalScore} points`
-    ));
+    // Assign positions
+    leaderboard.forEach((team, index) => {
+      team.position = index + 1;
+    });
 
-    // Add cache-busting timestamp
-    const timestamp = Date.now();
-    console.log('Returning response with timestamp:', timestamp);
+    // READ COMPETITION START TIME FROM COMPETITION SHEET
+    let competitionStartTime = null;
 
+    try {
+      // Access the Competition sheet
+      const competitionSheet = doc.sheetsByTitle['Competition'];
+      
+      if (competitionSheet) {
+        console.log('Competition sheet found');
+        await competitionSheet.loadHeaderRow();
+        const competitionRows = await competitionSheet.getRows();
+        
+        if (competitionRows.length > 0) {
+          // Get the most recent entry
+          const latestEntry = competitionRows[competitionRows.length - 1];
+          
+          // Check if competition is started
+          if (latestEntry.Status === 'start' && latestEntry['Start Time']) {
+            competitionStartTime = latestEntry['Start Time'];
+            console.log('Competition start time found:', competitionStartTime);
+          } else {
+            console.log('Competition not started or no start time found');
+          }
+        } else {
+          console.log('No entries in Competition sheet');
+        }
+      } else {
+        console.log('Competition sheet not found');
+      }
+    } catch (error) {
+      console.error('Error reading Competition sheet:', error);
+    }
+
+    const timestamp = new Date().toISOString();
+
+    // Return successful response with competition start time
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
-        'Expires': '0',
-        'X-Timestamp': timestamp.toString(),
+        'Expires': '0'
       },
       body: JSON.stringify({
         success: true,
         teams: allTeams,
         leaderboard,
-        lastUpdated: new Date().toISOString(),
-        competitionStartTime: competitionStartTime, // ← ADDED THIS FIELD
+        lastUpdated: timestamp,
+        competitionStartTime: competitionStartTime, // THIS IS THE KEY ADDITION
         timestamp: timestamp,
         debugInfo: {
-          teamsCount: allTeams.length,
-          teamsSource: allTeams.length > 0 ? 'Sheet1' : 'None Found',
-          competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
-          scoresLoaded: {
-            kindness: Object.keys(activityScores.kindness).length,
-            limerick: Object.keys(activityScores.limerick).length,
-            scavenger: Object.keys(activityScores.scavenger).length,
-            quiz: Object.keys(activityScores.quiz).length,
-            clueHunt: Object.keys(activityScores.clueHunt).length
-          }
+          totalTeams: allTeams.length,
+          activeTeams: leaderboard.length,
+          sheetTitle: sheet.title,
+          competitionStartTime: competitionStartTime,
+          lastUpdated: timestamp
         }
       }),
     };
 
   } catch (error) {
-    console.error('Leaderboard error:', error);
+    console.error('Leaderboard function error:', error);
     
     return {
       statusCode: 500,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         success: false,
-        error: error.message,
-        timestamp: Date.now()
+        error: 'Failed to load leaderboard data',
+        details: error.message,
+        timestamp: new Date().toISOString()
       }),
     };
   }
