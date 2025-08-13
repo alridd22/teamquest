@@ -443,6 +443,72 @@
             font-weight: 600;
         }
 
+        /* Lock Screen Styles */
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(139,69,19,0.95), rgba(160,82,45,0.95));
+            border-radius: 25px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            backdrop-filter: blur(3px);
+        }
+
+        .lock-content {
+            text-align: center;
+            color: white;
+            padding: 50px;
+            max-width: 600px;
+        }
+
+        .lock-icon {
+            font-size: 100px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .lock-title {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .lock-message {
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .lock-countdown {
+            background: rgba(255,140,0,0.9);
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .lock-details {
+            font-size: 1em;
+            opacity: 0.8;
+            line-height: 1.5;
+            max-width: 500px;
+        }
+
         /* Image Modal - Treasure Chest Style */
         .image-modal {
             display: none;
@@ -528,74 +594,7 @@
             }
         }
 
-        /* Lock Screen Styles */
-        .lock-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(145deg, rgba(139,69,19,0.95), rgba(160,82,45,0.95));
-            border-radius: 25px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            backdrop-filter: blur(3px);
-        }
-
-        .lock-content {
-            text-align: center;
-            color: white;
-            padding: 50px;
-            max-width: 600px;
-        }
-
-        .lock-icon {
-            font-size: 100px;
-            margin-bottom: 30px;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        .lock-title {
-            font-size: 3em;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .lock-message {
-            font-size: 1.4em;
-            margin-bottom: 25px;
-            opacity: 0.9;
-            line-height: 1.6;
-        }
-
-        .lock-details {
-            font-size: 1.1em;
-            opacity: 0.8;
-            line-height: 1.6;
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid rgba(255,255,255,0.3);
-        }
-
-        .lock-countdown {
-            background: rgba(255,140,0,0.9);
-            padding: 15px 25px;
-            border-radius: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin: 20px 0;
-            border: 3px solid rgba(255,255,255,0.3);
-        }
+        /* Treasure hunt decorative elements */
         .treasure-decoration {
             position: absolute;
             font-size: 20px;
