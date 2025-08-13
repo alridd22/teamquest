@@ -291,6 +291,14 @@
             background: linear-gradient(135deg, #A0522D, #8B4513); 
             color: white; 
         }
+        .btn-publish {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #8B4513;
+            font-size: 1.3em;
+            padding: 20px 30px;
+            border: 4px solid #DAA520;
+            grid-column: 1 / -1;
+        }
 
         .btn:disabled {
             opacity: 0.5;
@@ -305,6 +313,54 @@
 
         .btn:disabled::before {
             display: none;
+        }
+
+        /* Results Management Section */
+        .results-management {
+            background: linear-gradient(135deg, #FFFACD 0%, #F0E68C 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .results-management h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .results-status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .results-unpublished {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 2px solid #FF8C00;
+            color: #8B4513;
+        }
+
+        .results-published {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            border: 2px solid #32CD32;
+            color: #006400;
+        }
+
+        .publish-warning {
+            background: linear-gradient(135deg, #FFCCCB 0%, #FFA07A 100%);
+            border: 2px solid #DC143C;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            color: #8B0000;
+            font-weight: 600;
         }
 
         .emergency-controls {
@@ -608,7 +664,7 @@
         </div>
         <div class="terry-speech">
             <div class="terry-note">
-                <strong>Welcome to me command centre, Admiral!</strong> From this helm, ye can steer the entire treasure hunt adventure. Start the quest timer, monitor yer brave crews, and watch the doubloons flow into their coffers. The fate of the grand treasure hunt be in yer capable hands!
+                <strong>Welcome to me command centre, Admiral!</strong> From this helm, ye can steer the entire treasure hunt adventure. Start the quest timer, monitor yer brave crews, and when the final moment arrives, use the golden "Publish Results" treasure chest to unlock the final standings and gallery for all to see!
             </div>
         </div>
     </div>
@@ -637,6 +693,22 @@
                     <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">
                         🔄 Reset Timer
                     </button>
+                    <button class="btn btn-publish" id="publishBtn" onclick="publishResults()" disabled>
+                        🏆 Publish Final Results & Unlock Gallery
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Management Section -->
+            <div class="results-management" id="resultsManagement">
+                <h3>🏆 Final Results Management</h3>
+                
+                <div class="results-status" id="resultsStatus">
+                    🔒 Results not published - Gallery locked
+                </div>
+
+                <div class="publish-warning" id="publishWarning" style="display: none;">
+                    ⚠️ <strong>Captain's Notice:</strong> Publishing results will unfreeze the leaderboard and unlock the treasure gallery for all crews. This action cannot be undone!
                 </div>
             </div>
 
@@ -719,7 +791,9 @@
             isPaused: false,
             timeRemaining: 90 * 60, // 90 minutes in seconds
             startTime: null,
-            crews: []
+            crews: [],
+            resultsPublished: false,
+            competitionData: null
         };
 
         let timerInterval = null;
@@ -798,6 +872,89 @@
             }
         }
 
+        function updateResultsManagement() {
+            const resultsStatus = document.getElementById('resultsStatus');
+            const publishBtn = document.getElementById('publishBtn');
+            const publishWarning = document.getElementById('publishWarning');
+
+            if (adventureState.resultsPublished) {
+                resultsStatus.innerHTML = '🏆 Results Published - Gallery Unlocked';
+                resultsStatus.className = 'results-status results-published';
+                publishBtn.disabled = true;
+                publishBtn.innerHTML = '🏆 Results Already Published';
+                publishWarning.style.display = 'none';
+            } else {
+                resultsStatus.innerHTML = '🔒 Results Not Published - Gallery Locked';
+                resultsStatus.className = 'results-status results-unpublished';
+                
+                // Enable publish button if 20 minutes or less remaining OR competition ended
+                const timeLeftMinutes = Math.floor(adventureState.timeRemaining / 60);
+                if ((timeLeftMinutes <= 20 && adventureState.isRunning) || adventureState.timeRemaining <= 0) {
+                    publishBtn.disabled = false;
+                    publishWarning.style.display = 'block';
+                } else {
+                    publishBtn.disabled = true;
+                    publishWarning.style.display = 'none';
+                }
+            }
+        }
+
+        async function publishResults() {
+            if (!confirm('Are ye absolutely certain ye want to publish the final results? This will unfreeze the leaderboard and unlock the treasure gallery for all crews to see. This action cannot be undone!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'publish_results'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.resultsPublished = true;
+                    updateResultsManagement();
+                    showMessage('🏆 Final results published! The treasure gallery is now unlocked and the leaderboard unfrozen for all crews to see!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to publish results');
+                }
+            } catch (error) {
+                console.error('Error publishing results:', error);
+                showMessage(`Failed to publish results: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadCrewData() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                const data = await response.json();
+                
+                if (data.success) {
+                    adventureState.crews = data.teams || data.leaderboard || [];
+                    adventureState.resultsPublished = data.resultsPublished || false;
+                    adventureState.competitionData = data;
+                    
+                    renderCrews(adventureState.crews);
+                    updateStatistics(adventureState.crews);
+                    updateResultsManagement();
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('crewsContent').style.display = 'block';
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                console.error('Error loading crew data:', error);
+                showMessage('Failed to load crew data from the treasure logs. ' + error.message, 'error');
+            }
+        }
+
         async function startAdventure() {
             try {
                 const action = adventureState.isPaused ? 'start' : 'start';
@@ -846,11 +1003,13 @@
                             }
                             
                             updateTimerDisplay();
+                            updateResultsManagement(); // Update publish button availability
                         }
                     }, 1000);
 
                     updateButtonStates();
                     updateTimerDisplay();
+                    updateResultsManagement();
                     showMessage('🚀 Adventure launched! The treasure hunt has begun! Leaderboard will update within 30 seconds.', 'success');
                     
                     // Force refresh crew data to pick up any changes
@@ -885,6 +1044,7 @@
                     adventureState.isPaused = true;
                     updateButtonStates();
                     updateTimerDisplay();
+                    updateResultsManagement();
                     showMessage('⏸️ Adventure paused. Crews await your signal to continue.', 'success');
                 } else {
                     throw new Error(result.error || 'Failed to pause adventure');
@@ -920,6 +1080,7 @@
                     
                     updateButtonStates();
                     updateTimerDisplay();
+                    updateResultsManagement();
                     showMessage('⚓ Adventure ended. All crews return to harbour.', 'success');
                 } else {
                     throw new Error(result.error || 'Failed to stop adventure');
@@ -948,6 +1109,7 @@
                     adventureState.isRunning = false;
                     adventureState.isPaused = false;
                     adventureState.timeRemaining = 90 * 60; // Reset to 90 minutes
+                    adventureState.resultsPublished = false; // Reset results published status
                     
                     if (timerInterval) {
                         clearInterval(timerInterval);
@@ -956,6 +1118,7 @@
                     
                     updateButtonStates();
                     updateTimerDisplay();
+                    updateResultsManagement();
                     showMessage('🔄 Timer reset to 90 minutes. Ready for a new adventure!', 'success');
                 } else {
                     throw new Error(result.error || 'Failed to reset timer');
@@ -970,26 +1133,6 @@
             if (confirm('Are ye sure ye want to emergency stop the entire treasure hunt? This will immediately halt all quest activities across the realm!')) {
                 stopAdventure();
                 showMessage('🚨 EMERGENCY STOP activated. All adventure activities halted by Captain\'s orders.', 'error');
-            }
-        }
-
-        async function loadCrewData() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                const data = await response.json();
-                
-                if (data.success) {
-                    adventureState.crews = data.teams || data.leaderboard || [];
-                    renderCrews(adventureState.crews);
-                    updateStatistics(adventureState.crews);
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('crewsContent').style.display = 'block';
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                console.error('Error loading crew data:', error);
-                showMessage('Failed to load crew data from the treasure logs. ' + error.message, 'error');
             }
         }
 
