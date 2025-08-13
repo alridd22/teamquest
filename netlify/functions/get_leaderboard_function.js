@@ -1,4 +1,22 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
+body: JSON.stringify({
+        success: true,
+        teams: teams,
+        leaderboard: leaderboard,
+        lastUpdated: new Date().toISOString(),
+        competitionStartTime: competitionStartTime,
+        competitionDuration: competitionDuration,
+        timestamp: timestamp,
+        debugInfo: {
+          teamsCount: teams.length,
+          leaderboardCount: leaderboard.length,
+          dataSource: 'Single Leaderboard Sheet',
+          competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
+          competitionStartTime: competitionStartTime,
+          competitionDuration: competitionDuration,
+          apiCallsUsed: 2, // Only Competition + Leaderboard sheets!
+          sheetsProcessed: ['Competition', 'Leaderboard']
+        }
+          const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 
 exports.handler = async (event, context) => {
@@ -52,22 +70,39 @@ exports.handler = async (event, context) => {
     
     // 1. Load competition status
     let competitionStartTime = null;
+    let competitionDuration = null;
     try {
       const competitionSheet = doc.sheetsByTitle['Competition'];
       if (competitionSheet) {
         await competitionSheet.loadHeaderRow();
+        console.log('Competition sheet headers:', competitionSheet.headerValues);
+        
         const competitionRows = await competitionSheet.getRows();
+        console.log('Competition rows found:', competitionRows.length);
         
         if (competitionRows.length > 0) {
           const competitionRow = competitionRows[0];
+          console.log('Competition row raw data:', competitionRow._rawData);
+          
           const status = competitionRow.get('Status');
           const startTime = competitionRow.get('Start Time');
+          const duration = competitionRow.get('Duration Minutes');
+          
+          console.log('Competition data read:', { status, startTime, duration });
           
           if (status === 'start' && startTime) {
             competitionStartTime = startTime;
-            console.log('Competition started at:', competitionStartTime);
+            competitionDuration = parseInt(duration) || 90;
+            console.log('Competition active! Start:', competitionStartTime, 'Duration:', competitionDuration);
+            console.log('Duration type:', typeof competitionDuration, 'Value:', competitionDuration);
+          } else {
+            console.log('Competition not active. Status:', status, 'StartTime:', startTime);
           }
+        } else {
+          console.log('No competition rows found');
         }
+      } else {
+        console.log('Competition sheet not found');
       }
     } catch (error) {
       console.log('Competition sheet error:', error.message);
