@@ -1,22 +1,4 @@
-body: JSON.stringify({
-        success: true,
-        teams: teams,
-        leaderboard: leaderboard,
-        lastUpdated: new Date().toISOString(),
-        competitionStartTime: competitionStartTime,
-        competitionDuration: competitionDuration,
-        timestamp: timestamp,
-        debugInfo: {
-          teamsCount: teams.length,
-          leaderboardCount: leaderboard.length,
-          dataSource: 'Single Leaderboard Sheet',
-          competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
-          competitionStartTime: competitionStartTime,
-          competitionDuration: competitionDuration,
-          apiCallsUsed: 2, // Only Competition + Leaderboard sheets!
-          sheetsProcessed: ['Competition', 'Leaderboard']
-        }
-          const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 
 exports.handler = async (event, context) => {
@@ -66,8 +48,6 @@ exports.handler = async (event, context) => {
     await doc.loadInfo();
     console.log('Sheet loaded successfully:', doc.title);
 
-    // LOAD ONLY 2 SHEETS - MASSIVE REDUCTION IN API CALLS!
-    
     // 1. Load competition status
     let competitionStartTime = null;
     let competitionDuration = null;
@@ -108,7 +88,7 @@ exports.handler = async (event, context) => {
       console.log('Competition sheet error:', error.message);
     }
 
-    // 2. Load leaderboard data (Google Sheets has done all the calculations!)
+    // 2. Load leaderboard data
     const leaderboardSheet = doc.sheetsByTitle['Leaderboard'];
     if (!leaderboardSheet) {
       throw new Error('Leaderboard sheet not found. Please create a "Leaderboard" sheet with calculated totals.');
@@ -119,7 +99,7 @@ exports.handler = async (event, context) => {
     console.log('Leaderboard rows loaded:', leaderboardRows.length);
     console.log('Leaderboard headers:', leaderboardSheet.headerValues);
 
-    // Process leaderboard data (Google Sheets has already done the calculations!)
+    // Process leaderboard data
     const teams = [];
     const leaderboard = [];
 
@@ -164,7 +144,7 @@ exports.handler = async (event, context) => {
       }
     });
 
-    // Sort by total score (descending) - could also be done in Google Sheets!
+    // Sort by total score (descending)
     leaderboard.sort((a, b) => b.totalScore - a.totalScore);
 
     // Add positions
@@ -191,6 +171,7 @@ exports.handler = async (event, context) => {
         leaderboard: leaderboard,
         lastUpdated: new Date().toISOString(),
         competitionStartTime: competitionStartTime,
+        competitionDuration: competitionDuration,
         timestamp: timestamp,
         debugInfo: {
           teamsCount: teams.length,
@@ -198,7 +179,8 @@ exports.handler = async (event, context) => {
           dataSource: 'Single Leaderboard Sheet',
           competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
           competitionStartTime: competitionStartTime,
-          apiCallsUsed: 2, // Only Competition + Leaderboard sheets!
+          competitionDuration: competitionDuration,
+          apiCallsUsed: 2,
           sheetsProcessed: ['Competition', 'Leaderboard']
         }
       }),
