@@ -528,7 +528,74 @@
             }
         }
 
-        /* Treasure hunt decorative elements */
+        /* Lock Screen Styles */
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(139,69,19,0.95), rgba(160,82,45,0.95));
+            border-radius: 25px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 20;
+            backdrop-filter: blur(3px);
+        }
+
+        .lock-content {
+            text-align: center;
+            color: white;
+            padding: 50px;
+            max-width: 600px;
+        }
+
+        .lock-icon {
+            font-size: 100px;
+            margin-bottom: 30px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .lock-title {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .lock-message {
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .lock-details {
+            font-size: 1.1em;
+            opacity: 0.8;
+            line-height: 1.6;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .lock-countdown {
+            background: rgba(255,140,0,0.9);
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin: 20px 0;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
         .treasure-decoration {
             position: absolute;
             font-size: 20px;
@@ -645,6 +712,27 @@
                 </div>
             </div>
         </div>
+
+        <!-- Lock Overlay -->
+        <div class="lock-overlay" id="lockOverlay">
+            <div class="lock-content">
+                <div class="lock-icon">🔒</div>
+                <h2 class="lock-title">Treasure Gallery Locked</h2>
+                <p class="lock-message">
+                    Ahoy matey! The treasure gallery is currently sealed in Terry's vault.
+                </p>
+                <div class="lock-countdown" id="lockCountdown">
+                    Adventure in progress...
+                </div>
+                <p class="lock-details">
+                    🏴‍☠️ <strong>The gallery will unlock when:</strong><br>
+                    • The treasure hunt adventure is complete<br>
+                    • Terry has finished counting all the doubloons<br>
+                    • The final results are published by the crew leaders<br><br>
+                    Return here once the results have been announced!
+                </p>
+            </div>
+        </div>
     </div>
 
     <!-- Image Modal -->
@@ -658,12 +746,89 @@
     <script>
         let kindnessData = [];
         let limerickData = [];
+        let resultsPublished = false;
+        let competitionData = null;
 
         // Initialize page
         document.addEventListener('DOMContentLoaded', function() {
+            checkAccess();
+        });
+
+        async function checkAccess() {
+            try {
+                console.log('Checking gallery access...');
+                
+                // Check competition status and results published
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    competitionData = data;
+                    resultsPublished = data.resultsPublished || false;
+                    
+                    console.log('Results published:', resultsPublished);
+                    
+                    if (resultsPublished) {
+                        // Results are published, unlock gallery
+                        unlockGallery();
+                    } else {
+                        // Results not published, show lock screen
+                        showLockScreen();
+                    }
+                } else {
+                    // If can't check status, show lock screen as fallback
+                    showLockScreen();
+                }
+                
+            } catch (error) {
+                console.error('Error checking access:', error);
+                // If error checking, show lock screen as fallback
+                showLockScreen();
+            }
+        }
+
+        function showLockScreen() {
+            document.getElementById('lockOverlay').style.display = 'flex';
+            updateLockCountdown();
+            
+            // Check status every 30 seconds
+            setInterval(checkAccess, 30000);
+        }
+
+        function unlockGallery() {
+            document.getElementById('lockOverlay').style.display = 'none';
+            
+            // Load gallery content
             loadKindnessActs();
             loadLimericks();
-        });
+        }
+
+        function updateLockCountdown() {
+            const lockCountdown = document.getElementById('lockCountdown');
+            
+            if (competitionData && competitionData.competitionStartTime && competitionData.competitionDuration) {
+                const startTime = new Date(competitionData.competitionStartTime).getTime();
+                const duration = competitionData.competitionDuration * 60 * 1000;
+                const endTime = startTime + duration;
+                const now = new Date().getTime();
+                const timeLeft = endTime - now;
+
+                if (timeLeft > 0) {
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    
+                    lockCountdown.textContent = `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Update every second
+                    setTimeout(updateLockCountdown, 1000);
+                } else {
+                    lockCountdown.textContent = 'Adventure Complete - Awaiting Results';
+                }
+            } else {
+                lockCountdown.textContent = 'Adventure not started';
+            }
+        }
 
         function showSection(section) {
             // Update tab buttons
