@@ -51,6 +51,7 @@ exports.handler = async (event, context) => {
     // 1. Load competition status
     let competitionStartTime = null;
     let competitionDuration = null;
+    let resultsPublished = false;
     try {
       const competitionSheet = doc.sheetsByTitle['Competition'];
       if (competitionSheet) {
@@ -67,8 +68,13 @@ exports.handler = async (event, context) => {
           const status = competitionRow.get('Status');
           const startTime = competitionRow.get('Start Time');
           const duration = competitionRow.get('Duration Minutes');
+          const published = competitionRow.get('Results Published');
           
-          console.log('Competition data read:', { status, startTime, duration });
+          console.log('Competition data read:', { status, startTime, duration, published });
+          
+          // Check if results are published
+          resultsPublished = published === 'true';
+          console.log('Results published status:', resultsPublished);
           
           if (status === 'start' && startTime) {
             competitionStartTime = startTime;
@@ -172,6 +178,7 @@ exports.handler = async (event, context) => {
         lastUpdated: new Date().toISOString(),
         competitionStartTime: competitionStartTime,
         competitionDuration: competitionDuration,
+        resultsPublished: resultsPublished,
         timestamp: timestamp,
         debugInfo: {
           teamsCount: teams.length,
@@ -180,6 +187,7 @@ exports.handler = async (event, context) => {
           competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
           competitionStartTime: competitionStartTime,
           competitionDuration: competitionDuration,
+          resultsPublished: resultsPublished,
           apiCallsUsed: 2,
           sheetsProcessed: ['Competition', 'Leaderboard']
         }
