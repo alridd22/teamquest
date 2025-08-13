@@ -182,6 +182,70 @@
             color: #8b4513;
         }
 
+        /* Freeze Screen Styles */
+        .freeze-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(145deg, rgba(139,69,19,0.95), rgba(160,82,45,0.95));
+            border-radius: 25px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            backdrop-filter: blur(3px);
+        }
+
+        .freeze-content {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+
+        .freeze-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .freeze-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .freeze-message {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .freeze-timer {
+            background: rgba(255,140,0,0.9);
+            padding: 15px 25px;
+            border-radius: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .freeze-details {
+            font-size: 1em;
+            opacity: 0.8;
+            line-height: 1.5;
+            max-width: 500px;
+        }
+
         .status-bar {
             text-align: center;
             margin-top: 20px;
@@ -242,6 +306,14 @@
                 font-size: 0.8em;
                 padding: 3px 6px;
             }
+
+            .freeze-title {
+                font-size: 2em;
+            }
+
+            .freeze-message {
+                font-size: 1.1em;
+            }
         }
     </style>
 </head>
@@ -270,12 +342,28 @@
             <span class="auto-refresh-icon">🔄</span>
             Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">Never</span>
         </div>
+
+        <!-- Freeze Overlay -->
+        <div class="freeze-overlay" id="freezeOverlay">
+            <div class="freeze-content">
+                <div class="freeze-icon">🔒</div>
+                <h2 class="freeze-title">Adventure Complete!</h2>
+                <p class="freeze-message">The treasure hunt has ended and results are being finalized...</p>
+                <div class="freeze-timer" id="freezeTimer">Competition Ended</div>
+                <p class="freeze-details">
+                    The final standings will be revealed once Terry has finished counting all the treasure!<br>
+                    Results will be published shortly by the adventure organizers.
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
         let refreshInterval;
         let timerInterval;
         let competitionEndTime = null;
+        let isFrozen = false;
+        let resultsPublished = false;
 
         // Safe property access helper
         function safeGet(obj, path, defaultValue = 0) {
@@ -325,28 +413,15 @@
                 const rank = index + 1;
                 const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : rank === 3 ? 'third' : '';
                 
-                // Safely extract team data with fallbacks
                 const teamName = safeGet(team, 'teamName', 'Unknown Crew') || `Team ${safeGet(team, 'teamCode', rank)}`;
                 const totalScore = safeGet(team, 'totalScore', 0);
                 
-                // Safely extract activity scores with fallbacks
                 const registration = safeGet(team, 'activities.registration', 0) || safeGet(team, 'registration', 0);
                 const clueHunt = safeGet(team, 'activities.clueHunt', 0) || safeGet(team, 'clueHunt', 0) || safeGet(team, 'activities.clue_hunt', 0);
                 const quiz = safeGet(team, 'activities.quiz', 0) || safeGet(team, 'quiz', 0);
                 const kindness = safeGet(team, 'activities.kindness', 0) || safeGet(team, 'kindness', 0);
                 const scavenger = safeGet(team, 'activities.scavenger', 0) || safeGet(team, 'scavenger', 0);
                 const limerick = safeGet(team, 'activities.limerick', 0) || safeGet(team, 'limerick', 0);
-
-                console.log(`Team ${teamName}:`, {
-                    totalScore,
-                    registration,
-                    clueHunt,
-                    quiz,
-                    kindness,
-                    scavenger,
-                    limerick,
-                    rawTeam: team
-                });
 
                 html += `
                     <div class="team-entry">
@@ -381,6 +456,11 @@
             if (timeLeft <= 0) {
                 document.getElementById('timer').textContent = 'Adventure Complete!';
                 clearInterval(timerInterval);
+                
+                // Show freeze overlay if results not published
+                if (!resultsPublished) {
+                    showFreezeOverlay();
+                }
                 return;
             }
 
@@ -388,8 +468,35 @@
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-            document.getElementById('timer').textContent = 
-                `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            // Check if 20 minutes or less remaining
+            const totalMinutesLeft = Math.floor(timeLeft / (1000 * 60));
+            
+            if (totalMinutesLeft <= 20 && !resultsPublished) {
+                // Freeze the leaderboard
+                showFreezeOverlay();
+                document.getElementById('freezeTimer').textContent = 
+                    `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
+            } else {
+                // Normal timer display
+                document.getElementById('timer').textContent = 
+                    `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        function showFreezeOverlay() {
+            if (!isFrozen) {
+                isFrozen = true;
+                document.getElementById('freezeOverlay').style.display = 'flex';
+                console.log('Leaderboard frozen - 20 minutes or less remaining');
+            }
+        }
+
+        function hideFreezeOverlay() {
+            if (isFrozen) {
+                isFrozen = false;
+                document.getElementById('freezeOverlay').style.display = 'none';
+                console.log('Leaderboard unfrozen - results published');
+            }
         }
 
         async function loadLeaderboard() {
@@ -408,6 +515,10 @@
                     throw new Error(data?.error || 'Invalid response from server');
                 }
 
+                // Check if results are published
+                resultsPublished = data.resultsPublished || false;
+                console.log('Results published:', resultsPublished);
+
                 // Handle competition timer
                 if (data.competitionStartTime && data.competitionDuration) {
                     const startTime = new Date(data.competitionStartTime).getTime();
@@ -422,7 +533,12 @@
                     document.getElementById('timer').textContent = 'Timer not active';
                 }
 
-                // Handle leaderboard data - check multiple possible structures
+                // If results are published, unfreeze
+                if (resultsPublished) {
+                    hideFreezeOverlay();
+                }
+
+                // Handle leaderboard data
                 let teams = null;
                 
                 if (data.leaderboard && Array.isArray(data.leaderboard)) {
