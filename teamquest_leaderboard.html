@@ -13,76 +13,53 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
+            background: linear-gradient(135deg, #d4691a, #f4a261);
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
-            position: relative;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255,140,0,0.1) 0%, transparent 50%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+        .treasure-container {
+            background: linear-gradient(145deg, #f5e6d3, #e8d5b8);
             border-radius: 25px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.3);
+            border: 5px solid #8b4513;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
             position: relative;
             overflow: hidden;
-            border: 3px solid #8B4513;
-            z-index: 1;
         }
 
-        .container::before {
+        .treasure-container::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
         }
 
-        .container::after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border: 2px solid #DAA520;
-            border-radius: 20px;
-            pointer-events: none;
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
         }
 
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
-        .trophy-icon {
+        .trophy {
             font-size: 48px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             animation: bounce 2s infinite;
-            filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
         }
 
         @keyframes bounce {
@@ -91,725 +68,404 @@
             60% { transform: translateY(-5px); }
         }
 
-        h1 {
-            color: #8B4513;
+        .title {
             font-size: 2.5em;
-            font-weight: 700;
+            color: #8b4513;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            font-weight: bold;
         }
 
         .subtitle {
-            color: #A0522D;
-            font-size: 1.1em;
-            margin-bottom: 25px;
-            font-weight: 500;
-        }
-
-        .controls-section {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .timer-info {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding: 18px 35px;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1.1em;
-            border: 3px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            box-shadow: 0 5px 15px rgba(255,140,0,0.3);
-            animation: treasurePulse 2s infinite;
-        }
-
-        @keyframes treasurePulse {
-            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(255,140,0,0.3); }
-            50% { transform: scale(1.02); box-shadow: 0 8px 25px rgba(255,140,0,0.4); }
-            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(255,140,0,0.3); }
-        }
-
-        .freeze-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .freeze-btn {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #654321;
-            font-size: 0.9em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .freeze-btn:hover {
-            background: linear-gradient(135deg, #A0522D, #CD853F);
-            transform: translateY(-1px);
-        }
-
-        .freeze-btn.frozen {
-            background: linear-gradient(135deg, #DC143C, #B22222);
-            border-color: #8B0000;
-        }
-
-        .freeze-btn.frozen:hover {
-            background: linear-gradient(135deg, #FF6347, #DC143C);
-        }
-
-        .freeze-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .freeze-status {
-            font-size: 0.9em;
-            color: #8B4513;
-            font-weight: 600;
-        }
-
-        .auto-freeze-message {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
+            font-size: 1.2em;
+            color: #a0522d;
             margin-bottom: 20px;
-            border: 3px solid #8B4513;
-            box-shadow: 0 5px 15px rgba(255,140,0,0.3);
-            font-weight: 600;
-            font-size: 1.1em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            display: none;
         }
 
-        .leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-            box-shadow: 0 15px 35px rgba(139,69,19,0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-            z-index: 2;
-        }
-
-        .leaderboard-table th {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
+        .timer-display {
+            background: linear-gradient(145deg, #ff8c00, #ffa500);
             color: white;
-            padding: 20px 15px;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.4em;
+            font-weight: bold;
             text-align: center;
-            font-weight: 700;
-            font-size: 1em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            border-bottom: 2px solid #654321;
+            margin: 20px auto;
+            max-width: 300px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 3px solid #8b4513;
         }
 
-        .leaderboard-table td {
-            padding: 18px 15px;
-            text-align: center;
-            border-bottom: 1px solid #DAA520;
-            transition: all 0.3s ease;
-            background: rgba(255,248,220,0.7);
-            font-weight: 500;
+        .timer-icon {
+            margin-right: 10px;
         }
 
-        .leaderboard-table tr:hover {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%);
+        .leaderboard-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+            margin: 20px 0;
+            border: 2px solid #d2691e;
+            position: relative;
+            z-index: 1;
+        }
+
+        .team-entry {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: linear-gradient(145deg, #fff8dc, #f5f5dc);
+            border-radius: 12px;
+            border: 2px solid #daa520;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .team-entry:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
 
-        .leaderboard-table tr:hover td {
-            background: transparent;
-            color: #8B4513;
-        }
-
-        .rank-cell {
+        .rank {
+            font-size: 1.8em;
             font-weight: bold;
+            color: #8b4513;
+            margin-right: 20px;
+            min-width: 40px;
+        }
+
+        .rank.first { color: #ffd700; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .rank.second { color: #c0c0c0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .rank.third { color: #cd7f32; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+
+        .team-info {
+            flex-grow: 1;
+        }
+
+        .team-name {
             font-size: 1.3em;
-            width: 90px;
-        }
-
-        .rank-1 { color: #FFD700; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-        .rank-2 { color: #C0C0C0; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-        .rank-3 { color: #CD7F32; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
-
-        .crew-name {
-            text-align: left;
             font-weight: bold;
-            color: #654321;
-            min-width: 200px;
-            font-size: 1.05em;
+            color: #8b4513;
+            margin-bottom: 5px;
         }
 
-        .activity-score {
-            font-size: 0.95em;
-            color: #8B4513;
-            min-width: 80px;
-            font-weight: 600;
+        .team-activities {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
         }
 
-        .activity-score.completed {
-            color: #32CD32;
-            font-weight: bold;
-            background: rgba(50,205,50,0.1);
-            border-radius: 8px;
+        .activity {
+            background: #f0e68c;
             padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            border: 1px solid #daa520;
         }
 
         .total-score {
-            font-size: 1.4em;
+            font-size: 1.5em;
             font-weight: bold;
-            color: #FF8C00;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 12px;
-            padding: 12px;
-            min-width: 120px;
-            border: 2px solid #DAA520;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            color: #8b4513;
+            background: linear-gradient(145deg, #ffd700, #ffed4e);
+            padding: 10px 15px;
+            border-radius: 25px;
+            border: 2px solid #b8860b;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
         }
 
-        .rank-1 .total-score {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            color: white;
-            border-color: #DAA520;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        .doubloons {
+            font-size: 0.8em;
+            color: #8b4513;
         }
 
-        .rank-2 .total-score {
-            background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
-            color: white;
-            border-color: #808080;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .rank-3 .total-score {
-            background: linear-gradient(135deg, #CD7F32, #8B4513);
-            color: white;
-            border-color: #A0522D;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .loading, .error {
+        .status-bar {
             text-align: center;
-            padding: 40px;
-            font-size: 1.2em;
-            position: relative;
-            z-index: 2;
-        }
-
-        .loading {
-            color: #8B4513;
-            font-weight: 600;
-        }
-
-        .error {
-            color: #8B0000;
-            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
-            border: 3px solid #DC143C;
-            border-radius: 15px;
-            margin: 20px 0;
-            font-weight: 500;
-        }
-
-        .refresh-info {
-            text-align: center;
-            color: #8B4513;
-            font-size: 0.95em;
-            margin-top: 25px;
-            font-weight: 500;
-            position: relative;
-            z-index: 2;
-        }
-
-        .crew-details {
-            cursor: pointer;
-        }
-
-        .crew-details:hover {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 30%);
-        }
-
-        .expanded-details {
-            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
-            border-left: 6px solid #FF8C00;
-        }
-
-        .expanded-details td {
-            padding: 15px;
+            margin-top: 20px;
+            padding: 10px;
+            background: rgba(255,255,255,0.7);
+            border-radius: 10px;
             font-size: 0.9em;
-            color: #654321;
-            background: transparent;
-            font-weight: 500;
+            color: #8b4513;
+            position: relative;
+            z-index: 1;
+        }
+
+        .auto-refresh-icon {
+            margin-right: 5px;
+        }
+
+        .error-container {
+            background: #ffe6e6;
+            border: 2px solid #ff6b6b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #d63031;
+            text-align: center;
         }
 
         .retry-btn {
-            margin-left: 15px;
-            padding: 8px 15px;
-            border: none;
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
+            background: #ff8c00;
             color: white;
-            border-radius: 8px;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
             cursor: pointer;
-            font-weight: 600;
-            border: 2px solid #8B4513;
+            font-weight: bold;
+            margin-left: 10px;
+            transition: background 0.3s ease;
         }
 
         .retry-btn:hover {
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-            transform: translateY(-1px);
+            background: #ff7700;
         }
 
-        @media (max-width: 1200px) {
-            .leaderboard-table {
-                font-size: 0.9em;
-            }
-            
-            .leaderboard-table th,
-            .leaderboard-table td {
-                padding: 15px 8px;
-            }
-        }
-
-        @media (max-width: 900px) {
-            .container {
-                padding: 25px;
+        @media (max-width: 768px) {
+            .treasure-container {
+                padding: 20px;
                 margin: 10px;
             }
             
-            h1 {
+            .title {
                 font-size: 2em;
             }
             
-            .controls-section {
-                flex-direction: column;
-                gap: 15px;
+            .team-activities {
+                gap: 8px;
             }
             
-            .leaderboard-table {
-                font-size: 0.85em;
-            }
-            
-            .leaderboard-table th,
-            .leaderboard-table td {
-                padding: 12px 6px;
-            }
-            
-            .crew-name {
-                min-width: 120px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-                margin: 5px;
-            }
-            
-            h1 {
-                font-size: 1.8em;
-            }
-            
-            .subtitle {
-                font-size: 1em;
-            }
-            
-            .timer-info {
-                font-size: 0.95em;
-                padding: 15px 25px;
-            }
-            
-            .leaderboard-table {
+            .activity {
                 font-size: 0.8em;
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            .leaderboard-table thead,
-            .leaderboard-table tbody,
-            .leaderboard-table th,
-            .leaderboard-table td,
-            .leaderboard-table tr {
-                display: block;
-            }
-            
-            .leaderboard-table thead tr {
-                position: absolute;
-                top: -9999px;
-                left: -9999px;
-            }
-            
-            .leaderboard-table tr {
-                background: linear-gradient(145deg, #FFF8DC 0%, #F5E6D3 100%);
-                border: 2px solid #DAA520;
-                border-radius: 15px;
-                margin-bottom: 20px;
-                padding: 20px;
-                position: relative;
-                box-shadow: 0 4px 12px rgba(139,69,19,0.1);
-            }
-            
-            .leaderboard-table td {
-                border: none;
-                padding: 10px 0;
-                text-align: left !important;
-                white-space: normal;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                background: transparent;
-            }
-            
-            .leaderboard-table td:before {
-                content: attr(data-label) ": ";
-                font-weight: bold;
-                color: #8B4513;
-                flex-shrink: 0;
-                margin-right: 10px;
-            }
-            
-            .rank-cell:before {
-                content: "Rank: ";
-            }
-            
-            .crew-name:before {
-                content: "Crew: ";
-            }
-            
-            .activity-score:before {
-                content: attr(data-activity) ": ";
-            }
-            
-            .total-score {
-                font-size: 1.5em;
-                text-align: center !important;
-                margin-top: 15px;
-                padding: 18px;
-            }
-            
-            .total-score:before {
-                content: "Total Doubloons: ";
-            }
-            
-            .refresh-info {
-                font-size: 0.85em;
-                padding: 0 10px;
+                padding: 3px 6px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="treasure-container">
         <div class="header">
-            <div class="trophy-icon">🏆</div>
-            <h1>Terry's Treasure Leaderboard</h1>
+            <div class="trophy">🏆</div>
+            <h1 class="title">Terry's Treasure Leaderboard</h1>
             <p class="subtitle">Live treasure hunting standings</p>
-        </div>
-
-        <div class="controls-section">
-            <div class="timer-info" id="timerInfo">
-                ⏰ Adventure Timer: 01:30:00
+            
+            <div class="timer-display" id="timerDisplay">
+                <span class="timer-icon">⏰</span>
+                <span id="timer">Loading...</span>
             </div>
         </div>
 
-        <div class="auto-freeze-message" id="autoFreezeMessage">
-            🏴‍☠️ <strong>Treasure Hunt Finale!</strong> The leaderboard is now hidden to keep the suspense! Gather as many doubloons as ye can before time runs out, but don't be late to check in at the treasure base! ⚔️
+        <div class="leaderboard-container">
+            <div id="leaderboard">
+                <div style="text-align: center; padding: 20px; color: #8b4513;">
+                    🏴‍☠️ Loading treasure standings... 🏴‍☠️
+                </div>
+            </div>
         </div>
 
-        <div class="loading" id="loading">
-            🔄 Loading treasure leaderboard data...
-        </div>
-
-        <div class="error" id="error" style="display: none;">
-            ❌ Failed to load treasure leaderboard data. <button class="retry-btn" onclick="loadLeaderboard()">Retry</button>
-        </div>
-
-        <div id="leaderboardContent" style="display: none;">
-            <table class="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Crew Name</th>
-                        <th>Registration</th>
-                        <th>Treasure Map</th>
-                        <th>Knowledge</th>
-                        <th>Heart Treasures</th>
-                        <th>Scavenger</th>
-                        <th>Verse Vault</th>
-                        <th>Total Doubloons</th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboardBody">
-                    <!-- Leaderboard content will be inserted here -->
-                </tbody>
-            </table>
-        </div>
-
-        <div class="refresh-info">
-            <p id="refreshText">🔄 Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">--</span></p>
+        <div class="status-bar">
+            <span class="auto-refresh-icon">🔄</span>
+            Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">Never</span>
         </div>
     </div>
 
     <script>
         let refreshInterval;
         let timerInterval;
-        let isAutoFrozen = false;
-        let competitionStartTime = null;
-        let competitionDuration = 90 * 60 * 1000; // 90 minutes in milliseconds
-        let autoFreezeThreshold = 20 * 60 * 1000; // 20 minutes in milliseconds
+        let competitionEndTime = null;
 
-        // Start loading leaderboard on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            loadLeaderboard();
-            
-            // Set up auto-refresh every 30 seconds
-            startAutoRefresh();
-            
-            // Update timer display
-            startTimerUpdates();
-        });
-
-        function startAutoRefresh() {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-            }
-            refreshInterval = setInterval(() => {
-                if (!isAutoFrozen) {
-                    loadLeaderboard();
+        // Safe property access helper
+        function safeGet(obj, path, defaultValue = 0) {
+            try {
+                const keys = path.split('.');
+                let result = obj;
+                for (const key of keys) {
+                    if (result === null || result === undefined) {
+                        return defaultValue;
+                    }
+                    result = result[key];
                 }
-            }, 30000);
-        }
-
-        function startTimerUpdates() {
-            updateTimerDisplay();
-            if (timerInterval) {
-                clearInterval(timerInterval);
+                return result !== undefined ? result : defaultValue;
+            } catch (e) {
+                console.warn('Error accessing property:', path, e);
+                return defaultValue;
             }
-            timerInterval = setInterval(updateTimerDisplay, 1000);
         }
 
-        function autoFreeze() {
-            if (isAutoFrozen) return;
-            
-            isAutoFrozen = true;
-            
-            const refreshText = document.getElementById('refreshText');
-            const autoFreezeMessage = document.getElementById('autoFreezeMessage');
-            
-            refreshText.innerHTML = '⏰ Leaderboard auto-frozen for final 20 minutes | Last updated: <span id="lastUpdated">' + 
-                (document.getElementById('lastUpdated').textContent || '--') + '</span>';
-            
-            // Show auto-freeze message
-            autoFreezeMessage.style.display = 'block';
-            
-            console.log('Leaderboard auto-frozen - final 20 minutes');
+        function displayError(message) {
+            const leaderboard = document.getElementById('leaderboard');
+            leaderboard.innerHTML = `
+                <div class="error-container">
+                    ❌ ${message}
+                    <button class="retry-btn" onclick="loadLeaderboard()">Retry</button>
+                </div>
+            `;
         }
 
-        function updateTimerDisplay() {
-            const timerElement = document.getElementById('timerInfo');
+        function displayLeaderboard(teams) {
+            console.log('Displaying teams:', teams);
+            const leaderboard = document.getElementById('leaderboard');
             
-            // Check if competition has started (you'll need to get this from your backend)
-            if (!competitionStartTime) {
-                // Competition hasn't started yet
-                timerElement.innerHTML = `⏰ Adventure Timer: 01:30:00`;
+            if (!teams || !Array.isArray(teams) || teams.length === 0) {
+                leaderboard.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #8b4513;">
+                        🏴‍☠️ No treasure hunters have set sail yet! 🏴‍☠️
+                    </div>
+                `;
                 return;
             }
+
+            const sortedTeams = teams.sort((a, b) => (safeGet(b, 'totalScore', 0) || 0) - (safeGet(a, 'totalScore', 0) || 0));
             
-            const now = Date.now();
-            const elapsed = now - competitionStartTime;
-            const remaining = Math.max(0, competitionDuration - elapsed);
-            
-            // Check if we should auto-freeze (20 minutes or less remaining)
-            if (remaining <= autoFreezeThreshold && !isAutoFrozen) {
-                autoFreeze();
+            let html = '';
+            sortedTeams.forEach((team, index) => {
+                const rank = index + 1;
+                const rankClass = rank === 1 ? 'first' : rank === 2 ? 'second' : rank === 3 ? 'third' : '';
+                
+                // Safely extract team data with fallbacks
+                const teamName = safeGet(team, 'teamName', 'Unknown Crew') || `Team ${safeGet(team, 'teamCode', rank)}`;
+                const totalScore = safeGet(team, 'totalScore', 0);
+                
+                // Safely extract activity scores with fallbacks
+                const registration = safeGet(team, 'activities.registration', 0) || safeGet(team, 'registration', 0);
+                const clueHunt = safeGet(team, 'activities.clueHunt', 0) || safeGet(team, 'clueHunt', 0) || safeGet(team, 'activities.clue_hunt', 0);
+                const quiz = safeGet(team, 'activities.quiz', 0) || safeGet(team, 'quiz', 0);
+                const kindness = safeGet(team, 'activities.kindness', 0) || safeGet(team, 'kindness', 0);
+                const scavenger = safeGet(team, 'activities.scavenger', 0) || safeGet(team, 'scavenger', 0);
+                const limerick = safeGet(team, 'activities.limerick', 0) || safeGet(team, 'limerick', 0);
+
+                console.log(`Team ${teamName}:`, {
+                    totalScore,
+                    registration,
+                    clueHunt,
+                    quiz,
+                    kindness,
+                    scavenger,
+                    limerick,
+                    rawTeam: team
+                });
+
+                html += `
+                    <div class="team-entry">
+                        <div class="rank ${rankClass}">${rank}</div>
+                        <div class="team-info">
+                            <div class="team-name">🏴‍☠️ ${teamName}</div>
+                            <div class="team-activities">
+                                ${registration > 0 ? `<span class="activity">⚓ Registration: ${registration}</span>` : ''}
+                                ${clueHunt > 0 ? `<span class="activity">🗺️ Clue Hunt: ${clueHunt}</span>` : ''}
+                                ${quiz > 0 ? `<span class="activity">🧭 Quiz: ${quiz}</span>` : ''}
+                                ${kindness > 0 ? `<span class="activity">💙 Kindness: ${kindness}</span>` : ''}
+                                ${scavenger > 0 ? `<span class="activity">🔍 Scavenger: ${scavenger}</span>` : ''}
+                                ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="total-score">
+                            ${totalScore} <span class="doubloons">doubloons</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            leaderboard.innerHTML = html;
+        }
+
+        function updateTimer() {
+            if (!competitionEndTime) return;
+
+            const now = new Date().getTime();
+            const timeLeft = competitionEndTime - now;
+
+            if (timeLeft <= 0) {
+                document.getElementById('timer').textContent = 'Adventure Complete!';
+                clearInterval(timerInterval);
+                return;
             }
-            
-            // Format time display
-            const totalSeconds = Math.floor(remaining / 1000);
-            const hours = Math.floor(totalSeconds / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-            
-            const timeString = `${hours.toString().padStart(1, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            
-            if (remaining <= 0) {
-                timerElement.innerHTML = `⏰ Adventure Complete: 00:00:00`;
-                timerElement.style.color = '#DC143C';
-                if (!isAutoFrozen) {
-                    autoFreeze();
-                }
-            } else if (remaining <= autoFreezeThreshold) {
-                timerElement.innerHTML = `⏰ Final Sprint: ${timeString}`;
-                timerElement.style.color = '#DC143C';
-            } else {
-                timerElement.innerHTML = `⏰ Adventure Timer: ${timeString}`;
-                timerElement.style.color = 'white';
-            }
+
+            const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').textContent = 
+                `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
         }
 
         async function loadLeaderboard() {
-            console.log('Loading treasure leaderboard data...');
-            
-            const loadingElement = document.getElementById('loading');
-            const errorElement = document.getElementById('error');
-            const contentElement = document.getElementById('leaderboardContent');
-            
             try {
-                loadingElement.style.display = 'block';
-                errorElement.style.display = 'none';
-                contentElement.style.display = 'none';
-                
+                console.log('Loading leaderboard data...');
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                console.log('Response status:', response.status);
-                console.log('Response headers:', [...response.headers.entries()]);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const rawText = await response.text();
-                console.log('Raw response (first 500 chars):', rawText.substring(0, 500));
-                
-                const data = JSON.parse(rawText);
-                console.log('Parsed JSON result:', data);
-                
-                if (data && data.success && data.leaderboard && Array.isArray(data.leaderboard)) {
-                    console.log('Number of crews loaded:', data.leaderboard.length);
+                const data = await response.json();
+                console.log('Raw API response:', data);
+
+                if (!data || !data.success) {
+                    throw new Error(data?.error || 'Invalid response from server');
+                }
+
+                // Handle competition timer
+                if (data.competitionStartTime && data.competitionDuration) {
+                    const startTime = new Date(data.competitionStartTime).getTime();
+                    const duration = data.competitionDuration * 60 * 1000;
+                    competitionEndTime = startTime + duration;
                     
-                    // Check if competition has started from backend data
-                    if (data.competitionStartTime && !competitionStartTime) {
-                        competitionStartTime = new Date(data.competitionStartTime).getTime();
-                        console.log('Competition started at:', new Date(competitionStartTime));
+                    if (!timerInterval) {
+                        timerInterval = setInterval(updateTimer, 1000);
                     }
-                    
-                    displayLeaderboard(data.leaderboard);
-                    updateLastUpdated(data.lastUpdated);
-                    
-                    loadingElement.style.display = 'none';
-                    contentElement.style.display = 'block';
+                    updateTimer();
                 } else {
-                    throw new Error('Invalid response structure: ' + JSON.stringify(data));
+                    document.getElementById('timer').textContent = 'Timer not active';
                 }
+
+                // Handle leaderboard data - check multiple possible structures
+                let teams = null;
                 
+                if (data.leaderboard && Array.isArray(data.leaderboard)) {
+                    teams = data.leaderboard;
+                    console.log('Using data.leaderboard:', teams);
+                } else if (data.teams && Array.isArray(data.teams)) {
+                    teams = data.teams;
+                    console.log('Using data.teams:', teams);
+                } else {
+                    console.warn('No teams found in response. Full data:', data);
+                }
+
+                if (teams && teams.length > 0) {
+                    console.log('Number of crews loaded:', teams.length);
+                    displayLeaderboard(teams);
+                } else {
+                    displayLeaderboard([]);
+                }
+
+                // Update last updated time
+                const now = new Date();
+                const timeString = now.toTimeString().split(' ')[0];
+                document.getElementById('lastUpdated').textContent = timeString;
+
             } catch (error) {
-                console.error('Treasure leaderboard loading error:', error);
-                
-                loadingElement.style.display = 'none';
-                errorElement.style.display = 'block';
-                errorElement.innerHTML = `❌ ${error.message} <button class="retry-btn" onclick="loadLeaderboard()">Retry</button>`;
+                console.error('Error loading leaderboard:', error);
+                displayError(error.message);
             }
         }
 
-        function displayLeaderboard(teams) {
-            const tbody = document.getElementById('leaderboardBody');
-            tbody.innerHTML = '';
+        // Start the application
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Leaderboard page loaded');
+            loadLeaderboard();
             
-            teams.forEach((team, index) => {
-                const rank = index + 1;
-                const rankClass = rank <= 3 ? `rank-${rank}` : '';
-                
-                const row = document.createElement('tr');
-                row.className = `crew-details ${rankClass}`;
-                row.onclick = () => toggleCrewDetails(row, team);
-                
-                row.innerHTML = `
-                    <td class="rank-cell ${rankClass}" data-label="Rank">${getRankDisplay(rank)}</td>
-                    <td class="crew-name" data-label="Crew">${escapeHtml(team.teamName)}</td>
-                    <td class="activity-score ${team.activities.registration > 0 ? 'completed' : ''}" data-label="Registration" data-activity="Registration">${team.activities.registration}</td>
-                    <td class="activity-score ${team.activities.clueHunt > 0 ? 'completed' : ''}" data-label="Treasure Map" data-activity="Treasure Map">${team.activities.clueHunt}</td>
-                    <td class="activity-score ${team.activities.quiz > 0 ? 'completed' : ''}" data-label="Knowledge" data-activity="Knowledge">${team.activities.quiz}</td>
-                    <td class="activity-score ${team.activities.kindness > 0 ? 'completed' : ''}" data-label="Heart Treasures" data-activity="Heart Treasures">${team.activities.kindness}</td>
-                    <td class="activity-score ${team.activities.scavenger > 0 ? 'completed' : ''}" data-label="Scavenger" data-activity="Scavenger">${team.activities.scavenger}</td>
-                    <td class="activity-score ${team.activities.limerick > 0 ? 'completed' : ''}" data-label="Verse Vault" data-activity="Verse Vault">${team.activities.limerick}</td>
-                    <td class="total-score" data-label="Total Doubloons">${team.totalScore}</td>
-                `;
-                
-                tbody.appendChild(row);
-            });
-        }
+            // Set up auto-refresh
+            refreshInterval = setInterval(loadLeaderboard, 30000);
+        });
 
-        function getRankDisplay(rank) {
-            switch(rank) {
-                case 1: return '🥇';
-                case 2: return '🥈';
-                case 3: return '🥉';
-                default: return rank;
-            }
-        }
-
-        function toggleCrewDetails(row, team) {
-            const existingDetails = row.nextElementSibling;
-            
-            if (existingDetails && existingDetails.classList.contains('expanded-details')) {
-                existingDetails.remove();
-                return;
-            }
-            
-            // Remove any other expanded details
-            document.querySelectorAll('.expanded-details').forEach(el => el.remove());
-            
-            const detailsRow = document.createElement('tr');
-            detailsRow.className = 'expanded-details';
-            detailsRow.innerHTML = `
-                <td colspan="9">
-                    <strong>Crew Code:</strong> ${escapeHtml(team.teamCode)} | 
-                    <strong>Members:</strong> ${escapeHtml(team.members || 'Not specified')} | 
-                    <strong>Registered:</strong> ${team.registrationTime ? new Date(team.registrationTime).toLocaleString('en-GB') : 'Unknown'}
-                </td>
-            `;
-            
-            row.parentNode.insertBefore(detailsRow, row.nextSibling);
-        }
-
-        function updateLastUpdated(timestamp) {
-            const element = document.getElementById('lastUpdated');
-            if (timestamp) {
-                const date = new Date(timestamp);
-                element.textContent = date.toLocaleTimeString('en-GB');
-            } else {
-                element.textContent = new Date().toLocaleTimeString('en-GB');
-            }
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // Pause auto-refresh when page is not visible
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                if (refreshInterval) {
-                    clearInterval(refreshInterval);
-                }
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                }
-            } else {
-                if (!isAutoFrozen) {
-                    loadLeaderboard();
-                }
-                startAutoRefresh();
-                startTimerUpdates();
-            }
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (timerInterval) clearInterval(timerInterval);
         });
     </script>
 </body>
