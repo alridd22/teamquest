@@ -1,6 +1,9 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
 
 exports.handler = async (event, context) => {
+    console.log('Submit Quiz request started at:', new Date().toISOString());
+
     // Handle CORS
     if (event.httpMethod === 'OPTIONS') {
         return {
@@ -54,14 +57,32 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Initialize Google Sheets using the same method as your existing functions
-        const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID);
-        
-        // Use API key authentication (same as your existing functions)
-        doc.useApiKey(process.env.GOOGLE_API_KEY);
-        
+        // Get environment variables (EXACT SAME as your working functions)
+        const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+        const sheetId = process.env.GOOGLE_SHEET_ID;
+        const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
+
+        if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
+            throw new Error('Missing required environment variables');
+        }
+
+        // Decode private key (EXACT SAME as your working functions)
+        let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
+        if (privateKey.includes('\\n')) {
+            privateKey = privateKey.replace(/\\n/g, '\n');
+        }
+
+        // Create JWT client (EXACT SAME as your working functions)
+        const serviceAccountAuth = new JWT({
+            email: serviceAccountEmail,
+            key: privateKey,
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+        });
+
+        // Initialize Google Sheet (EXACT SAME as your working functions)
+        const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
         await doc.loadInfo();
-        console.log('Google Sheets connected successfully using API key');
+        console.log('Sheet loaded successfully:', doc.title);
 
         // Calculate duration if we have both start and completion times
         let durationMinutes = '';
@@ -102,29 +123,29 @@ exports.handler = async (event, context) => {
         const rows = await quizSheet.getRows();
 
         // Find existing row for this team
-        const existingRow = rows.find(row => row['Team Code'] === teamCode);
+        const existingRow = rows.find(row => row.get('Team Code') === teamCode);
 
         if (existingRow) {
             // Update existing row with completion data
-            existingRow['Team Name'] = teamName;
-            existingRow['Total Score'] = totalScore.toString();
-            existingRow['Questions Correct'] = questionsCorrect ? questionsCorrect.toString() : '';
-            existingRow['Total Questions'] = totalQuestions ? totalQuestions.toString() : '';
-            existingRow['Completion Time'] = completionTime;
-            existingRow['Duration (mins)'] = durationMinutes.toString();
-            existingRow['Percentage'] = percentage.toString();
-            existingRow['Submission Time'] = new Date().toISOString();
+            existingRow.set('Team Name', teamName);
+            existingRow.set('Total Score', totalScore.toString());
+            existingRow.set('Questions Correct', questionsCorrect ? questionsCorrect.toString() : '');
+            existingRow.set('Total Questions', totalQuestions ? totalQuestions.toString() : '');
+            existingRow.set('Completion Time', completionTime);
+            existingRow.set('Duration (mins)', durationMinutes.toString());
+            existingRow.set('Percentage', percentage.toString());
+            existingRow.set('Submission Time', new Date().toISOString());
             
             // Preserve Quiz Start Time if it exists
-            if (quizStartTime && !existingRow['Quiz Start Time']) {
-                existingRow['Quiz Start Time'] = quizStartTime;
+            if (quizStartTime && !existingRow.get('Quiz Start Time')) {
+                existingRow.set('Quiz Start Time', quizStartTime);
             }
 
             await existingRow.save();
             console.log('Updated existing quiz row for team:', teamCode);
         } else {
             // Create new row with all data
-            const newRow = {
+            const newRow = await quizSheet.addRow({
                 'Team Code': teamCode,
                 'Team Name': teamName,
                 'Total Score': totalScore.toString(),
@@ -135,9 +156,7 @@ exports.handler = async (event, context) => {
                 'Duration (mins)': durationMinutes.toString(),
                 'Percentage': percentage.toString(),
                 'Submission Time': new Date().toISOString()
-            };
-
-            await quizSheet.addRow(newRow);
+            });
             console.log('Created new quiz row for team:', teamCode);
         }
 
@@ -148,20 +167,20 @@ exports.handler = async (event, context) => {
                 await leaderboardSheet.loadHeaderRow();
                 const leaderboardRows = await leaderboardSheet.getRows();
                 
-                const leaderboardRow = leaderboardRows.find(row => row['Team Code'] === teamCode);
+                const leaderboardRow = leaderboardRows.find(row => row.get('Team Code') === teamCode);
                 if (leaderboardRow) {
-                    leaderboardRow['Quiz'] = totalScore.toString();
+                    leaderboardRow.set('Quiz', totalScore.toString());
                     
                     // Recalculate total score
-                    const registration = parseInt(leaderboardRow['Registration'] || '0', 10);
-                    const clueHunt = parseInt(leaderboardRow['Clue Hunt'] || '0', 10);
-                    const quiz = parseInt(leaderboardRow['Quiz'] || '0', 10);
-                    const kindness = parseInt(leaderboardRow['Kindness'] || '0', 10);
-                    const scavenger = parseInt(leaderboardRow['Scavenger'] || '0', 10);
-                    const limerick = parseInt(leaderboardRow['Limerick'] || '0', 10);
+                    const registration = parseInt(leaderboardRow.get('Registration') || '0', 10);
+                    const clueHunt = parseInt(leaderboardRow.get('Clue Hunt') || '0', 10);
+                    const quiz = parseInt(leaderboardRow.get('Quiz') || '0', 10);
+                    const kindness = parseInt(leaderboardRow.get('Kindness') || '0', 10);
+                    const scavenger = parseInt(leaderboardRow.get('Scavenger') || '0', 10);
+                    const limerick = parseInt(leaderboardRow.get('Limerick') || '0', 10);
                     
                     const newTotal = registration + clueHunt + quiz + kindness + scavenger + limerick;
-                    leaderboardRow['Total'] = newTotal.toString();
+                    leaderboardRow.set('Total', newTotal.toString());
                     
                     await leaderboardRow.save();
                     console.log('Updated leaderboard for team:', teamCode, 'with quiz score:', totalScore);
@@ -172,6 +191,33 @@ exports.handler = async (event, context) => {
         } catch (error) {
             console.error('Error updating leaderboard:', error);
             // Don't fail the entire operation if leaderboard update fails
+        }
+
+        // Store individual answers in Quiz Answers sheet (if needed for detailed analysis)
+        try {
+            let answersSheet = doc.sheetsByTitle['Quiz Answers'];
+            if (answersSheet && answers && Array.isArray(answers)) {
+                await answersSheet.loadHeaderRow();
+                
+                // Add each answer as a separate row
+                for (const answer of answers) {
+                    await answersSheet.addRow({
+                        'Team Code': teamCode,
+                        'Team Name': teamName,
+                        'Question ID': answer.questionId ? answer.questionId.toString() : '',
+                        'User Answer': answer.userAnswer || '',
+                        'Correct Answer': answer.correctAnswer || '',
+                        'Is Correct': answer.isCorrect ? 'TRUE' : 'FALSE',
+                        'Doubloons Earned': answer.doubloons ? answer.doubloons.toString() : '0',
+                        'Time Left': answer.timeLeft ? answer.timeLeft.toString() : '',
+                        'Submission Time': new Date().toISOString()
+                    });
+                }
+                console.log('Stored', answers.length, 'quiz answers for team:', teamCode);
+            }
+        } catch (error) {
+            console.error('Error storing quiz answers:', error);
+            // Don't fail the entire operation if answer storage fails
         }
 
         console.log('Quiz submission completed successfully for team:', teamCode);
