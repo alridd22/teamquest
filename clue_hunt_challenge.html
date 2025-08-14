@@ -724,6 +724,10 @@
                 <div class="result-message" id="resultMessage">
                     <!-- Result will be shown here -->
                 </div>
+                
+                <button class="submit-btn" id="continueBtn" onclick="continueToMap()" style="display: none;">
+                    🗺️ Continue to Treasure Map
+                </button>
             </div>
 
             <div class="completion-celebration" id="completionCelebration">
@@ -743,6 +747,7 @@
         var currentClue = null;
         var completedClues = {};
         var currentScore = 0;
+        var returnTimeout = null;
 
         // Treasure Hunt clue data - 140 doubloons total (randomised distribution)
         var clueHuntData = [
@@ -869,6 +874,7 @@
             document.getElementById('clueText').textContent = clue.clue;
             document.getElementById('answerInput').value = '';
             document.getElementById('resultMessage').style.display = 'none';
+            document.getElementById('continueBtn').style.display = 'none';
             
             document.getElementById('clueGridSection').style.display = 'none';
             document.getElementById('clueSection').classList.add('active');
@@ -936,13 +942,11 @@
             }
             
             // Always return to map after showing result (whether correct or incorrect)
-            setTimeout(function() {
-                showClueGrid();
-                
-                if (Object.keys(completedClues).length === clueHuntData.length) {
-                    showCompletionCelebration();
-                }
-            }, 3000); // Longer delay to read the message
+            document.getElementById('continueBtn').style.display = 'flex';
+            
+            returnTimeout = setTimeout(function() {
+                continueToMap();
+            }, 5000); // 5 seconds to read the message
         }
 
         function checkAnswer(userAnswer, clue) {
@@ -975,6 +979,25 @@
             resultMessage.textContent = message;
             resultMessage.className = 'result-message ' + type;
             resultMessage.style.display = 'block';
+        }
+
+        function continueToMap() {
+            // Clear the timeout if it exists
+            if (returnTimeout) {
+                clearTimeout(returnTimeout);
+                returnTimeout = null;
+            }
+            
+            // Hide the continue button
+            document.getElementById('continueBtn').style.display = 'none';
+            
+            // Return to the clue grid
+            showClueGrid();
+            
+            // Check if all clues are completed for celebration
+            if (Object.keys(completedClues).length === clueHuntData.length) {
+                showCompletionCelebration();
+            }
         }
 
         function updateScore() {
@@ -1160,7 +1183,7 @@
                                 answer: submission.userAnswer,
                                 correctAnswer: submission.correctAnswer,
                                 completedAt: submission.attemptTime,
-                                wasCorrect: submission.wasCorrect
+                                wasCorrect: submission.points > 0 // Determine correctness based on points earned
                             };
                         });
                         
