@@ -800,21 +800,7 @@
                 
             } catch (error) {
                 console.error('Failed to load crews:', error);
-                
-                // Fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Crews loaded from backup. You can select your crew and continue.', 'success');
+                showMessage('loginMessage', 'Unable to load crew list from the system. Please refresh the page or contact your organizer.', 'error');
             }
         }
 
@@ -933,7 +919,7 @@
                 submitClueToBackend(currentClue, userAnswer, currentClue.points, true);
                 
             } else {
-                // Incorrect answer - no doubloons, show correct answer
+                // Incorrect answer - no doubloons, show correct answer with doubloon value
                 completedClues[currentClue.id] = {
                     points: 0,
                     answer: userAnswer,
@@ -942,7 +928,7 @@
                     wasCorrect: false
                 };
                 
-                showResultMessage('❌ The treasure chest remains locked! The correct answer was: ' + currentClue.answer, 'error');
+                showResultMessage('❌ The treasure chest remains locked! The correct answer was: ' + currentClue.answer + ' (worth ' + currentClue.points + ' doubloons)', 'error');
                 
                 updateProgress();
                 
