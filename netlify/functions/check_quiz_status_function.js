@@ -45,19 +45,14 @@ exports.handler = async (event, context) => {
             };
         }
 
-        // Initialize Google Sheets
+        // Initialize Google Sheets using the same method as your existing functions
         const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID);
-
-        // Authenticate using service account
-        const serviceAccountAuth = {
-            client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-            private_key: Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, 'base64').toString('utf8')
-        };
-
-        await doc.useServiceAccountAuth(serviceAccountAuth);
+        
+        // Use API key authentication (same as your existing functions)
+        doc.useApiKey(process.env.GOOGLE_API_KEY);
+        
         await doc.loadInfo();
-
-        console.log('Google Sheets connected successfully');
+        console.log('Google Sheets connected successfully using API key');
 
         // Access the Quiz sheet
         let quizSheet;
@@ -155,6 +150,7 @@ exports.handler = async (event, context) => {
 
     } catch (error) {
         console.error('Check Quiz Status Function Error:', error);
+        console.error('Error stack:', error.stack);
         return {
             statusCode: 500,
             headers: {
