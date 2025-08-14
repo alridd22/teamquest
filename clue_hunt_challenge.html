@@ -875,6 +875,7 @@
             document.getElementById('answerInput').value = '';
             document.getElementById('resultMessage').style.display = 'none';
             document.getElementById('continueBtn').style.display = 'none';
+            document.getElementById('submitAnswerBtn').disabled = false;
             
             document.getElementById('clueGridSection').style.display = 'none';
             document.getElementById('clueSection').classList.add('active');
@@ -943,6 +944,7 @@
             
             // Always return to map after showing result (whether correct or incorrect)
             document.getElementById('continueBtn').style.display = 'flex';
+            document.getElementById('submitAnswerBtn').disabled = true;
             
             returnTimeout = setTimeout(function() {
                 continueToMap();
