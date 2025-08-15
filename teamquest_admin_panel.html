@@ -1047,6 +1047,12 @@
                 console.log('Start competition result:', result);
                 
                 if (result.success) {
+                    // FIXED: Clear any existing timer to prevent conflicts
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                    
                     if (adventureState.isPaused) {
                         // Resume from pause
                         adventureState.isPaused = false;
@@ -1055,6 +1061,8 @@
                         adventureState.isRunning = true;
                         adventureState.startTime = new Date();
                         adventureState.competitionEnded = false;
+                        // FIXED: Always reset to 90 minutes when starting fresh
+                        adventureState.timeRemaining = 90 * 60;
                     }
 
                     adventureState.isRunning = true;
