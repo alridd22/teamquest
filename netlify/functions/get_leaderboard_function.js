@@ -52,6 +52,10 @@ exports.handler = async (event, context) => {
     let competitionStartTime = null;
     let competitionDuration = null;
     let resultsPublished = false;
+    let competitionStatus = 'stopped'; // FIXED: Store actual status value
+    let startTime = null; // FIXED: Store start time for admin panel
+    let durationMinutes = 90; // FIXED: Store duration for admin panel
+    
     try {
       const competitionSheet = doc.sheetsByTitle['Competition'];
       if (competitionSheet) {
@@ -66,23 +70,28 @@ exports.handler = async (event, context) => {
           console.log('Competition row raw data:', competitionRow._rawData);
           
           const status = competitionRow.get('Status');
-          const startTime = competitionRow.get('Start Time');
+          const startTimeValue = competitionRow.get('Start Time');
           const duration = competitionRow.get('Duration Minutes');
           const published = competitionRow.get('Results Published');
           
-          console.log('Competition data read:', { status, startTime, duration, published });
+          console.log('Competition data read:', { status, startTimeValue, duration, published });
+          
+          // FIXED: Store actual status value from sheet
+          competitionStatus = status || 'stopped';
+          startTime = startTimeValue; // Store for admin panel
+          durationMinutes = parseInt(duration) || 90; // Store for admin panel
           
           // Check if results are published
           resultsPublished = published === 'true';
           console.log('Results published status:', resultsPublished);
           
-          if (status === 'start' && startTime) {
-            competitionStartTime = startTime;
+          if (status === 'start' && startTimeValue) {
+            competitionStartTime = startTimeValue;
             competitionDuration = parseInt(duration) || 90;
             console.log('Competition active! Start:', competitionStartTime, 'Duration:', competitionDuration);
             console.log('Duration type:', typeof competitionDuration, 'Value:', competitionDuration);
           } else {
-            console.log('Competition not active. Status:', status, 'StartTime:', startTime);
+            console.log('Competition not active. Status:', status, 'StartTime:', startTimeValue);
           }
         } else {
           console.log('No competition rows found');
@@ -179,12 +188,17 @@ exports.handler = async (event, context) => {
         competitionStartTime: competitionStartTime,
         competitionDuration: competitionDuration,
         resultsPublished: resultsPublished,
+        // FIXED: Add these key fields that admin panel needs
+        competitionStatus: competitionStatus, // The actual status from Google Sheets
+        startTime: startTime, // Raw start time for calculations
+        durationMinutes: durationMinutes, // Duration for calculations
         timestamp: timestamp,
         debugInfo: {
           teamsCount: teams.length,
           leaderboardCount: leaderboard.length,
           dataSource: 'Single Leaderboard Sheet',
-          competitionStatus: competitionStartTime ? 'Started' : 'Not Started',
+          competitionStatusFromSheet: competitionStatus, // Show what we read
+          competitionActive: competitionStartTime ? 'Started' : 'Not Started',
           competitionStartTime: competitionStartTime,
           competitionDuration: competitionDuration,
           resultsPublished: resultsPublished,
