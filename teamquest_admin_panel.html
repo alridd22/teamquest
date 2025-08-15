@@ -957,7 +957,10 @@
                     // SYNC BACKEND STATE: Update local state based on backend competition status
                     if (data.competitionStatus) {
                         const backendStatus = data.competitionStatus.toLowerCase();
-                        adventureState.competitionStatus = backendStatus;
+                        // FIXED: Map "start" to "running" for frontend consistency
+                        adventureState.competitionStatus = backendStatus === 'start' ? 'running' : backendStatus;
+                        
+                        console.log('Backend status:', backendStatus, '-> Frontend status:', adventureState.competitionStatus);
                         
                         // If backend shows stopped and we have a start time, competition has ended
                         if (backendStatus === 'stopped' && data.startTime) {
