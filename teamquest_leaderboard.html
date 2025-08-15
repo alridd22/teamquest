@@ -505,61 +505,87 @@
         function switchToFinalResults() {
             console.log('Switching to final results display');
             
-            // Update page elements
-            document.getElementById('pageTitle').textContent = "🏆 Terry's Final Treasure Results 🏆";
-            document.getElementById('pageSubtitle').textContent = "Adventure complete - final standings revealed!";
-            
-            // Hide timer, show final results display
-            document.getElementById('timerDisplay').style.display = 'none';
-            document.getElementById('finalResultsDisplay').style.display = 'block';
-            
-            // Add final results class to container for enhanced styling
-            document.getElementById('treasureContainer').classList.add('final-results');
-            
-            // Update status bar
-            document.getElementById('statusBar').innerHTML = `
-                <span style="font-size: 1.2em;">🏆</span>
-                Final Results Published | Competition Complete | Last updated: <span id="lastUpdated">${new Date().toTimeString().split(' ')[0]}</span>
-            `;
-            
-            // Stop auto-refresh
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
-                refreshInterval = null;
-                console.log('Auto-refresh stopped - results are final');
-            }
-            
-            // Stop timer
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
+            try {
+                // Update page elements
+                const pageTitle = document.getElementById('pageTitle');
+                const pageSubtitle = document.getElementById('pageSubtitle');
+                const timerDisplay = document.getElementById('timerDisplay');
+                const finalResultsDisplay = document.getElementById('finalResultsDisplay');
+                const treasureContainer = document.getElementById('treasureContainer');
+                
+                if (pageTitle) pageTitle.textContent = "🏆 Terry's Final Treasure Results 🏆";
+                if (pageSubtitle) pageSubtitle.textContent = "Adventure complete - final standings revealed!";
+                
+                // Hide timer, show final results display
+                if (timerDisplay) timerDisplay.style.display = 'none';
+                if (finalResultsDisplay) finalResultsDisplay.style.display = 'block';
+                
+                // Add final results class to container for enhanced styling
+                if (treasureContainer) treasureContainer.classList.add('final-results');
+                
+                // Update status bar safely
+                const statusBar = document.getElementById('statusBar');
+                if (statusBar) {
+                    statusBar.innerHTML = `
+                        <span style="font-size: 1.2em;">🏆</span>
+                        Final Results Published | Competition Complete | Last updated: <span id="lastUpdated">${new Date().toTimeString().split(' ')[0]}</span>
+                    `;
+                }
+                
+                // Stop auto-refresh
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                    console.log('Auto-refresh stopped - results are final');
+                }
+                
+                // Stop timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            } catch (error) {
+                console.error('Error switching to final results:', error);
             }
         }
 
         function switchToLiveMode() {
             console.log('Switching to live mode display');
             
-            // Update page elements back to live mode
-            document.getElementById('pageTitle').textContent = "Terry's Treasure Leaderboard";
-            document.getElementById('pageSubtitle').textContent = "Live treasure hunting standings";
-            
-            // Show timer, hide final results display
-            document.getElementById('timerDisplay').style.display = 'block';
-            document.getElementById('finalResultsDisplay').style.display = 'none';
-            
-            // Remove final results class
-            document.getElementById('treasureContainer').classList.remove('final-results');
-            
-            // Update status bar back to live mode
-            document.getElementById('statusBar').innerHTML = `
-                <span class="auto-refresh-icon">🔄</span>
-                Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">Never</span>
-            `;
-            
-            // Restart auto-refresh if not already running
-            if (!refreshInterval) {
-                refreshInterval = setInterval(loadLeaderboard, 30000);
-                console.log('Auto-refresh restarted');
+            try {
+                // Update page elements back to live mode
+                const pageTitle = document.getElementById('pageTitle');
+                const pageSubtitle = document.getElementById('pageSubtitle');
+                const timerDisplay = document.getElementById('timerDisplay');
+                const finalResultsDisplay = document.getElementById('finalResultsDisplay');
+                const treasureContainer = document.getElementById('treasureContainer');
+                
+                if (pageTitle) pageTitle.textContent = "Terry's Treasure Leaderboard";
+                if (pageSubtitle) pageSubtitle.textContent = "Live treasure hunting standings";
+                
+                // Show timer, hide final results display
+                if (timerDisplay) timerDisplay.style.display = 'block';
+                if (finalResultsDisplay) finalResultsDisplay.style.display = 'none';
+                
+                // Remove final results class
+                if (treasureContainer) treasureContainer.classList.remove('final-results');
+                
+                // Update status bar back to live mode safely
+                const statusBar = document.getElementById('statusBar');
+                if (statusBar) {
+                    statusBar.innerHTML = `
+                        <span class="auto-refresh-icon">🔄</span>
+                        Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">Never</span>
+                    `;
+                }
+                
+                // Restart auto-refresh if not already running
+                if (!refreshInterval) {
+                    refreshInterval = setInterval(loadLeaderboard, 30000);
+                    console.log('Auto-refresh restarted');
+                }
+            } catch (error) {
+                console.error('Error switching to live mode:', error);
             }
         }
 
@@ -699,34 +725,49 @@
                     throw new Error(data?.error || 'Invalid response from server');
                 }
 
-                // Check if results are published
+                // Check if results are published with safety check
                 const wasPublished = resultsPublished;
-                resultsPublished = data.resultsPublished || false;
+                resultsPublished = Boolean(data.resultsPublished);
                 console.log('Results published:', resultsPublished);
 
                 // SWITCH MODES based on results published status
                 if (resultsPublished && !wasPublished) {
                     // Just switched to final results
-                    switchToFinalResults();
-                    hideFreezeOverlay();
+                    try {
+                        switchToFinalResults();
+                        hideFreezeOverlay();
+                    } catch (error) {
+                        console.error('Error switching to final results:', error);
+                    }
                 } else if (!resultsPublished && wasPublished) {
                     // Switched back to live mode (admin reset)
-                    switchToLiveMode();
+                    try {
+                        switchToLiveMode();
+                    } catch (error) {
+                        console.error('Error switching to live mode:', error);
+                    }
                 }
 
                 // Handle competition timer (only in live mode)
                 if (!resultsPublished) {
-                    if (data.competitionStartTime && data.competitionDuration) {
-                        const startTime = new Date(data.competitionStartTime).getTime();
-                        const duration = data.competitionDuration * 60 * 1000;
-                        competitionEndTime = startTime + duration;
-                        
-                        if (!timerInterval) {
-                            timerInterval = setInterval(updateTimer, 1000);
+                    try {
+                        if (data.competitionStartTime && data.competitionDuration) {
+                            const startTime = new Date(data.competitionStartTime).getTime();
+                            const duration = data.competitionDuration * 60 * 1000;
+                            competitionEndTime = startTime + duration;
+                            
+                            if (!timerInterval) {
+                                timerInterval = setInterval(updateTimer, 1000);
+                            }
+                            updateTimer();
+                        } else {
+                            const timerElement = document.getElementById('timer');
+                            if (timerElement) {
+                                timerElement.textContent = 'Timer not active';
+                            }
                         }
-                        updateTimer();
-                    } else {
-                        document.getElementById('timer').textContent = 'Timer not active';
+                    } catch (error) {
+                        console.error('Error handling timer:', error);
                     }
                 }
 
@@ -750,10 +791,17 @@
                     displayLeaderboard([]);
                 }
 
-                // Update last updated time
-                const now = new Date();
-                const timeString = now.toTimeString().split(' ')[0];
-                document.getElementById('lastUpdated').textContent = timeString;
+                // Update last updated time safely
+                try {
+                    const now = new Date();
+                    const timeString = now.toTimeString().split(' ')[0];
+                    const lastUpdatedElement = document.getElementById('lastUpdated');
+                    if (lastUpdatedElement) {
+                        lastUpdatedElement.textContent = timeString;
+                    }
+                } catch (error) {
+                    console.error('Error updating timestamp:', error);
+                }
 
             } catch (error) {
                 console.error('Error loading leaderboard:', error);
