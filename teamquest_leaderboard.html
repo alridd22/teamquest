@@ -566,11 +566,6 @@
                     document.getElementById('finalResultsBanner').style.display = 'block';
                     document.getElementById('timerDisplay').style.display = 'none';
                     
-                    // Update status bar
-                    document.getElementById('auto-refresh-icon', document.querySelector('.status-bar')).innerHTML = `
-                        🏆 Final Results Published | Competition Complete | Last updated: <span id="lastUpdated">${new Date().toTimeString().split(' ')[0]}</span>
-                    `;
-                    
                     // Hide freeze overlay
                     hideFreezeOverlay();
                     
