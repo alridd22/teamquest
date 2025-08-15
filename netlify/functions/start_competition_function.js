@@ -190,11 +190,27 @@ exports.handler = async (event, context) => {
         await row.delete();
       }
       
+      // FIXED: Preserve start time and duration for 'stop' action
+      let preservedStartTime = '';
+      let preservedDuration = '';
+      
+      if (action === 'stop' && currentState) {
+        // Preserve the original start time and duration when stopping
+        preservedStartTime = currentState.startTime || '';
+        preservedDuration = currentState.duration || '';
+        console.log('Preserving start time and duration for stop action:', {
+          startTime: preservedStartTime,
+          duration: preservedDuration
+        });
+      }
+      
       // Create new row data based on action
       newRowData = {
         'Status': action,
-        'Start Time': action === 'start' ? startTime : '',
-        'Duration Minutes': action === 'start' ? 90 : '',
+        'Start Time': action === 'start' ? startTime : 
+                     action === 'stop' ? preservedStartTime : '',  // FIXED: Preserve for stop
+        'Duration Minutes': action === 'start' ? 90 : 
+                           action === 'stop' ? preservedDuration : '',  // FIXED: Preserve for stop
         'Results Published': 'false',  // Always false for start/stop/reset
         'Published At': '',
         'Created At': now,
@@ -217,7 +233,8 @@ exports.handler = async (event, context) => {
           break;
         case 'stop':
           responseMessage = 'Competition stopped successfully';
-          responseData.competitionStartTime = null;
+          responseData.competitionStartTime = preservedStartTime; // Return preserved time
+          responseData.duration = preservedDuration; // Return preserved duration
           responseData.resultsPublished = false;
           break;
         case 'reset':
