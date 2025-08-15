@@ -793,7 +793,9 @@
             startTime: null,
             crews: [],
             resultsPublished: false,
-            competitionData: null
+            competitionData: null,
+            competitionStatus: 'stopped', // Track backend competition status
+            competitionEnded: false // Track if competition has ended
         };
 
         let timerInterval = null;
@@ -824,13 +826,18 @@
             
             display.textContent = formatTime(adventureState.timeRemaining);
             
-            if (adventureState.isRunning && !adventureState.isPaused) {
+            // Sync with backend competition status
+            if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
                 status.innerHTML = '🏴‍☠️ Adventure in Progress';
                 status.className = 'adventure-status status-running';
                 display.style.color = '#006400';
-            } else if (adventureState.isPaused) {
+            } else if (adventureState.isPaused || adventureState.competitionStatus === 'paused') {
                 status.innerHTML = '⏸️ Quest Paused';
                 status.className = 'adventure-status status-paused';
+                display.style.color = '#8B4513';
+            } else if (adventureState.competitionStatus === 'stopped' && adventureState.competitionEnded) {
+                status.innerHTML = '⚓ Adventure Ended - Results Ready';
+                status.className = 'adventure-status status-stopped';
                 display.style.color = '#8B4513';
             } else {
                 status.innerHTML = '🏴‍☠️ Adventure Awaiting Launch';
@@ -839,9 +846,9 @@
             }
 
             // Change color based on time remaining
-            if (adventureState.timeRemaining <= 300 && adventureState.isRunning) { // Last 5 minutes
+            if (adventureState.timeRemaining <= 300 && adventureState.competitionStatus === 'running') { // Last 5 minutes
                 display.style.color = '#DC143C';
-            } else if (adventureState.timeRemaining <= 900 && adventureState.isRunning) { // Last 15 minutes
+            } else if (adventureState.timeRemaining <= 900 && adventureState.competitionStatus === 'running') { // Last 15 minutes
                 display.style.color = '#FF8C00';
             }
         }
@@ -852,12 +859,12 @@
             const stopBtn = document.getElementById('stopBtn');
             const resetBtn = document.getElementById('resetBtn');
 
-            if (adventureState.isRunning && !adventureState.isPaused) {
+            if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
                 startBtn.disabled = true;
                 pauseBtn.disabled = false;
                 stopBtn.disabled = false;
                 resetBtn.disabled = true;
-            } else if (adventureState.isPaused) {
+            } else if (adventureState.isPaused || adventureState.competitionStatus === 'paused') {
                 startBtn.disabled = false;
                 startBtn.innerHTML = '▶️ Resume Quest';
                 pauseBtn.disabled = true;
@@ -887,9 +894,16 @@
                 resultsStatus.innerHTML = '🔒 Results Not Published - Gallery Locked';
                 resultsStatus.className = 'results-status results-unpublished';
                 
-                // Enable publish button if 20 minutes or less remaining OR competition ended
+                // FIXED LOGIC: Enable publish button if:
+                // 1. Competition is running and 20 minutes or less remaining, OR
+                // 2. Timer naturally reached 0, OR  
+                // 3. Competition has been manually ended (stopped)
                 const timeLeftMinutes = Math.floor(adventureState.timeRemaining / 60);
-                if ((timeLeftMinutes <= 20 && adventureState.isRunning) || adventureState.timeRemaining <= 0) {
+                const canPublish = (timeLeftMinutes <= 20 && adventureState.competitionStatus === 'running') || 
+                                 adventureState.timeRemaining <= 0 || 
+                                 (adventureState.competitionStatus === 'stopped' && adventureState.competitionEnded);
+                
+                if (canPublish) {
                     publishBtn.disabled = false;
                     publishWarning.style.display = 'block';
                 } else {
@@ -940,6 +954,58 @@
                     adventureState.resultsPublished = data.resultsPublished || false;
                     adventureState.competitionData = data;
                     
+                    // SYNC BACKEND STATE: Update local state based on backend competition status
+                    if (data.competitionStatus) {
+                        const backendStatus = data.competitionStatus.toLowerCase();
+                        adventureState.competitionStatus = backendStatus;
+                        
+                        // If backend shows stopped and we have a start time, competition has ended
+                        if (backendStatus === 'stopped' && data.startTime) {
+                            adventureState.competitionEnded = true;
+                            adventureState.isRunning = false;
+                            adventureState.isPaused = false;
+                            
+                            // Calculate remaining time based on start time and duration
+                            if (data.startTime && data.durationMinutes) {
+                                const startTime = new Date(data.startTime);
+                                const endTime = new Date(startTime.getTime() + (data.durationMinutes * 60 * 1000));
+                                const now = new Date();
+                                const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+                                adventureState.timeRemaining = timeLeft;
+                            }
+                        } else if (backendStatus === 'running') {
+                            adventureState.competitionEnded = false;
+                            adventureState.isRunning = true;
+                            adventureState.isPaused = false;
+                            
+                            // Start local timer if not already running
+                            if (!timerInterval) {
+                                timerInterval = setInterval(() => {
+                                    if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
+                                        adventureState.timeRemaining--;
+                                        
+                                        if (adventureState.timeRemaining <= 0) {
+                                            stopAdventure();
+                                            showMessage('🏆 Adventure time has ended! All crews return to base!', 'success');
+                                        }
+                                        
+                                        updateTimerDisplay();
+                                        updateResultsManagement();
+                                    }
+                                }, 1000);
+                            }
+                        } else {
+                            // Backend shows stopped but no evidence of a previous competition
+                            adventureState.competitionEnded = false;
+                            adventureState.isRunning = false;
+                            adventureState.isPaused = false;
+                        }
+                        
+                        // Update UI based on synchronized state
+                        updateButtonStates();
+                        updateTimerDisplay();
+                    }
+                    
                     renderCrews(adventureState.crews);
                     updateStatistics(adventureState.crews);
                     updateResultsManagement();
@@ -988,13 +1054,15 @@
                         // Start fresh
                         adventureState.isRunning = true;
                         adventureState.startTime = new Date();
+                        adventureState.competitionEnded = false;
                     }
 
                     adventureState.isRunning = true;
+                    adventureState.competitionStatus = 'running';
                     
                     // Start timer countdown
                     timerInterval = setInterval(() => {
-                        if (adventureState.isRunning && !adventureState.isPaused) {
+                        if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
                             adventureState.timeRemaining--;
                             
                             if (adventureState.timeRemaining <= 0) {
@@ -1042,6 +1110,7 @@
                 
                 if (result.success) {
                     adventureState.isPaused = true;
+                    adventureState.competitionStatus = 'paused';
                     updateButtonStates();
                     updateTimerDisplay();
                     updateResultsManagement();
@@ -1072,6 +1141,8 @@
                 if (result.success) {
                     adventureState.isRunning = false;
                     adventureState.isPaused = false;
+                    adventureState.competitionStatus = 'stopped';
+                    adventureState.competitionEnded = true; // Mark as ended when manually stopped
                     
                     if (timerInterval) {
                         clearInterval(timerInterval);
@@ -1110,6 +1181,8 @@
                     adventureState.isPaused = false;
                     adventureState.timeRemaining = 90 * 60; // Reset to 90 minutes
                     adventureState.resultsPublished = false; // Reset results published status
+                    adventureState.competitionStatus = 'stopped';
+                    adventureState.competitionEnded = false; // Reset ended flag
                     
                     if (timerInterval) {
                         clearInterval(timerInterval);
