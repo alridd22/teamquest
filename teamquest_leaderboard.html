@@ -563,8 +563,8 @@
             }
         }
 
-        function displayLeaderboard(teams) {
-            console.log('Displaying teams:', teams);
+        function displayLeaderboard(teams, showScores = true) {
+            console.log('Displaying teams:', teams, 'Show scores:', showScores);
             const leaderboard = document.getElementById('leaderboard');
             
             if (!teams || !Array.isArray(teams) || teams.length === 0) {
@@ -576,6 +576,47 @@
                 return;
             }
 
+            // 🔧 HIDE SCORES MODE: Show participants without revealing standings
+            if (!showScores) {
+                let html = `
+                    <div style="text-align: center; padding: 20px; margin-bottom: 20px; background: linear-gradient(145deg, #ff8c00, #ffa500); border-radius: 15px; border: 3px solid #8b4513; color: white; font-weight: bold; font-size: 1.3em;">
+                        ⏳ Final Results Being Prepared ⏳<br>
+                        <span style="font-size: 0.9em; margin-top: 10px; display: block;">All crews have completed their adventures!</span>
+                    </div>
+                    <div style="text-align: center; padding: 15px; margin-bottom: 20px; background: rgba(255,255,255,0.8); border-radius: 10px; color: #8b4513; font-size: 1.1em;">
+                        <strong>📜 Participating Crews:</strong>
+                    </div>
+                `;
+
+                // Show teams in random order without scores
+                const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
+                
+                shuffledTeams.forEach((team, index) => {
+                    const teamName = safeGet(team, 'teamName', 'Unknown Crew') || `Team ${safeGet(team, 'teamCode', index + 1)}`;
+                    
+                    html += `
+                        <div class="team-entry" style="justify-content: center;">
+                            <div class="team-info" style="text-align: center;">
+                                <div class="team-name">🏴‍☠️ ${teamName}</div>
+                                <div style="color: #8b4513; font-style: italic; margin-top: 5px;">
+                                    Adventure completed - results pending...
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                    <div style="text-align: center; padding: 15px; margin-top: 20px; background: rgba(255,215,0,0.3); border-radius: 10px; color: #8b4513; font-size: 1em;">
+                        🔒 Final standings will be revealed when Terry publishes the official results! 🔒
+                    </div>
+                `;
+
+                leaderboard.innerHTML = html;
+                return;
+            }
+
+            // NORMAL MODE: Show full leaderboard with scores
             const sortedTeams = teams.sort((a, b) => (safeGet(b, 'totalScore', 0) || 0) - (safeGet(a, 'totalScore', 0) || 0));
             
             let html = '';
@@ -781,11 +822,15 @@
                     console.warn('No teams found in response. Full data:', data);
                 }
 
+                // 🔧 HIDE SCORES when adventure complete but results not published
+                const competitionStatus = data.competitionStatus || data.status;
+                const showScores = resultsPublished || (competitionStatus !== 'stop' && competitionStatus !== 'stopped');
+
                 if (teams && teams.length > 0) {
                     console.log('Number of crews loaded:', teams.length);
-                    displayLeaderboard(teams);
+                    displayLeaderboard(teams, showScores);
                 } else {
-                    displayLeaderboard([]);
+                    displayLeaderboard([], showScores);
                 }
 
                 // Update last updated time
