@@ -94,10 +94,67 @@
             max-width: 300px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
             border: 3px solid #8b4513;
+            transition: all 0.3s ease;
+        }
+
+        /* Enhanced Timer States for Penalty Mode */
+        .timer-display.penalty {
+            background: linear-gradient(145deg, #dc143c, #b22222);
+            animation: penalty-pulse 1s ease-in-out infinite;
+            border-color: #8b0000;
+        }
+
+        @keyframes penalty-pulse {
+            0%, 100% { 
+                box-shadow: 0 5px 15px rgba(220,20,60,0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 8px 25px rgba(220,20,60,0.7);
+                transform: scale(1.02);
+            }
         }
 
         .timer-icon {
             margin-right: 10px;
+        }
+
+        /* Penalty Warning Display */
+        .penalty-warning {
+            background: linear-gradient(145deg, #ffb6c1, #ffa0b4);
+            border: 3px solid #dc143c;
+            color: #8b0000;
+            padding: 20px 30px;
+            border-radius: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px auto;
+            max-width: 500px;
+            box-shadow: 0 8px 25px rgba(220,20,60,0.3);
+            display: none;
+            animation: warning-glow 2s ease-in-out infinite alternate;
+        }
+
+        .penalty-warning.show {
+            display: block;
+        }
+
+        @keyframes warning-glow {
+            from { box-shadow: 0 8px 25px rgba(220,20,60,0.3); }
+            to { box-shadow: 0 8px 35px rgba(220,20,60,0.6); }
+        }
+
+        .penalty-warning-icon {
+            font-size: 1.5em;
+            margin-right: 10px;
+            animation: warning-shake 1s ease-in-out infinite;
+        }
+
+        @keyframes warning-shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
         }
 
         /* FINAL RESULTS STYLES */
@@ -169,11 +226,26 @@
             border: 2px solid #daa520;
             box-shadow: 0 3px 8px rgba(0,0,0,0.1);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
 
         .team-entry:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Enhanced team entry states for penalties */
+        .team-entry.penalized {
+            background: linear-gradient(145deg, #ffcccb, #ffa0b4);
+            border: 3px solid #dc143c;
+            border-left: 8px solid #dc143c;
+            box-shadow: 0 5px 12px rgba(220,20,60,0.2);
+        }
+
+        .team-entry.late {
+            background: linear-gradient(145deg, #ffe4b5, #deb887);
+            border: 3px solid #ff8c00;
+            border-left: 6px solid #ff8c00;
         }
 
         /* Enhanced final results team entries */
@@ -220,10 +292,68 @@
             font-weight: bold;
             color: #8b4513;
             margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .final-results .team-name {
             font-size: 1.4em;
+        }
+
+        /* Team Status Badges */
+        .team-status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-active {
+            background: #3498db;
+            color: white;
+        }
+
+        .status-returned {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-late {
+            background: #e74c3c;
+            color: white;
+            animation: late-badge-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes late-badge-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Penalty Information Display */
+        .penalty-info {
+            background: linear-gradient(145deg, #ffcccb, #ffa0b4);
+            border: 2px solid #dc143c;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-size: 0.85em;
+            color: #8b0000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .penalty-icon {
+            font-size: 1.1em;
+            animation: penalty-warning-pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes penalty-warning-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .team-activities {
@@ -256,6 +386,31 @@
             border-radius: 25px;
             border: 2px solid #b8860b;
             box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Enhanced penalty score display */
+        .total-score.penalized {
+            background: linear-gradient(145deg, #ffcccb, #ffa0b4);
+            border-color: #dc143c;
+            color: #8b0000;
+        }
+
+        .original-score {
+            font-size: 0.6em;
+            color: #999;
+            text-decoration: line-through;
+            margin-bottom: 2px;
+        }
+
+        .penalty-deduction {
+            font-size: 0.6em;
+            color: #dc143c;
+            font-weight: bold;
+            margin-bottom: 2px;
         }
 
         .final-results .total-score {
@@ -268,6 +423,10 @@
         .doubloons {
             font-size: 0.8em;
             color: #8b4513;
+        }
+
+        .penalized .doubloons {
+            color: #8b0000;
         }
 
         /* Freeze Screen Styles */
@@ -392,7 +551,7 @@
                 font-size: 2em;
             }
 
-            .final-results-display {
+            .final-results-display, .penalty-warning {
                 font-size: 1.3em;
                 padding: 15px 20px;
             }
@@ -413,6 +572,11 @@
             .freeze-message {
                 font-size: 1.1em;
             }
+
+            .penalty-info {
+                font-size: 0.8em;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -427,6 +591,17 @@
             <div class="timer-display" id="timerDisplay">
                 <span class="timer-icon">⏰</span>
                 <span id="timer">Loading...</span>
+            </div>
+
+            <!-- Penalty Warning Display -->
+            <div class="penalty-warning" id="penaltyWarning">
+                <div>
+                    <span class="penalty-warning-icon">⚠️</span>
+                    Late Return Penalties Active!
+                </div>
+                <div style="font-size: 0.8em; margin-top: 5px;">
+                    <strong>5 doubloons lost per minute late</strong>
+                </div>
             </div>
 
             <!-- Final Results Display -->
@@ -473,6 +648,7 @@
         let competitionEndTime = null;
         let isFrozen = false;
         let resultsPublished = false;
+        let penaltyMode = false;
 
         // Safe property access helper
         function safeGet(obj, path, defaultValue = 0) {
@@ -505,31 +681,26 @@
         function switchToFinalResults() {
             console.log('Switching to final results display');
             
-            // Update page elements
             document.getElementById('pageTitle').textContent = "🏆 Terry's Final Treasure Results 🏆";
             document.getElementById('pageSubtitle').textContent = "Adventure complete - final standings revealed!";
             
-            // Hide timer, show final results display
             document.getElementById('timerDisplay').style.display = 'none';
+            document.getElementById('penaltyWarning').classList.remove('show');
             document.getElementById('finalResultsDisplay').style.display = 'block';
             
-            // Add final results class to container for enhanced styling
             document.getElementById('treasureContainer').classList.add('final-results');
             
-            // Update status bar
             document.getElementById('statusBar').innerHTML = `
                 <span style="font-size: 1.2em;">🏆</span>
                 Final Results Published | Competition Complete | Last updated: <span id="lastUpdated">${new Date().toTimeString().split(' ')[0]}</span>
             `;
             
-            // Stop auto-refresh
             if (refreshInterval) {
                 clearInterval(refreshInterval);
                 refreshInterval = null;
                 console.log('Auto-refresh stopped - results are final');
             }
             
-            // Stop timer
             if (timerInterval) {
                 clearInterval(timerInterval);
                 timerInterval = null;
@@ -539,24 +710,19 @@
         function switchToLiveMode() {
             console.log('Switching to live mode display');
             
-            // Update page elements back to live mode
             document.getElementById('pageTitle').textContent = "Terry's Treasure Leaderboard";
             document.getElementById('pageSubtitle').textContent = "Live treasure hunting standings";
             
-            // Show timer, hide final results display
             document.getElementById('timerDisplay').style.display = 'block';
             document.getElementById('finalResultsDisplay').style.display = 'none';
             
-            // Remove final results class
             document.getElementById('treasureContainer').classList.remove('final-results');
             
-            // Update status bar back to live mode
             document.getElementById('statusBar').innerHTML = `
                 <span class="auto-refresh-icon">🔄</span>
                 Auto-refreshes every 30 seconds | Last updated: <span id="lastUpdated">Never</span>
             `;
             
-            // Restart auto-refresh if not already running
             if (!refreshInterval) {
                 refreshInterval = setInterval(loadLeaderboard, 30000);
                 console.log('Auto-refresh restarted');
@@ -576,7 +742,7 @@
                 return;
             }
 
-            // 🔧 HIDE SCORES MODE: Show participants without revealing standings
+            // HIDE SCORES MODE: Show participants without revealing standings
             if (!showScores) {
                 let html = `
                     <div style="text-align: center; padding: 20px; margin-bottom: 20px; background: linear-gradient(145deg, #ff8c00, #ffa500); border-radius: 15px; border: 3px solid #8b4513; color: white; font-weight: bold; font-size: 1.3em;">
@@ -588,7 +754,6 @@
                     </div>
                 `;
 
-                // Show teams in random order without scores
                 const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
                 
                 shuffledTeams.forEach((team, index) => {
@@ -616,8 +781,12 @@
                 return;
             }
 
-            // NORMAL MODE: Show full leaderboard with scores
-            const sortedTeams = teams.sort((a, b) => (safeGet(b, 'totalScore', 0) || 0) - (safeGet(a, 'totalScore', 0) || 0));
+            // NORMAL MODE: Show full leaderboard with scores and penalties
+            const sortedTeams = teams.sort((a, b) => {
+                const aAdjusted = (safeGet(a, 'totalScore', 0) || 0) - (safeGet(a, 'penalty', 0) || 0);
+                const bAdjusted = (safeGet(b, 'totalScore', 0) || 0) - (safeGet(b, 'penalty', 0) || 0);
+                return bAdjusted - aAdjusted;
+            });
             
             let html = '';
             
@@ -637,6 +806,10 @@
                 
                 const teamName = safeGet(team, 'teamName', 'Unknown Crew') || `Team ${safeGet(team, 'teamCode', rank)}`;
                 const totalScore = safeGet(team, 'totalScore', 0);
+                const penalty = safeGet(team, 'penalty', 0) || 0;
+                const adjustedScore = Math.max(0, totalScore - penalty);
+                const status = safeGet(team, 'status', 'active');
+                const penaltyMinutes = safeGet(team, 'penaltyMinutes', 0) || 0;
                 
                 const registration = safeGet(team, 'activities.registration', 0) || safeGet(team, 'registration', 0);
                 const clueHunt = safeGet(team, 'activities.clueHunt', 0) || safeGet(team, 'clueHunt', 0) || safeGet(team, 'activities.clue_hunt', 0);
@@ -645,14 +818,57 @@
                 const scavenger = safeGet(team, 'activities.scavenger', 0) || safeGet(team, 'scavenger', 0);
                 const limerick = safeGet(team, 'activities.limerick', 0) || safeGet(team, 'limerick', 0);
 
+                // Determine entry classes
+                let entryClasses = 'team-entry';
+                if (penalty > 0) entryClasses += ' penalized';
+                else if (status === 'late') entryClasses += ' late';
+
+                // Status badge
+                const statusBadge = status !== 'active' ? `<span class="team-status-badge status-${status}">${getStatusText(status)}</span>` : '';
+
                 // Add crown for winner in final results
                 const winnerCrown = (resultsPublished && rank === 1) ? ' 👑' : '';
 
+                // Penalty information
+                let penaltyDisplay = '';
+                if (penalty > 0) {
+                    penaltyDisplay = `
+                        <div class="penalty-info">
+                            <span class="penalty-icon">⚠️</span>
+                            <div>
+                                <strong>Late penalty:</strong> -${penalty} doubloons (${penaltyMinutes} minutes late)
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Score display with penalty consideration
+                let scoreDisplay = '';
+                if (penalty > 0) {
+                    scoreDisplay = `
+                        <div class="total-score penalized">
+                            <div class="original-score">${totalScore}</div>
+                            <div class="penalty-deduction">-${penalty}</div>
+                            ${adjustedScore} <span class="doubloons">doubloons</span>
+                        </div>
+                    `;
+                } else {
+                    scoreDisplay = `
+                        <div class="total-score">
+                            ${adjustedScore} <span class="doubloons">doubloons</span>
+                        </div>
+                    `;
+                }
+
                 html += `
-                    <div class="team-entry">
+                    <div class="${entryClasses}">
                         <div class="rank ${rankClass}">${rank}</div>
                         <div class="team-info">
-                            <div class="team-name">🏴‍☠️ ${teamName}${winnerCrown}</div>
+                            <div class="team-name">
+                                🏴‍☠️ ${teamName}${winnerCrown}
+                                ${statusBadge}
+                            </div>
+                            ${penaltyDisplay}
                             <div class="team-activities">
                                 ${registration > 0 ? `<span class="activity">⚓ Registration: ${registration}</span>` : ''}
                                 ${clueHunt > 0 ? `<span class="activity">🗺️ Clue Hunt: ${clueHunt}</span>` : ''}
@@ -662,14 +878,21 @@
                                 ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
                             </div>
                         </div>
-                        <div class="total-score">
-                            ${totalScore} <span class="doubloons">doubloons</span>
-                        </div>
+                        ${scoreDisplay}
                     </div>
                 `;
             });
 
             leaderboard.innerHTML = html;
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'active': return 'Active';
+                case 'returned': return 'Safe';
+                case 'late': return 'Late';
+                default: return status;
+            }
         }
 
         function updateTimer() {
@@ -679,32 +902,43 @@
             const timeLeft = competitionEndTime - now;
 
             if (timeLeft <= 0) {
-                document.getElementById('timer').textContent = 'Adventure Complete!';
-                clearInterval(timerInterval);
+                // Penalty phase
+                const overTime = Math.abs(timeLeft);
+                const hours = Math.floor(overTime / (1000 * 60 * 60));
+                const minutes = Math.floor((overTime % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((overTime % (1000 * 60)) / 1000);
+
+                document.getElementById('timer').textContent = 
+                    `+${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timerDisplay').classList.add('penalty');
                 
-                // Show freeze overlay if results not published
-                if (!resultsPublished) {
-                    showFreezeOverlay();
+                // Show penalty warning
+                if (!penaltyMode) {
+                    penaltyMode = true;
+                    document.getElementById('penaltyWarning').classList.add('show');
                 }
+                
                 return;
             }
 
+            // Normal countdown
             const hours = Math.floor(timeLeft / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            document.getElementById('timer').textContent = 
+                `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Remove penalty styling if in normal countdown
+            document.getElementById('timerDisplay').classList.remove('penalty');
 
             // Check if 20 minutes or less remaining
             const totalMinutesLeft = Math.floor(timeLeft / (1000 * 60));
             
             if (totalMinutesLeft <= 20 && !resultsPublished) {
-                // Freeze the leaderboard
                 showFreezeOverlay();
                 document.getElementById('freezeTimer').textContent = 
                     `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} remaining`;
-            } else {
-                // Normal timer display
-                document.getElementById('timer').textContent = 
-                    `Adventure Timer: ${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }
 
@@ -747,42 +981,34 @@
 
                 // SWITCH MODES based on results published status
                 if (resultsPublished && !wasPublished) {
-                    // Just switched to final results
                     switchToFinalResults();
                     hideFreezeOverlay();
                 } else if (!resultsPublished && wasPublished) {
-                    // Switched back to live mode (admin reset)
                     switchToLiveMode();
                 }
 
-                // 🔧 FIXED TIMER LOGIC - Handle competition timer (only in live mode)
+                // Handle competition timer (only in live mode)
                 if (!resultsPublished) {
-                    // Get competition status and timing data from backend
-                    // Handle both possible field name formats
                     const competitionStatus = data.competitionStatus || data.status;
                     const startTime = data.startTime || data.competitionStartTime;
                     const duration = data.durationMinutes || data.competitionDuration;
                     
                     console.log('Competition status:', competitionStatus, 'Start time:', startTime, 'Duration:', duration);
                     
-                    // Handle manually stopped states (both 'stop' and 'stopped')
                     if (competitionStatus === 'stop' || competitionStatus === 'stopped') {
-                        // 🔧 KEY FIX: Competition was manually ended by admin
                         document.getElementById('timer').textContent = '🏁 Adventure Complete - Awaiting Results';
+                        document.getElementById('penaltyWarning').classList.remove('show');
                         
-                        // Clear any running timer
                         if (timerInterval) {
                             clearInterval(timerInterval);
                             timerInterval = null;
                         }
                         
-                        // Hide freeze overlay if it's showing
                         if (isFrozen) {
                             hideFreezeOverlay();
                         }
                         
                     } else if (startTime && duration && (competitionStatus === 'start' || competitionStatus === 'running')) {
-                        // Competition is actively running (handle both 'start' and 'running')
                         const startTimeMs = new Date(startTime).getTime();
                         const durationMs = duration * 60 * 1000;
                         competitionEndTime = startTimeMs + durationMs;
@@ -793,20 +1019,21 @@
                         updateTimer();
                         
                     } else {
-                        // Competition hasn't started yet or unknown state
                         document.getElementById('timer').textContent = '⚓ Timer not active';
+                        document.getElementById('penaltyWarning').classList.remove('show');
                         
-                        // Clear any running timer
                         if (timerInterval) {
                             clearInterval(timerInterval);
                             timerInterval = null;
                         }
                         
-                        // Hide freeze overlay if it's showing
                         if (isFrozen) {
                             hideFreezeOverlay();
                         }
                     }
+                } else {
+                    // Results published - hide penalty warning
+                    document.getElementById('penaltyWarning').classList.remove('show');
                 }
 
                 // Handle leaderboard data
@@ -814,15 +1041,13 @@
                 
                 if (data.leaderboard && Array.isArray(data.leaderboard)) {
                     teams = data.leaderboard;
-                    console.log('Using data.leaderboard:', teams);
                 } else if (data.teams && Array.isArray(data.teams)) {
                     teams = data.teams;
-                    console.log('Using data.teams:', teams);
                 } else {
                     console.warn('No teams found in response. Full data:', data);
                 }
 
-                // 🔧 HIDE SCORES when adventure complete but results not published
+                // Determine if scores should be shown
                 const competitionStatus = data.competitionStatus || data.status;
                 const showScores = resultsPublished || (competitionStatus !== 'stop' && competitionStatus !== 'stopped');
 
@@ -846,7 +1071,7 @@
 
         // Start the application
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Leaderboard page loaded');
+            console.log('Enhanced leaderboard page loaded');
             loadLeaderboard();
             
             // Set up auto-refresh (will be stopped when results published)
