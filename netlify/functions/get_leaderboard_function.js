@@ -81,9 +81,14 @@ exports.handler = async (event, context) => {
           startTime = startTimeValue; // Store for admin panel
           durationMinutes = parseInt(duration) || 90; // Store for admin panel
           
-          // Check if results are published
-          resultsPublished = published === 'true';
-          console.log('Results published status:', resultsPublished);
+          // 🔧 FIXED: Handle all possible published values from Google Sheets
+          resultsPublished = published === true || 
+                            published === 'true' || 
+                            published === 'TRUE' || 
+                            published === 'yes' || 
+                            published === 'YES';
+                            
+          console.log('Results published check - raw value:', published, 'type:', typeof published, 'result:', resultsPublished);
           
           if (status === 'start' && startTimeValue) {
             competitionStartTime = startTimeValue;
@@ -169,6 +174,7 @@ exports.handler = async (event, context) => {
 
     const timestamp = Date.now();
     console.log('Processed', teams.length, 'teams,', leaderboard.length, 'on leaderboard');
+    console.log('🔧 PUBLISH DEBUG - Final resultsPublished value being returned:', resultsPublished);
 
     return {
       statusCode: 200,
@@ -202,6 +208,7 @@ exports.handler = async (event, context) => {
           competitionStartTime: competitionStartTime,
           competitionDuration: competitionDuration,
           resultsPublished: resultsPublished,
+          publishedDebug: `Raw published value: ${published}, Type: ${typeof published}, Final result: ${resultsPublished}`,
           apiCallsUsed: 2,
           sheetsProcessed: ['Competition', 'Leaderboard']
         }
