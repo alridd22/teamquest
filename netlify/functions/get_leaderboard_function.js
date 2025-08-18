@@ -55,6 +55,7 @@ exports.handler = async (event, context) => {
     let competitionStatus = 'stopped'; // FIXED: Store actual status value
     let startTime = null; // FIXED: Store start time for admin panel
     let durationMinutes = 90; // FIXED: Store duration for admin panel
+    let published = null; // FIXED: Declare at top level for debug access
     
     try {
       const competitionSheet = doc.sheetsByTitle['Competition'];
@@ -72,7 +73,7 @@ exports.handler = async (event, context) => {
           const status = competitionRow.get('Status');
           const startTimeValue = competitionRow.get('Start Time');
           const duration = competitionRow.get('Duration Minutes');
-          const published = competitionRow.get('Results Published');
+          published = competitionRow.get('Results Published'); // FIXED: Use top-level variable
           
           console.log('Competition data read:', { status, startTimeValue, duration, published });
           
