@@ -229,6 +229,11 @@
             border-color: #FF8C00; 
             color: #8B4513;
         }
+        .status-ended { 
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); 
+            border-color: #DAA520; 
+            color: #8B4513;
+        }
 
         .control-buttons {
             display: grid;
@@ -304,6 +309,8 @@
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
+            background: #6c757d !important;
+            color: #fff !important;
         }
 
         .btn:disabled:hover {
@@ -677,7 +684,7 @@
             <div class="adventure-control">
                 <div class="timer-display" id="timerDisplay">01:30:00</div>
                 <div class="adventure-status status-stopped" id="timerStatus">
-                    🏴‍☠️ Adventure Awaiting Launch
+                    🔄 Loading status...
                 </div>
                 
                 <div class="control-buttons">
@@ -785,8 +792,9 @@
     </div>
 
     <script>
-        // Adventure state management
+        // 🔧 FIXED STATE MANAGEMENT
         let adventureState = {
+            backendStatus: null, // Track actual backend status
             isRunning: false,
             isPaused: false,
             timeRemaining: 90 * 60, // 90 minutes in seconds
@@ -794,8 +802,7 @@
             crews: [],
             resultsPublished: false,
             competitionData: null,
-            competitionStatus: 'stopped', // Track backend competition status
-            competitionEnded: false // Track if competition has ended
+            hasEnded: false // Track if competition has been ended
         };
 
         let timerInterval = null;
@@ -803,13 +810,101 @@
 
         // Initialize admin panel
         document.addEventListener('DOMContentLoaded', function() {
-            loadCrewData();
-            updateTimerDisplay();
-            updateButtonStates();
+            console.log('Admin panel loading - checking current state...');
+            loadCurrentState(); // Load backend state first
             
-            // Auto-refresh crew data every 30 seconds
-            dataRefreshInterval = setInterval(loadCrewData, 30000);
+            // Auto-refresh data every 30 seconds
+            dataRefreshInterval = setInterval(loadCurrentState, 30000);
         });
+
+        // 🔧 CRITICAL FIX: Load current backend state on page load
+        async function loadCurrentState() {
+            try {
+                console.log('Loading current competition state from backend...');
+                
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                const data = await response.json();
+                
+                if (!data || !data.success) {
+                    throw new Error('Failed to get competition status');
+                }
+                
+                // Update state with backend data
+                adventureState.backendStatus = data.competitionStatus || data.status;
+                adventureState.resultsPublished = data.resultsPublished === 'yes' || data.resultsPublished === true;
+                adventureState.crews = data.teams || data.leaderboard || [];
+                adventureState.competitionData = data;
+                
+                console.log('Backend status:', adventureState.backendStatus);
+                console.log('Results published:', adventureState.resultsPublished);
+                
+                // Sync local state with backend
+                syncWithBackendState(data);
+                
+                // Update UI
+                updateTimerDisplay();
+                updateButtonStates();
+                updateResultsManagement();
+                renderCrews(adventureState.crews);
+                updateStatistics(adventureState.crews);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('crewsContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading current state:', error);
+                showMessage('Failed to load current status: ' + error.message, 'error');
+            }
+        }
+
+        // 🔧 SYNC LOCAL STATE WITH BACKEND
+        function syncWithBackendState(data) {
+            const backendStatus = (data.competitionStatus || data.status || '').toLowerCase();
+            
+            if (backendStatus === 'start' || backendStatus === 'running') {
+                adventureState.isRunning = true;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                
+                // Calculate time remaining from backend data
+                if (data.startTime && data.durationMinutes) {
+                    const startTime = new Date(data.startTime);
+                    const duration = data.durationMinutes * 60 * 1000;
+                    const endTime = new Date(startTime.getTime() + duration);
+                    const now = new Date();
+                    const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+                    adventureState.timeRemaining = timeLeft;
+                    
+                    // Start timer if not already running
+                    if (!timerInterval) {
+                        startTimer();
+                    }
+                }
+                
+            } else if (backendStatus === 'stop' || backendStatus === 'stopped') {
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = true; // Mark as ended
+                
+                // Stop timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+            } else {
+                // Not started or unknown state
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                adventureState.timeRemaining = 90 * 60; // Reset to 90 minutes
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+            }
+        }
 
         function formatTime(seconds) {
             if (seconds <= 0) return "QUEST COMPLETE!";
@@ -826,18 +921,22 @@
             
             display.textContent = formatTime(adventureState.timeRemaining);
             
-            // Sync with backend competition status
-            if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
+            // Update status based on current state
+            if (adventureState.resultsPublished) {
+                status.innerHTML = '🏆 Final Results Published';
+                status.className = 'adventure-status status-ended';
+                display.style.color = '#8B4513';
+            } else if (adventureState.hasEnded) {
+                status.innerHTML = '🏁 Adventure Complete - Ready to Publish';
+                status.className = 'adventure-status status-ended';
+                display.style.color = '#8B4513';
+            } else if (adventureState.isRunning && !adventureState.isPaused) {
                 status.innerHTML = '🏴‍☠️ Adventure in Progress';
                 status.className = 'adventure-status status-running';
                 display.style.color = '#006400';
-            } else if (adventureState.isPaused || adventureState.competitionStatus === 'paused') {
+            } else if (adventureState.isPaused) {
                 status.innerHTML = '⏸️ Quest Paused';
                 status.className = 'adventure-status status-paused';
-                display.style.color = '#8B4513';
-            } else if (adventureState.competitionStatus === 'stopped' && adventureState.competitionEnded) {
-                status.innerHTML = '⚓ Adventure Ended - Results Ready';
-                status.className = 'adventure-status status-stopped';
                 display.style.color = '#8B4513';
             } else {
                 status.innerHTML = '🏴‍☠️ Adventure Awaiting Launch';
@@ -846,31 +945,56 @@
             }
 
             // Change color based on time remaining
-            if (adventureState.timeRemaining <= 300 && adventureState.competitionStatus === 'running') { // Last 5 minutes
+            if (adventureState.timeRemaining <= 300 && adventureState.isRunning) { // Last 5 minutes
                 display.style.color = '#DC143C';
-            } else if (adventureState.timeRemaining <= 900 && adventureState.competitionStatus === 'running') { // Last 15 minutes
+            } else if (adventureState.timeRemaining <= 900 && adventureState.isRunning) { // Last 15 minutes
                 display.style.color = '#FF8C00';
             }
         }
 
+        // 🔧 FIXED BUTTON STATE LOGIC
         function updateButtonStates() {
             const startBtn = document.getElementById('startBtn');
             const pauseBtn = document.getElementById('pauseBtn');
             const stopBtn = document.getElementById('stopBtn');
             const resetBtn = document.getElementById('resetBtn');
 
-            if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
+            if (adventureState.resultsPublished) {
+                // Results published - only reset available
                 startBtn.disabled = true;
+                startBtn.innerHTML = '🏆 Results Published';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+                
+            } else if (adventureState.hasEnded) {
+                // Adventure ended but results not published - CRITICAL: prevent restart
+                startBtn.disabled = true;
+                startBtn.innerHTML = '🔒 Adventure Ended';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                stopBtn.innerHTML = '✅ Adventure Ended';
+                resetBtn.disabled = false;
+                
+            } else if (adventureState.isRunning && !adventureState.isPaused) {
+                // Running
+                startBtn.disabled = true;
+                startBtn.innerHTML = '✅ Adventure Running';
                 pauseBtn.disabled = false;
                 stopBtn.disabled = false;
+                stopBtn.innerHTML = '⏹️ End Adventure';
                 resetBtn.disabled = true;
-            } else if (adventureState.isPaused || adventureState.competitionStatus === 'paused') {
+                
+            } else if (adventureState.isPaused) {
+                // Paused
                 startBtn.disabled = false;
                 startBtn.innerHTML = '▶️ Resume Quest';
                 pauseBtn.disabled = true;
                 stopBtn.disabled = false;
                 resetBtn.disabled = true;
+                
             } else {
+                // Not started
                 startBtn.disabled = false;
                 startBtn.innerHTML = '🚀 Launch Adventure';
                 pauseBtn.disabled = true;
@@ -894,137 +1018,44 @@
                 resultsStatus.innerHTML = '🔒 Results Not Published - Gallery Locked';
                 resultsStatus.className = 'results-status results-unpublished';
                 
-                // FIXED LOGIC: Enable publish button if:
-                // 1. Competition is running and 20 minutes or less remaining, OR
-                // 2. Timer naturally reached 0, OR  
-                // 3. Competition has been manually ended (stopped)
+                // Enable publish if adventure has ended or time is almost up
                 const timeLeftMinutes = Math.floor(adventureState.timeRemaining / 60);
-                const canPublish = (timeLeftMinutes <= 20 && adventureState.competitionStatus === 'running') || 
-                                 adventureState.timeRemaining <= 0 || 
-                                 (adventureState.competitionStatus === 'stopped' && adventureState.competitionEnded);
+                const canPublish = adventureState.hasEnded || 
+                                 (adventureState.isRunning && timeLeftMinutes <= 20) ||
+                                 adventureState.timeRemaining <= 0;
                 
                 if (canPublish) {
                     publishBtn.disabled = false;
+                    publishBtn.innerHTML = '🏆 Publish Final Results & Unlock Gallery';
                     publishWarning.style.display = 'block';
                 } else {
                     publishBtn.disabled = true;
+                    publishBtn.innerHTML = '🔒 Results Not Ready';
                     publishWarning.style.display = 'none';
                 }
             }
         }
 
-        async function publishResults() {
-            if (!confirm('Are ye absolutely certain ye want to publish the final results? This will unfreeze the leaderboard and unlock the treasure gallery for all crews to see. This action cannot be undone!')) {
+        // 🔧 FIXED START FUNCTION WITH STATE VALIDATION
+        async function startAdventure() {
+            // CRITICAL: Check current state before allowing start
+            await loadCurrentState(); // Refresh state from backend
+            
+            if (adventureState.hasEnded) {
+                alert('⚠️ Cannot restart adventure that has been completed!\n\nUse "Reset Timer" to prepare for a new adventure.');
+                return;
+            }
+            
+            if (adventureState.resultsPublished) {
+                alert('⚠️ Cannot restart - results have been published!\n\nUse "Reset Timer" to prepare for a new adventure.');
+                return;
+            }
+            
+            if (adventureState.isRunning && !adventureState.isPaused) {
+                alert('⚠️ Adventure is already running!');
                 return;
             }
 
-            try {
-                const response = await fetch('/.netlify/functions/start_competition_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'publish_results'
-                    })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                    adventureState.resultsPublished = true;
-                    updateResultsManagement();
-                    showMessage('🏆 Final results published! The treasure gallery is now unlocked and the leaderboard unfrozen for all crews to see!', 'success');
-                } else {
-                    throw new Error(result.error || 'Failed to publish results');
-                }
-            } catch (error) {
-                console.error('Error publishing results:', error);
-                showMessage(`Failed to publish results: ${error.message}`, 'error');
-            }
-        }
-
-        async function loadCrewData() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                const data = await response.json();
-                
-                if (data.success) {
-                    adventureState.crews = data.teams || data.leaderboard || [];
-                    adventureState.resultsPublished = data.resultsPublished || false;
-                    adventureState.competitionData = data;
-                    
-                    // SYNC BACKEND STATE: Update local state based on backend competition status
-                    if (data.competitionStatus) {
-                        const backendStatus = data.competitionStatus.toLowerCase();
-                        // FIXED: Map "start" to "running" for frontend consistency
-                        adventureState.competitionStatus = backendStatus === 'start' ? 'running' : backendStatus;
-                        
-                        console.log('Backend status:', backendStatus, '-> Frontend status:', adventureState.competitionStatus);
-                        
-                        // If backend shows stopped and we have a start time, competition has ended
-                        if (backendStatus === 'stopped' && data.startTime) {
-                            adventureState.competitionEnded = true;
-                            adventureState.isRunning = false;
-                            adventureState.isPaused = false;
-                            
-                            // Calculate remaining time based on start time and duration
-                            if (data.startTime && data.durationMinutes) {
-                                const startTime = new Date(data.startTime);
-                                const endTime = new Date(startTime.getTime() + (data.durationMinutes * 60 * 1000));
-                                const now = new Date();
-                                const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
-                                adventureState.timeRemaining = timeLeft;
-                            }
-                        } else if (backendStatus === 'running') {
-                            adventureState.competitionEnded = false;
-                            adventureState.isRunning = true;
-                            adventureState.isPaused = false;
-                            
-                            // Start local timer if not already running
-                            if (!timerInterval) {
-                                timerInterval = setInterval(() => {
-                                    if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
-                                        adventureState.timeRemaining--;
-                                        
-                                        if (adventureState.timeRemaining <= 0) {
-                                            stopAdventure();
-                                            showMessage('🏆 Adventure time has ended! All crews return to base!', 'success');
-                                        }
-                                        
-                                        updateTimerDisplay();
-                                        updateResultsManagement();
-                                    }
-                                }, 1000);
-                            }
-                        } else {
-                            // Backend shows stopped but no evidence of a previous competition
-                            adventureState.competitionEnded = false;
-                            adventureState.isRunning = false;
-                            adventureState.isPaused = false;
-                        }
-                        
-                        // Update UI based on synchronized state
-                        updateButtonStates();
-                        updateTimerDisplay();
-                    }
-                    
-                    renderCrews(adventureState.crews);
-                    updateStatistics(adventureState.crews);
-                    updateResultsManagement();
-                    
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('crewsContent').style.display = 'block';
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                console.error('Error loading crew data:', error);
-                showMessage('Failed to load crew data from the treasure logs. ' + error.message, 'error');
-            }
-        }
-
-        async function startAdventure() {
             try {
                 const action = adventureState.isPaused ? 'start' : 'start';
                 
@@ -1050,59 +1081,53 @@
                 console.log('Start competition result:', result);
                 
                 if (result.success) {
-                    // FIXED: Clear any existing timer to prevent conflicts
-                    if (timerInterval) {
-                        clearInterval(timerInterval);
-                        timerInterval = null;
-                    }
-                    
                     if (adventureState.isPaused) {
-                        // Resume from pause
                         adventureState.isPaused = false;
                     } else {
-                        // Start fresh
                         adventureState.isRunning = true;
                         adventureState.startTime = new Date();
-                        adventureState.competitionEnded = false;
-                        // FIXED: Always reset to 90 minutes when starting fresh
                         adventureState.timeRemaining = 90 * 60;
+                        adventureState.hasEnded = false;
                     }
 
                     adventureState.isRunning = true;
-                    adventureState.competitionStatus = 'running';
+                    startTimer();
                     
-                    // Start timer countdown
-                    timerInterval = setInterval(() => {
-                        if (adventureState.competitionStatus === 'running' && !adventureState.isPaused) {
-                            adventureState.timeRemaining--;
-                            
-                            if (adventureState.timeRemaining <= 0) {
-                                stopAdventure();
-                                showMessage('🏆 Adventure time has ended! All crews return to base!', 'success');
-                            }
-                            
-                            updateTimerDisplay();
-                            updateResultsManagement(); // Update publish button availability
-                        }
-                    }, 1000);
-
                     updateButtonStates();
                     updateTimerDisplay();
                     updateResultsManagement();
-                    showMessage('🚀 Adventure launched! The treasure hunt has begun! Leaderboard will update within 30 seconds.', 'success');
+                    showMessage('🚀 Adventure launched! The treasure hunt has begun!', 'success');
                     
-                    // Force refresh crew data to pick up any changes
-                    setTimeout(() => {
-                        loadCrewData();
-                    }, 2000);
+                    // Refresh data
+                    setTimeout(loadCurrentState, 2000);
                     
                 } else {
                     throw new Error(result.error || 'Failed to start adventure');
                 }
             } catch (error) {
                 console.error('Error starting adventure:', error);
-                showMessage(`Failed to launch adventure: ${error.message}. Please check browser console for details.`, 'error');
+                showMessage(`Failed to launch adventure: ${error.message}`, 'error');
             }
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(() => {
+                if (adventureState.isRunning && !adventureState.isPaused) {
+                    adventureState.timeRemaining--;
+                    
+                    if (adventureState.timeRemaining <= 0) {
+                        stopAdventure();
+                        showMessage('🏆 Adventure time has ended! All crews return to base!', 'success');
+                    }
+                    
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                }
+            }, 1000);
         }
 
         async function pauseAdventure() {
@@ -1121,7 +1146,7 @@
                 
                 if (result.success) {
                     adventureState.isPaused = true;
-                    adventureState.competitionStatus = 'paused';
+                    adventureState.isRunning = false;
                     updateButtonStates();
                     updateTimerDisplay();
                     updateResultsManagement();
@@ -1152,8 +1177,7 @@
                 if (result.success) {
                     adventureState.isRunning = false;
                     adventureState.isPaused = false;
-                    adventureState.competitionStatus = 'stopped';
-                    adventureState.competitionEnded = true; // Mark as ended when manually stopped
+                    adventureState.hasEnded = true; // Mark as ended
                     
                     if (timerInterval) {
                         clearInterval(timerInterval);
@@ -1174,6 +1198,8 @@
         }
 
         async function resetTimer() {
+            if (!confirm('Reset competition? This will clear all data and prepare for a new adventure.')) return;
+            
             try {
                 const response = await fetch('/.netlify/functions/start_competition_function', {
                     method: 'POST',
@@ -1190,10 +1216,9 @@
                 if (result.success) {
                     adventureState.isRunning = false;
                     adventureState.isPaused = false;
-                    adventureState.timeRemaining = 90 * 60; // Reset to 90 minutes
-                    adventureState.resultsPublished = false; // Reset results published status
-                    adventureState.competitionStatus = 'stopped';
-                    adventureState.competitionEnded = false; // Reset ended flag
+                    adventureState.timeRemaining = 90 * 60;
+                    adventureState.resultsPublished = false;
+                    adventureState.hasEnded = false;
                     
                     if (timerInterval) {
                         clearInterval(timerInterval);
@@ -1210,6 +1235,39 @@
             } catch (error) {
                 console.error('Error resetting timer:', error);
                 showMessage('Failed to reset timer.', 'error');
+            }
+        }
+
+        async function publishResults() {
+            if (!confirm('Are ye absolutely certain ye want to publish the final results? This will unfreeze the leaderboard and unlock the treasure gallery for all crews to see. This action cannot be undone!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'publish_results'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.resultsPublished = true;
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('🏆 Final results published! The treasure gallery is now unlocked and the leaderboard unfrozen for all crews to see!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to publish results');
+                }
+            } catch (error) {
+                console.error('Error publishing results:', error);
+                showMessage(`Failed to publish results: ${error.message}`, 'error');
             }
         }
 
@@ -1280,11 +1338,9 @@
         }
 
         function updateCrewStatus(teamCode, newStatus) {
-            // In a real implementation, this would update the Google Sheet
             console.log(`Updating ${teamCode} status to ${newStatus}`);
             showMessage(`Crew ${teamCode} status updated to ${newStatus}`, 'success');
             
-            // Update local state
             const crew = adventureState.crews.find(c => (c.teamCode || c.code) === teamCode);
             if (crew) {
                 crew.status = newStatus;
@@ -1292,11 +1348,9 @@
         }
 
         function toggleCrewLock(teamCode, isLocked) {
-            // In a real implementation, this would update the Google Sheet
             console.log(`${isLocked ? 'Locking' : 'Unlocking'} ${teamCode} doubloons`);
             showMessage(`Crew ${teamCode} doubloons ${isLocked ? 'locked' : 'unlocked'}`, 'success');
             
-            // Update local state
             const crew = adventureState.crews.find(c => (c.teamCode || c.code) === teamCode);
             if (crew) {
                 crew.locked = isLocked;
@@ -1311,7 +1365,6 @@
             
             messagesContainer.appendChild(message);
             
-            // Auto-remove message after 5 seconds
             setTimeout(() => {
                 if (messagesContainer.contains(message)) {
                     messagesContainer.removeChild(message);
