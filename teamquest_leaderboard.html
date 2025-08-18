@@ -714,19 +714,57 @@
                     switchToLiveMode();
                 }
 
-                // Handle competition timer (only in live mode)
+                // 🔧 FIXED TIMER LOGIC - Handle competition timer (only in live mode)
                 if (!resultsPublished) {
-                    if (data.competitionStartTime && data.competitionDuration) {
-                        const startTime = new Date(data.competitionStartTime).getTime();
-                        const duration = data.competitionDuration * 60 * 1000;
-                        competitionEndTime = startTime + duration;
+                    // Get competition status and timing data from backend
+                    // Handle both possible field name formats
+                    const competitionStatus = data.competitionStatus || data.status;
+                    const startTime = data.startTime || data.competitionStartTime;
+                    const duration = data.durationMinutes || data.competitionDuration;
+                    
+                    console.log('Competition status:', competitionStatus, 'Start time:', startTime, 'Duration:', duration);
+                    
+                    // Handle manually stopped states (both 'stop' and 'stopped')
+                    if (competitionStatus === 'stop' || competitionStatus === 'stopped') {
+                        // 🔧 KEY FIX: Competition was manually ended by admin
+                        document.getElementById('timer').textContent = '🏁 Adventure Complete - Awaiting Results';
+                        
+                        // Clear any running timer
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                        }
+                        
+                        // Hide freeze overlay if it's showing
+                        if (isFrozen) {
+                            hideFreezeOverlay();
+                        }
+                        
+                    } else if (startTime && duration && (competitionStatus === 'start' || competitionStatus === 'running')) {
+                        // Competition is actively running (handle both 'start' and 'running')
+                        const startTimeMs = new Date(startTime).getTime();
+                        const durationMs = duration * 60 * 1000;
+                        competitionEndTime = startTimeMs + durationMs;
                         
                         if (!timerInterval) {
                             timerInterval = setInterval(updateTimer, 1000);
                         }
                         updateTimer();
+                        
                     } else {
-                        document.getElementById('timer').textContent = 'Timer not active';
+                        // Competition hasn't started yet or unknown state
+                        document.getElementById('timer').textContent = '⚓ Timer not active';
+                        
+                        // Clear any running timer
+                        if (timerInterval) {
+                            clearInterval(timerInterval);
+                            timerInterval = null;
+                        }
+                        
+                        // Hide freeze overlay if it's showing
+                        if (isFrozen) {
+                            hideFreezeOverlay();
+                        }
                     }
                 }
 
