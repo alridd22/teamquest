@@ -896,7 +896,7 @@
                 <!-- Penalty Warning System -->
                 <div class="penalty-warning" id="penaltyWarning">
                     <div style="font-size: 1.3em; margin-bottom: 10px;">⚠️ Late Return Penalties Active! ⚠️</div>
-                    <div>Teams checking in late will lose <strong>5 doubloons per minute</strong></div>
+                    <div>Teams checking in late will lose <strong>3 doubloons per minute</strong></div>
                     <div class="penalty-rate" id="penaltyRate">Current penalty: 0 minutes = 0 doubloons</div>
                 </div>
                 
@@ -1193,7 +1193,7 @@
                 
                 // Show penalty warning
                 penaltyWarning.classList.add('show');
-                penaltyRate.textContent = `Current penalty: ${adventureState.penaltyMinutes} minutes = ${adventureState.penaltyMinutes * 5} doubloons`;
+                penaltyRate.textContent = `Current penalty: ${adventureState.penaltyMinutes} minutes = ${adventureState.penaltyMinutes * 3} doubloons`;
                 
                 if (adventureState.allTeamsReturned) {
                     status.innerHTML = '🏁 All Crews Returned - Adventure Complete';
@@ -1413,7 +1413,7 @@
                             <div class="penalty-controls">
                                 <label>Penalty:</label>
                                 <input type="number" class="penalty-input" id="penalty-input-${teamCode}" 
-                                       value="${penalty}" min="0" max="999" step="5">
+                                       value="${penalty}" min="0" max="999" step="3">
                                 <span>doubloons</span>
                                 <button class="penalty-apply-btn" onclick="applyManualPenalty('${teamCode}')">
                                     Apply
@@ -1491,7 +1491,7 @@
             let isLateReturn = false;
             
             if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
-                penalty = adventureState.penaltyMinutes * 5;
+                penalty = adventureState.penaltyMinutes * 3;
                 isLateReturn = true;
             }
             
@@ -1579,7 +1579,7 @@
                 // Auto-detect penalty for returned teams
                 if (newStatus === 'returned') {
                     if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
-                        penalty = customPenalty !== null ? customPenalty : adventureState.penaltyMinutes * 5;
+                        penalty = customPenalty !== null ? customPenalty : adventureState.penaltyMinutes * 3;
                         finalStatus = 'late'; // Internal status for penalty tracking
                     }
                 }
@@ -1633,7 +1633,7 @@
                         status: customPenalty > 0 ? 'late' : 'returned', // Internal status based on penalty
                         penalty: customPenalty,
                         returnTime: new Date().toISOString(),
-                        penaltyMinutes: Math.ceil(customPenalty / 5) // Calculate equivalent minutes
+                        penaltyMinutes: Math.ceil(customPenalty / 3) // Calculate equivalent minutes
                     })
                 });
 
