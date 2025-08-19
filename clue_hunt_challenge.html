@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamQuest - Terry's Treasure Hunt</title>
     <style>
-        /* Navigation Styles */
+        /* Updated Navigation Styles with TeamQuest Logo */
         .treasure-nav {
             position: fixed;
             top: 0;
@@ -16,7 +16,7 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             z-index: 1000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 70px;
+            height: 80px; /* Increased height for logo */
         }
 
         .nav-container {
@@ -30,17 +30,31 @@
         }
 
         .nav-logo {
-            color: #DAA520;
-            font-size: 1.6rem;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             text-decoration: none;
             transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
         }
 
         .nav-logo:hover {
-            color: #FFD700;
             transform: scale(1.05);
+        }
+
+        .nav-logo img {
+            height: 50px; /* Desktop size */
+            width: auto;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .nav-logo img {
+                height: 85px !important; /* Much bigger on mobile */
+            }
+        }
+
+        .nav-logo:hover img {
+            filter: drop-shadow(2px 2px 8px rgba(255,215,0,0.6));
         }
 
         .nav-menu {
@@ -136,12 +150,35 @@
 
         /* Mobile Styles */
         @media (max-width: 768px) {
+            .treasure-nav {
+                height: 120px; /* Taller for bigger logo */
+            }
+
+            .nav-container {
+                justify-content: center;
+                position: relative;
+            }
+
+            .nav-logo {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .nav-toggle {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                display: block;
+            }
+
             .nav-menu {
                 position: fixed;
-                top: 70px;
+                top: 120px;
                 left: -100%;
                 width: 100%;
-                height: calc(100vh - 70px);
+                height: calc(100vh - 120px);
                 background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
                 flex-direction: column;
                 align-items: center;
@@ -153,10 +190,6 @@
 
             .nav-menu.active {
                 left: 0;
-            }
-
-            .nav-toggle {
-                display: block;
             }
 
             .nav-link {
@@ -224,8 +257,14 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-            padding-top: 90px !important; /* Account for fixed nav */
+            padding-top: 100px !important; /* Account for taller fixed nav */
             position: relative;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding-top: 140px !important; /* Account for mobile nav height */
+            }
         }
 
         body::before {
@@ -824,10 +863,12 @@
     </style>
 </head>
 <body>
-    <!-- Navigation Menu -->
+    <!-- Navigation Menu with TeamQuest Logo -->
     <nav class="treasure-nav" id="treasure-nav">
         <div class="nav-container">
-            <a href="https://theteamquest.netlify.app/" class="nav-logo">🏴‍☠️ Terry's Treasure Hunt</a>
+            <a href="https://theteamquest.netlify.app/" class="nav-logo">
+                <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
+            </a>
             
             <ul class="nav-menu" id="nav-menu">
                 <li class="nav-item">
