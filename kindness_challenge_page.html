@@ -145,19 +145,30 @@
         /* Mobile Styles */
         @media (max-width: 768px) {
             .treasure-nav {
-                height: 70px; /* Slightly smaller on mobile */
+                height: 75px; /* Increased height for larger logo */
+            }
+
+            .nav-container {
+                justify-content: center; /* Center the logo on mobile */
+                position: relative; /* For hamburger positioning */
+            }
+
+            .nav-logo {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%); /* Perfect centering */
             }
 
             .nav-logo img {
-                height: 40px; /* Smaller logo on mobile */
+                height: 55px; /* Bigger logo on mobile */
             }
 
             .nav-menu {
                 position: fixed;
-                top: 70px;
+                top: 75px; /* Updated for new nav height */
                 left: -100%;
                 width: 100%;
-                height: calc(100vh - 70px);
+                height: calc(100vh - 75px); /* Updated for new nav height */
                 background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
                 flex-direction: column;
                 align-items: center;
@@ -173,6 +184,10 @@
 
             .nav-toggle {
                 display: block;
+                position: absolute;
+                right: 20px; /* Position hamburger on the right */
+                top: 50%;
+                transform: translateY(-50%); /* Vertically center the hamburger */
             }
 
             .nav-link {
@@ -246,7 +261,7 @@
 
         @media (max-width: 768px) {
             body {
-                padding-top: 90px !important; /* Account for mobile nav height */
+                padding-top: 95px !important; /* Account for increased mobile nav height */
             }
         }
 
