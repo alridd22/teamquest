@@ -151,22 +151,26 @@
         /* Mobile Styles */
         @media (max-width: 768px) {
             .treasure-nav {
-                height: 75px; /* Increased height for larger logo */
+                height: 120px; /* Taller for bigger logo - consistent with other pages */
             }
 
             .nav-container {
-                justify-content: center; /* Center the logo on mobile */
-                position: relative; /* For hamburger positioning */
+                justify-content: center;
+                position: relative;
             }
 
             .nav-logo {
                 position: absolute;
                 left: 50%;
-                transform: translateX(-50%); /* Perfect centering */
+                transform: translateX(-50%);
             }
 
-            .nav-logo img {
-                height: 55px; /* Bigger logo on mobile */
+            .nav-toggle {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                display: block;
             }
 
             .nav-menu {
@@ -186,14 +190,6 @@
 
             .nav-menu.active {
                 left: 0;
-            }
-
-            .nav-toggle {
-                display: block;
-                position: absolute;
-                right: 20px; /* Position hamburger on the right */
-                top: 50%;
-                transform: translateY(-50%); /* Vertically center the hamburger */
             }
 
             .nav-link {
@@ -267,7 +263,7 @@
 
         @media (max-width: 768px) {
             body {
-                padding-top: 120px !important; /* Match nav height */
+                padding-top: 140px !important; /* Account for mobile nav height */
             }
         }
 
