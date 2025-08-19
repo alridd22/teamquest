@@ -600,7 +600,7 @@
                     Late Return Penalties Active!
                 </div>
                 <div style="font-size: 0.8em; margin-top: 5px;">
-                    <strong>5 doubloons lost per minute late</strong>
+                    <strong>3 doubloons lost per minute late</strong>
                 </div>
             </div>
 
@@ -823,8 +823,15 @@
                 if (penalty > 0) entryClasses += ' penalized';
                 else if (status === 'late') entryClasses += ' late';
 
-                // Status badge
-                const statusBadge = status !== 'active' ? `<span class="team-status-badge status-${status}">${getStatusText(status)}</span>` : '';
+                // FIXED: Status badge with "Returned" + "Score Locked"
+                let statusDisplay = '';
+                if (status === 'returned' || status === 'late') {
+                    const badgeColor = penalty > 0 ? '#e74c3c' : '#27ae60';
+                    statusDisplay = `
+                        <span class="team-status-badge" style="background: ${badgeColor}; color: white;">Returned</span>
+                        <span class="team-status-badge" style="background: #8b4513; color: white; margin-left: 5px; font-size: 0.6em;">Score Locked</span>
+                    `;
+                }
 
                 // Add crown for winner in final results
                 const winnerCrown = (resultsPublished && rank === 1) ? ' 👑' : '';
@@ -866,7 +873,7 @@
                         <div class="team-info">
                             <div class="team-name">
                                 🏴‍☠️ ${teamName}${winnerCrown}
-                                ${statusBadge}
+                                ${statusDisplay}
                             </div>
                             ${penaltyDisplay}
                             <div class="team-activities">
@@ -884,15 +891,6 @@
             });
 
             leaderboard.innerHTML = html;
-        }
-
-        function getStatusText(status) {
-            switch (status) {
-                case 'active': return 'Active';
-                case 'returned': return 'Safe';
-                case 'late': return 'Late';
-                default: return status;
-            }
         }
 
         function updateTimer() {
