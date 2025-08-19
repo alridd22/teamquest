@@ -1002,8 +1002,22 @@
             <div class="stat-label">Returned Crews</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" id="lateCrews">-</div>
-            <div class="stat-label">Late Crews</div>
+            <div class="stat-number" id="penalizedCrews">-</div>
+            <div class="stat-label">Penalized Crews</div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%); border: 3px solid #8B4513; border-radius: 20px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+            <div style="text-align: center;">
+                <h3 id="confirmTitle" style="color: #8B4513; margin-bottom: 20px; font-size: 1.4em;"></h3>
+                <div id="confirmMessage" style="color: #8B4513; margin-bottom: 25px; line-height: 1.6;"></div>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button onclick="cancelReturn()" class="btn" style="background: linear-gradient(135deg, #A0522D, #8B4513); color: white; padding: 12px 20px;">Cancel</button>
+                    <button onclick="confirmReturn()" class="btn" style="background: linear-gradient(135deg, #32CD32, #228B22); color: white; padding: 12px 20px;">Confirm Return</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1354,8 +1368,10 @@
                 
                 crewCard.className = cardClasses;
                 
-                // Status badge
-                const statusBadge = `<span class="crew-status-badge status-${status}">${getStatusText(status)}</span>`;
+                // Status badge - show "returned" for both returned and late teams, but style differently
+                const displayStatus = (status === 'late' || status === 'returned') ? 'returned' : status;
+                const badgeClass = penalty > 0 ? 'status-late' : `status-${displayStatus}`;
+                const statusBadge = `<span class="crew-status-badge ${badgeClass}">${getStatusText(status)}</span>`;
                 
                 // Penalty info display
                 let penaltyDisplay = '';
@@ -1388,11 +1404,11 @@
                     `;
                 }
                 
-                // Manual penalty override section
+                // Manual penalty override section - show for teams with penalties
                 let penaltyOverride = '';
-                if (status === 'late' && adventureState.isRunning) {
+                if (penalty > 0 && adventureState.isRunning) {
                     penaltyOverride = `
-                        <div class="penalty-override ${penalty > 0 ? 'show' : ''}" id="penalty-override-${teamCode}">
+                        <div class="penalty-override show" id="penalty-override-${teamCode}">
                             <h4>Manual Penalty Override</h4>
                             <div class="penalty-controls">
                                 <label>Penalty:</label>
@@ -1419,12 +1435,11 @@
                     ${penaltyDisplay}
                     
                     <div class="crew-controls">
-                        <select class="status-select ${status === 'late' ? 'late' : ''}" 
-                                onchange="updateCrewStatus('${teamCode}', this.value)"
+                        <select class="status-select ${penalty > 0 ? 'late' : ''}" 
+                                onchange="handleStatusChange('${teamCode}', this.value, ${totalScore}, ${penalty})"
                                 ${!adventureState.isRunning ? 'disabled' : ''}>
                             <option value="active" ${status === 'active' ? 'selected' : ''}>🏴‍☠️ Active</option>
-                            <option value="returned" ${status === 'returned' ? 'selected' : ''}>⚓ Returned</option>
-                            <option value="late" ${status === 'late' ? 'selected' : ''}>⏰ Late</option>
+                            <option value="returned" ${status === 'returned' || status === 'late' ? 'selected' : ''}>⚓ Returned</option>
                         </select>
                         <label class="return-checkbox">
                             <input type="checkbox" ${locked ? 'checked' : ''} 
@@ -1448,20 +1463,125 @@
         function getStatusText(status) {
             switch (status) {
                 case 'active': return 'Active';
-                case 'returned': return 'Safe';
-                case 'late': return 'Late';
+                case 'returned': 
+                case 'late': return 'Returned';
                 default: return status;
             }
         }
 
-        // Enhanced crew status update with penalty calculation
-        async function updateCrewStatus(teamCode, newStatus) {
+        // Enhanced crew status update with confirmation and auto-penalty detection
+        let pendingStatusChange = null;
+
+        function handleStatusChange(teamCode, newStatus, currentScore, currentPenalty) {
+            if (newStatus === 'returned') {
+                // Show confirmation dialog for returning teams
+                showReturnConfirmation(teamCode, currentScore, currentPenalty);
+            } else {
+                // Direct update for active status
+                updateCrewStatus(teamCode, newStatus);
+            }
+        }
+
+        function showReturnConfirmation(teamCode, currentScore, currentPenalty) {
+            const team = adventureState.crews.find(c => (c.teamCode || c.code) === teamCode);
+            const teamName = team ? team.teamName || team.name : teamCode;
+            
+            // Calculate penalty if in penalty mode
+            let penalty = currentPenalty || 0;
+            let isLateReturn = false;
+            
+            if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
+                penalty = adventureState.penaltyMinutes * 5;
+                isLateReturn = true;
+            }
+            
+            const adjustedScore = Math.max(0, currentScore - penalty);
+            
+            // Store pending change
+            pendingStatusChange = {
+                teamCode,
+                teamName,
+                status: 'returned',
+                originalScore: currentScore,
+                penalty: penalty,
+                adjustedScore: adjustedScore,
+                isLateReturn: isLateReturn
+            };
+            
+            // Update modal content
+            const confirmTitle = document.getElementById('confirmTitle');
+            const confirmMessage = document.getElementById('confirmMessage');
+            
+            if (isLateReturn) {
+                confirmTitle.innerHTML = '⚠️ Confirm Late Team Return';
+                confirmMessage.innerHTML = `
+                    <strong>Are you sure ${teamName} has returned?</strong><br><br>
+                    • Original score: <strong>${currentScore} doubloons</strong><br>
+                    • Late penalty: <strong>-${penalty} doubloons (${adventureState.penaltyMinutes} minutes)</strong><br>
+                    • Final score: <strong>${adjustedScore} doubloons</strong><br><br>
+                    <span style="color: #DC143C;">⚠️ Doubloons will be FROZEN</span><br>
+                    <span style="color: #DC143C;">⚠️ No further activities allowed</span>
+                `;
+            } else {
+                confirmTitle.innerHTML = '⚓ Confirm Team Return';
+                confirmMessage.innerHTML = `
+                    <strong>Are you sure ${teamName} has returned?</strong><br><br>
+                    • Final score: <strong>${currentScore} doubloons</strong><br><br>
+                    <span style="color: #FF8C00;">⚠️ Doubloons will be FROZEN</span><br>
+                    <span style="color: #FF8C00;">⚠️ No further activities allowed</span>
+                `;
+            }
+            
+            // Show modal
+            const modal = document.getElementById('confirmationModal');
+            modal.style.display = 'flex';
+        }
+
+        function confirmReturn() {
+            if (!pendingStatusChange) return;
+            
+            const { teamCode, status, penalty } = pendingStatusChange;
+            
+            // Hide modal
+            document.getElementById('confirmationModal').style.display = 'none';
+            
+            // Process the return
+            updateCrewStatus(teamCode, status, penalty);
+            
+            // Clear pending change
+            pendingStatusChange = null;
+        }
+
+        function cancelReturn() {
+            // Hide modal
+            document.getElementById('confirmationModal').style.display = 'none';
+            
+            // Reset dropdown to previous value
+            if (pendingStatusChange) {
+                const team = adventureState.crews.find(c => (c.teamCode || c.code) === pendingStatusChange.teamCode);
+                if (team) {
+                    const dropdown = document.querySelector(`select[onchange*="${pendingStatusChange.teamCode}"]`);
+                    if (dropdown) {
+                        dropdown.value = team.status || 'active';
+                    }
+                }
+            }
+            
+            // Clear pending change
+            pendingStatusChange = null;
+        }
+
+        async function updateCrewStatus(teamCode, newStatus, customPenalty = null) {
             try {
                 let penalty = 0;
+                let finalStatus = newStatus;
                 
-                // Calculate penalty if marking as late during penalty phase
-                if (newStatus === 'late' && adventureState.penaltyMode) {
-                    penalty = adventureState.penaltyMinutes * 5;
+                // Auto-detect penalty for returned teams
+                if (newStatus === 'returned') {
+                    if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
+                        penalty = customPenalty !== null ? customPenalty : adventureState.penaltyMinutes * 5;
+                        finalStatus = 'late'; // Internal status for penalty tracking
+                    }
                 }
 
                 const response = await fetch('/.netlify/functions/start_competition_function', {
@@ -1472,10 +1592,10 @@
                     body: JSON.stringify({
                         action: 'update_team_status',
                         teamCode: teamCode,
-                        status: newStatus,
+                        status: finalStatus,
                         penalty: penalty,
                         returnTime: new Date().toISOString(),
-                        penaltyMinutes: adventureState.penaltyMinutes
+                        penaltyMinutes: adventureState.penaltyMinutes || 0
                     })
                 });
 
@@ -1483,9 +1603,9 @@
                     await loadCurrentState();
                     
                     if (penalty > 0) {
-                        showMessage(`Crew ${teamCode} marked as late. Penalty applied: -${penalty} doubloons`, 'error');
+                        showMessage(`${teamCode} returned late. Penalty applied: -${penalty} doubloons. Doubloons frozen.`, 'error');
                     } else {
-                        showMessage(`Crew ${teamCode} status updated to ${newStatus}`, 'success');
+                        showMessage(`${teamCode} returned safely. Doubloons frozen.`, 'success');
                     }
                 } else {
                     throw new Error('Failed to update crew status');
@@ -1496,7 +1616,7 @@
             }
         }
 
-        // Manual penalty override function
+        // Manual penalty override function - for already returned teams
         async function applyManualPenalty(teamCode) {
             const penaltyInput = document.getElementById(`penalty-input-${teamCode}`);
             const customPenalty = parseInt(penaltyInput.value) || 0;
@@ -1510,7 +1630,7 @@
                     body: JSON.stringify({
                         action: 'update_team_status',
                         teamCode: teamCode,
-                        status: 'late',
+                        status: customPenalty > 0 ? 'late' : 'returned', // Internal status based on penalty
                         penalty: customPenalty,
                         returnTime: new Date().toISOString(),
                         penaltyMinutes: Math.ceil(customPenalty / 5) // Calculate equivalent minutes
@@ -1532,13 +1652,16 @@
         function updateStatistics(crews) {
             const totalCrews = crews.length;
             const activeCrews = crews.filter(c => (c.status || 'active') === 'active').length;
-            const returnedCrews = crews.filter(c => (c.status || 'active') === 'returned').length;
-            const lateCrews = crews.filter(c => (c.status || 'active') === 'late').length;
+            const returnedCrews = crews.filter(c => {
+                const status = c.status || 'active';
+                return status === 'returned' || status === 'late';
+            }).length;
+            const penalizedCrews = crews.filter(c => (c.penalty || 0) > 0).length;
 
             document.getElementById('totalCrews').textContent = totalCrews;
             document.getElementById('activeCrews').textContent = activeCrews;
             document.getElementById('returnedCrews').textContent = returnedCrews;
-            document.getElementById('lateCrews').textContent = lateCrews;
+            document.getElementById('penalizedCrews').textContent = penalizedCrews;
 
             // Update activity counts
             document.getElementById('regCount').textContent = crews.filter(c => (c.registration || 0) > 0).length;
