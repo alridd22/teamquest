@@ -5,6 +5,169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamQuest - Terry's Verse Vault</title>
     <style>
+        /* Navigation Styles */
+        .treasure-nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #8B4513 0%, #654321 50%, #8B4513 100%);
+            border-bottom: 3px solid #DAA520;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            z-index: 1000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 70px;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            height: 100%;
+        }
+
+        .nav-logo {
+            color: #DAA520;
+            font-size: 1.6rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .nav-logo:hover {
+            color: #FFD700;
+            transform: scale(1.05);
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 25px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            color: #F5DEB3;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            display: block;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+
+        .nav-link:hover {
+            background: rgba(218, 165, 32, 0.2);
+            color: #DAA520;
+            transform: translateY(-2px);
+        }
+
+        .nav-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: linear-gradient(135deg, #654321 0%, #8B4513 100%);
+            border: 2px solid #DAA520;
+            border-radius: 8px;
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-item:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            display: block;
+            color: #F5DEB3;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-link:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-link:hover {
+            background: rgba(218, 165, 32, 0.3);
+            color: #DAA520;
+            padding-left: 25px;
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #DAA520;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            .nav-menu {
+                position: fixed;
+                top: 70px;
+                left: -100%;
+                width: 100%;
+                height: calc(100vh - 70px);
+                background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
+                flex-direction: column;
+                align-items: center;
+                padding-top: 30px;
+                gap: 15px;
+                transition: left 0.3s ease;
+                overflow-y: auto;
+            }
+
+            .nav-menu.active {
+                left: 0;
+            }
+
+            .nav-toggle {
+                display: block;
+            }
+
+            .nav-link {
+                font-size: 1.2rem;
+                padding: 12px 25px;
+                width: 200px;
+                text-align: center;
+            }
+
+            .nav-dropdown {
+                position: static;
+                opacity: 1;
+                visibility: visible;
+                transform: none;
+                background: rgba(101, 67, 33, 0.8);
+                border: none;
+                margin-top: 5px;
+                width: 220px;
+            }
+        }
+
+        /* Original Page Styles - Updated for Navigation */
         * {
             margin: 0;
             padding: 0;
@@ -19,6 +182,7 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            padding-top: 90px !important; /* Account for fixed nav */
             position: relative;
         }
 
@@ -452,6 +616,42 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Menu -->
+    <nav class="treasure-nav" id="treasure-nav">
+        <div class="nav-container">
+            <a href="https://theteamquest.netlify.app/" class="nav-logo">🏴‍☠️ Terry's Treasure Hunt</a>
+            
+            <ul class="nav-menu" id="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link">🎯 Activities ▼</a>
+                    <div class="nav-dropdown">
+                        <a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="dropdown-link">💎 The Treasure Hunt</a>
+                        <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link">🔍 The Scavenger Hunt</a>
+                        <a href="https://theteamquest.netlify.app/quiz_challenge" class="dropdown-link">⏰ The Timed Quiz</a>
+                        <a href="https://theteamquest.netlify.app/kindness_challenge_page" class="dropdown-link">❤️ The Kindness Task</a>
+                        <!-- Current activity (Limerick Challenge) excluded from menu -->
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">ℹ️ Help ▼</a>
+                    <div class="nav-dropdown">
+                        <a href="#rules" class="dropdown-link">📜 Rules</a>
+                        <a href="#scoring" class="dropdown-link">💰 Scoring</a>
+                        <a href="teamquest_admin_panel.html" class="dropdown-link">⚙️ Admin</a>
+                    </div>
+                </li>
+            </ul>
+            
+            <button class="nav-toggle" id="nav-toggle">☰</button>
+        </div>
+    </nav>
+
     <div class="container">
         <!-- Login Section -->
         <div class="login-section active" id="loginSection">
@@ -577,13 +777,43 @@
     </div>
 
     <script>
-        let currentTeam = null;
-        let allTeams = [];
-
-        // Initialize page
+        // Navigation Menu JavaScript
         document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.getElementById('nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
+                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                });
+
+                // Close mobile menu when clicking on links
+                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        navMenu.classList.remove('active');
+                        navToggle.textContent = '☰';
+                    });
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
+                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        navToggle.textContent = '☰';
+                    }
+                });
+            }
+
+            // Initialize limerick functionality
             loadTeamsList();
         });
+
+        // Original Limerick Challenge JavaScript
+        let currentTeam = null;
+        let allTeams = [];
 
         // Character counter for limerick
         document.getElementById('limerickText').addEventListener('input', function() {
