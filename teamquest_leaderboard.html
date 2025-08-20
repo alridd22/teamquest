@@ -575,29 +575,30 @@
                 font-size: 1.1em;
             }
 
-            /* MOBILE TEAM ENTRY - CLEANER VERTICAL LAYOUT */
+            /* MOBILE TEAM ENTRY - FIXED VERTICAL LAYOUT */
             .team-entry {
                 flex-direction: column;
                 align-items: stretch;
                 padding: 16px;
-                gap: 12px;
+                gap: 0;
                 margin: 16px 0;
             }
 
-            /* Mobile: Header row with rank, name, status, and score */
+            /* Mobile: Header row with rank and name */
             .mobile-header-row {
                 display: flex;
-                align-items: center;
-                justify-content: space-between;
+                align-items: flex-start;
                 width: 100%;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
+                gap: 12px;
             }
 
             .rank {
                 font-size: 1.6em;
-                margin-right: 12px;
+                margin-right: 0;
                 min-width: 35px;
                 flex-shrink: 0;
+                margin-top: 2px;
             }
 
             .rank.first { 
@@ -606,13 +607,12 @@
 
             .team-info {
                 flex: 1;
-                margin-right: 12px;
                 min-width: 0;
             }
 
             .team-name {
-                font-size: 1.1em;
-                margin-bottom: 5px;
+                font-size: 1.2em;
+                margin-bottom: 8px;
                 flex-wrap: wrap;
                 gap: 8px;
                 line-height: 1.3;
@@ -620,19 +620,26 @@
             }
 
             .final-results .team-name {
-                font-size: 1.2em;
+                font-size: 1.3em;
             }
 
             .team-status-badge {
                 font-size: 0.7em;
                 padding: 4px 8px;
-                margin-top: 2px;
+                margin-top: 4px;
             }
 
-            /* Mobile: Activities section - more compact */
+            /* Mobile: Separate score row */
+            .mobile-score-row {
+                display: flex;
+                justify-content: center;
+                margin-bottom: 12px;
+            }
+
+            /* Mobile: Activities section */
             .team-activities {
                 gap: 6px;
-                margin: 8px 0 0 0;
+                margin: 0;
                 justify-content: flex-start;
             }
             
@@ -643,14 +650,12 @@
                 border-radius: 10px;
             }
 
-            /* Mobile: Score section - more prominent */
+            /* Mobile: Score section - centered in its own row */
             .total-score {
                 font-size: 1.4em;
                 padding: 10px 16px;
+                min-width: 140px;
                 align-self: center;
-                margin-top: 0;
-                min-width: 110px;
-                flex-shrink: 0;
             }
 
             .final-results .total-score {
@@ -658,11 +663,11 @@
                 padding: 12px 18px;
             }
 
-            /* Mobile: Improved penalty info */
+            /* Mobile: Penalty info - between score and activities */
             .penalty-info {
                 font-size: 0.8em;
                 padding: 8px 12px;
-                margin: 8px 0 0 0;
+                margin: 8px 0;
                 border-radius: 10px;
                 line-height: 1.3;
             }
@@ -770,10 +775,12 @@
                         <div class="rank first">1</div>
                         <div class="team-info">
                             <div class="team-name">
-                                🏴‍☠️ Riddlers 👑
+                                Riddlers 👑
                                 <span class="team-status-badge status-returned">Returned</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="mobile-score-row">
                         <div class="total-score">
                             60 <span class="doubloons">doubloons</span>
                         </div>
@@ -790,10 +797,12 @@
                         <div class="rank second">2</div>
                         <div class="team-info">
                             <div class="team-name">
-                                🏴‍☠️ Steve
+                                Steve
                                 <span class="team-status-badge status-returned">Returned</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="mobile-score-row">
                         <div class="total-score">
                             13 <span class="doubloons">doubloons</span>
                         </div>
@@ -810,10 +819,12 @@
                         <div class="rank third">3</div>
                         <div class="team-info">
                             <div class="team-name">
-                                🏴‍☠️ Alex
+                                Alex
                                 <span class="team-status-badge status-late">Returned</span>
                             </div>
                         </div>
+                    </div>
+                    <div class="mobile-score-row">
                         <div class="total-score penalized">
                             <div class="original-score">486</div>
                             <div class="penalty-deduction">-486</div>
@@ -978,7 +989,7 @@
                     html += `
                         <div class="team-entry" style="justify-content: center;">
                             <div class="team-info" style="text-align: center;">
-                                <div class="team-name">🏴‍☠️ ${teamName}</div>
+                                <div class="team-name">${teamName}</div>
                                 <div style="color: #8b4513; font-style: italic; margin-top: 5px;">
                                     Adventure completed - results pending...
                                 </div>
@@ -1086,10 +1097,12 @@
                             <div class="rank ${rankClass}">${rank}</div>
                             <div class="team-info">
                                 <div class="team-name">
-                                    🏴‍☠️ ${teamName}${winnerCrown}
+                                    ${teamName}${winnerCrown}
                                     ${statusDisplay}
                                 </div>
                             </div>
+                        </div>
+                        <div class="mobile-score-row">
                             ${scoreDisplay}
                         </div>
                         ${penaltyDisplay}
