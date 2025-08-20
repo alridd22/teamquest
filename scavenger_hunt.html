@@ -1092,34 +1092,35 @@
             <div class="scoring-tier tier-15">
                 <div class="tier-points">15 Doubloons</div>
                 <div class="tier-title">Clear and Correct</div>
-                <div class="tier-description">The target treasure is unmistakably present and clearly visible in your photo. Perfect lighting, focus, and positioning within the magical frame.</div>
+                <div class="tier-description">The target treasure is unmistakably present and clearly visible inside the printed magical frame. Perfect lighting, focus, and positioning within the frame boundaries from your booklet.</div>
             </div>
 
             <div class="scoring-tier tier-10">
                 <div class="tier-points">10 Doubloons</div>
                 <div class="tier-title">Good but Could Be Clearer</div>
-                <div class="tier-description">Correct treasure identified, but the photo has minor issues such as blurriness, poor angle, lighting problems, or the treasure is partially obscured.</div>
+                <div class="tier-description">Correct treasure identified within the frame, but the photo has minor issues such as blurriness, poor angle, lighting problems, or the treasure is partially obscured.</div>
             </div>
 
             <div class="scoring-tier tier-5">
                 <div class="tier-points">5 Doubloons</div>
                 <div class="tier-title">Not Clear</div>
-                <div class="tier-description">Might be the correct treasure, but photo quality makes it very difficult to confirm. Shows effort but needs improvement.</div>
+                <div class="tier-description">Might be the correct treasure and appears to be in a frame, but photo quality makes it very difficult to confirm. Shows effort but needs improvement.</div>
             </div>
 
             <div class="scoring-tier tier-0">
                 <div class="tier-points">0 Doubloons</div>
                 <div class="tier-title">Clearly Incorrect</div>
-                <div class="tier-description">Wrong item, no relevant treasure visible, or completely unrelated image. Time to search for the correct treasure!</div>
+                <div class="tier-description">Wrong item, no magical frame visible, no relevant treasure visible, or completely unrelated image. Remember: the frame is required for all scoring!</div>
             </div>
 
             <div class="photo-tips">
                 <h3>💡 Photo Tips for Maximum Doubloons</h3>
                 <ul>
+                    <li><strong>⚠️ FRAME REQUIRED FOR SCORING</strong> - The treasure MUST be clearly visible inside the printed magical frame from your booklet. Photos without the frame will score 0 doubloons!</li>
                     <li><strong>Ensure good lighting and focus</strong> - Natural daylight works best</li>
                     <li><strong>Make the treasure the main subject</strong> - Fill the frame with your find</li>
-                    <li><strong>Position clearly within the magical frame</strong> - Use the printed frame boundaries</li>
-                    <li><strong>For date-specific items</strong> (like the 2023 coin) - Make sure the date is clearly readable</li>
+                    <li><strong>Position clearly within the magical frame boundaries</strong> - The entire treasure must be inside the frame borders</li>
+                    <li><strong>For date-specific items</strong> (like the 2023 coin) - Make sure the date is clearly readable within the frame</li>
                     <li><strong>Avoid multiple different items</strong> in the same photo - Focus on one treasure at a time</li>
                     <li><strong>Hold steady</strong> - Avoid blurry photos by keeping your device still</li>
                 </ul>
@@ -1221,9 +1222,9 @@
                     <div class="frame-instruction">📸 Place treasure in magical frame and capture</div>
                     <div class="frame-details" id="frameDetails">Position the treasure clearly within the printed frame boundaries</div>
                     
-                    <input type="file" id="photoUpload" class="file-input" accept="image/*" capture="environment">
+                    <input type="file" id="photoUpload" class="file-input" accept="image/*">
                     <button type="button" class="file-upload-btn" onclick="document.getElementById('photoUpload').click()">
-                        📸 Capture Treasure
+                        📸 Upload Treasure Photo
                     </button>
                     
                     <img id="photoPreview" class="photo-preview" style="display: none;">
