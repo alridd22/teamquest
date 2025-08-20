@@ -381,6 +381,236 @@
             display: block;
         }
 
+        /* Scoring Rules Button */
+        .scoring-rules-btn {
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            border: 2px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scoring-rules-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 4px solid #8B4513;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            color: #8B4513;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-subtitle {
+            color: #A0522D;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #8B4513;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,140,0,0.2);
+            transform: scale(1.1);
+        }
+
+        .scoring-category {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .scoring-category.category-rhythm {
+            border-color: #4169E1;
+            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+        }
+
+        .scoring-category.category-creativity {
+            border-color: #32CD32;
+            background: linear-gradient(135deg, #F0FFF0 0%, #E6FFE6 100%);
+        }
+
+        .scoring-category.category-humor {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #8B4513;
+        }
+
+        .category-points {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FF8C00;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid #DAA520;
+        }
+
+        .category-description {
+            color: #654321;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .category-examples {
+            font-style: italic;
+            color: #A0522D;
+            font-size: 0.95em;
+        }
+
+        .scoring-bands {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .scoring-bands h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .score-band {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139,69,19,0.2);
+        }
+
+        .score-band:last-child {
+            border-bottom: none;
+        }
+
+        .score-range {
+            font-weight: bold;
+            color: #FF8C00;
+            font-size: 1.1em;
+        }
+
+        .score-description {
+            color: #654321;
+            flex: 1;
+            margin-left: 20px;
+        }
+
+        .verse-tips {
+            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+            border: 3px solid #4169E1;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .verse-tips h3 {
+            color: #2E4BC6;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .verse-tips ul {
+            margin-left: 20px;
+            color: #2E4BC6;
+        }
+
+        .verse-tips li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
         .instructions {
             background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
             border-left: 6px solid #DAA520;
@@ -693,6 +923,30 @@
                 width: 100px !important;
                 height: 100px !important;
             }
+
+            .modal-content {
+                padding: 25px 20px;
+            }
+
+            .modal-title {
+                font-size: 1.6em;
+            }
+
+            .category-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .score-band {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .score-description {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -727,6 +981,98 @@
         </div>
     </nav>
 
+    <!-- Scoring Rules Modal -->
+    <div class="modal-overlay" id="scoringModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeScoringModal()">✕</button>
+            
+            <div class="modal-header">
+                <div class="modal-title">📝 Verse Vault Scoring</div>
+                <div class="modal-subtitle">How Terry's poetic masters evaluate your limericks</div>
+            </div>
+
+            <div class="scoring-category category-rhythm">
+                <div class="category-header">
+                    <div class="category-title">🎵 Rhyme Scheme & Rhythm</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    Perfect limericks follow the classic AABBA rhyme pattern with bouncy, musical rhythm that flows like a sea shanty.
+                </div>
+                <div class="category-examples">
+                    <strong>We look for:</strong> Lines 1, 2, 5 rhyming together • Lines 3, 4 forming a shorter rhyming pair • Anapestic meter (da-da-DUM rhythm)
+                </div>
+            </div>
+
+            <div class="scoring-category category-creativity">
+                <div class="category-header">
+                    <div class="category-title">✨ Creativity & Originality</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    The most treasure goes to imaginative tales with unexpected twists, clever wordplay, and original storytelling that surprises and delights.
+                </div>
+                <div class="category-examples">
+                    <strong>We treasure:</strong> Unique topics • Surprise endings • Clever wordplay and puns • Vivid imagery • Creative use of language
+                </div>
+            </div>
+
+            <div class="scoring-category category-humor">
+                <div class="category-header">
+                    <div class="category-title">😄 Humor & Entertainment</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    Limericks that make us chuckle, smile, or laugh out loud earn the highest entertainment scores. Wit and playfulness are worth their weight in doubloons!
+                </div>
+                <div class="category-examples">
+                    <strong>We enjoy:</strong> Funny situations • Clever puns • Absurd or silly scenarios • Playful language • Witty observations
+                </div>
+            </div>
+
+            <div class="scoring-bands">
+                <h3>🏆 Treasure Chest Scoring Bands</h3>
+                
+                <div class="score-band">
+                    <div class="score-range">50-60 Doubloons</div>
+                    <div class="score-description"><strong>Legendary Verse:</strong> Flawless rhythm, brilliantly clever or hilarious, highly original masterpiece</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">35-49 Doubloons</div>
+                    <div class="score-description"><strong>Worthy Poem:</strong> Good rhythm and structure, shows creativity or humor, well-crafted</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">25-34 Doubloons</div>
+                    <div class="score-description"><strong>Decent Attempt:</strong> Follows limerick rules but lacks significant impact or originality</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">15-24 Doubloons</div>
+                    <div class="score-description"><strong>Basic Effort:</strong> Some limerick elements present but rhythm issues or limited creativity</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">1-14 Doubloons</div>
+                    <div class="score-description"><strong>Needs Work:</strong> Broken structure, significant rhythm problems, or very low effort</div>
+                </div>
+            </div>
+
+            <div class="verse-tips">
+                <h3>💡 Tips for Maximum Doubloons</h3>
+                <ul>
+                    <li><strong>Perfect your rhythm</strong> - Read aloud to ensure bouncy, musical flow</li>
+                    <li><strong>Nail the rhyme scheme</strong> - AABBA pattern with strong rhymes</li>
+                    <li><strong>Add unexpected twists</strong> - Surprise endings earn extra treasure</li>
+                    <li><strong>Be playfully absurd</strong> - Limericks love silly, exaggerated scenarios</li>
+                    <li><strong>Use clever wordplay</strong> - Puns and double meanings delight our judges</li>
+                    <li><strong>Keep it fun</strong> - Entertainment value is worth serious doubloons!</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Login Section -->
         <div class="login-section active" id="loginSection">
@@ -743,6 +1089,10 @@
                 <div class="terry-speech">
                     <div class="terry-note">
                         <strong>Ah, a poet approaches!</strong> Welcome to me verse vault, where words be worth their weight in doubloons! Craft me a limerick that tickles the funny bone and shows yer creative spirit. The wittier and more clever, the greater yer treasure reward shall be!
+                        
+                        <button class="scoring-rules-btn" onclick="openScoringModal()">
+                            📝 View Scoring Rules
+                        </button>
                     </div>
                 </div>
             </div>
@@ -802,327 +1152,3 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;She reached distant land,<br>
                     And found all the treasure was free!
                 </div>
-            </div>
-
-            <form id="limerickForm">
-                <div class="form-group topic-select">
-                    <label for="limerickTopic">Choose Your Adventure Topic (Optional)</label>
-                    <input type="text" id="limerickTopic" name="limerickTopic" 
-                           placeholder="Or create your own treasure tale topic...">
-                    
-                    <div class="topic-ideas">
-                        <div class="topic-idea" onclick="selectTopic('Pirates & Treasure')">🏴‍☠️ Pirates & Treasure</div>
-                        <div class="topic-idea" onclick="selectTopic('Sea Adventures')">⚓ Sea Adventures</div>
-                        <div class="topic-idea" onclick="selectTopic('Mysterious Islands')">🏝️ Mysterious Islands</div>
-                        <div class="topic-idea" onclick="selectTopic('Ancient Maps')">🗺️ Ancient Maps</div>
-                        <div class="topic-idea" onclick="selectTopic('Lost Expeditions')">🧭 Lost Expeditions</div>
-                        <div class="topic-idea" onclick="selectTopic('Buried Gold')">💰 Buried Gold</div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="limerickText">✍️ Craft Your Treasure Limerick</label>
-                    <div class="rhyme-helper">
-                        <h4>💡 Verse Pattern Guide:</h4>
-                        Line 1: _____ A (long line)<br>
-                        Line 2: _____ A (long line)<br>
-                        Line 3: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
-                        Line 4: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
-                        Line 5: _____ A (long line)
-                    </div>
-                    <textarea id="limerickText" name="limerickText" class="limerick-textarea"
-                              placeholder="Enter your limerick here..."
-                              maxlength="500" required></textarea>
-                    <div class="char-count">
-                        <span id="charCount">500</span> characters remaining
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    🪙 Submit for Doubloons
-                </button>
-            </form>
-
-            <div class="loading" id="loading">
-                ✨ Terry is analysing your verse craftsmanship and calculating doubloons...
-            </div>
-
-            <div class="message" id="challengeMessage"></div>
-        </div>
-    </div>
-
-    <script>
-        // Navigation Menu JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            const navToggle = document.getElementById('nav-toggle');
-            const navMenu = document.getElementById('nav-menu');
-
-            if (navToggle && navMenu) {
-                navToggle.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
-
-                // Close mobile menu when clicking on links
-                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    });
-                });
-
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
-                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    }
-                });
-            }
-
-            // Initialize limerick functionality
-            loadTeamsList();
-        });
-
-        // Original Limerick Challenge JavaScript
-        let currentTeam = null;
-        let allTeams = [];
-
-        // Character counter for limerick
-        document.getElementById('limerickText').addEventListener('input', function() {
-            const remaining = 500 - this.value.length;
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = remaining;
-            charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
-        });
-
-        // Topic selection
-        function selectTopic(topic) {
-            document.getElementById('limerickTopic').value = topic;
-            
-            // Update visual selection
-            document.querySelectorAll('.topic-idea').forEach(el => {
-                el.classList.remove('selected');
-            });
-            event.target.classList.add('selected');
-        }
-
-        // EXACT TEAM LOADING CODE FROM WORKING QUIZ
-        async function loadTeamsList() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                
-                const data = await response.json();
-                
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
-                }
-                
-                throw new Error('Invalid response structure from leaderboard');
-                
-            } catch (error) {
-                console.error('Leaderboard function failed:', error);
-                
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
-            }
-        }
-
-        function populateTeamDropdown(teams) {
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
-            
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-        }
-
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const selectedTeamCode = document.getElementById('teamSelect').value;
-            const enteredPin = document.getElementById('teamPin').value;
-            
-            if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
-                return;
-            }
-            
-            if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
-                return;
-            }
-
-            try {
-                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
-                
-                if (isValid) {
-                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
-                    currentTeam = selectedTeam;
-                    document.getElementById('teamInfo').textContent = `Crew: ${selectedTeam.teamName}`;
-                    
-                    // Switch to challenge section
-                    document.getElementById('loginSection').classList.remove('active');
-                    document.getElementById('challengeSection').classList.add('active');
-                } else {
-                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
-            }
-        });
-
-        // Limerick form submission
-        document.getElementById('limerickForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const topic = document.getElementById('limerickTopic').value.trim();
-            const limerickText = document.getElementById('limerickText').value.trim();
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
-
-            // Validation
-            if (!limerickText) {
-                showMessage('challengeMessage', 'Please craft your treasure limerick.', 'error');
-                return;
-            }
-
-            if (limerickText.length < 50) {
-                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters) worthy of doubloons.', 'error');
-                return;
-            }
-
-            // Check for line breaks (limericks should have multiple lines)
-            const lines = limerickText.split('\n').filter(line => line.trim().length > 0);
-            if (lines.length < 3) {
-                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines) as befits a proper verse.', 'error');
-                return;
-            }
-
-            // Show loading
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
-            document.getElementById('challengeMessage').style.display = 'none';
-
-            try {
-                const result = await submitLimerick(topic, limerickText);
-                
-                showMessage('challengeMessage', 
-                    '🎉 Your limerick has sailed into Terry\'s verse vault! Our master poet is analysing your creativity, humour, and technique. Check the treasure map in a few minutes to see your doubloons!', 
-                    'success');
-                
-                // Disable form after successful submission
-                document.getElementById('limerickForm').style.opacity = '0.5';
-                document.getElementById('limerickForm').style.pointerEvents = 'none';
-                
-            } catch (error) {
-                console.error('Submission error:', error);
-                showMessage('challengeMessage', 'Failed to submit your limerick to the verse vault. Please try again.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
-
-        // EXACT VERIFICATION CODE FROM WORKING QUIZ
-        async function verifyTeamAndPin(teamCode, enteredPin) {
-            try {
-                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        teamCode: teamCode,
-                        pin: enteredPin
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    return result.valid;
-                } else {
-                    throw new Error(result.error || 'Verification failed');
-                }
-                
-            } catch (error) {
-                console.error('Error verifying team and PIN:', error);
-                return false;
-            }
-        }
-
-        async function submitLimerick(topic, limerickText) {
-            try {
-                const submissionData = {
-                    teamCode: currentTeam.teamCode,
-                    teamName: currentTeam.teamName,
-                    topic: topic,
-                    limerickText: limerickText
-                };
-                
-                const response = await fetch('/.netlify/functions/submit_limerick_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(submissionData)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Submission failed');
-                }
-                
-                return result;
-                
-            } catch (error) {
-                console.error('Limerick submission error:', error);
-                throw error;
-            }
-        }
-
-        function showMessage(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
-            container.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
