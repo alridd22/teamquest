@@ -541,41 +541,171 @@
             background: #ff7700;
         }
 
+        /* ENHANCED MOBILE STYLES - VERTICAL STACKING */
         @media (max-width: 768px) {
             .treasure-container {
-                padding: 20px;
+                padding: 15px;
                 margin: 10px;
             }
             
             .title {
-                font-size: 2em;
+                font-size: 1.8em;
             }
 
             .final-results-display, .penalty-warning {
-                font-size: 1.3em;
-                padding: 15px 20px;
-            }
-            
-            .team-activities {
-                gap: 8px;
-            }
-            
-            .activity {
-                font-size: 0.8em;
-                padding: 3px 6px;
+                font-size: 1.1em;
+                padding: 12px 15px;
+                max-width: 100%;
             }
 
             .freeze-title {
-                font-size: 2em;
+                font-size: 1.6em;
             }
 
             .freeze-message {
+                font-size: 1em;
+            }
+
+            /* MOBILE TEAM ENTRY - VERTICAL STACKING */
+            .team-entry {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 12px;
+                gap: 8px;
+            }
+
+            /* Mobile: Top row with rank, name, and score */
+            .mobile-top-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                margin-bottom: 8px;
+            }
+
+            .rank {
+                font-size: 1.4em;
+                margin-right: 10px;
+                min-width: 30px;
+                flex-shrink: 0;
+            }
+
+            .rank.first { 
+                font-size: 1.6em;
+            }
+
+            .team-info {
+                flex: 1;
+                margin-right: 10px;
+                min-width: 0; /* Allow text to wrap */
+            }
+
+            .team-name {
+                font-size: 1em;
+                margin-bottom: 3px;
+                flex-wrap: wrap;
+                gap: 5px;
+                line-height: 1.2;
+            }
+
+            .final-results .team-name {
                 font-size: 1.1em;
             }
 
+            .team-status-badge {
+                font-size: 0.6em;
+                padding: 2px 6px;
+            }
+
+            /* Mobile: Activities section */
+            .team-activities {
+                gap: 6px;
+                margin: 8px 0;
+                justify-content: flex-start;
+            }
+            
+            .activity {
+                font-size: 0.7em;
+                padding: 2px 5px;
+                white-space: nowrap;
+                border-radius: 6px;
+            }
+
+            /* Mobile: Score section */
+            .total-score {
+                font-size: 1.2em;
+                padding: 8px 12px;
+                align-self: center;
+                margin-top: 5px;
+                min-width: 100px;
+            }
+
+            .final-results .total-score {
+                font-size: 1.3em;
+                padding: 10px 15px;
+            }
+
+            /* Mobile: Penalty info */
             .penalty-info {
+                font-size: 0.75em;
+                padding: 6px 8px;
+                margin: 6px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+                word-break: break-word;
+            }
+
+            .penalty-info div {
+                line-height: 1.2;
+            }
+
+            /* Mobile: Status badges wrap better */
+            .team-name {
+                align-items: flex-start;
+            }
+
+            /* Mobile: Ensure no overflow */
+            .leaderboard-container {
+                padding: 12px;
+                overflow-x: hidden;
+            }
+
+            /* Mobile: Better responsive text */
+            .status-bar {
                 font-size: 0.8em;
+                padding: 8px;
+            }
+        }
+
+        /* Extra small mobile devices */
+        @media (max-width: 480px) {
+            .treasure-container {
+                padding: 12px;
+                margin: 5px;
+            }
+
+            .team-entry {
+                padding: 10px;
+            }
+
+            .team-name {
+                font-size: 0.9em;
+            }
+
+            .activity {
+                font-size: 0.65em;
+                padding: 2px 4px;
+            }
+
+            .total-score {
+                font-size: 1.1em;
                 padding: 6px 10px;
+            }
+
+            .penalty-info {
+                font-size: 0.7em;
+                padding: 5px 6px;
             }
         }
     </style>
@@ -823,7 +953,7 @@
                 if (penalty > 0) entryClasses += ' penalized';
                 else if (status === 'late') entryClasses += ' late';
 
-                // FIXED: Status badge with "Returned" + "Score Locked"
+                // Status badge with "Returned" + "Score Locked"
                 let statusDisplay = '';
                 if (status === 'returned' || status === 'late') {
                     const badgeColor = penalty > 0 ? '#e74c3c' : '#27ae60';
@@ -869,23 +999,25 @@
 
                 html += `
                     <div class="${entryClasses}">
-                        <div class="rank ${rankClass}">${rank}</div>
-                        <div class="team-info">
-                            <div class="team-name">
-                                🏴‍☠️ ${teamName}${winnerCrown}
-                                ${statusDisplay}
+                        <div class="mobile-top-row">
+                            <div class="rank ${rankClass}">${rank}</div>
+                            <div class="team-info">
+                                <div class="team-name">
+                                    🏴‍☠️ ${teamName}${winnerCrown}
+                                    ${statusDisplay}
+                                </div>
                             </div>
-                            ${penaltyDisplay}
-                            <div class="team-activities">
-                                ${registration > 0 ? `<span class="activity">⚓ Registration: ${registration}</span>` : ''}
-                                ${clueHunt > 0 ? `<span class="activity">🗺️ Clue Hunt: ${clueHunt}</span>` : ''}
-                                ${quiz > 0 ? `<span class="activity">🧭 Quiz: ${quiz}</span>` : ''}
-                                ${kindness > 0 ? `<span class="activity">💙 Kindness: ${kindness}</span>` : ''}
-                                ${scavenger > 0 ? `<span class="activity">🔍 Scavenger: ${scavenger}</span>` : ''}
-                                ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
-                            </div>
+                            ${scoreDisplay}
                         </div>
-                        ${scoreDisplay}
+                        ${penaltyDisplay}
+                        <div class="team-activities">
+                            ${registration > 0 ? `<span class="activity">⚓ Registration: ${registration}</span>` : ''}
+                            ${clueHunt > 0 ? `<span class="activity">🗺️ Clue Hunt: ${clueHunt}</span>` : ''}
+                            ${quiz > 0 ? `<span class="activity">🧭 Quiz: ${quiz}</span>` : ''}
+                            ${kindness > 0 ? `<span class="activity">💙 Kindness: ${kindness}</span>` : ''}
+                            ${scavenger > 0 ? `<span class="activity">🔍 Scavenger: ${scavenger}</span>` : ''}
+                            ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
+                        </div>
                     </div>
                 `;
             });
