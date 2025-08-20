@@ -371,6 +371,13 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
+        .activity.zero-score {
+            background: linear-gradient(145deg, #e8e8e8, #d0d0d0);
+            color: #666;
+            border: 1px solid #ccc;
+            opacity: 0.7;
+        }
+
         .final-results .activity {
             background: linear-gradient(145deg, #ffd700, #ffed4e);
             border: 2px solid #daa520;
@@ -611,16 +618,18 @@
             }
 
             .team-name {
-                font-size: 1.2em;
+                font-size: 1.4em;
                 margin-bottom: 8px;
                 flex-wrap: wrap;
                 gap: 8px;
                 line-height: 1.3;
                 align-items: flex-start;
+                font-weight: 800;
             }
 
             .final-results .team-name {
-                font-size: 1.3em;
+                font-size: 1.5em;
+                font-weight: 900;
             }
 
             .team-status-badge {
@@ -787,7 +796,11 @@
                     </div>
                     <div class="team-activities">
                         <span class="activity">⚓ Registration: 10</span>
+                        <span class="activity">🗺️ Clue Hunt: 0</span>
                         <span class="activity">🧭 Quiz: 50</span>
+                        <span class="activity">💙 Kindness: 0</span>
+                        <span class="activity">🔍 Scavenger: 0</span>
+                        <span class="activity">📜 Limerick: 0</span>
                     </div>
                 </div>
 
@@ -809,7 +822,11 @@
                     </div>
                     <div class="team-activities">
                         <span class="activity">⚓ Registration: 10</span>
+                        <span class="activity">🗺️ Clue Hunt: 0</span>
                         <span class="activity">🧭 Quiz: 3</span>
+                        <span class="activity">💙 Kindness: 0</span>
+                        <span class="activity">🔍 Scavenger: 0</span>
+                        <span class="activity">📜 Limerick: 0</span>
                     </div>
                 </div>
 
@@ -1038,64 +1055,13 @@
                 const status = safeGet(team, 'status', 'active');
                 const penaltyMinutes = safeGet(team, 'penaltyMinutes', 0) || 0;
                 
-                // Debug: Log team structure for first team to help identify correct property names
-                if (index === 0) {
-                    console.log('Sample team structure:', JSON.stringify(team, null, 2));
-                }
-                
-                // Try multiple possible property name variations
-                const registration = safeGet(team, 'activities.registration', 0) || 
-                                   safeGet(team, 'registration', 0) || 
-                                   safeGet(team, 'Registration', 0);
-                
-                const clueHunt = safeGet(team, 'activities.clueHunt', 0) || 
-                               safeGet(team, 'activities.clue_hunt', 0) || 
-                               safeGet(team, 'activities.cluehunt', 0) ||
-                               safeGet(team, 'activities.ClueHunt', 0) ||
-                               safeGet(team, 'activities.Clue_Hunt', 0) ||
-                               safeGet(team, 'clueHunt', 0) || 
-                               safeGet(team, 'clue_hunt', 0) ||
-                               safeGet(team, 'cluehunt', 0) ||
-                               safeGet(team, 'ClueHunt', 0);
-                
-                const quiz = safeGet(team, 'activities.quiz', 0) || 
-                           safeGet(team, 'quiz', 0) ||
-                           safeGet(team, 'Quiz', 0);
-                
-                const kindness = safeGet(team, 'activities.kindness', 0) || 
-                               safeGet(team, 'activities.Kindness', 0) ||
-                               safeGet(team, 'kindness', 0) ||
-                               safeGet(team, 'Kindness', 0);
-                
-                const scavenger = safeGet(team, 'activities.scavenger', 0) || 
-                                safeGet(team, 'activities.scavengerHunt', 0) ||
-                                safeGet(team, 'activities.scavenger_hunt', 0) ||
-                                safeGet(team, 'activities.Scavenger', 0) ||
-                                safeGet(team, 'activities.ScavengerHunt', 0) ||
-                                safeGet(team, 'scavenger', 0) ||
-                                safeGet(team, 'scavengerHunt', 0) ||
-                                safeGet(team, 'scavenger_hunt', 0) ||
-                                safeGet(team, 'Scavenger', 0);
-                
-                const limerick = safeGet(team, 'activities.limerick', 0) || 
-                               safeGet(team, 'activities.Limerick', 0) ||
-                               safeGet(team, 'limerick', 0) ||
-                               safeGet(team, 'Limerick', 0);
-                
-                // Debug: Log activity scores for first few teams
-                if (index < 3) {
-                    console.log(`Team ${teamName} activities:`, {
-                        registration, clueHunt, quiz, kindness, scavenger, limerick
-                    });
-                    
-                    // If no activities found, log all available properties to help debug
-                    if ((registration + clueHunt + quiz + kindness + scavenger + limerick) === 0) {
-                        console.log(`No activities found for ${teamName}. Available properties:`, Object.keys(team));
-                        if (team.activities) {
-                            console.log('Activities object properties:', Object.keys(team.activities));
-                        }
-                    }
-                }
+                // Get activity scores using the exact property names from your data
+                const registration = safeGet(team, 'activities.registration', 0) || safeGet(team, 'registration', 0);
+                const clueHunt = safeGet(team, 'activities.clueHunt', 0) || safeGet(team, 'clueHunt', 0);
+                const quiz = safeGet(team, 'activities.quiz', 0) || safeGet(team, 'quiz', 0);
+                const kindness = safeGet(team, 'activities.kindness', 0) || safeGet(team, 'kindness', 0);
+                const scavenger = safeGet(team, 'activities.scavenger', 0) || safeGet(team, 'scavenger', 0);
+                const limerick = safeGet(team, 'activities.limerick', 0) || safeGet(team, 'limerick', 0);
 
                 // Determine entry classes
                 let entryClasses = 'team-entry';
@@ -1159,14 +1125,12 @@
                         </div>
                         ${penaltyDisplay}
                         <div class="team-activities">
-                            ${registration > 0 ? `<span class="activity">⚓ Registration: ${registration}</span>` : ''}
-                            ${clueHunt > 0 ? `<span class="activity">🗺️ Clue Hunt: ${clueHunt}</span>` : ''}
-                            ${quiz > 0 ? `<span class="activity">🧭 Quiz: ${quiz}</span>` : ''}
-                            ${kindness > 0 ? `<span class="activity">💙 Kindness: ${kindness}</span>` : ''}
-                            ${scavenger > 0 ? `<span class="activity">🔍 Scavenger: ${scavenger}</span>` : ''}
-                            ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
-                            ${(registration + clueHunt + quiz + kindness + scavenger + limerick) === 0 ? 
-                                `<span class="activity" style="background: #ddd; color: #666;">No activities recorded</span>` : ''}
+                            <span class="activity${registration === 0 ? ' zero-score' : ''}">⚓ Registration: ${registration}</span>
+                            <span class="activity${clueHunt === 0 ? ' zero-score' : ''}">🗺️ Clue Hunt: ${clueHunt}</span>
+                            <span class="activity${quiz === 0 ? ' zero-score' : ''}">🧭 Quiz: ${quiz}</span>
+                            <span class="activity${kindness === 0 ? ' zero-score' : ''}">💙 Kindness: ${kindness}</span>
+                            <span class="activity${scavenger === 0 ? ' zero-score' : ''}">🔍 Scavenger: ${scavenger}</span>
+                            <span class="activity${limerick === 0 ? ' zero-score' : ''}">📜 Limerick: ${limerick}</span>
                         </div>
                     </div>
                 `;
