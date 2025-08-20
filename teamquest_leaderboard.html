@@ -1038,12 +1038,64 @@
                 const status = safeGet(team, 'status', 'active');
                 const penaltyMinutes = safeGet(team, 'penaltyMinutes', 0) || 0;
                 
-                const registration = safeGet(team, 'activities.registration', 0) || safeGet(team, 'registration', 0);
-                const clueHunt = safeGet(team, 'activities.clueHunt', 0) || safeGet(team, 'clueHunt', 0) || safeGet(team, 'activities.clue_hunt', 0);
-                const quiz = safeGet(team, 'activities.quiz', 0) || safeGet(team, 'quiz', 0);
-                const kindness = safeGet(team, 'activities.kindness', 0) || safeGet(team, 'kindness', 0);
-                const scavenger = safeGet(team, 'activities.scavenger', 0) || safeGet(team, 'scavenger', 0);
-                const limerick = safeGet(team, 'activities.limerick', 0) || safeGet(team, 'limerick', 0);
+                // Debug: Log team structure for first team to help identify correct property names
+                if (index === 0) {
+                    console.log('Sample team structure:', JSON.stringify(team, null, 2));
+                }
+                
+                // Try multiple possible property name variations
+                const registration = safeGet(team, 'activities.registration', 0) || 
+                                   safeGet(team, 'registration', 0) || 
+                                   safeGet(team, 'Registration', 0);
+                
+                const clueHunt = safeGet(team, 'activities.clueHunt', 0) || 
+                               safeGet(team, 'activities.clue_hunt', 0) || 
+                               safeGet(team, 'activities.cluehunt', 0) ||
+                               safeGet(team, 'activities.ClueHunt', 0) ||
+                               safeGet(team, 'activities.Clue_Hunt', 0) ||
+                               safeGet(team, 'clueHunt', 0) || 
+                               safeGet(team, 'clue_hunt', 0) ||
+                               safeGet(team, 'cluehunt', 0) ||
+                               safeGet(team, 'ClueHunt', 0);
+                
+                const quiz = safeGet(team, 'activities.quiz', 0) || 
+                           safeGet(team, 'quiz', 0) ||
+                           safeGet(team, 'Quiz', 0);
+                
+                const kindness = safeGet(team, 'activities.kindness', 0) || 
+                               safeGet(team, 'activities.Kindness', 0) ||
+                               safeGet(team, 'kindness', 0) ||
+                               safeGet(team, 'Kindness', 0);
+                
+                const scavenger = safeGet(team, 'activities.scavenger', 0) || 
+                                safeGet(team, 'activities.scavengerHunt', 0) ||
+                                safeGet(team, 'activities.scavenger_hunt', 0) ||
+                                safeGet(team, 'activities.Scavenger', 0) ||
+                                safeGet(team, 'activities.ScavengerHunt', 0) ||
+                                safeGet(team, 'scavenger', 0) ||
+                                safeGet(team, 'scavengerHunt', 0) ||
+                                safeGet(team, 'scavenger_hunt', 0) ||
+                                safeGet(team, 'Scavenger', 0);
+                
+                const limerick = safeGet(team, 'activities.limerick', 0) || 
+                               safeGet(team, 'activities.Limerick', 0) ||
+                               safeGet(team, 'limerick', 0) ||
+                               safeGet(team, 'Limerick', 0);
+                
+                // Debug: Log activity scores for first few teams
+                if (index < 3) {
+                    console.log(`Team ${teamName} activities:`, {
+                        registration, clueHunt, quiz, kindness, scavenger, limerick
+                    });
+                    
+                    // If no activities found, log all available properties to help debug
+                    if ((registration + clueHunt + quiz + kindness + scavenger + limerick) === 0) {
+                        console.log(`No activities found for ${teamName}. Available properties:`, Object.keys(team));
+                        if (team.activities) {
+                            console.log('Activities object properties:', Object.keys(team.activities));
+                        }
+                    }
+                }
 
                 // Determine entry classes
                 let entryClasses = 'team-entry';
@@ -1113,6 +1165,8 @@
                             ${kindness > 0 ? `<span class="activity">💙 Kindness: ${kindness}</span>` : ''}
                             ${scavenger > 0 ? `<span class="activity">🔍 Scavenger: ${scavenger}</span>` : ''}
                             ${limerick > 0 ? `<span class="activity">📜 Limerick: ${limerick}</span>` : ''}
+                            ${(registration + clueHunt + quiz + kindness + scavenger + limerick) === 0 ? 
+                                `<span class="activity" style="background: #ddd; color: #666;">No activities recorded</span>` : ''}
                         </div>
                     </div>
                 `;
