@@ -438,6 +438,186 @@
             box-shadow: 0 5px 15px rgba(255,215,0,0.3);
         }
 
+        /* Scoring Rules Button */
+        .scoring-rules-btn {
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            border: 2px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scoring-rules-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 4px solid #8B4513;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            color: #8B4513;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-subtitle {
+            color: #A0522D;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #8B4513;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,140,0,0.2);
+            transform: scale(1.1);
+        }
+
+        .scoring-tier {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .scoring-tier.tier-15 {
+            border-color: #32CD32;
+            background: linear-gradient(135deg, #F0FFF0 0%, #E6FFE6 100%);
+        }
+
+        .scoring-tier.tier-10 {
+            border-color: #FFD700;
+            background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
+        }
+
+        .scoring-tier.tier-5 {
+            border-color: #FFA500;
+            background: linear-gradient(135deg, #FFEAA7 0%, #FDCB6E 100%);
+        }
+
+        .scoring-tier.tier-0 {
+            border-color: #DC143C;
+            background: linear-gradient(135deg, #FFE4E1 0%, #FFCCCB 100%);
+        }
+
+        .tier-points {
+            font-size: 2em;
+            font-weight: bold;
+            color: #8B4513;
+            margin-bottom: 10px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .tier-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #654321;
+            margin-bottom: 8px;
+        }
+
+        .tier-description {
+            color: #654321;
+            line-height: 1.5;
+        }
+
+        .photo-tips {
+            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+            border: 3px solid #4169E1;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .photo-tips h3 {
+            color: #2E4BC6;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .photo-tips ul {
+            margin-left: 20px;
+            color: #2E4BC6;
+        }
+
+        .photo-tips li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
         .instructions {
             background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
             border-left: 6px solid #DAA520;
@@ -857,6 +1037,14 @@
                 width: 100px !important;
                 height: 100px !important;
             }
+
+            .modal-content {
+                padding: 25px 20px;
+            }
+
+            .modal-title {
+                font-size: 1.6em;
+            }
         }
     </style>
 </head>
@@ -891,6 +1079,54 @@
         </div>
     </nav>
 
+    <!-- Scoring Rules Modal -->
+    <div class="modal-overlay" id="scoringModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeScoringModal()">✕</button>
+            
+            <div class="modal-header">
+                <div class="modal-title">🤖 AI Scoring System</div>
+                <div class="modal-subtitle">How Terry's magical AI evaluates your treasure photos</div>
+            </div>
+
+            <div class="scoring-tier tier-15">
+                <div class="tier-points">15 Doubloons</div>
+                <div class="tier-title">Clear and Correct</div>
+                <div class="tier-description">The target treasure is unmistakably present and clearly visible in your photo. Perfect lighting, focus, and positioning within the magical frame.</div>
+            </div>
+
+            <div class="scoring-tier tier-10">
+                <div class="tier-points">10 Doubloons</div>
+                <div class="tier-title">Good but Could Be Clearer</div>
+                <div class="tier-description">Correct treasure identified, but the photo has minor issues such as blurriness, poor angle, lighting problems, or the treasure is partially obscured.</div>
+            </div>
+
+            <div class="scoring-tier tier-5">
+                <div class="tier-points">5 Doubloons</div>
+                <div class="tier-title">Not Clear</div>
+                <div class="tier-description">Might be the correct treasure, but photo quality makes it very difficult to confirm. Shows effort but needs improvement.</div>
+            </div>
+
+            <div class="scoring-tier tier-0">
+                <div class="tier-points">0 Doubloons</div>
+                <div class="tier-title">Clearly Incorrect</div>
+                <div class="tier-description">Wrong item, no relevant treasure visible, or completely unrelated image. Time to search for the correct treasure!</div>
+            </div>
+
+            <div class="photo-tips">
+                <h3>💡 Photo Tips for Maximum Doubloons</h3>
+                <ul>
+                    <li><strong>Ensure good lighting and focus</strong> - Natural daylight works best</li>
+                    <li><strong>Make the treasure the main subject</strong> - Fill the frame with your find</li>
+                    <li><strong>Position clearly within the magical frame</strong> - Use the printed frame boundaries</li>
+                    <li><strong>For date-specific items</strong> (like the 2023 coin) - Make sure the date is clearly readable</li>
+                    <li><strong>Avoid multiple different items</strong> in the same photo - Focus on one treasure at a time</li>
+                    <li><strong>Hold steady</strong> - Avoid blurry photos by keeping your device still</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Login Section -->
         <div class="login-section active" id="loginSection">
@@ -907,6 +1143,10 @@
                 <div class="terry-speech">
                     <div class="terry-note">
                         <strong>Ahoy, treasure hunter!</strong> Welcome to me legendary scavenger hunt! Six mystical artifacts lie hidden around these lands, each worth a king's ransom in doubloons. Use yer keen eye and me magical photo frame to capture each treasure. Me enchanted AI will verify yer finds and award the doubloons ye deserve!
+                        
+                        <button class="scoring-rules-btn" onclick="openScoringModal()">
+                            🤖 View Scoring Rules
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1040,6 +1280,22 @@
             renderScavengerGrid();
         });
 
+        // Scoring Modal Functions
+        function openScoringModal() {
+            document.getElementById('scoringModal').classList.add('active');
+        }
+
+        function closeScoringModal() {
+            document.getElementById('scoringModal').classList.remove('active');
+        }
+
+        // Close modal when clicking outside of it
+        document.getElementById('scoringModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeScoringModal();
+            }
+        });
+
         // Original Scavenger Hunt JavaScript
         let currentTeam = null;
         let allTeams = [];
@@ -1047,49 +1303,49 @@
         let completedItems = {};
         let submittedItems = new Set(); // Track submitted items (even if pending verification)
 
-        // Terry's legendary treasures collection
+        // Terry's legendary treasures collection - Updated to 15 points max
         const scavengerItems = [
             {
                 id: 'british_coin_2023',
                 title: 'Ancient British Coin (2023)',
                 description: 'A British coin from the year 2023',
                 details: 'Must clearly show the 2023 date on the coin',
-                maxPoints: 10
+                maxPoints: 15
             },
             {
                 id: 'paperclip',
                 title: 'Metal Binding Clip',
                 description: 'A paperclip treasure',
                 details: 'Any standard metal or plastic paperclip',
-                maxPoints: 8
+                maxPoints: 15
             },
             {
                 id: 'snail_shell',
                 title: 'Spiral Shell Treasure',
                 description: 'An empty snail shell',
                 details: 'Empty snail shell, any size - nature\'s treasure',
-                maxPoints: 12
+                maxPoints: 15
             },
             {
                 id: 'feather',
                 title: 'Sky Messenger Plume',
                 description: 'A bird feather',
                 details: 'Any bird feather, any size or colour - gift from the sky',
-                maxPoints: 10
+                maxPoints: 15
             },
             {
                 id: 'elastic_band',
                 title: 'Flexible Circle Treasure',
                 description: 'An elastic band',
                 details: 'Any rubber band or elastic band',
-                maxPoints: 8
+                maxPoints: 15
             },
             {
                 id: 'golf_tee',
                 title: 'Sporting Peg Treasure',
                 description: 'A golf tee',
                 details: 'Wooden or plastic golf tee from the sporting grounds',
-                maxPoints: 12
+                maxPoints: 15
             }
         ];
 
