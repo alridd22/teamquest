@@ -984,7 +984,7 @@
     <!-- Scoring Rules Modal -->
     <div class="modal-overlay" id="scoringModal">
         <div class="modal-content">
-            <button class="close-btn" onclick="closeScoringModal()">✕</button>
+            <button class="close-btn" id="closeModalBtn">✕</button>
             
             <div class="modal-header">
                 <div class="modal-title">📝 Verse Vault Scoring</div>
@@ -1090,7 +1090,7 @@
                     <div class="terry-note">
                         <strong>Ah, a poet approaches!</strong> Welcome to me verse vault, where words be worth their weight in doubloons! Craft me a limerick that tickles the funny bone and shows yer creative spirit. The wittier and more clever, the greater yer treasure reward shall be!
                         
-                        <button class="scoring-rules-btn" onclick="openScoringModal()">
+                        <button class="scoring-rules-btn" id="scoringRulesBtn">
                             📝 View Scoring Rules
                         </button>
                     </div>
@@ -1152,3 +1152,374 @@
                     &nbsp;&nbsp;&nbsp;&nbsp;She reached distant land,<br>
                     And found all the treasure was free!
                 </div>
+            </div>
+
+            <form id="limerickForm">
+                <div class="form-group topic-select">
+                    <label for="limerickTopic">Choose Your Adventure Topic (Optional)</label>
+                    <input type="text" id="limerickTopic" name="limerickTopic" 
+                           placeholder="Or create your own treasure tale topic...">
+                    
+                    <div class="topic-ideas">
+                        <div class="topic-idea" data-topic="Pirates & Treasure">🏴‍☠️ Pirates & Treasure</div>
+                        <div class="topic-idea" data-topic="Sea Adventures">⚓ Sea Adventures</div>
+                        <div class="topic-idea" data-topic="Mysterious Islands">🏝️ Mysterious Islands</div>
+                        <div class="topic-idea" data-topic="Ancient Maps">🗺️ Ancient Maps</div>
+                        <div class="topic-idea" data-topic="Lost Expeditions">🧭 Lost Expeditions</div>
+                        <div class="topic-idea" data-topic="Buried Gold">💰 Buried Gold</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="limerickText">✍️ Craft Your Treasure Limerick</label>
+                    <div class="rhyme-helper">
+                        <h4>💡 Verse Pattern Guide:</h4>
+                        Line 1: _____ A (long line)<br>
+                        Line 2: _____ A (long line)<br>
+                        Line 3: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
+                        Line 4: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
+                        Line 5: _____ A (long line)
+                    </div>
+                    <textarea id="limerickText" name="limerickText" class="limerick-textarea"
+                              placeholder="Enter your limerick here..."
+                              maxlength="500" required></textarea>
+                    <div class="char-count">
+                        <span id="charCount">500</span> characters remaining
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🪙 Submit for Doubloons
+                </button>
+            </form>
+
+            <div class="loading" id="loading">
+                ✨ Terry is analysing your verse craftsmanship and calculating doubloons...
+            </div>
+
+            <div class="message" id="challengeMessage"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentTeam = null;
+        let allTeams = [];
+
+        // Scoring Modal Functions
+        function openScoringModal() {
+            document.getElementById('scoringModal').classList.add('active');
+        }
+
+        function closeScoringModal() {
+            document.getElementById('scoringModal').classList.remove('active');
+        }
+
+        // Topic selection function
+        function selectTopic(topic) {
+            document.getElementById('limerickTopic').value = topic;
+            
+            // Update visual selection
+            document.querySelectorAll('.topic-idea').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Find and select the clicked topic
+            document.querySelectorAll('.topic-idea').forEach(el => {
+                if (el.getAttribute('data-topic') === topic) {
+                    el.classList.add('selected');
+                }
+            });
+        }
+
+        // Navigation Menu JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const navToggle = document.getElementById('nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+
+            if (navToggle && navMenu) {
+                navToggle.addEventListener('click', function() {
+                    navMenu.classList.toggle('active');
+                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+                });
+
+                // Close mobile menu when clicking on links
+                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
+                navLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        navMenu.classList.remove('active');
+                        navToggle.textContent = '☰';
+                    });
+                });
+
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
+                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
+                        navMenu.classList.remove('active');
+                        navToggle.textContent = '☰';
+                    }
+                });
+            }
+
+            // Modal event listeners
+            const scoringRulesBtn = document.getElementById('scoringRulesBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const scoringModal = document.getElementById('scoringModal');
+
+            if (scoringRulesBtn) {
+                scoringRulesBtn.addEventListener('click', openScoringModal);
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeScoringModal);
+            }
+
+            if (scoringModal) {
+                scoringModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeScoringModal();
+                    }
+                });
+            }
+
+            // Topic selection event listeners
+            document.querySelectorAll('.topic-idea').forEach(topic => {
+                topic.addEventListener('click', function() {
+                    selectTopic(this.getAttribute('data-topic'));
+                });
+            });
+
+            // Character counter for limerick
+            const limerickText = document.getElementById('limerickText');
+            const charCount = document.getElementById('charCount');
+            
+            if (limerickText && charCount) {
+                limerickText.addEventListener('input', function() {
+                    const remaining = 500 - this.value.length;
+                    charCount.textContent = remaining;
+                    charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+                });
+            }
+
+            // Initialize limerick functionality
+            loadTeamsList();
+        });
+
+        // EXACT TEAM LOADING CODE FROM WORKING QUIZ
+        async function loadTeamsList() {
+            try {
+                const response = await fetch('/.netlify/functions/get_leaderboard_function');
+                
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                
+                const data = await response.json();
+                
+                if (data && data.success && data.teams && Array.isArray(data.teams)) {
+                    allTeams = data.teams;
+                    populateTeamDropdown(data.teams);
+                    return;
+                }
+                
+                throw new Error('Invalid response structure from leaderboard');
+                
+            } catch (error) {
+                console.error('Leaderboard function failed:', error);
+                
+                // Use fallback teams
+                const fallbackTeams = [
+                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
+                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
+                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
+                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
+                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
+                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
+                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
+                ];
+                
+                allTeams = fallbackTeams;
+                populateTeamDropdown(fallbackTeams);
+                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
+            }
+        }
+
+        function populateTeamDropdown(teams) {
+            const select = document.getElementById('teamSelect');
+            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
+            
+            teams
+                .sort((a, b) => a.teamName.localeCompare(b.teamName))
+                .forEach(team => {
+                    const option = document.createElement('option');
+                    option.value = team.teamCode;
+                    option.textContent = team.teamName;
+                    select.appendChild(option);
+                });
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const selectedTeamCode = document.getElementById('teamSelect').value;
+            const enteredPin = document.getElementById('teamPin').value;
+            
+            if (!selectedTeamCode) {
+                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
+                return;
+            }
+            
+            if (!/^\d{4}$/.test(enteredPin)) {
+                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
+                return;
+            }
+
+            try {
+                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
+                
+                if (isValid) {
+                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
+                    currentTeam = selectedTeam;
+                    document.getElementById('teamInfo').textContent = `Crew: ${selectedTeam.teamName}`;
+                    
+                    // Switch to challenge section
+                    document.getElementById('loginSection').classList.remove('active');
+                    document.getElementById('challengeSection').classList.add('active');
+                } else {
+                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
+            }
+        });
+
+        // Limerick form submission
+        document.getElementById('limerickForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const topic = document.getElementById('limerickTopic').value.trim();
+            const limerickText = document.getElementById('limerickText').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+
+            // Validation
+            if (!limerickText) {
+                showMessage('challengeMessage', 'Please craft your treasure limerick.', 'error');
+                return;
+            }
+
+            if (limerickText.length < 50) {
+                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters) worthy of doubloons.', 'error');
+                return;
+            }
+
+            // Check for line breaks (limericks should have multiple lines)
+            const lines = limerickText.split('\n').filter(line => line.trim().length > 0);
+            if (lines.length < 3) {
+                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines) as befits a proper verse.', 'error');
+                return;
+            }
+
+            // Show loading
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            document.getElementById('challengeMessage').style.display = 'none';
+
+            try {
+                const result = await submitLimerick(topic, limerickText);
+                
+                showMessage('challengeMessage', 
+                    '🎉 Your limerick has sailed into Terry\'s verse vault! Our master poet is analysing your creativity, humour, and technique. Check the treasure map in a few minutes to see your doubloons!', 
+                    'success');
+                
+                // Disable form after successful submission
+                document.getElementById('limerickForm').style.opacity = '0.5';
+                document.getElementById('limerickForm').style.pointerEvents = 'none';
+                
+            } catch (error) {
+                console.error('Submission error:', error);
+                showMessage('challengeMessage', 'Failed to submit your limerick to the verse vault. Please try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        });
+
+        // EXACT VERIFICATION CODE FROM WORKING QUIZ
+        async function verifyTeamAndPin(teamCode, enteredPin) {
+            try {
+                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        teamCode: teamCode,
+                        pin: enteredPin
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    return result.valid;
+                } else {
+                    throw new Error(result.error || 'Verification failed');
+                }
+                
+            } catch (error) {
+                console.error('Error verifying team and PIN:', error);
+                return false;
+            }
+        }
+
+        async function submitLimerick(topic, limerickText) {
+            try {
+                const submissionData = {
+                    teamCode: currentTeam.teamCode,
+                    teamName: currentTeam.teamName,
+                    topic: topic,
+                    limerickText: limerickText
+                };
+                
+                const response = await fetch('/.netlify/functions/submit_limerick_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(submissionData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error('HTTP error! status: ' + response.status);
+                }
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || 'Submission failed');
+                }
+                
+                return result;
+                
+            } catch (error) {
+                console.error('Limerick submission error:', error);
+                throw error;
+            }
+        }
+
+        function showMessage(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.textContent = message;
+            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
+            container.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
