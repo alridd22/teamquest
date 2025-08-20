@@ -382,6 +382,236 @@
             display: block;
         }
 
+        /* Scoring Rules Button */
+        .scoring-rules-btn {
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+            border: 2px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scoring-rules-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 750px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 4px solid #8B4513;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #FFB6C1, #DAA520, #FFD700);
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            color: #8B4513;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .modal-subtitle {
+            color: #A0522D;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #8B4513;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255,140,0,0.2);
+            transform: scale(1.1);
+        }
+
+        .scoring-category {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .scoring-category.category-creativity {
+            border-color: #32CD32;
+            background: linear-gradient(135deg, #F0FFF0 0%, #E6FFE6 100%);
+        }
+
+        .scoring-category.category-effort {
+            border-color: #4169E1;
+            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+        }
+
+        .scoring-category.category-impact {
+            border-color: #FFB6C1;
+            background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #8B4513;
+        }
+
+        .category-points {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #FF8C00;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 15px;
+            border-radius: 20px;
+            border: 2px solid #DAA520;
+        }
+
+        .category-description {
+            color: #654321;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .category-examples {
+            font-style: italic;
+            color: #A0522D;
+            font-size: 0.95em;
+        }
+
+        .scoring-bands {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 3px solid #DAA520;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .scoring-bands h3 {
+            color: #8B4513;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .score-band {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(139,69,19,0.2);
+        }
+
+        .score-band:last-child {
+            border-bottom: none;
+        }
+
+        .score-range {
+            font-weight: bold;
+            color: #FF8C00;
+            font-size: 1.1em;
+        }
+
+        .score-description {
+            color: #654321;
+            flex: 1;
+            margin-left: 20px;
+        }
+
+        .kindness-tips {
+            background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 100%);
+            border: 3px solid #FFB6C1;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .kindness-tips h3 {
+            color: #8B4513;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .kindness-tips ul {
+            margin-left: 20px;
+            color: #654321;
+        }
+
+        .kindness-tips li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
         .terry-greeting {
             display: flex;
             align-items: flex-start;
@@ -751,6 +981,30 @@
                 width: 100px !important;
                 height: 100px !important;
             }
+
+            .modal-content {
+                padding: 25px 20px;
+            }
+
+            .modal-title {
+                font-size: 1.6em;
+            }
+
+            .category-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .score-band {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .score-description {
+                margin-left: 0;
+            }
         }
     </style>
 </head>
@@ -785,6 +1039,98 @@
         </div>
     </nav>
 
+    <!-- Scoring Rules Modal -->
+    <div class="modal-overlay" id="scoringModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeModalBtn">✕</button>
+            
+            <div class="modal-header">
+                <div class="modal-title">💖 Heart Treasure Scoring</div>
+                <div class="modal-subtitle">How Terry's kindness masters evaluate your generous acts</div>
+            </div>
+
+            <div class="scoring-category category-creativity">
+                <div class="category-header">
+                    <div class="category-title">✨ Creativity & Originality</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    Unique, unexpected, and thoughtful acts of kindness earn the highest treasure. Think beyond the ordinary to create something truly special.
+                </div>
+                <div class="category-examples">
+                    <strong>We treasure:</strong> Original ideas • Unexpected generosity • Personalized kindness • Creative problem-solving • Going beyond common gestures
+                </div>
+            </div>
+
+            <div class="scoring-category category-effort">
+                <div class="category-header">
+                    <div class="category-title">💪 Effort & Investment</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    Time, energy, preparation, and personal investment in your kind deed show true commitment to making a difference.
+                </div>
+                <div class="category-examples">
+                    <strong>We value:</strong> Time invested • Careful preparation • Personal sacrifice • Multiple steps taken • Sustained commitment • Going the extra mile
+                </div>
+            </div>
+
+            <div class="scoring-category category-impact">
+                <div class="category-header">
+                    <div class="category-title">💝 Positive Impact</div>
+                    <div class="category-points">Up to 20 Points</div>
+                </div>
+                <div class="category-description">
+                    Acts that meaningfully help others emotionally, physically, or practically create the most precious Heart Treasures.
+                </div>
+                <div class="category-examples">
+                    <strong>We celebrate:</strong> Emotional uplift • Practical help • Community benefit • Solving real problems • Brightening someone's day • Making life easier
+                </div>
+            </div>
+
+            <div class="scoring-bands">
+                <h3>🏆 Heart Treasure Scoring Bands</h3>
+                
+                <div class="score-band">
+                    <div class="score-range">50-60 Doubloons</div>
+                    <div class="score-description"><strong>Exceptional Kindness:</strong> Highly creative, meaningful, and clearly required significant effort</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">35-49 Doubloons</div>
+                    <div class="score-description"><strong>Worthy Generosity:</strong> Thoughtful with visible effort and clear positive outcome</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">25-34 Doubloons</div>
+                    <div class="score-description"><strong>Good Kindness:</strong> Genuine and helpful, but relatively simple or common</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">15-24 Doubloons</div>
+                    <div class="score-description"><strong>Basic Effort:</strong> Minimal effort or unclear, but shows some attempt at kindness</div>
+                </div>
+                
+                <div class="score-band">
+                    <div class="score-range">1-14 Doubloons</div>
+                    <div class="score-description"><strong>Needs More Heart:</strong> Vague submission with little clear impact or effort</div>
+                </div>
+            </div>
+
+            <div class="kindness-tips">
+                <h3>💡 Tips for Maximum Heart Treasures</h3>
+                <ul>
+                    <li><strong>Think creatively</strong> - Personalize your kindness to the recipient's needs</li>
+                    <li><strong>Document the impact</strong> - Show how your kindness affected others</li>
+                    <li><strong>Put in real effort</strong> - Time and preparation show genuine care</li>
+                    <li><strong>Focus on authenticity</strong> - Genuine acts score higher than staged ones</li>
+                    <li><strong>Tell the full story</strong> - Explain the situation, action, and outcome</li>
+                    <li><strong>Make it meaningful</strong> - Address real needs or brighten someone's day significantly</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div class="container">
         <!-- Login Section -->
         <div class="login-section active" id="loginSection">
@@ -801,6 +1147,10 @@
                 <div class="terry-speech">
                     <div class="terry-note">
                         <strong>Ahoy, kind soul!</strong> Welcome to me most precious treasure vault - the Heart Treasures! These be the rarest gems of all, forged from acts of pure kindness. Show me yer generous spirit through a photo and tale of kindness, and me magical AI will weigh yer treasure's worth in doubloons. Remember, the greatest treasure isn't gold - it's the warmth ye bring to others!
+                        
+                        <button class="scoring-rules-btn" id="scoringRulesBtn">
+                            💖 View Scoring Rules
+                        </button>
                     </div>
                 </div>
             </div>
@@ -814,19 +1164,6 @@
                     <li><strong>AI treasure evaluation</strong> - Terry's magical AI will assess creativity, effort, and heart impact</li>
                     <li><strong>Earn up to 60 doubloons</strong> for yer crew's treasure chest!</li>
                 </ul>
-            </div>
-
-            <div class="scoring-info">
-                <h4>💰 Doubloon Scoring System</h4>
-                <p>Terry's magical AI evaluates each Heart Treasure based on these criteria:</p>
-                <div class="scoring-breakdown">
-                    <ul>
-                        <li><strong>Creativity & Originality (20 doubloons):</strong> Unique, thoughtful, and imaginative kindness</li>
-                        <li><strong>Effort & Impact (20 doubloons):</strong> Time invested and positive effect on others</li>
-                        <li><strong>Heart & Sincerity (20 doubloons):</strong> Genuine care and emotional connection</li>
-                    </ul>
-                    <p style="margin-top: 10px; font-weight: bold; color: #FF8C00;">Maximum treasure: 60 doubloons per Heart Treasure</p>
-                </div>
             </div>
 
             <form id="loginForm">
@@ -917,6 +1254,19 @@
     </div>
 
     <script>
+        // Global variables
+        let currentTeam = null;
+        let allTeams = [];
+
+        // Scoring Modal Functions
+        function openScoringModal() {
+            document.getElementById('scoringModal').classList.add('active');
+        }
+
+        function closeScoringModal() {
+            document.getElementById('scoringModal').classList.remove('active');
+        }
+
         // Navigation Menu JavaScript
         document.addEventListener('DOMContentLoaded', function() {
             const navToggle = document.getElementById('nav-toggle');
@@ -947,13 +1297,42 @@
                 });
             }
 
+            // Modal event listeners
+            const scoringRulesBtn = document.getElementById('scoringRulesBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const scoringModal = document.getElementById('scoringModal');
+
+            if (scoringRulesBtn) {
+                scoringRulesBtn.addEventListener('click', openScoringModal);
+            }
+
+            if (closeModalBtn) {
+                closeModalBtn.addEventListener('click', closeScoringModal);
+            }
+
+            if (scoringModal) {
+                scoringModal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeScoringModal();
+                    }
+                });
+            }
+
+            // Character counter for description
+            const kindnessDescription = document.getElementById('kindnessDescription');
+            const charCount = document.getElementById('charCount');
+            
+            if (kindnessDescription && charCount) {
+                kindnessDescription.addEventListener('input', function() {
+                    const remaining = 500 - this.value.length;
+                    charCount.textContent = remaining;
+                    charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+                });
+            }
+
             // Initialize kindness functionality
             loadTeamsList();
         });
-
-        // Original Kindness Challenge JavaScript
-        let currentTeam = null;
-        let allTeams = [];
 
         // Handle file upload preview
         document.getElementById('photoUpload').addEventListener('change', function(e) {
@@ -988,14 +1367,6 @@
                 };
                 reader.readAsDataURL(file);
             }
-        });
-
-        // Character counter for description
-        document.getElementById('kindnessDescription').addEventListener('input', function() {
-            const remaining = 500 - this.value.length;
-            const charCount = document.getElementById('charCount');
-            charCount.textContent = remaining;
-            charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
         });
 
         // Login form submission
