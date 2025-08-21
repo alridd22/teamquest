@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TeamQuest - Terry's Treasure Hunt</title>
+    <!-- Cache busting for reliable content delivery -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <style>
         /* Updated Navigation Styles with TeamQuest Logo */
         .treasure-nav {
@@ -379,6 +383,71 @@
 
         .login-section.active, .hunt-section.active {
             display: block;
+        }
+
+        /* Completion message section */
+        .completion-section {
+            display: none;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .completion-section.active {
+            display: block;
+        }
+
+        .completion-message {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            padding: 40px;
+            border-radius: 25px;
+            margin-bottom: 30px;
+            border: 4px solid #DAA520;
+            box-shadow: 0 10px 30px rgba(255,215,0,0.4);
+        }
+
+        .completion-message h2 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .completion-message p {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .final-score {
+            font-size: 2.2em;
+            margin: 25px 0;
+            font-weight: bold;
+            color: #8B4513;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #FF8C00, #DAA520);
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            border: 2px solid #8B4513;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
+            background: linear-gradient(135deg, #FFB347, #F0C814);
         }
 
         .terry-greeting {
@@ -953,6 +1022,25 @@
             <div class="message" id="loginMessage"></div>
         </div>
 
+        <!-- Completion Section -->
+        <div class="completion-section" id="completionSection">
+            <div class="logo">
+                <div class="hunt-icon">🏴‍☠️</div>
+                <h1>Quest Complete!</h1>
+            </div>
+
+            <div class="completion-message">
+                <h2>🏴‍☠️ Treasure Map Complete, Matey!</h2>
+                <p>Your crew has already conquered this treasure hunt and claimed all the doubloons!</p>
+                <div class="final-score" id="completionScore">Total Doubloons Earned: 0</div>
+                <p>Well done, ye master treasure hunters! Your adventure is complete.</p>
+                <p>Check the treasure leaderboard to see how your crew's haul compares to other adventurers!</p>
+                <a href="https://theteamquest.netlify.app/teamquest_main.html" class="btn-primary">
+                    Return to Main Quest
+                </a>
+            </div>
+        </div>
+
         <!-- Hunt Section -->
         <div class="hunt-section" id="huntSection">
             <div class="team-info" id="teamInfo">
@@ -1084,6 +1172,53 @@
             { id: 19, clue: "What number comes after eighteen?", answer: "nineteen", acceptableAnswers: ["nineteen", "19", "Nineteen"], points: 5 },
             { id: 20, clue: "What number comes after nineteen?", answer: "twenty", acceptableAnswers: ["twenty", "20", "Twenty"], points: 6 }
         ];
+
+        // Enhanced completion status checking
+        async function checkCompletionStatus() {
+            const teamCode = localStorage.getItem('teamCode');
+            if (!teamCode) {
+                return false;
+            }
+
+            try {
+                console.log('Checking completion status for team:', teamCode);
+                
+                // Check backend for completion status
+                const response = await fetch('/.netlify/functions/check-clue-completion', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ teamCode })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Completion check response:', data);
+                    
+                    if (data.completed) {
+                        showCompletionMessage(data.totalScore);
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error checking completion:', error);
+                return false;
+            }
+        }
+
+        // Show completion message and prevent re-entry
+        function showCompletionMessage(score) {
+            console.log('Showing completion message with score:', score);
+            
+            // Hide login and hunt sections
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('huntSection').classList.remove('active');
+            
+            // Show completion section
+            document.getElementById('completionSection').classList.add('active');
+            document.getElementById('completionScore').textContent = `Total Doubloons Earned: ${score}`;
+        }
 
         async function loadTeamsList() {
             try {
@@ -1399,19 +1534,29 @@
                     
                     if (selectedTeam) {
                         currentTeam = selectedTeam;
-                        document.getElementById('teamInfo').textContent = 'Crew: ' + selectedTeam.teamName;
+                        
+                        // Store team code for completion checking
+                        localStorage.setItem('teamCode', selectedTeam.teamCode);
                         
                         // Load previous clue attempts for this crew
                         await loadPreviousAttempts();
                         
-                        // Re-render grid to show completed clues
-                        renderClueGrid();
+                        // Check if quest is already completed
+                        const isCompleted = await checkCompletionStatus();
                         
-                        document.getElementById('loginSection').classList.remove('active');
-                        document.getElementById('huntSection').classList.add('active');
-                        
-                        updateProgress();
-                        updateScore();
+                        if (!isCompleted) {
+                            // Continue with normal hunt
+                            document.getElementById('teamInfo').textContent = 'Crew: ' + selectedTeam.teamName;
+                            
+                            // Re-render grid to show completed clues
+                            renderClueGrid();
+                            
+                            document.getElementById('loginSection').classList.remove('active');
+                            document.getElementById('huntSection').classList.add('active');
+                            
+                            updateProgress();
+                            updateScore();
+                        }
                     }
                 } else {
                     showMessage('loginMessage', 'Incorrect secret code for the selected crew. Please check your code and try again.', 'error');
