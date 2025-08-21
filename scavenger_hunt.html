@@ -1009,6 +1009,20 @@
             font-weight: 500;
         }
 
+        .optimization-notice {
+            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+            border: 3px solid #4169E1;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #2E4BC6;
+        }
+
+        .optimization-notice h4 {
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 30px 20px;
@@ -1150,6 +1164,11 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <div class="optimization-notice">
+                <h4>📸 Enhanced Photo Processing</h4>
+                <p>Photos are now automatically optimized for faster AI analysis and better scoring accuracy. This prevents timeout errors and improves treasure verification speed!</p>
             </div>
 
             <div class="instructions">
@@ -1350,7 +1369,41 @@
             }
         ];
 
-        // Handle photo upload
+        // Enhanced image validation for AI compatibility
+        function validateImageForAI(file) {
+            // Check file size (OpenAI has limits)
+            if (file.size > 20 * 1024 * 1024) { // 20MB limit
+                throw new Error('Image too large. Please use a smaller image (max 20MB).');
+            }
+            
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error('Please use JPEG, PNG, or WebP format for best AI analysis.');
+            }
+            
+            return true;
+        }
+
+        // Optimize Uploadcare URL for AI processing
+        function optimizeImageForAI(uploadcareUrl) {
+            // Extract the file UUID from the URL
+            const uuid = uploadcareUrl.match(/\/([a-f0-9-]{36})\//)?.[1];
+            
+            if (!uuid) {
+                console.warn('Could not extract UUID from:', uploadcareUrl);
+                return uploadcareUrl;
+            }
+            
+            // Return optimized URL with transformations for AI compatibility
+            // - Resize to max 1024px (OpenAI limit)
+            // - Convert to JPEG (better compatibility) 
+            // - Compress quality to 85% (good balance of quality/size)
+            // - Progressive loading for faster initial download
+            return `https://ucarecdn.com/${uuid}/-/resize/1024x1024/-/format/jpeg/-/quality/85/-/progressive/yes/`;
+        }
+
+        // Handle photo upload with enhanced validation and optimization
         document.getElementById('photoUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const preview = document.getElementById('photoPreview');
@@ -1358,26 +1411,25 @@
             const submitBtn = document.getElementById('submitBtn');
 
             if (file) {
-                // Check file size (max 5MB)
-                if (file.size > 5 * 1024 * 1024) {
-                    showMessage('submitMessage', 'File size must be less than 5MB. Please choose a smaller image.', 'error');
+                try {
+                    // Validate image for AI processing
+                    validateImageForAI(file);
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                        frame.classList.add('has-photo');
+                        submitBtn.disabled = false;
+                        
+                        // Clear any previous error messages
+                        document.getElementById('submitMessage').style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                } catch (error) {
+                    showMessage('submitMessage', error.message, 'error');
                     return;
                 }
-
-                // Check file type
-                if (!file.type.startsWith('image/')) {
-                    showMessage('submitMessage', 'Please upload an image file.', 'error');
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    frame.classList.add('has-photo');
-                    submitBtn.disabled = false;
-                };
-                reader.readAsDataURL(file);
             }
         });
 
@@ -1425,7 +1477,7 @@
             }
         });
 
-        // Treasure hunt form submission
+        // Treasure hunt form submission with enhanced optimization
         document.getElementById('scavengerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1457,7 +1509,7 @@
                 // Handle pending verification state
                 if (result.status === 'pending_verification') {
                     showMessage('submitMessage', 
-                        '🏴‍☠️ ' + result.message + ' Yer treasure submission is being analysed by Terry\'s magical AI. Check the treasure leaderboard in 1-2 minutes for verification results and yer doubloons!', 
+                        '🏴‍☠️ ' + result.message + ' Yer treasure submission is being analysed by Terry\'s enhanced AI. Check the treasure leaderboard in 1-2 minutes for verification results and yer doubloons!', 
                         'success');
                     
                     // Mark as submitted but not yet verified
@@ -1484,7 +1536,7 @@
                 // Update progress
                 updateProgress();
                 
-                // Store locally for persistence (restore original working system)
+                // Store locally for persistence
                 localStorage.setItem('scavenger_' + currentTeam.teamCode, JSON.stringify(completedItems));
                 localStorage.setItem('submitted_' + currentTeam.teamCode, JSON.stringify([...submittedItems]));
                 
@@ -1685,7 +1737,7 @@
         }
 
         async function loadCompletedItems() {
-            // Restore original working system - load from localStorage first, then sync with backend
+            // Load from localStorage first, then sync with backend
             const storedCompleted = localStorage.getItem('scavenger_' + currentTeam.teamCode);
             const storedSubmitted = localStorage.getItem('submitted_' + currentTeam.teamCode);
             
@@ -1755,11 +1807,18 @@
 
         async function submitScavengerItem(photoFile, item) {
             try {
-                console.log('Starting scavenger hunt treasure submission...');
+                console.log('Starting scavenger hunt treasure submission with enhanced optimization...');
+                
+                // Validate image before upload
+                validateImageForAI(photoFile);
                 
                 // Upload photo to Uploadcare first
                 const photoUrl = await uploadToUploadcare(photoFile);
                 console.log('Photo uploaded successfully:', photoUrl);
+                
+                // Optimize the URL for AI processing
+                const optimizedPhotoUrl = optimizeImageForAI(photoUrl);
+                console.log('Photo URL optimized for AI:', optimizedPhotoUrl);
                 
                 const submissionData = {
                     teamCode: currentTeam.teamCode,
@@ -1767,7 +1826,7 @@
                     itemId: item.id,
                     itemTitle: item.title,
                     itemDescription: item.description,
-                    photoUrl: photoUrl,
+                    photoUrl: optimizedPhotoUrl, // Use optimized URL
                     maxPoints: item.maxPoints
                 };
                 
