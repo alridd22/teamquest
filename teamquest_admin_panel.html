@@ -286,6 +286,11 @@
             border-color: #DAA520; 
             color: #8B4513;
         }
+        .status-not-started {
+            background: linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%);
+            border-color: #9370DB;
+            color: #4B0082;
+        }
 
         .control-buttons {
             display: grid;
@@ -1084,9 +1089,40 @@
         }
 
         function syncWithBackendState(data) {
-            const backendStatus = (data.competitionStatus || data.status || '').toLowerCase();
+            // Enhanced status detection with better empty sheet handling
+            const rawStatus = data.competitionStatus || data.status;
+            const backendStatus = (rawStatus || '').toString().toLowerCase().trim();
             
-            if (backendStatus === 'start' || backendStatus === 'running') {
+            // Add debugging to help diagnose issues
+            console.log('Raw backend status:', rawStatus);
+            console.log('Processed backend status:', backendStatus);
+            console.log('Full backend data:', data);
+            
+            // Check if this appears to be an empty/uninitialized competition
+            const isEmpty = !rawStatus || rawStatus === '' || rawStatus === null || rawStatus === undefined;
+            const hasNoStartTime = !data.startTime;
+            const hasNoTeams = !data.teams || !data.leaderboard || (data.teams && data.teams.length === 0) || (data.leaderboard && data.leaderboard.length === 0);
+            
+            console.log('Empty status check:', { isEmpty, hasNoStartTime, hasNoTeams });
+            
+            if (isEmpty && hasNoStartTime) {
+                // Definitely an uninitialized competition
+                console.log('Detected uninitialized competition - setting to not started state');
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                adventureState.timeRemaining = 90 * 60;
+                adventureState.penaltyMode = false;
+                adventureState.penaltyMinutes = 0;
+                adventureState.allTeamsReturned = false;
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+            } else if (backendStatus === 'start' || backendStatus === 'running') {
+                console.log('Competition is running');
                 adventureState.isRunning = true;
                 adventureState.isPaused = false;
                 adventureState.hasEnded = false;
@@ -1115,6 +1151,7 @@
                 }
                 
             } else if (backendStatus === 'stop' || backendStatus === 'stopped') {
+                console.log('Competition is stopped/ended');
                 adventureState.isRunning = false;
                 adventureState.isPaused = false;
                 adventureState.hasEnded = true;
@@ -1125,12 +1162,15 @@
                 }
                 
             } else {
+                // Unknown status or other edge cases
+                console.log('Unknown or edge case status, defaulting to not started');
                 adventureState.isRunning = false;
                 adventureState.isPaused = false;
                 adventureState.hasEnded = false;
                 adventureState.timeRemaining = 90 * 60;
                 adventureState.penaltyMode = false;
                 adventureState.penaltyMinutes = 0;
+                adventureState.allTeamsReturned = false;
                 
                 if (timerInterval) {
                     clearInterval(timerInterval);
@@ -1222,8 +1262,18 @@
                     status.innerHTML = '⏸️ Quest Paused';
                     status.className = 'adventure-status status-paused';
                 } else {
-                    status.innerHTML = '🏴‍☠️ Adventure Awaiting Launch';
-                    status.className = 'adventure-status status-stopped';
+                    // This is the key fix - better handling of not-started state
+                    const hasAnyData = adventureState.competitionData && 
+                                     (adventureState.competitionData.startTime || 
+                                      (adventureState.crews && adventureState.crews.length > 0));
+                    
+                    if (!hasAnyData) {
+                        status.innerHTML = '🗺️ Adventure Not Started - Ready to Launch';
+                        status.className = 'adventure-status status-not-started';
+                    } else {
+                        status.innerHTML = '🏴‍☠️ Adventure Awaiting Launch';
+                        status.className = 'adventure-status status-stopped';
+                    }
                 }
             }
 
