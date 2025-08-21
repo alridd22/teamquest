@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Terry's Verse Vault</title>
+    <title>Terry's Treasure Hunt Command Centre</title>
     <style>
-        /* Updated Navigation Styles with TeamQuest Logo */
+        /* Simple Header with Logo Only (like limerick page) */
         .treasure-nav {
             position: fixed;
             top: 0;
@@ -16,16 +16,16 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             z-index: 1000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 80px; /* Increased height for logo */
+            height: 70px;
+            padding: 0 20px;
         }
 
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 0 20px;
             height: 100%;
         }
 
@@ -41,208 +41,26 @@
         }
 
         .nav-logo img {
-            height: 50px; /* Desktop size */
+            height: 45px;
             width: auto;
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
             transition: all 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .nav-logo img {
-                height: 85px !important; /* Much bigger on mobile */
-            }
         }
 
         .nav-logo:hover img {
             filter: drop-shadow(2px 2px 8px rgba(255,215,0,0.6));
         }
 
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 30px;
-        }
-
-        .nav-item {
-            position: relative;
-        }
-
-        .nav-link {
-            color: #F5DEB3;
-            text-decoration: none;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 12px 18px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            display: block;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            background: rgba(101, 67, 33, 0.3);
-            border: 2px solid rgba(218, 165, 32, 0.4);
-            white-space: nowrap;
-        }
-
-        .nav-link:hover {
-            background: linear-gradient(135deg, #DAA520, #FF8C00);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4);
-            border-color: #DAA520;
-        }
-
-        .nav-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: linear-gradient(135deg, #654321 0%, #8B4513 100%);
-            border: 2px solid #DAA520;
-            border-radius: 8px;
-            min-width: 180px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .nav-item:hover .nav-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-link {
-            display: block;
-            color: #F5DEB3;
-            text-decoration: none;
-            padding: 12px 18px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
-            transition: all 0.3s ease;
-            background: rgba(101, 67, 33, 0.2);
-            margin: 2px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .dropdown-link:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-link:hover {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding-left: 25px;
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
-        }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: #DAA520;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        /* Mobile Styles */
         @media (max-width: 768px) {
             .treasure-nav {
-                height: 120px; /* Taller for bigger logo */
+                height: 90px;
             }
-
-            .nav-container {
-                justify-content: center;
-                position: relative;
-            }
-
-            .nav-logo {
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .nav-toggle {
-                position: absolute;
-                right: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                display: block;
-            }
-
-            .nav-menu {
-                position: fixed;
-                top: 120px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 120px);
-                background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
-                flex-direction: column;
-                align-items: center;
-                padding-top: 30px;
-                gap: 20px;
-                transition: left 0.3s ease;
-                overflow-y: auto;
-            }
-
-            .nav-menu.active {
-                left: 0;
-            }
-
-            .nav-link {
-                font-size: 1.1rem;
-                padding: 15px 25px;
-                width: 280px;
-                text-align: center;
-                background: linear-gradient(135deg, rgba(101, 67, 33, 0.8), rgba(139, 69, 19, 0.6));
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .nav-link:hover {
-                background: linear-gradient(135deg, #DAA520, #FF8C00);
-                transform: translateY(-3px);
-                box-shadow: 0 6px 15px rgba(218, 165, 32, 0.4);
-            }
-
-            .nav-dropdown {
-                position: static;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                background: rgba(101, 67, 33, 0.9);
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                margin-top: 10px;
-                width: 280px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            }
-
-            .dropdown-link {
-                padding: 12px 20px;
-                font-size: 1rem;
-                margin: 4px;
-                border-radius: 8px;
-                text-align: center;
-                background: rgba(139, 69, 19, 0.4);
-                border: 1px solid rgba(218, 165, 32, 0.3);
-            }
-
-            .dropdown-link:hover {
-                background: linear-gradient(135deg, #FF8C00, #DAA520);
-                padding-left: 20px;
-                transform: translateY(-2px);
+            
+            .nav-logo img {
+                height: 65px;
             }
         }
 
-        /* Original Page Styles - Updated for Navigation */
         * {
             margin: 0;
             padding: 0;
@@ -253,17 +71,16 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #3E2723;
             padding: 20px;
-            padding-top: 100px !important; /* Account for taller fixed nav */
+            padding-top: 90px;
             position: relative;
         }
 
         @media (max-width: 768px) {
             body {
-                padding-top: 140px !important; /* Account for mobile nav height */
+                padding: 10px;
+                padding-top: 110px;
             }
         }
 
@@ -282,506 +99,1407 @@
             z-index: 0;
         }
 
-        .container {
-            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-            max-width: 700px;
-            width: 100%;
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
             position: relative;
-            overflow: hidden;
             z-index: 1;
-            border: 3px solid #8B4513;
         }
 
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
-        }
-
-        .container::after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border: 2px solid #DAA520;
-            border-radius: 20px;
-            pointer-events: none;
+        @media (max-width: 768px) {
+            .header {
+                margin-bottom: 20px;
+            }
         }
 
         .logo {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .poem-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
+            font-size: 2.5em;
+            margin-bottom: 8px;
             filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
+            animation: gentle-sway 3s ease-in-out infinite;
         }
 
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2em;
+                margin-bottom: 6px;
+            }
+        }
+
+        @keyframes gentle-sway {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
         }
 
         h1 {
-            color: #8B4513;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
+            font-size: 2.2em;
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 8px;
+            color: #3E2723;
+            text-shadow: 3px 3px 6px rgba(255,255,255,0.8), 1px 1px 3px rgba(0,0,0,0.8);
+            line-height: 1.1;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.6em;
+                margin-bottom: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.4em;
+            }
         }
 
         .subtitle {
-            text-align: center;
             color: #A0522D;
-            margin-bottom: 30px;
             font-size: 1.1em;
-            font-weight: 500;
+            font-weight: 600;
+            line-height: 1.3;
         }
 
-        .team-info {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: white;
-            padding: 20px;
+        @media (max-width: 768px) {
+            .subtitle {
+                font-size: 1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .subtitle {
+                font-size: 0.9em;
+            }
+        }
+
+        .terry-greeting {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin: 20px auto 30px;
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
             border-radius: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
-            border: 2px solid #DAA520;
+            padding: 20px;
+            border: 3px solid #DAA520;
+            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
+            max-width: 900px;
             position: relative;
-            z-index: 2;
+            z-index: 1;
         }
 
-        .login-section, .challenge-section {
-            display: none;
-            position: relative;
-            z-index: 2;
+        @media (max-width: 768px) {
+            .terry-greeting {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 12px;
+                padding: 15px;
+                margin: 15px auto 20px;
+            }
         }
 
-        .login-section.active, .challenge-section.active {
+        @media (max-width: 480px) {
+            .terry-greeting {
+                padding: 12px;
+                margin: 10px 5px 15px;
+            }
+        }
+
+        .terry-character {
+            flex-shrink: 0;
+        }
+
+        .terry-character img {
+            width: 100px !important;
+            height: 100px !important;
+            border-radius: 12px !important;
+            border: 3px solid #DAA520;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.3);
+            object-fit: cover;
+            background: linear-gradient(135deg, #8B4513, #A0522D);
             display: block;
         }
 
-        /* Scoring Rules Button */
-        .scoring-rules-btn {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 12px;
-            font-size: 1em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 15px;
-            border: 2px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        @media (max-width: 768px) {
+            .terry-character img {
+                width: 80px !important;
+                height: 80px !important;
+            }
         }
 
-        .scoring-rules-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
-            border-radius: 25px;
-            padding: 40px;
-            max-width: 750px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 4px solid #8B4513;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        .terry-speech {
+            flex: 1;
             position: relative;
         }
 
-        .modal-content::before {
+        .terry-speech::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 12px 12px 12px 0;
+            border-color: transparent #FFD700 transparent transparent;
+        }
+
+        @media (max-width: 768px) {
+            .terry-speech::before {
+                display: none;
+            }
+        }
+
+        .terry-note {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            color: #8B4513;
+            padding: 18px;
+            border-radius: 12px;
+            margin: 0;
+            border: 2px solid #DAA520;
+            position: relative;
+            font-weight: 500;
+            line-height: 1.5;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            font-size: 0.95em;
+        }
+
+        @media (max-width: 768px) {
+            .terry-note {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .terry-note {
+                padding: 12px;
+                font-size: 0.85em;
+            }
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 1200px) {
+            .admin-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                gap: 12px;
+                margin: 0 5px;
+            }
+        }
+
+        .control-panel {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            border: 3px solid #8B4513;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .control-panel {
+                padding: 18px;
+                border-radius: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .control-panel {
+                padding: 12px;
+            }
+        }
+
+        .control-panel::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 8px;
+            height: 6px;
             background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
-            border-radius: 20px 20px 0 0;
         }
 
-        .modal-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .modal-title {
-            color: #8B4513;
-            font-size: 2em;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .modal-subtitle {
-            color: #A0522D;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-        .close-btn {
+        .control-panel::after {
+            content: '';
             position: absolute;
-            top: 15px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #8B4513;
-            cursor: pointer;
-            padding: 5px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
-        }
-
-        .close-btn:hover {
-            background: rgba(255,140,0,0.2);
-            transform: scale(1.1);
-        }
-
-        .scoring-category {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border: 3px solid #DAA520;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 2px solid #DAA520;
             border-radius: 15px;
-            padding: 25px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .control-panel::after {
+                top: 8px;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+            }
+        }
+
+        .section-title {
+            font-size: 1.4em;
             margin-bottom: 20px;
+            color: #8B4513;
+            border-bottom: 3px solid #DAA520;
+            padding-bottom: 8px;
+            position: relative;
+            z-index: 2;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            line-height: 1.2;
+        }
+
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 1.2em;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .section-title {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
+        }
+
+        .adventure-control {
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 480px) {
+            .adventure-control {
+                margin-bottom: 20px;
+            }
+        }
+
+        .timer-display {
+            font-size: 2.5em;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            color: #8B4513;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 12px;
+            border: 3px solid #DAA520;
+            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        @media (max-width: 768px) {
+            .timer-display {
+                font-size: 2em;
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .timer-display {
+                font-size: 1.6em;
+                padding: 10px;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Enhanced Timer States */
+        .timer-penalty {
+            background: linear-gradient(135deg, #DC143C 0%, #B22222 100%);
+            color: white;
+            animation: pulse-penalty 1s ease-in-out infinite;
+            border-color: #8B0000;
+        }
+
+        @keyframes pulse-penalty {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 5px 15px rgba(220,20,60,0.4);
+            }
+            50% { 
+                transform: scale(1.02);
+                box-shadow: 0 8px 25px rgba(220,20,60,0.6);
+            }
+        }
+
+        /* Penalty Warning System */
+        .penalty-warning {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+            border: 3px solid #DC143C;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 12px 0;
+            text-align: center;
+            color: #8B0000;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(220,20,60,0.3);
+            display: none;
+            position: relative;
+            z-index: 2;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .penalty-warning {
+                padding: 12px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .penalty-warning {
+                padding: 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        .penalty-warning.show {
+            display: block;
+            animation: warning-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes warning-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .penalty-rate {
+            font-size: 1em;
+            margin-top: 8px;
+            color: #8B0000;
+        }
+
+        @media (max-width: 480px) {
+            .penalty-rate {
+                font-size: 0.9em;
+                margin-top: 6px;
+            }
+        }
+
+        .adventure-status {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            border: 2px solid;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 768px) {
+            .adventure-status {
+                font-size: 1em;
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .adventure-status {
+                font-size: 0.9em;
+                padding: 8px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .status-stopped { 
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%); 
+            border-color: #DC143C; 
+            color: #8B0000;
+        }
+        .status-running { 
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%); 
+            border-color: #32CD32; 
+            color: #006400;
+        }
+        .status-paused { 
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%); 
+            border-color: #FF8C00; 
+            color: #8B4513;
+        }
+        .status-ended { 
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); 
+            border-color: #DAA520; 
+            color: #8B4513;
+        }
+        .status-not-started {
+            background: linear-gradient(135deg, #E6E6FA 0%, #D8BFD8 100%);
+            border-color: #9370DB;
+            color: #4B0082;
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .control-buttons {
+                gap: 10px;
+                margin-bottom: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .control-buttons {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                margin-bottom: 15px;
+            }
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 3px solid #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            line-height: 1.2;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .btn {
+                padding: 12px 15px;
+                font-size: 0.9em;
+                letter-spacing: 0.5px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.85em;
+                letter-spacing: 0.3px;
+            }
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 480px) {
+            .btn:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            }
+        }
+
+        .btn-start { 
+            background: linear-gradient(135deg, #32CD32, #228B22); 
+            color: white; 
+        }
+        .btn-pause { 
+            background: linear-gradient(135deg, #FFD700, #FF8C00); 
+            color: #8B4513; 
+        }
+        .btn-stop { 
+            background: linear-gradient(135deg, #DC143C, #B22222); 
+            color: white; 
+        }
+        .btn-reset { 
+            background: linear-gradient(135deg, #A0522D, #8B4513); 
+            color: white; 
+        }
+        .btn-publish {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #8B4513;
+            font-size: 1.1em;
+            padding: 18px 25px;
+            border: 4px solid #DAA520;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .btn-publish {
+                font-size: 1em;
+                padding: 15px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn-publish {
+                font-size: 0.9em;
+                padding: 12px 15px;
+            }
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            background: #6c757d !important;
+            color: #fff !important;
+        }
+
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn:disabled::before {
+            display: none;
+        }
+
+        .results-management {
+            background: linear-gradient(135deg, #FFFACD 0%, #F0E68C 100%);
+            border: 3px solid #DAA520;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .results-management {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .results-management {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .results-management h3 {
+            color: #8B4513;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 480px) {
+            .results-management h3 {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+        }
+
+        .results-status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.95em;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 480px) {
+            .results-status {
+                padding: 10px;
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+        }
+
+        .results-unpublished {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 2px solid #FF8C00;
+            color: #8B4513;
+        }
+
+        .results-published {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            border: 2px solid #32CD32;
+            color: #006400;
+        }
+
+        .publish-warning {
+            background: linear-gradient(135deg, #FFCCCB 0%, #FFA07A 100%);
+            border: 2px solid #DC143C;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            color: #8B0000;
+            font-weight: 600;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .publish-warning {
+                padding: 10px;
+                font-size: 0.85em;
+                margin-bottom: 10px;
+            }
+        }
+
+        .emergency-controls {
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+            border: 3px solid #DC143C;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .emergency-controls {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .emergency-controls {
+                padding: 12px;
+                margin-bottom: 12px;
+            }
+        }
+
+        .emergency-controls h3 {
+            color: #8B0000;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 480px) {
+            .emergency-controls h3 {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
+        }
+
+        .crews-panel {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.2),
+                inset 0 1px 0 rgba(255,255,255,0.3);
+            border: 3px solid #8B4513;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .crews-panel {
+                padding: 18px;
+                border-radius: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crews-panel {
+                padding: 12px;
+            }
+        }
+
+        .crews-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+        }
+
+        .crews-panel::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            border: 2px solid #DAA520;
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            .crews-panel::after {
+                top: 8px;
+                left: 8px;
+                right: 8px;
+                bottom: 8px;
+            }
+        }
+
+        .crews-grid {
+            display: grid;
+            gap: 12px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            .crews-grid {
+                max-height: 500px;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crews-grid {
+                max-height: 400px;
+                gap: 8px;
+            }
+        }
+
+        .crew-card {
+            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
+            border-radius: 12px;
+            padding: 15px;
+            border: 2px solid #DAA520;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
             position: relative;
         }
 
-        .scoring-category.category-rhythm {
-            border-color: #4169E1;
-            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
+        @media (max-width: 768px) {
+            .crew-card {
+                padding: 12px;
+            }
         }
 
-        .scoring-category.category-creativity {
-            border-color: #32CD32;
-            background: linear-gradient(135deg, #F0FFF0 0%, #E6FFE6 100%);
+        @media (max-width: 480px) {
+            .crew-card {
+                padding: 10px;
+            }
         }
 
-        .scoring-category.category-humor {
-            border-color: #FFD700;
-            background: linear-gradient(135deg, #FFFACD 0%, #FFF8DC 100%);
+        .crew-card:hover {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(139,69,19,0.2);
         }
 
-        .category-header {
+        @media (max-width: 480px) {
+            .crew-card:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        /* Enhanced Crew Card States */
+        .crew-card.late {
+            background: linear-gradient(135deg, #FFCCCB 0%, #FFA0B4 100%);
+            border: 3px solid #DC143C;
+            box-shadow: 0 4px 12px rgba(220,20,60,0.2);
+        }
+
+        .crew-card.returned {
+            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
+            border: 3px solid #32CD32;
+            box-shadow: 0 4px 12px rgba(50,205,50,0.2);
+        }
+
+        .crew-card.penalized {
+            border-left: 6px solid #DC143C;
+            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
+        }
+
+        .crew-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
         }
 
-        .category-title {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #8B4513;
+        @media (max-width: 480px) {
+            .crew-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
         }
 
-        .category-points {
+        .crew-name {
             font-size: 1.2em;
             font-weight: bold;
-            color: #FF8C00;
-            background: rgba(255,255,255,0.8);
-            padding: 5px 15px;
-            border-radius: 20px;
-            border: 2px solid #DAA520;
+            color: #8B4513;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.2;
+            word-break: break-word;
         }
 
-        .category-description {
-            color: #654321;
-            line-height: 1.6;
+        @media (max-width: 768px) {
+            .crew-name {
+                font-size: 1.1em;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crew-name {
+                font-size: 1em;
+                gap: 5px;
+            }
+        }
+
+        .crew-status-badge {
+            padding: 3px 6px;
+            border-radius: 10px;
+            font-size: 0.6em;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-active {
+            background: #3498db;
+            color: white;
+        }
+
+        .status-returned {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-late {
+            background: #e74c3c;
+            color: white;
+            animation: badge-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes badge-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .crew-doubloons {
+            font-size: 1.3em;
+            color: #DAA520;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .crew-doubloons {
+                font-size: 1.2em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .crew-doubloons {
+                font-size: 1.1em;
+                align-items: flex-start;
+            }
+        }
+
+        .crew-doubloons.penalized {
+            color: #DC143C;
+        }
+
+        .original-score {
+            font-size: 0.6em;
+            color: #999;
+            text-decoration: line-through;
+            margin-bottom: 2px;
+        }
+
+        /* Penalty Information Display */
+        .penalty-info {
+            background: linear-gradient(135deg, #FFCCCB 0%, #FFA0B4 100%);
+            border: 2px solid #DC143C;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 8px 0;
+            font-size: 0.8em;
+            color: #8B0000;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 480px) {
+            .penalty-info {
+                padding: 6px;
+                font-size: 0.75em;
+                gap: 4px;
+            }
+        }
+
+        .penalty-icon {
+            font-size: 1.1em;
+            animation: warning-shake 1s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes warning-shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-3deg); }
+            75% { transform: rotate(3deg); }
+        }
+
+        .crew-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            align-items: center;
             margin-bottom: 12px;
         }
 
-        .category-examples {
-            font-style: italic;
-            color: #A0522D;
+        @media (max-width: 480px) {
+            .crew-controls {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                margin-bottom: 10px;
+            }
+        }
+
+        .status-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid #DAA520;
+            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
+            color: #8B4513;
+            font-size: 0.85em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 480px) {
+            .status-select {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        .status-select.late {
+            border-color: #DC143C;
+            background: linear-gradient(145deg, #FFCCCB 0%, #FFA0B4 100%);
+            color: #8B0000;
+        }
+
+        .return-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.8em;
+            color: #8B4513;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 480px) {
+            .return-checkbox {
+                font-size: 0.75em;
+                gap: 4px;
+            }
+        }
+
+        .return-checkbox input[type="checkbox"] {
+            transform: scale(1.2);
+            accent-color: #DAA520;
+        }
+
+        /* Manual Penalty Override */
+        .penalty-override {
+            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border: 2px solid #FF8C00;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            display: none;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 480px) {
+            .penalty-override {
+                padding: 10px;
+                font-size: 0.8em;
+            }
+        }
+
+        .penalty-override.show {
+            display: block;
+        }
+
+        .penalty-override h4 {
+            color: #8B4513;
+            margin-bottom: 8px;
             font-size: 0.95em;
         }
 
-        .scoring-bands {
-            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        .scoring-bands h3 {
-            color: #8B4513;
-            margin-bottom: 20px;
-            font-size: 1.3em;
-            font-weight: 700;
-            text-align: center;
-        }
-
-        .score-band {
+        .penalty-controls {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(139,69,19,0.2);
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .score-band:last-child {
-            border-bottom: none;
+        @media (max-width: 480px) {
+            .penalty-controls {
+                gap: 6px;
+                justify-content: center;
+            }
         }
 
-        .score-range {
-            font-weight: bold;
-            color: #FF8C00;
-            font-size: 1.1em;
-        }
-
-        .score-description {
-            color: #654321;
-            flex: 1;
-            margin-left: 20px;
-        }
-
-        .verse-tips {
-            background: linear-gradient(135deg, #E6F3FF 0%, #CCE7FF 100%);
-            border: 3px solid #4169E1;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 30px;
-        }
-
-        .verse-tips h3 {
-            color: #2E4BC6;
-            margin-bottom: 15px;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .verse-tips ul {
-            margin-left: 20px;
-            color: #2E4BC6;
-        }
-
-        .verse-tips li {
-            margin-bottom: 8px;
-            line-height: 1.5;
-        }
-
-        .instructions {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-left: 6px solid #DAA520;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-radius: 0 15px 15px 0;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
+        .penalty-input {
+            padding: 6px 10px;
             border: 2px solid #DAA520;
-            border-left: 6px solid #FF8C00;
-        }
-
-        .instructions h3 {
-            color: #8B4513;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .instructions ul {
-            margin-left: 20px;
-            color: #654321;
-            line-height: 1.8;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8B4513;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
-        input[type="text"], input[type="number"], select, textarea {
-            width: 100%;
-            padding: 15px;
-            border: 3px solid #DAA520;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #FF8C00;
+            border-radius: 6px;
             background: white;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
+            color: #8B4513;
+            font-weight: bold;
+            width: 70px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 480px) {
+            .penalty-input {
+                width: 60px;
+                padding: 5px 8px;
+                font-size: 0.8em;
+            }
+        }
+
+        .penalty-apply-btn {
+            background: linear-gradient(135deg, #FF8C00, #FF7700);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 480px) {
+            .penalty-apply-btn {
+                padding: 5px 10px;
+                font-size: 0.75em;
+            }
+        }
+
+        .penalty-apply-btn:hover {
+            background: linear-gradient(135deg, #FF7700, #FF6600);
             transform: translateY(-1px);
         }
 
-        .limerick-textarea {
-            min-height: 180px;
-            resize: vertical;
-            font-family: 'Georgia', 'Times New Roman', serif;
-            font-size: 1.1em;
-            line-height: 1.6;
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
         }
 
-        .char-count {
-            text-align: right;
-            font-size: 0.9em;
-            color: #8B4513;
-            margin-top: 5px;
-            font-weight: 500;
+        @media (max-width: 768px) {
+            .stats-overview {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-top: 20px;
+            }
         }
 
-        .pin-input {
+        @media (max-width: 480px) {
+            .stats-overview {
+                gap: 10px;
+                margin: 15px 5px 0;
+            }
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
+            border-radius: 12px;
+            padding: 20px;
             text-align: center;
-            font-size: 1.5em;
-            letter-spacing: 3px;
+            border: 3px solid #8B4513;
+            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .stat-card {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-card {
+                padding: 12px;
+            }
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
+        }
+
+        .stat-number {
+            font-size: 1.8em;
             font-weight: bold;
+            color: #8B4513;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            line-height: 1;
         }
 
-        .examples {
+        @media (max-width: 768px) {
+            .stat-number {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-number {
+                font-size: 1.3em;
+            }
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #A0522D;
+            margin-top: 6px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 480px) {
+            .stat-label {
+                font-size: 0.8em;
+                margin-top: 4px;
+            }
+        }
+
+        .activity-summary {
+            margin-top: 20px;
             background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
+            border-radius: 12px;
+            padding: 20px;
             border: 2px solid #DAA520;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
+            position: relative;
+            z-index: 2;
         }
 
-        .examples h4 {
+        @media (max-width: 768px) {
+            .activity-summary {
+                padding: 15px;
+                margin-top: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .activity-summary {
+                padding: 12px;
+                margin-top: 12px;
+            }
+        }
+
+        .activity-summary h3 {
             color: #8B4513;
             margin-bottom: 15px;
-            text-align: center;
             font-size: 1.2em;
             font-weight: 700;
         }
 
-        .example-limerick {
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            font-family: 'Georgia', serif;
-            font-style: italic;
-            line-height: 1.6;
-            border-left: 4px solid #FF8C00;
-            border: 2px solid #DAA520;
-            color: #654321;
+        @media (max-width: 768px) {
+            .activity-summary h3 {
+                font-size: 1.1em;
+                margin-bottom: 12px;
+            }
         }
 
-        .example-limerick:last-child {
-            margin-bottom: 0;
+        @media (max-width: 480px) {
+            .activity-summary h3 {
+                font-size: 1em;
+                margin-bottom: 10px;
+            }
         }
 
-        .rhyme-helper {
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        @media (max-width: 768px) {
+            .activity-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .activity-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+        }
+
+        .activity-item {
+            text-align: center;
+            padding: 12px 8px;
             background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
+            border-radius: 8px;
             border: 2px solid #DAA520;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .rhyme-helper h4 {
+            font-weight: 600;
             color: #8B4513;
-            margin-bottom: 10px;
-            font-weight: 700;
         }
 
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
+        @media (max-width: 768px) {
+            .activity-item {
+                padding: 10px 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .activity-item {
+                padding: 8px 4px;
+            }
+        }
+
+        .activity-item div:first-child {
+            font-size: 0.8em;
+            margin-bottom: 4px;
+            line-height: 1.2;
+        }
+
+        @media (max-width: 480px) {
+            .activity-item div:first-child {
+                font-size: 0.75em;
+                margin-bottom: 3px;
+            }
+        }
+
+        .activity-item div:last-child {
             font-size: 1.1em;
             font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            border: 2px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            color: #A0522D;
         }
 
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
+        @media (max-width: 768px) {
+            .activity-item div:last-child {
+                font-size: 1em;
+            }
         }
 
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        @media (max-width: 480px) {
+            .activity-item div:last-child {
+                font-size: 0.9em;
+            }
         }
 
-        .message {
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
+        .loading {
             text-align: center;
-            display: none;
+            opacity: 0.8;
+            padding: 20px;
+            color: #8B4513;
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 480px) {
+            .loading {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+        }
+
+        .success-message, .error-message {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+            font-weight: 600;
             border: 2px solid;
+            position: relative;
+            z-index: 2;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .success-message, .error-message {
+                padding: 12px;
+                margin: 12px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .success-message, .error-message {
+                padding: 10px;
+                font-size: 0.9em;
+                margin: 10px 0;
+            }
         }
 
         .success-message {
@@ -795,731 +1513,1115 @@
             border-color: #DC143C;
             color: #8B0000;
         }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-            color: #8B4513;
-            font-weight: 600;
-        }
-
-        .topic-select {
-            margin-bottom: 20px;
-        }
-
-        .topic-ideas {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-top: 15px;
-        }
-
-        .topic-idea {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 2px solid #DAA520;
-            font-weight: 500;
-        }
-
-        .topic-idea:hover {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255,140,0,0.3);
-        }
-
-        .topic-idea.selected {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border-color: #8B4513;
-        }
-
-        .terry-greeting {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            margin: 20px 0;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 20px;
-            padding: 25px;
-            border: 3px solid #DAA520;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
-        }
-
-        .terry-character {
-            flex-shrink: 0;
-        }
-
-        .terry-character img {
-            width: 120px !important;
-            height: 120px !important;
-            border-radius: 15px !important;
-            border: 4px solid #DAA520;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.3);
-            object-fit: cover;
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            display: block;
-        }
-
-        .terry-speech {
-            flex: 1;
-            position: relative;
-        }
-
-        .terry-speech::before {
-            content: '';
-            position: absolute;
-            left: -15px;
-            top: 20px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 15px 15px 15px 0;
-            border-color: transparent #FFD700 transparent transparent;
-        }
-
-        .terry-note {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #8B4513;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 0;
-            border: 3px solid #DAA520;
-            position: relative;
-            font-weight: 500;
-            line-height: 1.6;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .topic-ideas {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .terry-greeting {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .terry-speech::before {
-                display: none;
-            }
-
-            .terry-character img {
-                width: 100px !important;
-                height: 100px !important;
-            }
-
-            .modal-content {
-                padding: 25px 20px;
-            }
-
-            .modal-title {
-                font-size: 1.6em;
-            }
-
-            .category-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-            }
-
-            .score-band {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-
-            .score-description {
-                margin-left: 0;
-            }
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation Menu with TeamQuest Logo -->
+    <!-- Simple Header with Logo Only -->
     <nav class="treasure-nav" id="treasure-nav">
         <div class="nav-container">
             <a href="https://theteamquest.netlify.app/" class="nav-logo">
                 <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
             </a>
-            
-            <ul class="nav-menu" id="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link">🎯 Activities ▼</a>
-                    <div class="nav-dropdown">
-                        <a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="dropdown-link">💎 The Treasure Hunt</a>
-                        <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link">🔍 The Scavenger Hunt</a>
-                        <a href="https://theteamquest.netlify.app/quiz_challenge" class="dropdown-link">⏰ The Timed Quiz</a>
-                        <a href="https://theteamquest.netlify.app/kindness_challenge_page" class="dropdown-link">❤️ The Kindness Task</a>
-                        <!-- Current activity (Limerick Challenge) excluded from menu -->
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a>
-                </li>
-            </ul>
-            
-            <button class="nav-toggle" id="nav-toggle">☰</button>
         </div>
     </nav>
 
-    <!-- Scoring Rules Modal -->
-    <div class="modal-overlay" id="scoringModal">
-        <div class="modal-content">
-            <button class="close-btn" id="closeModalBtn">✕</button>
-            
-            <div class="modal-header">
-                <div class="modal-title">📝 Verse Vault Scoring</div>
-                <div class="modal-subtitle">How Terry's poetic masters evaluate your limericks</div>
-            </div>
+    <div class="header">
+        <div class="logo">🏴‍☠️</div>
+        <h1>Terry's Treasure Hunt Command Centre</h1>
+        <p class="subtitle">Captain's Bridge for Managing the Grand Adventure</p>
+    </div>
 
-            <div class="scoring-category category-rhythm">
-                <div class="category-header">
-                    <div class="category-title">🎵 Rhyme Scheme & Rhythm</div>
-                    <div class="category-points">Up to 20 Points</div>
-                </div>
-                <div class="category-description">
-                    Perfect limericks follow the classic AABBA rhyme pattern with bouncy, musical rhythm that flows like a sea shanty.
-                </div>
-                <div class="category-examples">
-                    <strong>We look for:</strong> Lines 1, 2, 5 rhyming together • Lines 3, 4 forming a shorter rhyming pair • Anapestic meter (da-da-DUM rhythm)
-                </div>
-            </div>
-
-            <div class="scoring-category category-creativity">
-                <div class="category-header">
-                    <div class="category-title">✨ Creativity & Originality</div>
-                    <div class="category-points">Up to 20 Points</div>
-                </div>
-                <div class="category-description">
-                    The most treasure goes to imaginative tales with unexpected twists, clever wordplay, and original storytelling that surprises and delights.
-                </div>
-                <div class="category-examples">
-                    <strong>We treasure:</strong> Unique topics • Surprise endings • Clever wordplay and puns • Vivid imagery • Creative use of language
-                </div>
-            </div>
-
-            <div class="scoring-category category-humor">
-                <div class="category-header">
-                    <div class="category-title">😄 Humour & Entertainment</div>
-                    <div class="category-points">Up to 20 Points</div>
-                </div>
-                <div class="category-description">
-                    Limericks that make us chuckle, smile, or laugh out loud earn the highest entertainment scores. Wit and playfulness are worth their weight in doubloons!
-                </div>
-                <div class="category-examples">
-                    <strong>We enjoy:</strong> Funny situations • Clever puns • Absurd or silly scenarios • Playful language • Witty observations
-                </div>
-            </div>
-
-            <div class="scoring-bands">
-                <h3>🏆 Treasure Chest Scoring Bands</h3>
-                
-                <div class="score-band">
-                    <div class="score-range">50-60 Doubloons</div>
-                    <div class="score-description"><strong>Legendary Verse:</strong> Flawless rhythm, brilliantly clever or hilarious, highly original masterpiece</div>
-                </div>
-                
-                <div class="score-band">
-                    <div class="score-range">35-49 Doubloons</div>
-                    <div class="score-description"><strong>Worthy Poem:</strong> Good rhythm and structure, shows creativity or humour, well-crafted</div>
-                </div>
-                
-                <div class="score-band">
-                    <div class="score-range">25-34 Doubloons</div>
-                    <div class="score-description"><strong>Decent Attempt:</strong> Follows limerick rules but lacks significant impact or originality</div>
-                </div>
-                
-                <div class="score-band">
-                    <div class="score-range">15-24 Doubloons</div>
-                    <div class="score-description"><strong>Basic Effort:</strong> Some limerick elements present but rhythm issues or limited creativity</div>
-                </div>
-                
-                <div class="score-band">
-                    <div class="score-range">1-14 Doubloons</div>
-                    <div class="score-description"><strong>Needs Work:</strong> Broken structure, significant rhythm problems, or very low effort</div>
-                </div>
-            </div>
-
-            <div class="verse-tips">
-                <h3>💡 Tips for Maximum Doubloons</h3>
-                <ul>
-                    <li><strong>Perfect your rhythm</strong> - Read aloud to ensure bouncy, musical flow</li>
-                    <li><strong>Nail the rhyme scheme</strong> - AABBA pattern with strong rhymes</li>
-                    <li><strong>Add unexpected twists</strong> - Surprise endings earn extra treasure</li>
-                    <li><strong>Be playfully absurd</strong> - Limericks love silly, exaggerated scenarios</li>
-                    <li><strong>Use clever wordplay</strong> - Puns and double meanings delight our judges</li>
-                    <li><strong>Keep it fun</strong> - Entertainment value is worth serious doubloons!</li>
-                </ul>
+    <div class="terry-greeting">
+        <div class="terry-character">
+            <img src="/terry-clock.png" alt="Captain Terry" class="terry-image">
+        </div>
+        <div class="terry-speech">
+            <div class="terry-note">
+                <strong>Ahoy, Admiral!</strong> Yer command centre now includes penalty tracking for crews who return after the adventure cutoff! When the timer runs out, any crew marked as "Late" will automatically lose <strong>5 doubloons per minute</strong> they're overdue. The timer will turn red and show how much penalty time has elapsed. Fair winds and following seas!
             </div>
         </div>
     </div>
 
-    <div class="container">
-        <!-- Login Section -->
-        <div class="login-section active" id="loginSection">
-            <div class="logo">
-                <div class="poem-icon">📝</div>
-                <h1>Terry's Verse Vault</h1>
-                <p class="subtitle">Craft clever limericks and earn doubloons for your wit!</p>
+    <div class="admin-container">
+        <!-- Adventure Control Panel -->
+        <div class="control-panel">
+            <h2 class="section-title">⚓ Adventure Control</h2>
+            
+            <div class="adventure-control">
+                <div class="timer-display" id="timerDisplay">01:30:00</div>
+                
+                <!-- Penalty Warning System -->
+                <div class="penalty-warning" id="penaltyWarning">
+                    <div style="font-size: 1.1em; margin-bottom: 8px;">⚠️ Late Return Penalties Active! ⚠️</div>
+                    <div>Teams checking in late will lose <strong>3 doubloons per minute</strong></div>
+                    <div class="penalty-rate" id="penaltyRate">Current penalty: 0 minutes = 0 doubloons</div>
+                </div>
+                
+                <div class="adventure-status status-stopped" id="timerStatus">
+                    🔄 Loading status...
+                </div>
+                
+                <div class="control-buttons">
+                    <button class="btn btn-start" id="startBtn" onclick="startAdventure()">
+                        🚀 Launch Adventure
+                    </button>
+                    <button class="btn btn-pause" id="pauseBtn" onclick="pauseAdventure()" disabled>
+                        ⏸️ Pause Quest
+                    </button>
+                    <button class="btn btn-stop" id="stopBtn" onclick="stopAdventure()" disabled>
+                        ⏹️ End Adventure
+                    </button>
+                    <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">
+                        🔄 Reset Timer
+                    </button>
+                    <button class="btn btn-publish" id="publishBtn" onclick="publishResults()" disabled>
+                        🏆 Publish Final Results & Unlock Gallery
+                    </button>
+                </div>
             </div>
 
-            <div class="terry-greeting">
-                <div class="terry-character">
-                    <img src="/terry-thinking.png" alt="Terry Quest" class="terry-image">
+            <div class="results-management" id="resultsManagement">
+                <h3>🏆 Final Results Management</h3>
+                
+                <div class="results-status" id="resultsStatus">
+                    🔒 Results not published - Gallery locked
                 </div>
-                <div class="terry-speech">
-                    <div class="terry-note">
-                        <strong>Ah, a poet approaches!</strong> Welcome to me verse vault, where words be worth their weight in doubloons! Craft me a limerick that tickles the funny bone and shows yer creative spirit. The wittier and more clever, the greater yer treasure reward shall be!
-                        
-                        <button class="scoring-rules-btn" id="scoringRulesBtn">
-                            📝 View Scoring Rules
-                        </button>
+
+                <div class="publish-warning" id="publishWarning" style="display: none;">
+                    ⚠️ <strong>Captain's Notice:</strong> Publishing results will unfreeze the leaderboard and unlock the treasure gallery for all crews. This action cannot be undone!
+                </div>
+            </div>
+
+            <div class="emergency-controls">
+                <h3>🚨 Emergency Captain's Orders</h3>
+                <button class="btn btn-stop" onclick="emergencyStop()" style="width: 100%; margin-top: 12px;">
+                    ⚠️ Emergency All Stop
+                </button>
+            </div>
+
+            <div class="activity-summary">
+                <h3>🗺️ Quest Activity Overview</h3>
+                <div class="activity-grid">
+                    <div class="activity-item">
+                        <div>Crew Registration</div>
+                        <div id="regCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>Treasure Map</div>
+                        <div id="clueCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>Knowledge Challenge</div>
+                        <div id="quizCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>Heart Treasures</div>
+                        <div id="kindnessCount">-</div>
+                    </div>
+                    <div class="activity-item">
+                        <div>Verse Vault</div>
+                        <div id="limerickCount">-</div>
                     </div>
                 </div>
             </div>
-
-            <div class="instructions">
-                <h3>📜 Limerick Treasure Rules</h3>
-                <ul>
-                    <li><strong>5 lines total:</strong> Lines 1, 2, 5 must rhyme together (A-A-A pattern)</li>
-                    <li><strong>Lines 3, 4 rhyme:</strong> Shorter lines that rhyme with each other (B-B pattern)</li>
-                    <li><strong>Rhythm matters:</strong> Bouncy, musical flow like a sea shanty!</li>
-                    <li><strong>Be creative:</strong> Funny, clever, or surprising endings earn the most treasure!</li>
-                    <li><strong>Earn up to 60 doubloons</strong> based on creativity, humour, and poetic technique</li>
-                </ul>
-            </div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="teamSelect">Select Your Crew</label>
-                    <select id="teamSelect" name="teamSelect" required>
-                        <option value="">Choose your treasure hunting crew...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="teamPin">Enter Your Crew's Secret Code</label>
-                    <input type="number" id="teamPin" name="teamPin" class="pin-input" 
-                           min="1000" max="9999" placeholder="1234" required>
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    🏴‍☠️ Enter the Verse Vault
-                </button>
-            </form>
-
-            <div class="message" id="loginMessage"></div>
         </div>
 
-        <!-- Challenge Section -->
-        <div class="challenge-section" id="challengeSection">
-            <div class="team-info" id="teamInfo">
-                Crew: Loading...
+        <!-- Crews Management Panel -->
+        <div class="crews-panel">
+            <h2 class="section-title">👥 Crew Management</h2>
+            
+            <div id="loading" class="loading">
+                🔍 Loading crew data from the treasure logs...
             </div>
-
-            <div class="examples">
-                <h4>📚 Terry's Treasure Limericks</h4>
-                <div class="example-limerick">
-                    There once was a pirate named Pete,<br>
-                    Who buried his gold in the street,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;He drew a rough map,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;Took a well-earned nap,<br>
-                    And woke to find treasure complete!
-                </div>
-                <div class="example-limerick">
-                    An adventurer sailed the blue sea,<br>
-                    In search of doubloons, one, two, three,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;With compass in hand,<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;She reached distant land,<br>
-                    And found all the treasure was free!
+            
+            <div id="crewsContent" style="display: none;">
+                <div class="crews-grid" id="crewsGrid">
+                    <!-- Crew cards will be populated here -->
                 </div>
             </div>
+            
+            <div id="messages"></div>
+        </div>
+    </div>
 
-            <form id="limerickForm">
-                <div class="form-group topic-select">
-                    <label for="limerickTopic">Choose Your Adventure Topic (Optional)</label>
-                    <input type="text" id="limerickTopic" name="limerickTopic" 
-                           placeholder="Or create your own treasure tale topic...">
-                    
-                    <div class="topic-ideas">
-                        <div class="topic-idea" data-topic="Pirates & Treasure">🏴‍☠️ Pirates & Treasure</div>
-                        <div class="topic-idea" data-topic="Sea Adventures">⚓ Sea Adventures</div>
-                        <div class="topic-idea" data-topic="Mysterious Islands">🏝️ Mysterious Islands</div>
-                        <div class="topic-idea" data-topic="Ancient Maps">🗺️ Ancient Maps</div>
-                        <div class="topic-idea" data-topic="Lost Expeditions">🧭 Lost Expeditions</div>
-                        <div class="topic-idea" data-topic="Buried Gold">💰 Buried Gold</div>
-                    </div>
+    <!-- Treasure Statistics Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-number" id="totalCrews">-</div>
+            <div class="stat-label">Total Crews</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="activeCrews">-</div>
+            <div class="stat-label">Active Crews</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="returnedCrews">-</div>
+            <div class="stat-label">Returned Crews</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" id="penalizedCrews">-</div>
+            <div class="stat-label">Penalised Crews</div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%); border: 3px solid #8B4513; border-radius: 20px; padding: 25px; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3); margin: 15px;">
+            <div style="text-align: center;">
+                <h3 id="confirmTitle" style="color: #8B4513; margin-bottom: 15px; font-size: 1.3em; line-height: 1.2;"></h3>
+                <div id="confirmMessage" style="color: #8B4513; margin-bottom: 20px; line-height: 1.5; font-size: 0.95em;"></div>
+                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="cancelReturn()" class="btn" style="background: linear-gradient(135deg, #A0522D, #8B4513); color: white; padding: 10px 16px; font-size: 0.9em;">Cancel</button>
+                    <button onclick="confirmReturn()" class="btn" style="background: linear-gradient(135deg, #32CD32, #228B22); color: white; padding: 10px 16px; font-size: 0.9em;">Confirm Return</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="limerickText">✍️ Craft Your Treasure Limerick</label>
-                    <div class="rhyme-helper">
-                        <h4>💡 Verse Pattern Guide:</h4>
-                        Line 1: _____ A (long line)<br>
-                        Line 2: _____ A (long line)<br>
-                        Line 3: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
-                        Line 4: &nbsp;&nbsp;&nbsp;&nbsp;_____ B (shorter)<br>
-                        Line 5: _____ A (long line)
-                    </div>
-                    <textarea id="limerickText" name="limerickText" class="limerick-textarea"
-                              placeholder="Enter your limerick here..."
-                              maxlength="500" required></textarea>
-                    <div class="char-count">
-                        <span id="charCount">500</span> characters remaining
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    🪙 Submit for Doubloons
-                </button>
-            </form>
-
-            <div class="loading" id="loading">
-                ✨ Terry is analysing your verse craftsmanship and calculating doubloons...
             </div>
-
-            <div class="message" id="challengeMessage"></div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let currentTeam = null;
-        let allTeams = [];
+        // Enhanced state management with penalty tracking
+        let adventureState = {
+            backendStatus: null,
+            isRunning: false,
+            isPaused: false,
+            timeRemaining: 90 * 60,
+            startTime: null,
+            crews: [],
+            resultsPublished: false,
+            competitionData: null,
+            hasEnded: false,
+            // NEW: Penalty tracking
+            penaltyMode: false,
+            penaltyMinutes: 0,
+            allTeamsReturned: false
+        };
 
-        // Scoring Modal Functions
-        function openScoringModal() {
-            document.getElementById('scoringModal').classList.add('active');
-        }
+        let timerInterval = null;
+        let dataRefreshInterval = null;
 
-        function closeScoringModal() {
-            document.getElementById('scoringModal').classList.remove('active');
-        }
-
-        // Topic selection function
-        function selectTopic(topic) {
-            document.getElementById('limerickTopic').value = topic;
-            
-            // Update visual selection
-            document.querySelectorAll('.topic-idea').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            // Find and select the clicked topic
-            document.querySelectorAll('.topic-idea').forEach(el => {
-                if (el.getAttribute('data-topic') === topic) {
-                    el.classList.add('selected');
-                }
-            });
-        }
-
-        // Navigation Menu JavaScript
         document.addEventListener('DOMContentLoaded', function() {
-            const navToggle = document.getElementById('nav-toggle');
-            const navMenu = document.getElementById('nav-menu');
-
-            if (navToggle && navMenu) {
-                navToggle.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
-
-                // Close mobile menu when clicking on links
-                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    });
-                });
-
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
-                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    }
-                });
-            }
-
-            // Modal event listeners
-            const scoringRulesBtn = document.getElementById('scoringRulesBtn');
-            const closeModalBtn = document.getElementById('closeModalBtn');
-            const scoringModal = document.getElementById('scoringModal');
-
-            if (scoringRulesBtn) {
-                scoringRulesBtn.addEventListener('click', openScoringModal);
-            }
-
-            if (closeModalBtn) {
-                closeModalBtn.addEventListener('click', closeScoringModal);
-            }
-
-            if (scoringModal) {
-                scoringModal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        closeScoringModal();
-                    }
-                });
-            }
-
-            // Topic selection event listeners
-            document.querySelectorAll('.topic-idea').forEach(topic => {
-                topic.addEventListener('click', function() {
-                    selectTopic(this.getAttribute('data-topic'));
-                });
-            });
-
-            // Character counter for limerick
-            const limerickText = document.getElementById('limerickText');
-            const charCount = document.getElementById('charCount');
-            
-            if (limerickText && charCount) {
-                limerickText.addEventListener('input', function() {
-                    const remaining = 500 - this.value.length;
-                    charCount.textContent = remaining;
-                    charCount.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
-                });
-            }
-
-            // Initialize limerick functionality
-            loadTeamsList();
+            console.log('Enhanced admin panel loading - checking current state...');
+            loadCurrentState();
+            dataRefreshInterval = setInterval(loadCurrentState, 30000);
         });
 
-        // EXACT TEAM LOADING CODE FROM WORKING QUIZ
-        async function loadTeamsList() {
+        async function loadCurrentState() {
             try {
+                console.log('Loading current competition state from backend...');
+                
                 const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                
                 const data = await response.json();
                 
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
+                if (!data || !data.success) {
+                    throw new Error('Failed to get competition status');
                 }
                 
-                throw new Error('Invalid response structure from leaderboard');
+                adventureState.backendStatus = data.competitionStatus || data.status;
+                adventureState.resultsPublished = data.resultsPublished === 'yes' || data.resultsPublished === true;
+                adventureState.crews = data.teams || data.leaderboard || [];
+                adventureState.competitionData = data;
+                
+                console.log('Backend status:', adventureState.backendStatus);
+                console.log('Results published:', adventureState.resultsPublished);
+                
+                syncWithBackendState(data);
+                updateTimerDisplay();
+                updateButtonStates();
+                updateResultsManagement();
+                renderCrews(adventureState.crews);
+                updateStatistics(adventureState.crews);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('crewsContent').style.display = 'block';
                 
             } catch (error) {
-                console.error('Leaderboard function failed:', error);
-                
-                // Use fallback teams
-                const fallbackTeams = [
-                    { teamCode: 'TEAM-C', teamName: 'The Clue Hunters' },
-                    { teamCode: 'TEAM-D', teamName: 'Pheebs the Gr8' },
-                    { teamCode: 'TEAM-I', teamName: 'AaronTeam2' },
-                    { teamCode: 'TEAM-E', teamName: 'Emma is great' },
-                    { teamCode: 'TEAM-F', teamName: 'CHTeam Best' },
-                    { teamCode: 'TEAM-G', teamName: 'I can\'t think of another name' },
-                    { teamCode: 'TEAM-H', teamName: 'AaronTeam' }
-                ];
-                
-                allTeams = fallbackTeams;
-                populateTeamDropdown(fallbackTeams);
-                showMessage('loginMessage', 'Crews loaded. You can select your crew and continue.', 'success');
+                console.error('Error loading current state:', error);
+                showMessage('Failed to load current status: ' + error.message, 'error');
             }
         }
 
-        function populateTeamDropdown(teams) {
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
+        function syncWithBackendState(data) {
+            // Enhanced status detection with better empty sheet handling
+            const rawStatus = data.competitionStatus || data.status;
+            const backendStatus = (rawStatus || '').toString().toLowerCase().trim();
             
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-        }
-
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            // Add debugging to help diagnose issues
+            console.log('Raw backend status:', rawStatus);
+            console.log('Processed backend status:', backendStatus);
+            console.log('Full backend data:', data);
             
-            const selectedTeamCode = document.getElementById('teamSelect').value;
-            const enteredPin = document.getElementById('teamPin').value;
+            // Check if this appears to be an empty/uninitialized competition
+            const isEmpty = !rawStatus || rawStatus === '' || rawStatus === null || rawStatus === undefined;
+            const hasNoStartTime = !data.startTime;
+            const hasNoTeams = !data.teams || !data.leaderboard || (data.teams && data.teams.length === 0) || (data.leaderboard && data.leaderboard.length === 0);
             
-            if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
-                return;
-            }
+            console.log('Empty status check:', { isEmpty, hasNoStartTime, hasNoTeams });
             
-            if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
-                return;
-            }
-
-            try {
-                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
+            if (isEmpty && hasNoStartTime) {
+                // Definitely an uninitialized competition
+                console.log('Detected uninitialized competition - setting to not started state');
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                adventureState.timeRemaining = 90 * 60;
+                adventureState.penaltyMode = false;
+                adventureState.penaltyMinutes = 0;
+                adventureState.allTeamsReturned = false;
                 
-                if (isValid) {
-                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
-                    currentTeam = selectedTeam;
-                    document.getElementById('teamInfo').textContent = `Crew: ${selectedTeam.teamName}`;
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+            } else if (backendStatus === 'start' || backendStatus === 'running') {
+                console.log('Competition is running');
+                adventureState.isRunning = true;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                
+                if (data.startTime && data.durationMinutes) {
+                    const startTime = new Date(data.startTime);
+                    const duration = data.durationMinutes * 60 * 1000;
+                    const endTime = new Date(startTime.getTime() + duration);
+                    const now = new Date();
+                    const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
+                    adventureState.timeRemaining = timeLeft;
                     
-                    // Switch to challenge section
-                    document.getElementById('loginSection').classList.remove('active');
-                    document.getElementById('challengeSection').classList.add('active');
-                } else {
-                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
+                    // Check for penalty mode
+                    if (timeLeft <= 0) {
+                        const overTime = Math.floor((now - endTime) / 1000);
+                        adventureState.penaltyMode = true;
+                        adventureState.penaltyMinutes = Math.ceil(overTime / 60);
+                    } else {
+                        adventureState.penaltyMode = false;
+                        adventureState.penaltyMinutes = 0;
+                    }
+                    
+                    if (!timerInterval) {
+                        startTimer();
+                    }
                 }
-            } catch (error) {
-                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
+                
+            } else if (backendStatus === 'stop' || backendStatus === 'stopped') {
+                console.log('Competition is stopped/ended');
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = true;
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+            } else {
+                // Unknown status or other edge cases
+                console.log('Unknown or edge case status, defaulting to not started');
+                adventureState.isRunning = false;
+                adventureState.isPaused = false;
+                adventureState.hasEnded = false;
+                adventureState.timeRemaining = 90 * 60;
+                adventureState.penaltyMode = false;
+                adventureState.penaltyMinutes = 0;
+                adventureState.allTeamsReturned = false;
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
             }
-        });
-
-        // Limerick form submission
-        document.getElementById('limerickForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
             
-            const topic = document.getElementById('limerickTopic').value.trim();
-            const limerickText = document.getElementById('limerickText').value.trim();
-            const submitBtn = document.getElementById('submitBtn');
-            const loading = document.getElementById('loading');
+            // Check if all teams have returned
+            checkAllTeamsReturned();
+        }
 
-            // Validation
-            if (!limerickText) {
-                showMessage('challengeMessage', 'Please craft your treasure limerick.', 'error');
-                return;
+        function checkAllTeamsReturned() {
+            const activeTeams = adventureState.crews.filter(crew => 
+                (crew.status || 'active') === 'active'
+            );
+            
+            const newAllTeamsReturned = activeTeams.length === 0 && adventureState.crews.length > 0;
+            
+            if (newAllTeamsReturned && !adventureState.allTeamsReturned && adventureState.penaltyMode) {
+                // All teams returned during penalty phase - stop penalty timer
+                adventureState.allTeamsReturned = true;
+                
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                }
+                
+                updateTimerDisplay();
+                updateButtonStates();
+                showMessage('🎉 All crews have returned! Timer stopped.', 'success');
+            }
+            
+            adventureState.allTeamsReturned = newAllTeamsReturned;
+        }
+
+        function formatTime(seconds) {
+            if (seconds <= 0) return "QUEST COMPLETE!";
+            
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const status = document.getElementById('timerStatus');
+            const penaltyWarning = document.getElementById('penaltyWarning');
+            const penaltyRate = document.getElementById('penaltyRate');
+            
+            if (adventureState.penaltyMode && adventureState.isRunning) {
+                // Penalty mode - show red timer counting up
+                const penaltyTime = adventureState.penaltyMinutes * 60;
+                const hours = Math.floor(penaltyTime / 3600);
+                const minutes = Math.floor((penaltyTime % 3600) / 60);
+                const seconds = penaltyTime % 60;
+                
+                display.textContent = `+${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                display.className = 'timer-display timer-penalty';
+                
+                // Show penalty warning
+                penaltyWarning.classList.add('show');
+                penaltyRate.textContent = `Current penalty: ${adventureState.penaltyMinutes} minutes = ${adventureState.penaltyMinutes * 3} doubloons`;
+                
+                if (adventureState.allTeamsReturned) {
+                    status.innerHTML = '🏁 All Crews Returned - Adventure Complete';
+                    status.className = 'adventure-status status-ended';
+                } else {
+                    status.innerHTML = '⚠️ Penalty Phase - Teams Late!';
+                    status.className = 'adventure-status status-stopped';
+                }
+                
+            } else {
+                // Normal mode
+                display.textContent = formatTime(adventureState.timeRemaining);
+                display.className = 'timer-display';
+                penaltyWarning.classList.remove('show');
+                
+                if (adventureState.resultsPublished) {
+                    status.innerHTML = '🏆 Final Results Published';
+                    status.className = 'adventure-status status-ended';
+                } else if (adventureState.hasEnded) {
+                    status.innerHTML = '🏁 Adventure Complete - Ready to Publish';
+                    status.className = 'adventure-status status-ended';
+                } else if (adventureState.isRunning && !adventureState.isPaused) {
+                    status.innerHTML = '🏴‍☠️ Adventure in Progress';
+                    status.className = 'adventure-status status-running';
+                } else if (adventureState.isPaused) {
+                    status.innerHTML = '⏸️ Quest Paused';
+                    status.className = 'adventure-status status-paused';
+                } else {
+                    // This is the key fix - better handling of not-started state
+                    const hasAnyData = adventureState.competitionData && 
+                                     (adventureState.competitionData.startTime || 
+                                      (adventureState.crews && adventureState.crews.length > 0));
+                    
+                    if (!hasAnyData) {
+                        status.innerHTML = '🗺️ Adventure Not Started - Ready to Launch';
+                        status.className = 'adventure-status status-not-started';
+                    } else {
+                        status.innerHTML = '🏴‍☠️ Adventure Awaiting Launch';
+                        status.className = 'adventure-status status-stopped';
+                    }
+                }
             }
 
-            if (limerickText.length < 50) {
-                showMessage('challengeMessage', 'Please write a longer limerick (at least 50 characters) worthy of doubloons.', 'error');
-                return;
+            // Timer color logic
+            if (adventureState.timeRemaining <= 300 && adventureState.isRunning && !adventureState.penaltyMode) {
+                display.style.color = '#DC143C';
+            } else if (adventureState.timeRemaining <= 900 && adventureState.isRunning && !adventureState.penaltyMode) {
+                display.style.color = '#FF8C00';
             }
+        }
 
-            // Check for line breaks (limericks should have multiple lines)
-            const lines = limerickText.split('\n').filter(line => line.trim().length > 0);
-            if (lines.length < 3) {
-                showMessage('challengeMessage', 'Please write your limerick with multiple lines (press Enter to create new lines) as befits a proper verse.', 'error');
-                return;
+        function updateButtonStates() {
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            if (adventureState.resultsPublished) {
+                startBtn.disabled = true;
+                startBtn.innerHTML = '🏆 Results Published';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+                
+            } else if (adventureState.hasEnded || adventureState.allTeamsReturned) {
+                startBtn.disabled = true;
+                startBtn.innerHTML = '🔒 Adventure Ended';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                stopBtn.innerHTML = '✅ Adventure Ended';
+                resetBtn.disabled = false;
+                
+            } else if (adventureState.isRunning && !adventureState.isPaused) {
+                startBtn.disabled = true;
+                startBtn.innerHTML = '✅ Adventure Running';
+                pauseBtn.disabled = false;
+                stopBtn.disabled = false;
+                stopBtn.innerHTML = '⏹️ End Adventure';
+                resetBtn.disabled = true;
+                
+            } else if (adventureState.isPaused) {
+                startBtn.disabled = false;
+                startBtn.innerHTML = '▶️ Resume Quest';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = false;
+                resetBtn.disabled = true;
+                
+            } else {
+                startBtn.disabled = false;
+                startBtn.innerHTML = '🚀 Launch Adventure';
+                pauseBtn.disabled = true;
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
             }
+        }
 
-            // Show loading
-            submitBtn.disabled = true;
-            loading.style.display = 'block';
-            document.getElementById('challengeMessage').style.display = 'none';
+        function updateResultsManagement() {
+            const resultsStatus = document.getElementById('resultsStatus');
+            const publishBtn = document.getElementById('publishBtn');
+            const publishWarning = document.getElementById('publishWarning');
 
+            if (adventureState.resultsPublished) {
+                resultsStatus.innerHTML = '🏆 Results Published - Gallery Unlocked';
+                resultsStatus.className = 'results-status results-published';
+                publishBtn.disabled = true;
+                publishBtn.innerHTML = '🏆 Results Already Published';
+                publishWarning.style.display = 'none';
+            } else {
+                resultsStatus.innerHTML = '🔒 Results Not Published - Gallery Locked';
+                resultsStatus.className = 'results-status results-unpublished';
+                
+                const timeLeftMinutes = Math.floor(adventureState.timeRemaining / 60);
+                const canPublish = adventureState.hasEnded || 
+                                 adventureState.allTeamsReturned ||
+                                 (adventureState.isRunning && timeLeftMinutes <= 20) ||
+                                 adventureState.timeRemaining <= 0;
+                
+                if (canPublish) {
+                    publishBtn.disabled = false;
+                    publishBtn.innerHTML = '🏆 Publish Final Results & Unlock Gallery';
+                    publishWarning.style.display = 'block';
+                } else {
+                    publishBtn.disabled = true;
+                    publishBtn.innerHTML = '🔒 Results Not Ready';
+                    publishWarning.style.display = 'none';
+                }
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+            
+            timerInterval = setInterval(() => {
+                if (adventureState.isRunning && !adventureState.isPaused) {
+                    if (adventureState.timeRemaining > 0) {
+                        // Countdown phase
+                        adventureState.timeRemaining--;
+                        
+                        if (adventureState.timeRemaining <= 0) {
+                            // Enter penalty phase
+                            adventureState.penaltyMode = true;
+                            adventureState.penaltyMinutes = 1;
+                            showMessage('⚠️ Adventure time expired! Late return penalties now active!', 'error');
+                        }
+                    } else if (adventureState.penaltyMode && !adventureState.allTeamsReturned) {
+                        // Penalty phase - increment penalty time
+                        adventureState.penaltyMinutes = Math.ceil((Date.now() - (new Date(adventureState.competitionData.startTime).getTime() + adventureState.competitionData.durationMinutes * 60 * 1000)) / (60 * 1000));
+                    }
+                    
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                }
+            }, 1000);
+        }
+
+        // Enhanced crew rendering with penalty display
+        function renderCrews(crews) {
+            const container = document.getElementById('crewsGrid');
+            container.innerHTML = '';
+
+            crews.forEach(crew => {
+                const crewCard = document.createElement('div');
+                
+                const totalScore = crew.totalScore || crew.total || 0;
+                const teamCode = crew.teamCode || crew.code || '';
+                const teamName = crew.teamName || crew.name || 'Unknown Crew';
+                const status = crew.status || 'active';
+                const locked = crew.locked || false;
+                const penalty = crew.penalty || 0;
+                const penaltyMinutes = crew.penaltyMinutes || 0;
+                
+                // Calculate adjusted score
+                const adjustedScore = Math.max(0, totalScore - penalty);
+                
+                // Determine card classes
+                let cardClasses = 'crew-card';
+                if (status === 'late') cardClasses += ' late';
+                if (status === 'returned') cardClasses += ' returned';
+                if (penalty > 0) cardClasses += ' penalized';
+                
+                crewCard.className = cardClasses;
+                
+                // Status badge - show "returned" for both returned and late teams, but style differently
+                const displayStatus = (status === 'late' || status === 'returned') ? 'returned' : status;
+                const badgeClass = penalty > 0 ? 'status-late' : `status-${displayStatus}`;
+                const statusBadge = `<span class="crew-status-badge ${badgeClass}">${getStatusText(status)}</span>`;
+                
+                // Penalty info display
+                let penaltyDisplay = '';
+                if (penalty > 0) {
+                    penaltyDisplay = `
+                        <div class="penalty-info">
+                            <span class="penalty-icon">⚠️</span>
+                            <div>
+                                <strong>Late Penalty:</strong> -${penalty} doubloons (${penaltyMinutes} minutes late)
+                                <br><small>Original: ${totalScore} → Adjusted: ${adjustedScore}</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                // Score display
+                let scoreDisplay = '';
+                if (penalty > 0) {
+                    scoreDisplay = `
+                        <div class="crew-doubloons penalized">
+                            <div class="original-score">${totalScore}</div>
+                            ${adjustedScore} 🪙
+                        </div>
+                    `;
+                } else {
+                    scoreDisplay = `
+                        <div class="crew-doubloons">
+                            ${totalScore} 🪙
+                        </div>
+                    `;
+                }
+                
+                // Manual penalty override section - show for teams with penalties
+                let penaltyOverride = '';
+                if (penalty > 0 && adventureState.isRunning) {
+                    penaltyOverride = `
+                        <div class="penalty-override show" id="penalty-override-${teamCode}">
+                            <h4>Manual Penalty Override</h4>
+                            <div class="penalty-controls">
+                                <label>Penalty:</label>
+                                <input type="number" class="penalty-input" id="penalty-input-${teamCode}" 
+                                       value="${penalty}" min="0" max="999" step="3">
+                                <span>doubloons</span>
+                                <button class="penalty-apply-btn" onclick="applyManualPenalty('${teamCode}')">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                crewCard.innerHTML = `
+                    <div class="crew-header">
+                        <div class="crew-name">
+                            ${teamName}
+                            ${statusBadge}
+                        </div>
+                        ${scoreDisplay}
+                    </div>
+                    
+                    ${penaltyDisplay}
+                    
+                    <div class="crew-controls">
+                        <select class="status-select ${penalty > 0 ? 'late' : ''}" 
+                                onchange="handleStatusChange('${teamCode}', this.value, ${totalScore}, ${penalty})"
+                                ${!adventureState.isRunning ? 'disabled' : ''}>
+                            <option value="active" ${status === 'active' ? 'selected' : ''}>🏴‍☠️ Active</option>
+                            <option value="returned" ${status === 'returned' || status === 'late' ? 'selected' : ''}>⚓ Returned</option>
+                        </select>
+                        <label class="return-checkbox">
+                            <input type="checkbox" ${locked ? 'checked' : ''} 
+                                   onchange="toggleCrewLock('${teamCode}', this.checked)"
+                                   ${!adventureState.isRunning ? 'disabled' : ''}> 
+                            🔒 Lock Doubloons
+                        </label>
+                    </div>
+                    
+                    ${penaltyOverride}
+                    
+                    <div style="margin-top: 12px; font-size: 0.8em; color: #8B4513; font-weight: 500; line-height: 1.3;">
+                        ${teamCode} | Reg: ${crew.registration || 0} | Map: ${crew.clueHunt || 0} | Quiz: ${crew.quiz || 0}
+                    </div>
+                `;
+                
+                container.appendChild(crewCard);
+            });
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'active': return 'Active';
+                case 'returned': 
+                case 'late': return 'Returned';
+                default: return status;
+            }
+        }
+
+        // Enhanced crew status update with confirmation and auto-penalty detection
+        let pendingStatusChange = null;
+
+        function handleStatusChange(teamCode, newStatus, currentScore, currentPenalty) {
+            if (newStatus === 'returned') {
+                // Show confirmation dialog for returning teams
+                showReturnConfirmation(teamCode, currentScore, currentPenalty);
+            } else {
+                // Direct update for active status
+                updateCrewStatus(teamCode, newStatus);
+            }
+        }
+
+        function showReturnConfirmation(teamCode, currentScore, currentPenalty) {
+            const team = adventureState.crews.find(c => (c.teamCode || c.code) === teamCode);
+            const teamName = team ? team.teamName || team.name : teamCode;
+            
+            // Calculate penalty if in penalty mode
+            let penalty = currentPenalty || 0;
+            let isLateReturn = false;
+            
+            if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
+                penalty = adventureState.penaltyMinutes * 3;
+                isLateReturn = true;
+            }
+            
+            const adjustedScore = Math.max(0, currentScore - penalty);
+            
+            // Store pending change
+            pendingStatusChange = {
+                teamCode,
+                teamName,
+                status: 'returned',
+                originalScore: currentScore,
+                penalty: penalty,
+                adjustedScore: adjustedScore,
+                isLateReturn: isLateReturn
+            };
+            
+            // Update modal content
+            const confirmTitle = document.getElementById('confirmTitle');
+            const confirmMessage = document.getElementById('confirmMessage');
+            
+            if (isLateReturn) {
+                confirmTitle.innerHTML = '⚠️ Confirm Late Team Return';
+                confirmMessage.innerHTML = `
+                    <strong>Are you sure ${teamName} has returned?</strong><br><br>
+                    • Original score: <strong>${currentScore} doubloons</strong><br>
+                    • Late penalty: <strong>-${penalty} doubloons (${adventureState.penaltyMinutes} minutes)</strong><br>
+                    • Final score: <strong>${adjustedScore} doubloons</strong><br><br>
+                    <span style="color: #DC143C;">⚠️ Doubloons will be FROZEN</span><br>
+                    <span style="color: #DC143C;">⚠️ No further activities allowed</span>
+                `;
+            } else {
+                confirmTitle.innerHTML = '⚓ Confirm Team Return';
+                confirmMessage.innerHTML = `
+                    <strong>Are you sure ${teamName} has returned?</strong><br><br>
+                    • Final score: <strong>${currentScore} doubloons</strong><br><br>
+                    <span style="color: #FF8C00;">⚠️ Doubloons will be FROZEN</span><br>
+                    <span style="color: #FF8C00;">⚠️ No further activities allowed</span>
+                `;
+            }
+            
+            // Show modal
+            const modal = document.getElementById('confirmationModal');
+            modal.style.display = 'flex';
+        }
+
+        function confirmReturn() {
+            if (!pendingStatusChange) return;
+            
+            const { teamCode, status, penalty } = pendingStatusChange;
+            
+            // Hide modal
+            document.getElementById('confirmationModal').style.display = 'none';
+            
+            // Process the return
+            updateCrewStatus(teamCode, status, penalty);
+            
+            // Clear pending change
+            pendingStatusChange = null;
+        }
+
+        function cancelReturn() {
+            // Hide modal
+            document.getElementById('confirmationModal').style.display = 'none';
+            
+            // Reset dropdown to previous value
+            if (pendingStatusChange) {
+                const team = adventureState.crews.find(c => (c.teamCode || c.code) === pendingStatusChange.teamCode);
+                if (team) {
+                    const dropdown = document.querySelector(`select[onchange*="${pendingStatusChange.teamCode}"]`);
+                    if (dropdown) {
+                        dropdown.value = team.status || 'active';
+                    }
+                }
+            }
+            
+            // Clear pending change
+            pendingStatusChange = null;
+        }
+
+        async function updateCrewStatus(teamCode, newStatus, customPenalty = null) {
             try {
-                const result = await submitLimerick(topic, limerickText);
+                let penalty = 0;
+                let finalStatus = newStatus;
                 
-                showMessage('challengeMessage', 
-                    '🎉 Your limerick has sailed into Terry\'s verse vault! Our master poet is analysing your creativity, humour, and technique. Check the treasure map in a few minutes to see your doubloons!', 
-                    'success');
-                
-                // Disable form after successful submission
-                document.getElementById('limerickForm').style.opacity = '0.5';
-                document.getElementById('limerickForm').style.pointerEvents = 'none';
-                
-            } catch (error) {
-                console.error('Submission error:', error);
-                showMessage('challengeMessage', 'Failed to submit your limerick to the verse vault. Please try again.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                loading.style.display = 'none';
-            }
-        });
+                // Auto-detect penalty for returned teams
+                if (newStatus === 'returned') {
+                    if (adventureState.penaltyMode && adventureState.penaltyMinutes > 0) {
+                        penalty = customPenalty !== null ? customPenalty : adventureState.penaltyMinutes * 3;
+                        finalStatus = 'late'; // Internal status for penalty tracking
+                    }
+                }
 
-        // EXACT VERIFICATION CODE FROM WORKING QUIZ
-        async function verifyTeamAndPin(teamCode, enteredPin) {
-            try {
-                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        action: 'update_team_status',
                         teamCode: teamCode,
-                        pin: enteredPin
+                        status: finalStatus,
+                        penalty: penalty,
+                        returnTime: new Date().toISOString(),
+                        penaltyMinutes: adventureState.penaltyMinutes || 0
                     })
                 });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    return result.valid;
+
+                if (response.ok) {
+                    await loadCurrentState();
+                    
+                    if (penalty > 0) {
+                        showMessage(`${teamCode} returned late. Penalty applied: -${penalty} doubloons. Doubloons frozen.`, 'error');
+                    } else {
+                        showMessage(`${teamCode} returned safely. Doubloons frozen.`, 'success');
+                    }
                 } else {
-                    throw new Error(result.error || 'Verification failed');
+                    throw new Error('Failed to update crew status');
                 }
-                
             } catch (error) {
-                console.error('Error verifying team and PIN:', error);
-                return false;
+                console.error('Error updating crew status:', error);
+                showMessage('Failed to update crew status: ' + error.message, 'error');
             }
         }
 
-        async function submitLimerick(topic, limerickText) {
+        // Manual penalty override function - for already returned teams
+        async function applyManualPenalty(teamCode) {
+            const penaltyInput = document.getElementById(`penalty-input-${teamCode}`);
+            const customPenalty = parseInt(penaltyInput.value) || 0;
+            
             try {
-                const submissionData = {
-                    teamCode: currentTeam.teamCode,
-                    teamName: currentTeam.teamName,
-                    topic: topic,
-                    limerickText: limerickText
-                };
-                
-                const response = await fetch('/.netlify/functions/submit_limerick_function', {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(submissionData)
+                    body: JSON.stringify({
+                        action: 'update_team_status',
+                        teamCode: teamCode,
+                        status: customPenalty > 0 ? 'late' : 'returned', // Internal status based on penalty
+                        penalty: customPenalty,
+                        returnTime: new Date().toISOString(),
+                        penaltyMinutes: Math.ceil(customPenalty / 3) // Calculate equivalent minutes
+                    })
                 });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
+
+                if (response.ok) {
+                    await loadCurrentState();
+                    showMessage(`Manual penalty applied to ${teamCode}: -${customPenalty} doubloons`, 'success');
+                } else {
+                    throw new Error('Failed to apply manual penalty');
                 }
-                
-                const result = await response.json();
-                
-                if (!result.success) {
-                    throw new Error(result.error || 'Submission failed');
-                }
-                
-                return result;
-                
             } catch (error) {
-                console.error('Limerick submission error:', error);
-                throw error;
+                console.error('Error applying manual penalty:', error);
+                showMessage('Failed to apply manual penalty: ' + error.message, 'error');
             }
         }
 
-        function showMessage(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = `message ${type === 'error' ? 'error-message' : 'success-message'}`;
-            container.style.display = 'block';
+        function updateStatistics(crews) {
+            const totalCrews = crews.length;
+            const activeCrews = crews.filter(c => (c.status || 'active') === 'active').length;
+            const returnedCrews = crews.filter(c => {
+                const status = c.status || 'active';
+                return status === 'returned' || status === 'late';
+            }).length;
+            const penalizedCrews = crews.filter(c => (c.penalty || 0) > 0).length;
+
+            document.getElementById('totalCrews').textContent = totalCrews;
+            document.getElementById('activeCrews').textContent = activeCrews;
+            document.getElementById('returnedCrews').textContent = returnedCrews;
+            document.getElementById('penalizedCrews').textContent = penalizedCrews;
+
+            // Update activity counts
+            document.getElementById('regCount').textContent = crews.filter(c => (c.registration || 0) > 0).length;
+            document.getElementById('clueCount').textContent = crews.filter(c => (c.clueHunt || 0) > 0).length;
+            document.getElementById('quizCount').textContent = crews.filter(c => (c.quiz || 0) > 0).length;
+            document.getElementById('kindnessCount').textContent = crews.filter(c => (c.kindness || 0) > 0).length;
+            document.getElementById('limerickCount').textContent = crews.filter(c => (c.limerick || 0) > 0).length;
         }
+
+        // Existing functions remain the same...
+        async function startAdventure() {
+            await loadCurrentState();
+            
+            if (adventureState.hasEnded) {
+                alert('⚠️ Cannot restart adventure that has been completed!\n\nUse "Reset Timer" to prepare for a new adventure.');
+                return;
+            }
+            
+            if (adventureState.resultsPublished) {
+                alert('⚠️ Cannot restart - results have been published!\n\nUse "Reset Timer" to prepare for a new adventure.');
+                return;
+            }
+            
+            if (adventureState.isRunning && !adventureState.isPaused) {
+                alert('⚠️ Adventure is already running!');
+                return;
+            }
+
+            try {
+                const action = adventureState.isPaused ? 'start' : 'start';
+                
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: action
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (adventureState.isPaused) {
+                        adventureState.isPaused = false;
+                    } else {
+                        adventureState.isRunning = true;
+                        adventureState.startTime = new Date();
+                        adventureState.timeRemaining = 90 * 60;
+                        adventureState.hasEnded = false;
+                        adventureState.penaltyMode = false;
+                        adventureState.penaltyMinutes = 0;
+                    }
+
+                    adventureState.isRunning = true;
+                    startTimer();
+                    
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('🚀 Adventure launched! The treasure hunt has begun!', 'success');
+                    
+                    setTimeout(loadCurrentState, 2000);
+                    
+                } else {
+                    throw new Error(result.error || 'Failed to start adventure');
+                }
+            } catch (error) {
+                console.error('Error starting adventure:', error);
+                showMessage(`Failed to launch adventure: ${error.message}`, 'error');
+            }
+        }
+
+        async function pauseAdventure() {
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'stop'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.isPaused = true;
+                    adventureState.isRunning = false;
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('⏸️ Adventure paused. Crews await your signal to continue.', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to pause adventure');
+                }
+            } catch (error) {
+                console.error('Error pausing adventure:', error);
+                showMessage('Failed to pause adventure.', 'error');
+            }
+        }
+
+        async function stopAdventure() {
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'stop'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.isRunning = false;
+                    adventureState.isPaused = false;
+                    adventureState.hasEnded = true;
+                    
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                    
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('⚓ Adventure ended. All crews return to harbour.', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to stop adventure');
+                }
+            } catch (error) {
+                console.error('Error stopping adventure:', error);
+                showMessage('Failed to end adventure.', 'error');
+            }
+        }
+
+        async function resetTimer() {
+            if (!confirm('Reset competition? This will clear all data and prepare for a new adventure.')) return;
+            
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'reset'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.isRunning = false;
+                    adventureState.isPaused = false;
+                    adventureState.timeRemaining = 90 * 60;
+                    adventureState.resultsPublished = false;
+                    adventureState.hasEnded = false;
+                    adventureState.penaltyMode = false;
+                    adventureState.penaltyMinutes = 0;
+                    adventureState.allTeamsReturned = false;
+                    
+                    if (timerInterval) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                    }
+                    
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('🔄 Timer reset to 90 minutes. Ready for a new adventure!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to reset timer');
+                }
+            } catch (error) {
+                console.error('Error resetting timer:', error);
+                showMessage('Failed to reset timer.', 'error');
+            }
+        }
+
+        async function publishResults() {
+            if (!confirm('Are ye absolutely certain ye want to publish the final results? This will unfreeze the leaderboard and unlock the treasure gallery for all crews to see. This action cannot be undone!')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/.netlify/functions/start_competition_function', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'publish_results'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    adventureState.resultsPublished = true;
+                    updateButtonStates();
+                    updateTimerDisplay();
+                    updateResultsManagement();
+                    showMessage('🏆 Final results published! The treasure gallery is now unlocked and the leaderboard unfrozen for all crews to see!', 'success');
+                } else {
+                    throw new Error(result.error || 'Failed to publish results');
+                }
+            } catch (error) {
+                console.error('Error publishing results:', error);
+                showMessage(`Failed to publish results: ${error.message}`, 'error');
+            }
+        }
+
+        function emergencyStop() {
+            if (confirm('Are ye sure ye want to emergency stop the entire treasure hunt? This will immediately halt all quest activities across the realm!')) {
+                stopAdventure();
+                showMessage('🚨 EMERGENCY STOP activated. All adventure activities halted by Captain\'s orders.', 'error');
+            }
+        }
+
+        function toggleCrewLock(teamCode, isLocked) {
+            console.log(`${isLocked ? 'Locking' : 'Unlocking'} ${teamCode} doubloons`);
+            showMessage(`Crew ${teamCode} doubloons ${isLocked ? 'locked' : 'unlocked'}`, 'success');
+            
+            const crew = adventureState.crews.find(c => (c.teamCode || c.code) === teamCode);
+            if (crew) {
+                crew.locked = isLocked;
+            }
+        }
+
+        function showMessage(text, type) {
+            const messagesContainer = document.getElementById('messages');
+            const message = document.createElement('div');
+            message.className = type === 'error' ? 'error-message' : 'success-message';
+            message.textContent = text;
+            
+            messagesContainer.appendChild(message);
+            
+            setTimeout(() => {
+                if (messagesContainer.contains(message)) {
+                    messagesContainer.removeChild(message);
+                }
+            }, 5000);
+        }
+
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) clearInterval(timerInterval);
+            if (dataRefreshInterval) clearInterval(dataRefreshInterval);
+        });
     </script>
 </body>
 </html>
