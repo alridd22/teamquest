@@ -1,11 +1,27 @@
+// netlify/functions/_utils.js
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_EMAIL = process.env.GOOGLE_SERVICE_EMAIL;
-const SERVICE_KEY = process.env.GOOGLE_PRIVATE_KEY?.replace(/\n/g, '\n');
+
+// Load key: prefer env if present, else read from bundled file written at build time
+let SERVICE_KEY = process.env.GOOGLE_PRIVATE_KEY;
+if (SERVICE_KEY) {
+  SERVICE_KEY = SERVICE_KEY.replace(/\\n/g, '\n');
+} else {
+  const keyPath = process.env.GOOGLE_PRIVATE_KEY_PATH || path.join(__dirname, 'sa_key.pem');
+  try {
+    SERVICE_KEY = fs.readFileSync(keyPath, 'utf8');
+  } catch (err) {
+    throw new Error('Missing GOOGLE_PRIVATE_KEY env and sa_key.pem file: ' + err.message);
+  }
+}
+
 const JWT_SECRET = process.env.TQ_JWT_SECRET;
 const CURRENT_EVENT = process.env.TQ_CURRENT_EVENT_ID || 'default';
 
@@ -20,9 +36,7 @@ const corsHeaders = {
 const ok  = (body={}) => ({ statusCode: 200, headers: corsHeaders, body: JSON.stringify(body) });
 const bad = (code, message, extra={}) => ({ statusCode: code, headers: corsHeaders, body: JSON.stringify({ success:false, message, ...extra }) });
 
-function signToken(payload, ttlSeconds=4*60*60) {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: ttlSeconds });
-}
+function signToken(payload, ttlSeconds=4*60*60) { return jwt.sign(payload, JWT_SECRET, { expiresIn: ttlSeconds }); }
 function verifyToken(authHeader) {
   if (!authHeader?.startsWith('Bearer ')) throw new Error('Missing token');
   return jwt.verify(authHeader.slice(7), JWT_SECRET);
@@ -47,7 +61,7 @@ async function getOrCreateSheet(doc, title, headers) {
 async function appendOnce(sheet, idempotencyKey, rowData) {
   const hash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
   let found = [];
-  try { found = await sheet.getRows({ limit: 1, query: `Idempotency = "${hash}"` }); } catch (_e) { /* ignore */ }
+  try { found = await sheet.getRows({ limit: 1, query: `Idempotency = "${hash}"` }); } catch (_e) {}
   if (found?.length) return { existed: true, row: found[0] };
   const row = await sheet.addRow({ ...rowData, Idempotency: hash });
   return { existed: false, row };
