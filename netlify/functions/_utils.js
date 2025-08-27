@@ -50,7 +50,7 @@ function verifyToken(authHeader) {
 function nowIso(){ return new Date().toISOString(); }
 function toNum(v,d=0){ return (v===''||v==null) ? d : (Number(v)||d); }
 
-// ---- Google Sheets (constructor auth; NO top-level await) ----
+// ---- Google Sheets (constructor auth; no top-level await) ----
 async function getDoc() {
   const auth = new JWT({
     email: SERVICE_EMAIL,
