@@ -1,0 +1,69 @@
+import {
+  getSheets, readRange, writeRange, appendRows, ok, error, isPreflight,
+  indexByHeader, tabRange, requireAdmin
+} from "./_utils.js";
+
+export async function handler(event) {
+  try {
+    if (isPreflight(event)) return ok({});
+    if (event.httpMethod !== "POST") return error(405, "POST only");
+
+    requireAdmin(event);
+
+    const { submissionId, finalScore } = JSON.parse(event.body || "{}");
+    if (!submissionId || typeof finalScore !== "number") {
+      return error(400, "submissionId (string) and finalScore (number) required");
+    }
+
+    const sheets = await getSheets();
+
+    // Update Submissions
+    const subsVals = await readRange(sheets, null, tabRange("Submissions", "A:I"));
+    const subs = indexByHeader(subsVals);
+
+    let row = -1;
+    let existing;
+    for (let i = 0; i < subs.rows.length; i++) {
+      if (subs.rows[i][subs.idx.SubmissionID] === submissionId) {
+        row = i + 2; existing = subs.rows[i]; break;
+      }
+    }
+    if (row < 0) return error(404, "Submission not found");
+
+    const teamId = existing[subs.idx.TeamID];
+    const activity = existing[subs.idx.Activity];
+    const provisional = parseFloat(existing[subs.idx.ProvisionalScore] || "0") || 0;
+
+    await writeRange(sheets, null, tabRange("Submissions", `F${row}:I${row}`), [[
+      "FINAL",
+      provisional.toString(),
+      finalScore.toString(),
+      finalScore.toString()
+    ]]);
+
+    // Update or Append in Scores
+    const scoresVals = await readRange(sheets, null, tabRange("Scores", "A:E"));
+    const header = scoresVals[0];
+    let replaced = false;
+    for (let i = 1; i < scoresVals.length; i++) {
+      const r = scoresVals[i];
+      if (r[4] === submissionId) { // SubmissionID col
+        r[2] = finalScore.toString();
+        r[3] = "final";
+        replaced = true;
+      }
+    }
+    if (replaced) {
+      await writeRange(sheets, null, tabRange("Scores", "A1"), scoresVals);
+    } else {
+      await appendRows(sheets, null, tabRange("Scores", "A1"), [[
+        teamId, activity, finalScore.toString(), "final", submissionId
+      ]]);
+    }
+
+    return ok({ updated: true, submissionId, teamId, activity, finalScore });
+  } catch (e) {
+    console.error("zapier_update_score_function error:", e);
+    return error(400, e.message);
+  }
+}
