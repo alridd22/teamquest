@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
-// ---- Env checks (fail fast with clear messages) ----
+// ---- Env + constants ----
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_EMAIL = process.env.GOOGLE_SERVICE_EMAIL;
 const JWT_SECRET = process.env.TQ_JWT_SECRET;
@@ -16,7 +16,7 @@ if (!SHEET_ID) throw new Error('Missing env GOOGLE_SHEET_ID');
 if (!SERVICE_EMAIL) throw new Error('Missing env GOOGLE_SERVICE_EMAIL');
 if (!JWT_SECRET) throw new Error('Missing env TQ_JWT_SECRET');
 
-// Load key: prefer env, else use the file we write at build time
+// Load key: prefer env, else bundled file from build step
 let SERVICE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 if (SERVICE_KEY) {
   SERVICE_KEY = SERVICE_KEY.replace(/\\n/g, '\n');
@@ -24,11 +24,12 @@ if (SERVICE_KEY) {
   const keyPath = process.env.GOOGLE_PRIVATE_KEY_PATH || path.join(__dirname, 'sa_key.pem');
   try {
     SERVICE_KEY = fs.readFileSync(keyPath, 'utf8');
-  } catch (err) {
+  } catch (_err) {
     throw new Error('Missing GOOGLE_PRIVATE_KEY env and sa_key.pem file');
   }
 }
 
+// ---- helpers ----
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -49,9 +50,8 @@ function verifyToken(authHeader) {
 function nowIso(){ return new Date().toISOString(); }
 function toNum(v,d=0){ return (v===''||v==null) ? d : (Number(v)||d); }
 
-// ---- Google Sheets helper (use OAuth2 client explicitly) ----
+// ---- Google Sheets (constructor auth; NO top-level await) ----
 async function getDoc() {
-  // Add Drive readonly for shared-drive / permission checks
   const auth = new JWT({
     email: SERVICE_EMAIL,
     key: SERVICE_KEY,
@@ -61,34 +61,13 @@ async function getDoc() {
     ],
   });
 
-  // Pass the JWT client directly to the constructor
   const doc = new GoogleSpreadsheet(SHEET_ID, auth);
-
   try {
     await doc.loadInfo();
   } catch (e) {
     const code = e?.response?.status || e?.code || 'unknown';
-    const details =
-      e?.response?.data?.error?.message ||
-      e?.message ||
-      String(e);
+    const details = e?.response?.data?.error?.message || e?.message || String(e);
     throw new Error(`Google API error - [${code}] ${details}`);
-  }
-  return doc;
-}
-
-
-  const doc = new GoogleSpreadsheet(SHEET_ID);
-  // This is the most compatible way in v4
-  await doc.useOAuth2Client(auth);
-
-  // If this throws, surface a better error
-  try {
-    await doc.loadInfo();
-  } catch (e) {
-    const code = e?.code || e?.response?.status;
-    const msg  = e?.message || e?.response?.statusText || String(e);
-    throw new Error(`Google API error - [${code}] ${msg}`);
   }
   return doc;
 }
@@ -101,7 +80,7 @@ async function getOrCreateSheet(doc, title, headers) {
   return sheet;
 }
 
-// Append-once using an Idempotency hash column
+// Append-once with idempotency hash
 async function appendOnce(sheet, idempotencyKey, rowData) {
   const hash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
   let found = [];
