@@ -1,20 +1,12 @@
-# ========= TeamQuest netlify.toml =========
-
 [build]
-  # If your site is served from the repo root, keep ".".
-  # If you serve from a subfolder (e.g., "public" or "site"), change this.
   publish = "."
-  # Ensure serverless deps are installed for Functions.
   command = "npm install"
 
 [functions]
-  # Path to your Netlify Functions folder (relative to the repo root or Base directory).
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  # These need to be bundled for Google Sheets + JWT auth to work.
-  external_node_modules = ["google-auth-library", "google-spreadsheet", "jsonwebtoken"]
+  external_node_modules = ["google-auth-library","google-spreadsheet","jsonwebtoken"]
 
-# ---- No-cache + CORS for all Functions (critical for fresh data) ----
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
@@ -22,12 +14,3 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-
-# (Optional) If you use client-side routing and want unknown routes to fall back to index.html,
-# uncomment the redirect below.
-# [[redirects]]
-#   from = "/*"
-#   to = "/index.html"
-#   status = 200
-
-# ========= end =========
