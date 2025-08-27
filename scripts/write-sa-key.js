@@ -1,11 +1,12 @@
 // scripts/write-sa-key.js
-// Writes the GOOGLE_PRIVATE_KEY env var to netlify/functions/sa_key.pem at build time.
+// Writes the SA key to netlify/functions/sa_key.pem at build time.
 const fs = require('fs');
 const path = require('path');
 
-const key = process.env.GOOGLE_PRIVATE_KEY;
+// Prefer the build-scoped var; fall back to the old name if present.
+const key = process.env.GOOGLE_PRIVATE_KEY_BUILD || process.env.GOOGLE_PRIVATE_KEY;
 if (!key) {
-  console.log('No GOOGLE_PRIVATE_KEY found at build time; skipping file write.');
+  console.log('No GOOGLE_PRIVATE_KEY_BUILD (or GOOGLE_PRIVATE_KEY) found at build time; skipping file write.');
   process.exit(0);
 }
 
