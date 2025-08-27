@@ -1,128 +1,172 @@
-// netlify/functions/_utils.js
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const fs = require('fs');
-const path = require('path');
+// _utils.js  (expanded)
+import { google } from "googleapis";
 
-// ---- Env + constants ----
-const SHEET_ID = process.env.GOOGLE_SHEET_ID;
-const SERVICE_EMAIL = process.env.GOOGLE_SERVICE_EMAIL;
-const JWT_SECRET = process.env.TQ_JWT_SECRET;
-const CURRENT_EVENT = process.env.TQ_CURRENT_EVENT_ID || 'default';
+/* ===== Env mapping ===== */
+export const SHEET_ID =
+  process.env.SHEET_ID || process.env.GOOGLE_SHEET_ID;
+const GOOGLE_CLIENT_EMAIL =
+  process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_EMAIL;
+const GOOGLE_PRIVATE_KEY = (
+  process.env.GOOGLE_PRIVATE_KEY || process.env.GOOGLE_PRIVATE_KEY_BUILD || ""
+).replace(/\\n/g, "\n");
+const ADMIN_SECRET = process.env.TQ_ADMIN_SECRET;
+export const JWT_SECRET =
+  process.env.JWT_SECRET || process.env.TQ_JWT_SECRET;
+export const CURRENT_EVENT_ID = process.env.TQ_CURRENT_EVENT_ID || ""; // optional
 
-if (!SHEET_ID) throw new Error('Missing env GOOGLE_SHEET_ID');
-if (!SERVICE_EMAIL) throw new Error('Missing env GOOGLE_SERVICE_EMAIL');
-if (!JWT_SECRET) throw new Error('Missing env TQ_JWT_SECRET');
+/* ===== HTTP helpers ===== */
+export function ok(body, extraHeaders = {}) {
+  return {
+    statusCode: 200,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Secret",
+      ...extraHeaders,
+    },
+    body: JSON.stringify(body),
+  };
+}
+export function error(statusCode, message, extra = {}) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Secret",
+    },
+    body: JSON.stringify({ error: message, ...extra }),
+  };
+}
+export const isPreflight = (e) => e.httpMethod === "OPTIONS";
+export function requireAdmin(event) {
+  const s = event.headers["x-admin-secret"] || event.headers["X-Admin-Secret"];
+  if (!s || s !== ADMIN_SECRET) throw new Error("Forbidden: bad admin secret");
+}
 
-// Load key: prefer env, else bundled file from build step
-let SERVICE_KEY = process.env.GOOGLE_PRIVATE_KEY;
-if (SERVICE_KEY) {
-  SERVICE_KEY = SERVICE_KEY.replace(/\\n/g, '\n');
-} else {
-  const keyPath = process.env.GOOGLE_PRIVATE_KEY_PATH || path.join(__dirname, 'sa_key.pem');
-  try {
-    SERVICE_KEY = fs.readFileSync(keyPath, 'utf8');
-  } catch (_err) {
-    throw new Error('Missing GOOGLE_PRIVATE_KEY env and sa_key.pem file');
+/* ===== Sheets client (memoized) ===== */
+let _sheets;
+export async function getSheets() {
+  if (_sheets) return _sheets;
+  const auth = new google.auth.JWT(
+    GOOGLE_CLIENT_EMAIL,
+    null,
+    GOOGLE_PRIVATE_KEY,
+    ["https://www.googleapis.com/auth/spreadsheets"]
+  );
+  _sheets = google.sheets({ version: "v4", auth });
+  return _sheets;
+}
+
+/* ===== Utility ===== */
+export function nowIso() { return new Date().toISOString(); }
+export function indexByHeader(values) {
+  const header = (values && values[0]) || [];
+  const rows = values ? values.slice(1) : [];
+  const idx = header.reduce((m, h, i) => (m[h] = i, m), {});
+  return { header, rows, idx };
+}
+
+/* ===== A1 helpers ===== */
+export function tabRange(tab, a1) {
+  // Optional event scoping: Teams_[EVENT]!A:E, etc.
+  const t = CURRENT_EVENT_ID ? `${tab}_${CURRENT_EVENT_ID}` : tab;
+  return `${t}!${a1}`;
+}
+
+/* ===== Retry wrapper ===== */
+async function withRetry(fn, attempts = 3, baseDelay = 200) {
+  let last;
+  for (let i = 0; i < attempts; i++) {
+    try { return await fn(); } catch (e) { last = e; }
+    await new Promise(r => setTimeout(r, baseDelay * Math.pow(2, i)));
   }
+  throw last;
 }
 
-// ---- helpers ----
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-  'Pragma': 'no-cache',
-  'Expires': '0',
-};
-const ok  = (body={}) => ({ statusCode: 200, headers: corsHeaders, body: JSON.stringify(body) });
-const bad = (code, message, extra={}) =>
-  ({ statusCode: code, headers: corsHeaders, body: JSON.stringify({ success:false, message, ...extra }) });
-
-function signToken(payload, ttlSeconds=4*60*60) { return jwt.sign(payload, JWT_SECRET, { expiresIn: ttlSeconds }); }
-function verifyToken(authHeader) {
-  if (!authHeader?.startsWith('Bearer ')) throw new Error('Missing token');
-  return jwt.verify(authHeader.slice(7), JWT_SECRET);
-}
-function nowIso(){ return new Date().toISOString(); }
-function toNum(v,d=0){ return (v===''||v==null) ? d : (Number(v)||d); }
-
-// ---- Google Sheets (constructor auth; no top-level await) ----
-async function getDoc() {
-  const auth = new JWT({
-    email: SERVICE_EMAIL,
-    key: SERVICE_KEY,
-    scopes: [
-      'https://www.googleapis.com/auth/spreadsheets',
-      'https://www.googleapis.com/auth/drive.readonly',
-    ],
+/* ===== Read / Write / Append ===== */
+export async function readRange(sheets, spreadsheetId, range) {
+  const id = spreadsheetId || SHEET_ID;
+  return withRetry(async () => {
+    const r = await sheets.spreadsheets.values.get({ spreadsheetId: id, range });
+    return r.data.values || [];
   });
-
-  const doc = new GoogleSpreadsheet(SHEET_ID, auth);
-  try {
-    await doc.loadInfo();
-  } catch (e) {
-    const code = e?.response?.status || e?.code || 'unknown';
-    const details = e?.response?.data?.error?.message || e?.message || String(e);
-    throw new Error(`Google API error - [${code}] ${details}`);
-  }
-  return doc;
+}
+export async function writeRange(sheets, spreadsheetId, range, values) {
+  const id = spreadsheetId || SHEET_ID;
+  return withRetry(async () => sheets.spreadsheets.values.update({
+    spreadsheetId: id,
+    range,
+    valueInputOption: "RAW",
+    requestBody: { values },
+  }));
+}
+export async function appendRows(sheets, spreadsheetId, range, values) {
+  const id = spreadsheetId || SHEET_ID;
+  return withRetry(async () => sheets.spreadsheets.values.append({
+    spreadsheetId: id,
+    range,
+    valueInputOption: "RAW",
+    insertDataOption: "INSERT_ROWS",
+    requestBody: { values },
+  }));
 }
 
-async function getOrCreateSheet(doc, title, headers) {
-  let sheet = doc.sheetsByTitle[title];
-  if (!sheet) sheet = await doc.addSheet({ title, headerValues: headers });
-  await sheet.loadHeaderRow();
-  if (!sheet.headerValues?.length) await sheet.setHeaderRow(headers);
-  return sheet;
-}
-
-// Append-once with idempotency hash
-async function appendOnce(sheet, idempotencyKey, rowData) {
-  const hash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
-  let found = [];
-  try { found = await sheet.getRows({ limit: 1, query: `Idempotency = "${hash}"` }); } catch (_e) {}
-  if (found?.length) return { existed: true, row: found[0] };
-  const row = await sheet.addRow({ ...rowData, Idempotency: hash });
-  return { existed: false, row };
-}
-
-// --- Admin helper ---
-function requireAdmin(event) {
-  const got = event.headers?.['x-admin-secret'] || event.headers?.['X-Admin-Secret'];
-  if (!process.env.TQ_ADMIN_SECRET) throw new Error('Missing env TQ_ADMIN_SECRET');
-  if (!got || got !== process.env.TQ_ADMIN_SECRET) {
-    const err = new Error('Forbidden');
-    err.statusCode = 403;
-    throw err;
-  }
-}
-
-// --- Competition KV helpers (in competition sheet) ---
-async function getCompetitionMap(doc, eventId) {
-  const comp = await getOrCreateSheet(doc, 'competition', ['Event Id','Key','Value']);
-  const rows = await comp.getRows();
+/* ===== State helpers (State!A:B) ===== */
+export async function getStateMap(sheets) {
+  const vals = await readRange(sheets, SHEET_ID, tabRange("State", "A:B"));
   const map = {};
-  for (const r of rows) if (String(r.get('Event Id')) === String(eventId)) map[r.get('Key')] = r.get('Value');
-  return { map, sheet: comp };
+  (vals.slice(1) || []).forEach(([k, v]) => (map[k] = v));
+  return map;
 }
-async function setCompetitionValue(sheet, eventId, key, value) {
-  const rows = await sheet.getRows();
-  let row = rows.find(r => String(r.get('Event Id')) === String(eventId) && r.get('Key') === key);
-  if (row) { row.set('Value', String(value)); await row.save(); }
-  else { await sheet.addRow({ 'Event Id': eventId, 'Key': key, 'Value': String(value) }); }
+export async function setStateKV(sheets, key, value) {
+  // Read state to find row for key; append if missing
+  const vals = await readRange(sheets, SHEET_ID, tabRange("State", "A:B"));
+  const header = vals[0] || ["Key","Value"];
+  let found = false;
+  for (let i = 1; i < vals.length; i++) {
+    if (vals[i][0] === key) {
+      await writeRange(sheets, SHEET_ID, tabRange("State", `A${i+1}:B${i+1}`), [[key, String(value)]]);
+      found = true; break;
+    }
+  }
+  if (!found) {
+    await appendRows(sheets, SHEET_ID, tabRange("State", "A1"), [[key, String(value)]]);
+  }
 }
-module.exports.requireAdmin = requireAdmin;
-module.exports.getCompetitionMap = getCompetitionMap;
-module.exports.setCompetitionValue = setCompetitionValue;
 
+/* ===== Simple lock (best-effort, per-key) =====
+   Uses State! with keys: lock:<name> = ownerId|expiresIso
+*/
+export async function withLock(sheets, name, fn, ttlMs = 8000) {
+  const lockKey = `lock:${name}`;
+  const owner = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const now = Date.now();
+  const expires = new Date(now + ttlMs).toISOString();
 
-module.exports = {
-  corsHeaders, ok, bad,
-  signToken, verifyToken,
-  getDoc, getOrCreateSheet, appendOnce,
-  nowIso, toNum, CURRENT_EVENT
-};
+  // Try to acquire
+  const state = await getStateMap(sheets);
+  const current = state[lockKey];
+  if (current) {
+    const [, exp] = String(current).split("|");
+    if (exp && new Date(exp).getTime() > now) {
+      throw new Error(`Lock busy: ${name}`);
+    }
+  }
+  await setStateKV(sheets, lockKey, `${owner}|${expires}`);
+
+  try {
+    const res = await fn();
+    return res;
+  } finally {
+    // Release if still owner
+    const state2 = await getStateMap(sheets);
+    const val = state2[lockKey];
+    if (val && val.startsWith(owner)) {
+      // set expired
+      await setStateKV(sheets, lockKey, `${owner}|${new Date(Date.now()-1).toISOString()}`);
+    }
+  }
+}
