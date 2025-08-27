@@ -2,10 +2,10 @@
   "name": "teamquest",
   "version": "1.0.0",
   "private": true,
-  "description": "TeamQuest Netlify Functions deps",
-  "license": "UNLICENSED",
-  "engines": {
-    "node": ">=18"
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "postinstall": "node scripts/write-sa-key.js",
+    "build": "echo 'build complete'"
   },
   "dependencies": {
     "google-auth-library": "^9.14.1",
