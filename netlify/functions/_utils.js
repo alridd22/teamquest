@@ -51,7 +51,7 @@ function toNum(v,d=0){ return (v===''||v==null) ? d : (Number(v)||d); }
 
 // ---- Google Sheets helper (use OAuth2 client explicitly) ----
 async function getDoc() {
-  // Include Drive readonly scope — required for files in Shared Drives or when resolving by ID.
+  // Add Drive readonly for shared-drive / permission checks
   const auth = new JWT({
     email: SERVICE_EMAIL,
     key: SERVICE_KEY,
@@ -60,6 +60,23 @@ async function getDoc() {
       'https://www.googleapis.com/auth/drive.readonly',
     ],
   });
+
+  // Pass the JWT client directly to the constructor
+  const doc = new GoogleSpreadsheet(SHEET_ID, auth);
+
+  try {
+    await doc.loadInfo();
+  } catch (e) {
+    const code = e?.response?.status || e?.code || 'unknown';
+    const details =
+      e?.response?.data?.error?.message ||
+      e?.message ||
+      String(e);
+    throw new Error(`Google API error - [${code}] ${details}`);
+  }
+  return doc;
+}
+
 
   const doc = new GoogleSpreadsheet(SHEET_ID);
   // This is the most compatible way in v4
