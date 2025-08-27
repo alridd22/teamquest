@@ -6,10 +6,17 @@ const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 
+// ---- Env checks (fail fast with clear messages) ----
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_EMAIL = process.env.GOOGLE_SERVICE_EMAIL;
+const JWT_SECRET = process.env.TQ_JWT_SECRET;
+const CURRENT_EVENT = process.env.TQ_CURRENT_EVENT_ID || 'default';
 
-// Load key: prefer env if present, else read from bundled file written at build time
+if (!SHEET_ID) throw new Error('Missing env GOOGLE_SHEET_ID');
+if (!SERVICE_EMAIL) throw new Error('Missing env GOOGLE_SERVICE_EMAIL');
+if (!JWT_SECRET) throw new Error('Missing env TQ_JWT_SECRET');
+
+// Load key: prefer env, else use the file we write at build time
 let SERVICE_KEY = process.env.GOOGLE_PRIVATE_KEY;
 if (SERVICE_KEY) {
   SERVICE_KEY = SERVICE_KEY.replace(/\\n/g, '\n');
@@ -18,12 +25,9 @@ if (SERVICE_KEY) {
   try {
     SERVICE_KEY = fs.readFileSync(keyPath, 'utf8');
   } catch (err) {
-    throw new Error('Missing GOOGLE_PRIVATE_KEY env and sa_key.pem file: ' + err.message);
+    throw new Error('Missing GOOGLE_PRIVATE_KEY env and sa_key.pem file');
   }
 }
-
-const JWT_SECRET = process.env.TQ_JWT_SECRET;
-const CURRENT_EVENT = process.env.TQ_CURRENT_EVENT_ID || 'default';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,7 +38,8 @@ const corsHeaders = {
   'Expires': '0',
 };
 const ok  = (body={}) => ({ statusCode: 200, headers: corsHeaders, body: JSON.stringify(body) });
-const bad = (code, message, extra={}) => ({ statusCode: code, headers: corsHeaders, body: JSON.stringify({ success:false, message, ...extra }) });
+const bad = (code, message, extra={}) =>
+  ({ statusCode: code, headers: corsHeaders, body: JSON.stringify({ success:false, message, ...extra }) });
 
 function signToken(payload, ttlSeconds=4*60*60) { return jwt.sign(payload, JWT_SECRET, { expiresIn: ttlSeconds }); }
 function verifyToken(authHeader) {
@@ -44,12 +49,33 @@ function verifyToken(authHeader) {
 function nowIso(){ return new Date().toISOString(); }
 function toNum(v,d=0){ return (v===''||v==null) ? d : (Number(v)||d); }
 
+// ---- Google Sheets helper (use OAuth2 client explicitly) ----
 async function getDoc() {
-  const auth = new JWT({ email: SERVICE_EMAIL, key: SERVICE_KEY, scopes: ['https://www.googleapis.com/auth/spreadsheets'] });
-  const doc = new GoogleSpreadsheet(SHEET_ID, auth);
-  await doc.loadInfo();
+  // Include Drive readonly scope — required for files in Shared Drives or when resolving by ID.
+  const auth = new JWT({
+    email: SERVICE_EMAIL,
+    key: SERVICE_KEY,
+    scopes: [
+      'https://www.googleapis.com/auth/spreadsheets',
+      'https://www.googleapis.com/auth/drive.readonly',
+    ],
+  });
+
+  const doc = new GoogleSpreadsheet(SHEET_ID);
+  // This is the most compatible way in v4
+  await doc.useOAuth2Client(auth);
+
+  // If this throws, surface a better error
+  try {
+    await doc.loadInfo();
+  } catch (e) {
+    const code = e?.code || e?.response?.status;
+    const msg  = e?.message || e?.response?.statusText || String(e);
+    throw new Error(`Google API error - [${code}] ${msg}`);
+  }
   return doc;
 }
+
 async function getOrCreateSheet(doc, title, headers) {
   let sheet = doc.sheetsByTitle[title];
   if (!sheet) sheet = await doc.addSheet({ title, headerValues: headers });
@@ -57,6 +83,7 @@ async function getOrCreateSheet(doc, title, headers) {
   if (!sheet.headerValues?.length) await sheet.setHeaderRow(headers);
   return sheet;
 }
+
 // Append-once using an Idempotency hash column
 async function appendOnce(sheet, idempotencyKey, rowData) {
   const hash = crypto.createHash('sha256').update(idempotencyKey).digest('hex');
