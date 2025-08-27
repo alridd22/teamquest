@@ -90,6 +90,36 @@ async function appendOnce(sheet, idempotencyKey, rowData) {
   return { existed: false, row };
 }
 
+// --- Admin helper ---
+function requireAdmin(event) {
+  const got = event.headers?.['x-admin-secret'] || event.headers?.['X-Admin-Secret'];
+  if (!process.env.TQ_ADMIN_SECRET) throw new Error('Missing env TQ_ADMIN_SECRET');
+  if (!got || got !== process.env.TQ_ADMIN_SECRET) {
+    const err = new Error('Forbidden');
+    err.statusCode = 403;
+    throw err;
+  }
+}
+
+// --- Competition KV helpers (in competition sheet) ---
+async function getCompetitionMap(doc, eventId) {
+  const comp = await getOrCreateSheet(doc, 'competition', ['Event Id','Key','Value']);
+  const rows = await comp.getRows();
+  const map = {};
+  for (const r of rows) if (String(r.get('Event Id')) === String(eventId)) map[r.get('Key')] = r.get('Value');
+  return { map, sheet: comp };
+}
+async function setCompetitionValue(sheet, eventId, key, value) {
+  const rows = await sheet.getRows();
+  let row = rows.find(r => String(r.get('Event Id')) === String(eventId) && r.get('Key') === key);
+  if (row) { row.set('Value', String(value)); await row.save(); }
+  else { await sheet.addRow({ 'Event Id': eventId, 'Key': key, 'Value': String(value) }); }
+}
+module.exports.requireAdmin = requireAdmin;
+module.exports.getCompetitionMap = getCompetitionMap;
+module.exports.setCompetitionValue = setCompetitionValue;
+
+
 module.exports = {
   corsHeaders, ok, bad,
   signToken, verifyToken,
