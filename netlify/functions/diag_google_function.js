@@ -68,20 +68,15 @@ async function runDiag() {
     ],
   });
 
-  // Try authorizing
+  // Try authorizing and get a token string
   try {
     await auth.authorize();
-    const token = await auth.getAccessToken();
+    const { token } = await auth.getAccessToken();
     details.access_token_snippet = String(token || '').slice(0, 20) + '...';
-  } catch (e) {
-    details.token_error = e.message || String(e);
-    return details;
-  }
 
-  // Call Sheets API directly
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}?fields=spreadsheetId,properties.title`;
-  try {
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${await auth.getAccessToken()}` } });
+    // Call Sheets API directly
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(SHEET_ID)}?fields=spreadsheetId,properties.title`;
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     const text = await r.text();
     details.http_status = r.status;
     details.http_statusText = r.statusText;
@@ -89,7 +84,7 @@ async function runDiag() {
     details.success = r.ok;
     return details;
   } catch (e) {
-    details.fetch_error = e.message || String(e);
+    details.token_error = e.message || String(e);
     return details;
   }
 }
