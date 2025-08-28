@@ -2,9 +2,10 @@
   "name": "teamquest",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "engines": { "node": ">=18" },
   "scripts": {
-    "postinstall": "node scripts/write-sa-key.js",
+    "postinstall": "node scripts/write-sa-key.mjs",
     "build": "echo 'build complete'"
   },
   "dependencies": {
