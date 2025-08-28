@@ -1,7 +1,7 @@
 [build]
   publish = "."
   # (optional but faster/cleaner) use npm ci if you commit package-lock.json
-  command = "npm install && node scripts/write-sa-key.js"
+  command = "npm install && node scripts/write-sa-key.mjs"
 
 [functions]
   directory = "netlify/functions"
@@ -23,3 +23,4 @@
     # <-- add X-Admin-Secret so the POST from Zapier is allowed
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Admin-Secret"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
