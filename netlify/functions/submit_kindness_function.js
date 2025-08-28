@@ -1,168 +1,98 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+// submit_kindness.js — CommonJS, uses shared utils
 
-exports.handler = async (event, context) => {
-  console.log('Kindness submission started');
-  
-  // Handle preflight CORS requests
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
-      body: '',
-    };
-  }
+const {
+  ok, error, isPreflight,
+  getDoc, // exported from _utils.js: returns authenticated GoogleSpreadsheet
+} = require("./_utils.js");
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: {'Access-Control-Allow-Origin': '*'},
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
+module.exports.handler = async (event) => {
+  console.log("Kindness submission started");
 
   try {
-    console.log('Parsing request body');
-    const { teamCode, teamName, description, location, photoUrl } = JSON.parse(event.body);
-    
-    console.log('Processing kindness submission for team:', teamCode);
-    console.log('Photo URL received:', photoUrl);
+    // CORS preflight
+    if (isPreflight(event)) return ok({});
 
-    if (!teamCode || !teamName || !description || !photoUrl) {
-      throw new Error('Missing required fields');
-    }
+    // Only POST
+    if (event.httpMethod !== "POST") return error(405, "Method not allowed");
 
-    // Get environment variables (same as registration)
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKeyB64: !!privateKeyBase64,
-    });
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
-
-    // Decode private key from base64 (same as registration)
-    console.log('Decoding GOOGLE_PRIVATE_KEY_B64');
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Private key format invalid – missing BEGIN header');
-    }
-
-    console.log('Private key successfully decoded, length:', privateKey.length);
-
-    // Create JWT client (same as registration)
-    console.log('Creating JWT client');
-    const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    // Initialize Google Sheet (same as registration)
-    console.log('Initializing Google Sheet');
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-
+    // Parse body
+    let body = {};
     try {
-      await doc.loadInfo();
-      console.log('Sheet loaded successfully:', doc.title);
-    } catch (loadError) {
-      console.error('Sheet load failed:', loadError.message);
-      throw new Error(`Sheet access failed: ${loadError.message}`);
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      return error(400, "Invalid JSON body");
     }
 
-    // Find the Kindness sheet
-    console.log('Looking for Kindness sheet');
-    let kindnessSheet = null;
-    
-    // Try to find existing Kindness sheet
-    for (const sheet of Object.values(doc.sheetsByTitle)) {
-      if (sheet.title === 'Kindness') {
-        kindnessSheet = sheet;
-        break;
-      }
+    const { teamCode, teamName, description, location, photoUrl } = body;
+    if (!teamCode || !teamName || !description || !photoUrl) {
+      return error(400, "Missing required fields");
     }
+
+    // Authenticated doc via shared utils (robust env/file fallback)
+    const doc = await getDoc?.();
+    if (!doc) return error(500, "Spreadsheet client not available");
+
+    // Find or create the Kindness sheet
+    let kindnessSheet = doc.sheetsByTitle ? doc.sheetsByTitle["Kindness"] : null;
 
     if (!kindnessSheet) {
-      console.log('Kindness sheet not found, creating it');
-      kindnessSheet = await doc.addSheet({ 
-        title: 'Kindness',
-        headerValues: ['Team Code', 'Team Name', 'Description', 'Location', 'Photo Status', 'Submission Time', 'AI Score']
+      console.log("Kindness sheet not found, creating it");
+      kindnessSheet = await doc.addSheet({
+        title: "Kindness",
+        headerValues: [
+          "Team Code",
+          "Team Name",
+          "Description",
+          "Location",
+          "Photo Status",
+          "Submission Time",
+          "AI Score",
+        ],
       });
     } else {
-      console.log('Using existing Kindness sheet');
       await kindnessSheet.loadHeaderRow();
-      
-      // Set headers if they don't exist
       if (!kindnessSheet.headerValues || kindnessSheet.headerValues.length === 0) {
-        console.log('Setting up Kindness sheet headers');
-        await kindnessSheet.setHeaderRow(['Team Code', 'Team Name', 'Description', 'Location', 'Photo Status', 'Submission Time', 'AI Score']);
+        console.log("Setting Kindness sheet headers");
+        await kindnessSheet.setHeaderRow([
+          "Team Code",
+          "Team Name",
+          "Description",
+          "Location",
+          "Photo Status",
+          "Submission Time",
+          "AI Score",
+        ]);
+        await kindnessSheet.loadHeaderRow();
       }
     }
 
-    console.log('Adding kindness submission to sheet');
+    // Add the submission
     const submissionTime = new Date().toISOString();
     const newRow = await kindnessSheet.addRow({
-      'Team Code': teamCode,
-      'Team Name': teamName,
-      'Description': description,
-      'Location': location || '',
-      'Photo Status': photoUrl, // Store the actual photo URL
-      'Submission Time': submissionTime,
-      'AI Score': 'Pending AI Score'
+      "Team Code": teamCode,
+      "Team Name": teamName,
+      "Description": description,
+      "Location": location || "",
+      "Photo Status": photoUrl,      // store the actual photo URL here (as you designed)
+      "Submission Time": submissionTime,
+      "AI Score": "Pending AI Score" // AI scoring handled elsewhere (e.g., Apps Script / Sheet trigger)
     });
 
-    console.log('Kindness submission saved successfully:', newRow.rowNumber);
-    console.log('AI scoring will be processed automatically via Google Sheets trigger');
+    console.log("Kindness submission saved:", newRow.rowNumber);
 
-    // Return success - AI scoring will happen automatically
-    const estimatedScore = 'Will be scored by AI within 1-2 minutes';
-    
-    console.log('Kindness submission processed successfully');
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: true,
-        message: 'Kindness act submitted successfully! AI will score your submission within 1-2 minutes.',
-        estimatedScore: estimatedScore,
-        teamCode,
-        teamName,
-        photoUrl
-      }),
-    };
-
-  } catch (error) {
-    console.error('Kindness submission error:', error);
-    
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
-    };
+    // Return success (AI scoring message kept)
+    const estimatedScore = "Will be scored by AI within 1-2 minutes";
+    return ok({
+      success: true,
+      message:
+        "Kindness act submitted successfully! AI will score your submission within 1-2 minutes.",
+      estimatedScore,
+      teamCode,
+      teamName,
+      photoUrl,
+    });
+  } catch (e) {
+    console.error("Kindness submission error:", e);
+    return error(500, e.message || "Unexpected error");
   }
 };
