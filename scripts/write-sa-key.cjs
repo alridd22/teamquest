@@ -1,4 +1,5 @@
-// writes netlify/functions/sa_key.json at build time from GOOGLE_SERVICE_ACCOUNT_JSON_B64
+// scripts/write-sa-key.cjs
+// Writes netlify/functions/sa_key.json at build time from GOOGLE_SERVICE_ACCOUNT_JSON_B64
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -11,8 +12,7 @@ if (!b64) {
 let jsonText;
 try {
   jsonText = Buffer.from(b64.trim(), "base64").toString("utf8");
-  // sanity check it's valid JSON and contains a private_key
-  const obj = JSON.parse(jsonText);
+  const obj = JSON.parse(jsonText); // sanity check
   if (!obj.client_email || !obj.private_key) {
     console.error("[write-sa-key] JSON present but missing client_email/private_key.");
     process.exit(1);
@@ -27,5 +27,4 @@ const outPath = path.join(outDir, "sa_key.json");
 
 fs.mkdirSync(outDir, { recursive: true });
 fs.writeFileSync(outPath, jsonText, { encoding: "utf8", mode: 0o600 });
-
 console.log("[write-sa-key] Wrote", outPath, `(${Buffer.byteLength(jsonText)} bytes)`);
