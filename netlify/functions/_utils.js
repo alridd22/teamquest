@@ -15,7 +15,8 @@ function ok(body, extraHeaders = {}) {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Secret",
+      "Access-Control-Allow-Headers":
+        "Content-Type, Authorization, X-Admin-Secret",
       ...extraHeaders,
     },
     body: JSON.stringify(body),
@@ -29,7 +30,8 @@ function error(statusCode, message, extra = {}) {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Admin-Secret",
+      "Access-Control-Allow-Headers":
+        "Content-Type, Authorization, X-Admin-Secret",
     },
     body: JSON.stringify({ error: message, ...extra }),
   };
@@ -42,167 +44,25 @@ function requireAdmin(event) {
   if (!s || s !== ADMIN_SECRET) throw new Error("Forbidden: bad admin secret");
 }
 
-/* ===== Key helpers ===== */
-function looksBase64(s) {
-  return /^[A-Za-z0-9+/=\s]+$/.test(s) && !s.includes("{") && !s.includes("-----BEGIN");
-}
-
-function tryBase64Decode(s) {
-  try {
-    const out = Buffer.from(s.trim(), "base64").toString("utf8");
-    if (out.includes("-----BEGIN") || out.trim().startsWith("{")) return out;
-  } catch {}
-  return null;
-}
-
-function normalizePem(s) {
-  if (!s) return s;
-  let t = s.toString().trim();
-
-  // If accidentally JSON-quoted, unquote
-  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
-    try { t = JSON.parse(t); } catch {}
-  }
-
-  // Convert escaped newlines + CRLF/CR to LF
-  t = t.replace(/\\n/g, "\n").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-
-  // Strip accidental surrounding backticks
-  if (t.startsWith("`") && t.endsWith("`")) t = t.slice(1, -1);
-
-  return t.trim();
-}
-
-/* Accept any of these for the service account email */
-const EXPLICIT_CLIENT_EMAIL =
-  process.env.GOOGLE_CLIENT_EMAIL ||
-  process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || // added alias
-  process.env.GOOGLE_SERVICE_EMAIL ||
-  "";
-
-/* ===== Resolve credentials from env JSON ===== */
-function fromJsonCandidate(raw, sourceName) {
-  if (!raw) return null;
-  let text = raw.trim();
-  const b = looksBase64(text) ? tryBase64Decode(text) : null;
-  if (b) text = b;
-
-  try {
-    const obj = JSON.parse(text);
-    const clientEmail = obj.client_email || EXPLICIT_CLIENT_EMAIL;
-    let privateKey = obj.private_key || obj.privateKey || "";
-    privateKey = normalizePem(privateKey);
-
-    if (clientEmail && privateKey.includes("BEGIN PRIVATE KEY")) {
-      return { clientEmail, privateKey, source: `env:${sourceName}` };
-    }
-  } catch {}
-  return null;
-}
-
-/* ===== Resolve from separate envs (email + key separately) ===== */
-function fromSeparateEnvs() {
-  let pk =
-    process.env.GOOGLE_PRIVATE_KEY ||
-    process.env.GOOGLE_PRIVATE_KEY_BUILD ||
-    process.env.GOOGLE_PRIVATE_KEY_B64 ||
-    "";
-
-  if (!pk) return null;
-
-  if (looksBase64(pk)) {
-    const decoded = tryBase64Decode(pk);
-    if (decoded) pk = decoded;
-  }
-  pk = normalizePem(pk);
-
-  const clientEmail = EXPLICIT_CLIENT_EMAIL;
-  if (clientEmail && pk.includes("BEGIN PRIVATE KEY")) {
-    return { clientEmail, privateKey: pk, source: "env:separate" };
-  }
-  return null;
-}
-
-/* ===== Resolve from filesystem (PEM sidecar) ===== */
-function fromFileSystem() {
-  const fs = require("node:fs");
-  const path = require("node:path");
-
-  const candidates = [];
-  if (process.env.GOOGLE_KEY_FILE) candidates.push(process.env.GOOGLE_KEY_FILE);
-  try {
-    candidates.push(path.join(__dirname, "sa_key.pem"));
-  } catch {}
-  candidates.push("netlify/functions/sa_key.pem");
-
-  for (const p of candidates) {
-    try {
-      if (fs.existsSync(p)) {
-        const pkRaw = fs.readFileSync(p, "utf8");
-        const pk = normalizePem(pkRaw);
-        if (pk.includes("BEGIN PRIVATE KEY")) {
-          const clientEmail = EXPLICIT_CLIENT_EMAIL;
-          if (!clientEmail) continue;
-          return { clientEmail, privateKey: pk, source: `file:${p}` };
-        }
-      }
-    } catch {}
-  }
-  return null;
-}
-
-async function resolveServiceAccount() {
-  // Prefer JSON creds if provided (direct or Base64)
-  const jsonFirst =
-    fromJsonCandidate(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, "service_account_json") ||
-    fromJsonCandidate(process.env.GOOGLE_CREDENTIALS_JSON, "credentials_json") ||
-    fromJsonCandidate(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, "application_credentials_json");
-  if (jsonFirst) return jsonFirst;
-
-  // Then separate env vars
-  const sep = fromSeparateEnvs();
-  if (sep) return sep;
-
-  // Then PEM from filesystem
-  const file = fromFileSystem();
-  if (file) return file;
-
-  // Then a path to a JSON keyfile via GOOGLE_APPLICATION_CREDENTIALS
-  if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-    const fs = require("node:fs");
-    try {
-      const text = fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, "utf8");
-      const obj = JSON.parse(text);
-      const clientEmail = obj.client_email || EXPLICIT_CLIENT_EMAIL;
-      const privateKey = normalizePem(obj.private_key || "");
-      if (clientEmail && privateKey.includes("BEGIN PRIVATE KEY")) {
-        return { clientEmail, privateKey, source: `file:${process.env.GOOGLE_APPLICATION_CREDENTIALS}` };
-      }
-    } catch {}
-  }
-
-  throw new Error(
-    "No service account credentials found. Tried env JSON (GOOGLE_SERVICE_ACCOUNT_JSON / GOOGLE_CREDENTIALS_JSON / GOOGLE_APPLICATION_CREDENTIALS_JSON), " +
-      "separate envs (GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY*), sidecar/file (GOOGLE_KEY_FILE, sa_key.pem), and GOOGLE_APPLICATION_CREDENTIALS path."
-  );
-}
-
-/* ===== Sheets client (memoized) ===== */
+/* ===== Sheets client (memoized) — JSON keyfile written at build ===== */
 let _sheets;
+
 async function getSheets() {
   if (_sheets) return _sheets;
-  const { clientEmail, privateKey, source } = await resolveServiceAccount();
-  console.info(`[sheets] Using service account from: ${source}`);
 
-  // Use PEM directly with google.auth.JWT
-  const auth = new google.auth.JWT(
-    clientEmail,
-    null,
-    privateKey,
-    ["https://www.googleapis.com/auth/spreadsheets"]
-  );
+  const path = require("node:path");
+  const { GoogleAuth } = require("google-auth-library");
 
-  _sheets = google.sheets({ version: "v4", auth });
+  // Written by scripts/write-sa-key.cjs during build
+  const keyFile = path.join(__dirname, "sa_key.json");
+
+  const auth = new GoogleAuth({
+    keyFile,
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+
+  const client = await auth.getClient();
+  _sheets = google.sheets({ version: "v4", auth: client });
   return _sheets;
 }
 
