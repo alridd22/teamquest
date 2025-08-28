@@ -1,5 +1,6 @@
-// _scoring.js (updated)
-export function scoreProvisional(activity, payload) {
+// _scoring.js (CommonJS)
+
+function scoreProvisional(activity, payload) {
   switch (activity) {
     case "scavenger": {
       // If you submit one item per call, this will be 0 or 15 by presence only.
@@ -26,3 +27,5 @@ export function scoreProvisional(activity, payload) {
       return 0;
   }
 }
+
+module.exports = { scoreProvisional };
