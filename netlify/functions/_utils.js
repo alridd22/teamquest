@@ -1,5 +1,7 @@
 // netlify/functions/_utils.js
 const { google } = require("googleapis");
+const { GoogleAuth } = require("google-auth-library");
+const path = require("node:path");
 
 /* ===== Env mapping ===== */
 const SHEET_ID = process.env.SHEET_ID || process.env.GOOGLE_SHEET_ID || "";
@@ -44,16 +46,12 @@ function requireAdmin(event) {
   if (!s || s !== ADMIN_SECRET) throw new Error("Forbidden: bad admin secret");
 }
 
-/* ===== Sheets client (memoized) — JSON keyfile written at build ===== */
+/* ===== Sheets client (memoized, JSON keyfile) ===== */
 let _sheets;
-
 async function getSheets() {
   if (_sheets) return _sheets;
 
-  const path = require("node:path");
-  const { GoogleAuth } = require("google-auth-library");
-
-  // Written by scripts/write-sa-key.cjs during build
+  // JSON written at build by write-sa-key.cjs
   const keyFile = path.join(__dirname, "sa_key.json");
 
   const auth = new GoogleAuth({
