@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  command = "npm install && node scripts/write-sa-key.json"
+  command = "npm install && node scripts/write-sa-key.cjs"
 
 [functions]
   directory = "netlify/functions"
@@ -15,4 +15,5 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Admin-Secret"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
 
