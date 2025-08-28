@@ -1,26 +1,42 @@
-const { ok, bad, corsHeaders, getDoc, CURRENT_EVENT,
-        requireAdmin, getCompetitionMap, setCompetitionValue, nowIso } = require('./_utils');
+// admin_publish_results_function.js (CommonJS, standardised helpers)
 
-exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: corsHeaders, body: '' };
+const {
+  ok, error, isPreflight, requireAdmin,
+  getDoc, getCompetitionMap, setCompetitionValue, nowIso,
+  CURRENT_EVENT
+} = require("./_utils.js");
+
+module.exports.handler = async (event) => {
   try {
+    // Handle OPTIONS + CORS
+    if (isPreflight(event)) return ok({});
     requireAdmin(event);
-    const doc = await getDoc();
 
+    const doc = await getDoc();
     const { map, sheet } = await getCompetitionMap(doc, CURRENT_EVENT);
-    if ((map.state || '') === 'PUBLISHED') {
-      return ok({ success:true, state:'PUBLISHED', publish_at: map.publish_at, gallery_unlocked: map.gallery_unlocked === 'true' });
+
+    // Idempotent: if already PUBLISHED, just return current state
+    if ((map.state || "") === "PUBLISHED") {
+      return ok({
+        success: true,
+        state: "PUBLISHED",
+        publish_at: map.publish_at || "",
+        gallery_unlocked: map.gallery_unlocked === "true"
+      });
     }
 
-    // You can enforce that all teams checked in before publish — or allow publish anyway.
-    await setCompetitionValue(sheet, CURRENT_EVENT, 'state', 'PUBLISHED');
-    const when = map.publish_at || nowIso();
-    await setCompetitionValue(sheet, CURRENT_EVENT, 'publish_at', when);
-    await setCompetitionValue(sheet, CURRENT_EVENT, 'gallery_unlocked', 'true');
+    // Optionally enforce “checked-in before publish” here if you add that rule later.
 
-    return ok({ success:true, state:'PUBLISHED', publish_at: when, gallery_unlocked: true });
+    // Set state to PUBLISHED + publish_at + unlock gallery
+    const when = map.publish_at || (nowIso ? nowIso() : new Date().toISOString());
+    await setCompetitionValue(sheet, CURRENT_EVENT, "state", "PUBLISHED");
+    await setCompetitionValue(sheet, CURRENT_EVENT, "publish_at", when);
+    await setCompetitionValue(sheet, CURRENT_EVENT, "gallery_unlocked", "true");
+
+    return ok({ success: true, state: "PUBLISHED", publish_at: when, gallery_unlocked: true });
   } catch (e) {
-    const code = e.statusCode || 500;
-    return bad(code, 'Admin publish error', { error: e.message });
+    console.error("admin_publish_results_function error:", e);
+    const code = e.statusCode || 400;
+    return error(code, e.message || "Admin publish error");
   }
 };
