@@ -1,7 +1,8 @@
+// netlify/functions/zapier_update_score_function.js
 const {
   getSheets, readRange, writeRange, appendRows, ok, error, isPreflight,
   indexByHeader, tabRange, requireAdmin
-} = require("./_utils.cjs");
+} = require("./_utils.js");
 
 module.exports.handler = async (event) => {
   try {
@@ -11,13 +12,14 @@ module.exports.handler = async (event) => {
     requireAdmin(event);
 
     const { submissionId, finalScore } = JSON.parse(event.body || "{}");
-    if (!submissionId || typeof finalScore !== "number") {
+    const scoreNum = Number(finalScore);
+    if (!submissionId || !Number.isFinite(scoreNum)) {
       return error(400, "submissionId (string) and finalScore (number) required");
     }
 
     const sheets = await getSheets();
 
-    // Update Submissions
+    // Update Submissions (tab name must match your sheet; keep 'submissions' if that's what you use)
     const subsVals = await readRange(sheets, null, tabRange("submissions", "A:K"));
     const subs = indexByHeader(subsVals);
 
@@ -37,7 +39,7 @@ module.exports.handler = async (event) => {
       "FINAL",
       existing[subs.idx["AI Attempts"]] || "0",
       existing[subs.idx["AI Score"]] || "",
-      finalScore.toString()
+      String(scoreNum)
     ]]);
 
     // Update or Append in Scores
@@ -46,7 +48,7 @@ module.exports.handler = async (event) => {
     for (let i = 1; i < scoresVals.length; i++) {
       const r = scoresVals[i];
       if (r[4] === submissionId) { // SubmissionID col
-        r[2] = finalScore.toString();
+        r[2] = String(scoreNum);
         r[3] = "final";
         replaced = true;
       }
@@ -55,11 +57,11 @@ module.exports.handler = async (event) => {
       await writeRange(sheets, null, tabRange("Scores", "A1"), scoresVals);
     } else {
       await appendRows(sheets, null, tabRange("Scores", "A1"), [[
-        teamCode, activity, finalScore.toString(), "final", submissionId
+        teamCode, activity, String(scoreNum), "final", submissionId
       ]]);
     }
 
-    return ok({ updated: true, submissionId, teamCode, activity, finalScore });
+    return ok({ updated: true, submissionId, teamCode, activity, finalScore: scoreNum });
   } catch (e) {
     console.error("zapier_update_score_function error:", e);
     return error(400, e.message);
