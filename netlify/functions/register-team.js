@@ -1,133 +1,83 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+// register-team.js — CommonJS, uses shared utils
 
-exports.handler = async (event, context) => {
-  console.log('Function started');
+const {
+  ok, error, isPreflight,
+  getDoc, getOrCreateSheet, CURRENT_EVENT,
+} = require("./_utils.js");
 
-  // Handle preflight CORS requests
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
-      body: '',
-    };
-  }
+// If your utils don't have nowIso, we'll inline a tiny helper:
+const nowIso = () => new Date().toISOString();
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-      },
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
-
+module.exports.handler = async (event) => {
   try {
-    console.log('Parsing request body');
-    const { teamCode, teamName, teamPin } = JSON.parse(event.body);
-    console.log('Team data received:', { teamCode, teamName, teamPin: teamPin ? '****' : undefined });
+    // CORS preflight
+    if (isPreflight(event)) return ok({});
 
-    // Get environment variables
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKeyB64: !!privateKeyBase64,
-    });
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
-
-    // Decode private key from base64
-    console.log('Decoding GOOGLE_PRIVATE_KEY_B64');
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Private key format invalid – missing BEGIN header');
-    }
-
-    console.log('Private key successfully decoded, length:', privateKey.length);
-
-    // Create JWT client
-    console.log('Creating JWT client');
-    const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    // Initialize Google Sheet
-    console.log('Initializing Google Sheet');
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-
+    // Parse body
+    let body = {};
     try {
-      await doc.loadInfo();
-      console.log('Sheet loaded successfully:', doc.title);
-    } catch (loadError) {
-      console.error('Sheet load failed:', loadError.message);
-      throw new Error(`Sheet access failed: ${loadError.message}`);
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      return error(400, "Invalid JSON");
     }
 
-    const sheet = doc.sheetsByIndex[0];
-    console.log('Using sheet:', sheet.title);
+    const teamCode = (body.teamCode || "").trim();
+    const teamName = (body.teamName || "").trim();
+    const pin      = body.pin ? String(body.pin).trim() : "";
+    const device   = body.device ? String(body.device).trim() : "";
 
-    await sheet.loadHeaderRow();
+    if (!teamCode) return error(400, "teamCode is required");
+    if (!teamName) return error(400, "teamName is required");
 
-    if (!sheet.headerValues || sheet.headerValues.length === 0) {
-      console.log('Setting up headers');
-      await sheet.setHeaderRow(['Team Code', 'Team Name', 'Team PIN', 'Registration Time']);
-    }
+    // Spreadsheet client via shared utils (uses robust key loading)
+    const doc = await getDoc?.();
+    if (!doc) return error(500, "Spreadsheet client not available");
 
-    console.log('Adding team data to sheet');
-    const newRow = await sheet.addRow({
-      'Team Code': teamCode,
-      'Team Name': teamName,
-      'Team PIN': teamPin,
-      'Registration Time': new Date().toISOString(),
-    });
+    // Ensure 'teams' sheet with expected headers
+    const teams = await getOrCreateSheet(doc, "teams", [
+      "Team Code", "Team Name", "PIN", "State", "Device", "LastSeen", "Event Id"
+    ]);
 
-    console.log('Team registered successfully:', newRow.rowNumber);
+    // Load rows and find existing team for current event
+    const rows = await teams.getRows();
+    const row = rows.find(r =>
+      String(r.get("Team Code")).trim() === teamCode &&
+      String(r.get("Event Id") || "").trim() === String(CURRENT_EVENT)
+    );
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Idempotent create/update
+    if (!row) {
+      await teams.addRow({
+        "Team Code": teamCode,
+        "Team Name": teamName,
+        "PIN": pin,
+        "State": "REGISTERED",
+        "Device": device,
+        "LastSeen": nowIso(),
+        "Event Id": String(CURRENT_EVENT),
+      });
+      return ok({ success: true, created: true, teamCode, teamName, event: CURRENT_EVENT });
+    } else {
+      // update only when needed; keep existing values if not provided
+      if (teamName && row.get("Team Name") !== teamName) row.set("Team Name", teamName);
+      if (pin && row.get("PIN") !== pin) row.set("PIN", pin);
+      if (device) row.set("Device", device);
+      if (!row.get("State")) row.set("State", "REGISTERED");
+      row.set("LastSeen", nowIso());
+      await row.save();
+
+      return ok({
         success: true,
-        message: 'Team registered successfully',
+        updated: true,
         teamCode,
-        teamName,
-      }),
-    };
-
-  } catch (error) {
-    console.error('Registration error:', error);
-
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
-    };
+        teamName: row.get("Team Name"),
+        event: CURRENT_EVENT
+      });
+    }
+  } catch (e) {
+    console.error("register-team error:", e);
+    return error(500, e.message || "Unexpected error");
   }
 };
