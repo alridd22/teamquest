@@ -1,165 +1,94 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+// submit_limerick.js — CommonJS, uses shared utils
 
-exports.handler = async (event, context) => {
-  console.log('Limerick submission started');
-  
-  // Handle preflight CORS requests
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
-      body: '',
-    };
-  }
+const {
+  ok, error, isPreflight,
+  getDoc, // exported from _utils.js: returns an authenticated GoogleSpreadsheet
+} = require("./_utils.js");
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: {'Access-Control-Allow-Origin': '*'},
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
+module.exports.handler = async (event) => {
+  console.log("Limerick submission started");
 
   try {
-    console.log('Parsing request body');
-    const { teamCode, teamName, topic, limerickText } = JSON.parse(event.body);
-    
-    console.log('Processing limerick submission for team:', teamCode);
+    // CORS preflight
+    if (isPreflight(event)) return ok({});
 
-    if (!teamCode || !teamName || !limerickText) {
-      throw new Error('Missing required fields');
-    }
+    // Only POST
+    if (event.httpMethod !== "POST") return error(405, "Method not allowed");
 
-    // Get environment variables (same as kindness function)
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-
-    console.log('Environment variables check:', {
-      hasEmail: !!serviceAccountEmail,
-      hasSheetId: !!sheetId,
-      hasPrivateKeyB64: !!privateKeyBase64,
-    });
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
-
-    // Decode private key from base64 (same as kindness function)
-    console.log('Decoding GOOGLE_PRIVATE_KEY_B64');
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    if (!privateKey.includes('-----BEGIN PRIVATE KEY-----')) {
-      throw new Error('Private key format invalid – missing BEGIN header');
-    }
-
-    console.log('Private key successfully decoded, length:', privateKey.length);
-
-    // Create JWT client (same as kindness function)
-    console.log('Creating JWT client');
-    const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    // Initialize Google Sheet (same as kindness function)
-    console.log('Initializing Google Sheet');
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-
+    // Parse body
+    let body = {};
     try {
-      await doc.loadInfo();
-      console.log('Sheet loaded successfully:', doc.title);
-    } catch (loadError) {
-      console.error('Sheet load failed:', loadError.message);
-      throw new Error(`Sheet access failed: ${loadError.message}`);
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      return error(400, "Invalid JSON body");
     }
 
-    // Find the Limerick sheet
-    console.log('Looking for Limerick sheet');
-    let limerickSheet = null;
-    
-    // Try to find existing Limerick sheet
-    for (const sheet of Object.values(doc.sheetsByTitle)) {
-      if (sheet.title === 'Limerick') {
-        limerickSheet = sheet;
-        break;
-      }
+    const { teamCode, teamName, topic, limerickText } = body;
+    if (!teamCode || !teamName || !limerickText) {
+      return error(400, "Missing required fields");
     }
+
+    // Authenticated doc via shared utils (robust env/file fallback)
+    const doc = await getDoc?.();
+    if (!doc) return error(500, "Spreadsheet client not available");
+
+    // Find or create the Limerick sheet
+    let limerickSheet = doc.sheetsByTitle ? doc.sheetsByTitle["Limerick"] : null;
 
     if (!limerickSheet) {
-      console.log('Limerick sheet not found, creating it');
-      limerickSheet = await doc.addSheet({ 
-        title: 'Limerick',
-        headerValues: ['Team Code', 'Team Name', 'Topic', 'Limerick Text', 'Submission Time', 'AI Score']
+      console.log("Limerick sheet not found, creating it");
+      limerickSheet = await doc.addSheet({
+        title: "Limerick",
+        headerValues: [
+          "Team Code",
+          "Team Name",
+          "Topic",
+          "Limerick Text",
+          "Submission Time",
+          "AI Score",
+        ],
       });
     } else {
-      console.log('Using existing Limerick sheet');
       await limerickSheet.loadHeaderRow();
-      
-      // Set headers if they don't exist
       if (!limerickSheet.headerValues || limerickSheet.headerValues.length === 0) {
-        console.log('Setting up Limerick sheet headers');
-        await limerickSheet.setHeaderRow(['Team Code', 'Team Name', 'Topic', 'Limerick Text', 'Submission Time', 'AI Score']);
+        console.log("Setting Limerick sheet headers");
+        await limerickSheet.setHeaderRow([
+          "Team Code",
+          "Team Name",
+          "Topic",
+          "Limerick Text",
+          "Submission Time",
+          "AI Score",
+        ]);
+        await limerickSheet.loadHeaderRow();
       }
     }
 
-    console.log('Adding limerick submission to sheet');
+    // Add the submission
     const submissionTime = new Date().toISOString();
     const newRow = await limerickSheet.addRow({
-      'Team Code': teamCode,
-      'Team Name': teamName,
-      'Topic': topic || 'No topic specified',
-      'Limerick Text': limerickText,
-      'Submission Time': submissionTime,
-      'AI Score': 'Pending AI Score'
+      "Team Code": teamCode,
+      "Team Name": teamName,
+      "Topic": topic || "No topic specified",
+      "Limerick Text": limerickText,
+      "Submission Time": submissionTime,
+      "AI Score": "Pending AI Score",
     });
 
-    console.log('Limerick submission saved successfully:', newRow.rowNumber);
-    console.log('AI scoring will be processed automatically via Google Sheets trigger');
+    console.log("Limerick submission saved:", newRow.rowNumber);
 
-    // Return success - AI scoring will happen automatically
-    const estimatedScore = 'Will be scored by AI within 1-2 minutes';
-    
-    console.log('Limerick submission processed successfully');
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: true,
-        message: 'Limerick submitted successfully! AI will score your submission within 1-2 minutes.',
-        estimatedScore: estimatedScore,
-        teamCode,
-        teamName
-      }),
-    };
-
-  } catch (error) {
-    console.error('Limerick submission error:', error);
-    
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: false,
-        error: error.message,
-      }),
-    };
+    // Mirror your original success payload
+    const estimatedScore = "Will be scored by AI within 1-2 minutes";
+    return ok({
+      success: true,
+      message:
+        "Limerick submitted successfully! AI will score your submission within 1-2 minutes.",
+      estimatedScore,
+      teamCode,
+      teamName,
+    });
+  } catch (e) {
+    console.error("Limerick submission error:", e);
+    return error(500, e.message || "Unexpected error");
   }
 };
