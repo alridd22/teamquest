@@ -1,59 +1,65 @@
-import jwt from "jsonwebtoken";
-import {
+// get_leaderboard.js — CommonJS
+
+const jwt = require("jsonwebtoken");
+const {
   getSheets, readRange, ok, error, isPreflight,
-  indexByHeader, tabRange, getStateMap
-} from "./_utils.js";
+  indexByHeader, tabRange, getStateMap, JWT_SECRET
+} = require("./_utils.js");
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.TQ_JWT_SECRET;
-
-export async function handler(event) {
+module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
 
     // Optional: validate bearer token from team/admin pages
     const authz = event.headers.authorization || "";
     if (authz) {
-      try { jwt.verify(authz.replace(/^Bearer\s+/i, ""), JWT_SECRET); } catch { /* ignore */ }
+      try {
+        jwt.verify(authz.replace(/^Bearer\s+/i, ""), JWT_SECRET);
+      } catch {
+        /* ignore invalid tokens; endpoint remains public */
+      }
     }
 
     const sheets = await getSheets();
 
     // Load sheets
     const [teamsVals, scoresVals, stateMap] = await Promise.all([
-      readRange(sheets, null, tabRange("Teams", "A:E")),     // TeamID | Name | Pin | CheckedIn | ReturnedAt
-      readRange(sheets, null, tabRange("Scores", "A:E")),    // TeamID | Activity | Points | Source | SubmissionID
-      getStateMap(sheets),                                   // event_start, event_duration_minutes, checkins, published
+      readRange(sheets, null, tabRange("Teams", "A:E")),   // TeamID | Name | Pin | CheckedIn | ReturnedAt
+      readRange(sheets, null, tabRange("Scores", "A:E")),  // TeamID | Activity | Points | Source | SubmissionID
+      getStateMap(sheets),                                 // event_start, event_duration_minutes, checkins, published
     ]);
 
     const published = String(stateMap["published"]).toLowerCase() === "true";
     const checkinsStarted = String(stateMap["checkins"]).toLowerCase() === "true";
     const eventStart = stateMap["event_start"] ? new Date(stateMap["event_start"]) : null;
-    const durationMin = stateMap["event_duration_minutes"] ? parseInt(stateMap["event_duration_minutes"], 10) : 90;
+    const durationMin = stateMap["event_duration_minutes"]
+      ? parseInt(stateMap["event_duration_minutes"], 10)
+      : 90;
 
     const teams = indexByHeader(teamsVals);
     const scores = indexByHeader(scoresVals);
 
-    // Aggregate
+    // Aggregate scores per team
     const totals = {};
     scores.rows.forEach((r) => {
-      const teamId = r[scores.idx.TeamID];
+      const teamId   = r[scores.idx.TeamID];
       const activity = r[scores.idx.Activity];
-      const pts = parseFloat(r[scores.idx.Points] || "0") || 0;
+      const pts      = parseFloat(r[scores.idx.Points] || "0") || 0;
       if (!teamId) return;
       if (!totals[teamId]) totals[teamId] = { base: 0, breakdown: {} };
       totals[teamId].base += pts;
       totals[teamId].breakdown[activity] = (totals[teamId].breakdown[activity] || 0) + pts;
     });
 
-    // Build rows
+    // Build leaderboard rows
     const out = (teams.rows || []).map((r) => {
-      const teamId = r[teams.idx.TeamID];
-      const name = r[teams.idx.Name];
-      const checkedIn = String(r[teams.idx.CheckedIn] || "").toLowerCase() === "true";
+      const teamId       = r[teams.idx.TeamID];
+      const name         = r[teams.idx.Name];
+      const checkedIn    = String(r[teams.idx.CheckedIn] || "").toLowerCase() === "true";
       const returnedAtStr = r[teams.idx.ReturnedAt] || null;
       const t = totals[teamId] || { base: 0, breakdown: {} };
 
-      // Late penalty = 1 point/min after allotted time, if returned
+      // Late penalty: 1 pt/min after allotted time, if returned
       let latePenalty = 0;
       if (returnedAtStr && eventStart) {
         const returnedAt = new Date(returnedAtStr);
@@ -69,13 +75,13 @@ export async function handler(event) {
         checkedIn,
         returnedAt: returnedAtStr,
         baseScore: t.base,
-        breakdown: t.breakdown,       // includes any admin penalty rows you add
+        breakdown: t.breakdown, // includes any admin penalty rows you add
         latePenalty,
-        finalScore
+        finalScore,
       };
     });
 
-    // Sort by score desc, then earliest return, then name
+    // Sort: score desc, then earliest return, then name
     out.sort((a, b) => {
       if (b.finalScore !== a.finalScore) return b.finalScore - a.finalScore;
       if (a.returnedAt && b.returnedAt) return new Date(a.returnedAt) - new Date(b.returnedAt);
@@ -87,6 +93,6 @@ export async function handler(event) {
     return ok({ published, checkinsStarted, leaderboard: out });
   } catch (e) {
     console.error("get_leaderboard_function error:", e);
-    return error(500, e.message);
+    return error(500, e.message || "Unexpected error");
   }
-}
+};
