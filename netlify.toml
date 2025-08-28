@@ -5,8 +5,8 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["google-auth-library","google-spreadsheet","jsonwebtoken","googleapis"]
-  included_files = ["netlify/functions/sa_key.pem"]
+  external_node_modules = ["google-auth-library","googleapis","jsonwebtoken"]
+  included_files = ["netlify/functions/sa_key.json"]
 
 [[headers]]
   for = "/.netlify/functions/*"
@@ -15,5 +15,6 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Admin-Secret"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
 
 
