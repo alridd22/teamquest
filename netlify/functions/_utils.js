@@ -1,3 +1,4 @@
+// netlify/functions/_utils.js
 const { google } = require("googleapis");
 
 /* ===== Env mapping ===== */
@@ -20,6 +21,7 @@ function ok(body, extraHeaders = {}) {
     body: JSON.stringify(body),
   };
 }
+
 function error(statusCode, message, extra = {}) {
   return {
     statusCode,
@@ -32,16 +34,19 @@ function error(statusCode, message, extra = {}) {
     body: JSON.stringify({ error: message, ...extra }),
   };
 }
+
 const isPreflight = (e) => e.httpMethod === "OPTIONS";
+
 function requireAdmin(event) {
   const s = event.headers["x-admin-secret"] || event.headers["X-Admin-Secret"];
   if (!s || s !== ADMIN_SECRET) throw new Error("Forbidden: bad admin secret");
 }
 
-/* ===== key helpers ===== */
+/* ===== Key helpers ===== */
 function looksBase64(s) {
   return /^[A-Za-z0-9+/=\s]+$/.test(s) && !s.includes("{") && !s.includes("-----BEGIN");
 }
+
 function tryBase64Decode(s) {
   try {
     const out = Buffer.from(s.trim(), "base64").toString("utf8");
@@ -49,12 +54,31 @@ function tryBase64Decode(s) {
   } catch {}
   return null;
 }
-function unescapeNewlines(s) {
-  return s.replace(/\\n/g, "\n");
+
+function normalizePem(s) {
+  if (!s) return s;
+  let t = s.toString().trim();
+
+  // If accidentally JSON-quoted, unquote
+  if ((t.startsWith('"') && t.endsWith('"')) || (t.startsWith("'") && t.endsWith("'"))) {
+    try { t = JSON.parse(t); } catch {}
+  }
+
+  // Convert escaped newlines + CRLF/CR to LF
+  t = t.replace(/\\n/g, "\n").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
+  // Strip accidental surrounding backticks
+  if (t.startsWith("`") && t.endsWith("`")) t = t.slice(1, -1);
+
+  return t.trim();
 }
 
+/* Accept any of these for the service account email */
 const EXPLICIT_CLIENT_EMAIL =
-  process.env.GOOGLE_CLIENT_EMAIL || process.env.GOOGLE_SERVICE_EMAIL || "";
+  process.env.GOOGLE_CLIENT_EMAIL ||
+  process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || // added alias
+  process.env.GOOGLE_SERVICE_EMAIL ||
+  "";
 
 /* ===== Resolve credentials from env JSON ===== */
 function fromJsonCandidate(raw, sourceName) {
@@ -67,7 +91,7 @@ function fromJsonCandidate(raw, sourceName) {
     const obj = JSON.parse(text);
     const clientEmail = obj.client_email || EXPLICIT_CLIENT_EMAIL;
     let privateKey = obj.private_key || obj.privateKey || "";
-    if (privateKey) privateKey = unescapeNewlines(privateKey);
+    privateKey = normalizePem(privateKey);
 
     if (clientEmail && privateKey.includes("BEGIN PRIVATE KEY")) {
       return { clientEmail, privateKey, source: `env:${sourceName}` };
@@ -76,21 +100,21 @@ function fromJsonCandidate(raw, sourceName) {
   return null;
 }
 
-/* ===== Resolve from separate envs ===== */
+/* ===== Resolve from separate envs (email + key separately) ===== */
 function fromSeparateEnvs() {
   let pk =
     process.env.GOOGLE_PRIVATE_KEY ||
     process.env.GOOGLE_PRIVATE_KEY_BUILD ||
     process.env.GOOGLE_PRIVATE_KEY_B64 ||
     "";
+
   if (!pk) return null;
 
   if (looksBase64(pk)) {
     const decoded = tryBase64Decode(pk);
     if (decoded) pk = decoded;
-  } else {
-    pk = unescapeNewlines(pk);
   }
+  pk = normalizePem(pk);
 
   const clientEmail = EXPLICIT_CLIENT_EMAIL;
   if (clientEmail && pk.includes("BEGIN PRIVATE KEY")) {
@@ -99,7 +123,7 @@ function fromSeparateEnvs() {
   return null;
 }
 
-/* ===== Resolve from filesystem ===== */
+/* ===== Resolve from filesystem (PEM sidecar) ===== */
 function fromFileSystem() {
   const fs = require("node:fs");
   const path = require("node:path");
@@ -114,7 +138,8 @@ function fromFileSystem() {
   for (const p of candidates) {
     try {
       if (fs.existsSync(p)) {
-        const pk = fs.readFileSync(p, "utf8");
+        const pkRaw = fs.readFileSync(p, "utf8");
+        const pk = normalizePem(pkRaw);
         if (pk.includes("BEGIN PRIVATE KEY")) {
           const clientEmail = EXPLICIT_CLIENT_EMAIL;
           if (!clientEmail) continue;
@@ -127,25 +152,29 @@ function fromFileSystem() {
 }
 
 async function resolveServiceAccount() {
+  // Prefer JSON creds if provided (direct or Base64)
   const jsonFirst =
     fromJsonCandidate(process.env.GOOGLE_SERVICE_ACCOUNT_JSON, "service_account_json") ||
     fromJsonCandidate(process.env.GOOGLE_CREDENTIALS_JSON, "credentials_json") ||
     fromJsonCandidate(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON, "application_credentials_json");
   if (jsonFirst) return jsonFirst;
 
+  // Then separate env vars
   const sep = fromSeparateEnvs();
   if (sep) return sep;
 
+  // Then PEM from filesystem
   const file = fromFileSystem();
   if (file) return file;
 
+  // Then a path to a JSON keyfile via GOOGLE_APPLICATION_CREDENTIALS
   if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
     const fs = require("node:fs");
     try {
       const text = fs.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS, "utf8");
       const obj = JSON.parse(text);
       const clientEmail = obj.client_email || EXPLICIT_CLIENT_EMAIL;
-      const privateKey = unescapeNewlines(obj.private_key || "");
+      const privateKey = normalizePem(obj.private_key || "");
       if (clientEmail && privateKey.includes("BEGIN PRIVATE KEY")) {
         return { clientEmail, privateKey, source: `file:${process.env.GOOGLE_APPLICATION_CREDENTIALS}` };
       }
@@ -154,7 +183,7 @@ async function resolveServiceAccount() {
 
   throw new Error(
     "No service account credentials found. Tried env JSON (GOOGLE_SERVICE_ACCOUNT_JSON / GOOGLE_CREDENTIALS_JSON / GOOGLE_APPLICATION_CREDENTIALS_JSON), " +
-    "separate envs (GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY*), sidecar/file (GOOGLE_KEY_FILE, sa_key.pem), and GOOGLE_APPLICATION_CREDENTIALS path."
+      "separate envs (GOOGLE_CLIENT_EMAIL + GOOGLE_PRIVATE_KEY*), sidecar/file (GOOGLE_KEY_FILE, sa_key.pem), and GOOGLE_APPLICATION_CREDENTIALS path."
   );
 }
 
@@ -164,31 +193,37 @@ async function getSheets() {
   if (_sheets) return _sheets;
   const { clientEmail, privateKey, source } = await resolveServiceAccount();
   console.info(`[sheets] Using service account from: ${source}`);
+
+  // Use PEM directly with google.auth.JWT
   const auth = new google.auth.JWT(
     clientEmail,
     null,
     privateKey,
     ["https://www.googleapis.com/auth/spreadsheets"]
   );
+
   _sheets = google.sheets({ version: "v4", auth });
   return _sheets;
 }
 
-/* ===== Helpers you referenced elsewhere (stubs if you already had them) ===== */
+/* ===== Sheet helpers ===== */
 function tabRange(tab, a1) {
   return `${tab}!${a1}`;
 }
+
 function indexByHeader(values) {
   const header = values[0] || [];
   const idx = {};
   header.forEach((h, i) => (idx[h] = i));
   return { idx, rows: values.slice(1) };
 }
+
 async function readRange(sheets, spreadsheetId, range) {
   const sid = spreadsheetId || SHEET_ID;
   const res = await sheets.spreadsheets.values.get({ spreadsheetId: sid, range });
   return res.data.values || [];
 }
+
 async function writeRange(sheets, spreadsheetId, range, values) {
   const sid = spreadsheetId || SHEET_ID;
   await sheets.spreadsheets.values.update({
@@ -198,6 +233,7 @@ async function writeRange(sheets, spreadsheetId, range, values) {
     requestBody: { values },
   });
 }
+
 async function appendRows(sheets, spreadsheetId, range, values) {
   const sid = spreadsheetId || SHEET_ID;
   await sheets.spreadsheets.values.append({
