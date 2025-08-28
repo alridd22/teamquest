@@ -1,14 +1,17 @@
-import crypto from "crypto";
-import jwt from "jsonwebtoken";
-import {
+// submit_activity.js — CommonJS
+
+const crypto = require("node:crypto");
+const jwt = require("jsonwebtoken");
+const {
   getSheets, readRange, ok, error, isPreflight, indexByHeader,
-  appendRows, tabRange, nowIso
-} from "./_utils.js";
-import { scoreProvisional } from "./_scoring.js";
+  appendRows, tabRange, JWT_SECRET
+} = require("./_utils.js");
+const { scoreProvisional } = require("./_scoring.js");
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.TQ_JWT_SECRET;
+// local helper to avoid depending on utils export
+const nowIso = () => new Date().toISOString();
 
-export async function handler(event) {
+module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
     if (event.httpMethod !== "POST") return error(405, "POST only");
@@ -37,7 +40,12 @@ export async function handler(event) {
       const r = subs.rows[i];
       if (r[subs.idx.SubmissionID] === submissionId) {
         existed = true;
-        usedScore = parseFloat(r[subs.idx.UsedScore] || r[subs.idx.FinalScore] || r[subs.idx.ProvisionalScore] || "0") || 0;
+        usedScore = parseFloat(
+          r[subs.idx.UsedScore] ||
+          r[subs.idx.FinalScore] ||
+          r[subs.idx.ProvisionalScore] ||
+          "0"
+        ) || 0;
         break;
       }
     }
@@ -50,8 +58,15 @@ export async function handler(event) {
     const createdAt = nowIso();
 
     await appendRows(sheets, null, tabRange("Submissions", "A1"), [[
-      submissionId, teamId, activity, JSON.stringify(payload || {}),
-      createdAt, "QUEUED", provisional.toString(), "", provisional.toString()
+      submissionId,
+      teamId,
+      activity,
+      JSON.stringify(payload || {}),
+      createdAt,
+      "QUEUED",
+      provisional.toString(),
+      "",
+      provisional.toString()
     ]]);
 
     await appendRows(sheets, null, tabRange("Scores", "A1"), [[
@@ -63,4 +78,4 @@ export async function handler(event) {
     console.error("submit_activity_function error:", e);
     return error(400, e.message);
   }
-}
+};
