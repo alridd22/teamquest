@@ -1,146 +1,84 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+// get_scavenger.js — CommonJS, uses shared utils
 
-exports.handler = async (event, context) => {
-  console.log('Get scavenger submissions request started');
+const {
+  ok, error, isPreflight,
+  getDoc, // must be exported from _utils.js (GoogleSpreadsheet client)
+} = require("./_utils.js");
 
-  // Handle CORS
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-      body: '',
-    };
-  }
+module.exports.handler = async (event) => {
+  console.log("Get scavenger submissions request started");
 
   try {
-    // Parse request body
-    const requestBody = JSON.parse(event.body);
-    const { teamCode } = requestBody;
+    // CORS preflight
+    if (isPreflight(event)) return ok({});
 
-    if (!teamCode) {
-      return {
-        statusCode: 400,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-        },
-        body: JSON.stringify({
-          success: false,
-          error: 'Team code is required'
-        }),
-      };
-    }
+    // Only POST
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
-    // Get environment variables
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      throw new Error('Missing required environment variables');
-    }
-
-    // Decode private key
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    // Create JWT client
-    const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    // Initialize Google Sheet
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-    await doc.loadInfo();
-    console.log('Sheet loaded successfully:', doc.title);
-
-    // Get submissions for this team from Scavenger sheet
-    const submissions = [];
-    
+    // Parse body
+    let body = {};
     try {
-      const scavengerSheet = doc.sheetsByTitle['Scavenger'];
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      return error(400, "Invalid JSON");
+    }
+    const { teamCode } = body;
+    if (!teamCode) return error(400, "Team code is required");
+
+    // Authenticated doc via shared utils (robust env/file fallback)
+    const doc = await getDoc?.();
+    if (!doc) return error(500, "Spreadsheet client not available");
+
+    // Pull submissions from Scavenger sheet
+    const submissions = [];
+    try {
+      const scavengerSheet = doc.sheetsByTitle ? doc.sheetsByTitle["Scavenger"] : null;
       if (scavengerSheet) {
         await scavengerSheet.loadHeaderRow();
         const rows = await scavengerSheet.getRows();
-        console.log('Scavenger rows loaded:', rows.length);
+        console.log("Scavenger rows loaded:", rows.length);
 
-        // Filter rows for this team
-        const teamRows = rows.filter(row => row.get('Team Code') === teamCode);
+        const teamRows = rows.filter((row) => row.get("Team Code") === teamCode);
         console.log(`Found ${teamRows.length} submissions for team ${teamCode}`);
 
-        teamRows.forEach(row => {
-          const itemId = row.get('Item ID');
-          const aiScore = parseInt(row.get('AI Score')) || 0;
-          const verified = row.get('Verified');
-          const submissionTime = row.get('Submission Time');
-          
-          // Consider it submitted if there's an AI Score OR if Verified column has any value
-          const isSubmitted = aiScore > 0 || (verified && verified !== 'Pending AI Verification');
-          const isVerified = verified === 'Verified' && aiScore > 0;
+        for (const row of teamRows) {
+          const itemId = row.get("Item ID");
+          if (!itemId) continue;
 
-          if (itemId) {
-            submissions.push({
-              itemId: itemId,
-              score: aiScore,
-              verified: isVerified,
-              submitted: isSubmitted,
-              submissionTime: submissionTime,
-              verifiedStatus: verified
-            });
-          }
-        });
+          const aiScore = parseInt(row.get("AI Score"), 10) || 0;
+          const verified = row.get("Verified");
+          const submissionTime = row.get("Submission Time");
+
+          // Consider it submitted if there's an AI Score OR if Verified column has any value
+          const isSubmitted = aiScore > 0 || (verified && verified !== "Pending AI Verification");
+          const isVerified = verified === "Verified" && aiScore > 0;
+
+          submissions.push({
+            itemId,
+            score: aiScore,
+            verified: isVerified,
+            submitted: isSubmitted,
+            submissionTime,
+            verifiedStatus: verified,
+          });
+        }
+      } else {
+        console.log("Scavenger sheet not found");
       }
-    } catch (error) {
-      console.log('Error loading scavenger sheet:', error.message);
+    } catch (e) {
+      console.log("Error loading scavenger sheet:", e.message);
     }
 
-    console.log('Returning submissions:', submissions);
+    console.log("Returning submissions:", submissions.length);
 
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-      },
-      body: JSON.stringify({
-        success: true,
-        submissions: submissions,
-        teamCode: teamCode,
-        timestamp: Date.now()
-      }),
-    };
-
-  } catch (error) {
-    console.error('Get scavenger submissions error:', error);
-    
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      },
-      body: JSON.stringify({
-        success: false,
-        error: error.message,
-        timestamp: Date.now()
-      }),
-    };
+    return ok({
+      success: true,
+      submissions,
+      teamCode,
+      timestamp: Date.now(),
+    });
+  } catch (e) {
+    console.error("Get scavenger submissions error:", e);
+    return error(500, e.message || "Unexpected error", { timestamp: Date.now() });
   }
 };
