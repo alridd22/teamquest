@@ -4,7 +4,7 @@
   "private": true,
   "engines": { "node": ">=18" },
   "scripts": {
-    "postinstall": "node scripts/write-sa-key.json",
+    "postinstall": "node scripts/write-sa-key.cjs",
     "build": "echo 'build complete'"
   },
   "dependencies": {
