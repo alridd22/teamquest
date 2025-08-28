@@ -1,153 +1,98 @@
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
+// check-quiz-completion.js — CommonJS, uses shared utils
 
-exports.handler = async (event, context) => {
-  console.log('Quiz completion check started');
-  
-  // Handle preflight CORS requests
-  if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      },
-      body: '',
-    };
-  }
+const {
+  ok, error, isPreflight,
+  getDoc, // exported from _utils.js to return an authenticated GoogleSpreadsheet
+} = require("./_utils.js");
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers: {'Access-Control-Allow-Origin': '*'},
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
-  }
+module.exports.handler = async (event) => {
+  console.log("Quiz completion check started");
 
   try {
-    console.log('Parsing quiz completion check request');
-    const { teamCode } = JSON.parse(event.body);
-    
-    console.log('Checking quiz completion for team:', teamCode);
+    // CORS preflight
+    if (isPreflight(event)) return ok({});
 
-    if (!teamCode) {
-      throw new Error('Missing team code');
-    }
+    // Only POST allowed
+    if (event.httpMethod !== "POST") return error(405, "Method not allowed");
 
-    // Get environment variables (same as working functions)
-    const serviceAccountEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-    const sheetId = process.env.GOOGLE_SHEET_ID;
-    const privateKeyBase64 = process.env.GOOGLE_PRIVATE_KEY_B64;
-
-    if (!serviceAccountEmail || !privateKeyBase64 || !sheetId) {
-      console.log('Missing environment variables, allowing quiz');
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          success: true,
-          completed: false,
-          message: 'Environment not configured, allowing quiz'
-        }),
-      };
-    }
-
-    // Decode private key from base64
-    let privateKey = Buffer.from(privateKeyBase64, 'base64').toString('utf8');
-    if (privateKey.includes('\\n')) {
-      privateKey = privateKey.replace(/\\n/g, '\n');
-    }
-
-    // Create JWT client
-    const serviceAccountAuth = new JWT({
-      email: serviceAccountEmail,
-      key: privateKey,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-
-    // Initialize Google Sheet
-    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
-    await doc.loadInfo();
-    console.log('Sheet loaded successfully');
-
-    // Look for Quiz sheet
-    let quizSheet = null;
-    for (const sheet of Object.values(doc.sheetsByTitle)) {
-      if (sheet.title === 'Quiz') {
-        quizSheet = sheet;
-        break;
-      }
-    }
-
-    if (!quizSheet) {
-      console.log('Quiz sheet not found, allowing quiz');
-      return {
-        statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          success: true,
-          completed: false,
-          message: 'Quiz sheet not found, allowing quiz'
-        }),
-      };
-    }
-
-    // Load sheet data
-    await quizSheet.loadHeaderRow();
-    const rows = await quizSheet.getRows();
-    
-    // Check if team has already completed quiz
-    const existingSubmission = rows.find(row => 
-      row.get('Team Code') === teamCode
-    );
-
-    const hasCompleted = !!existingSubmission;
-    
-    console.log('Quiz completion check result:', {
-      teamCode,
-      hasCompleted,
-      existingScore: existingSubmission ? existingSubmission.get('Total Score') : 'N/A'
-    });
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        success: true,
-        completed: hasCompleted,
-        teamCode,
-        existingScore: existingSubmission ? existingSubmission.get('Total Score') : null,
-        existingCorrect: existingSubmission ? existingSubmission.get('Questions Correct') : null,
-        existingTotal: existingSubmission ? existingSubmission.get('Total Questions') : null,
-        message: hasCompleted ? 'Team has already completed the quiz' : 'Team can take the quiz'
-      }),
-    };
-
-  } catch (error) {
-    console.error('Quiz completion check error:', error);
-    
-    // On error, allow quiz to proceed (fail-safe)
-    return {
-      statusCode: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    // Parse body
+    let payload = {};
+    try {
+      payload = JSON.parse(event.body || "{}");
+    } catch {
+      // Be permissive: allow quiz if header/body is malformed (fail-safe)
+      return ok({
         success: true,
         completed: false,
-        message: 'Check failed, allowing quiz to proceed'
-      }),
-    };
+        message: "Invalid JSON; allowing quiz",
+      });
+    }
+    const { teamCode } = payload;
+    if (!teamCode) {
+      return ok({
+        success: true,
+        completed: false,
+        message: "teamCode missing; allowing quiz",
+      });
+    }
+
+    // Get authenticated spreadsheet doc via utils (robust env/file fallback)
+    const doc = await getDoc?.();
+    if (!doc) {
+      console.log("No spreadsheet client; allowing quiz");
+      return ok({
+        success: true,
+        completed: false,
+        message: "Spreadsheet not available; allowing quiz",
+      });
+    }
+
+    // Find "Quiz" sheet (case-sensitive match like original)
+    let quizSheet = null;
+    if (doc.sheetsByTitle && doc.sheetsByTitle["Quiz"]) {
+      quizSheet = doc.sheetsByTitle["Quiz"];
+    }
+    if (!quizSheet) {
+      console.log("Quiz sheet not found; allowing quiz");
+      return ok({
+        success: true,
+        completed: false,
+        message: "Quiz sheet not found; allowing quiz",
+      });
+    }
+
+    // Load headers & rows
+    await quizSheet.loadHeaderRow();
+    const rows = await quizSheet.getRows();
+
+    // Existing submission?
+    const existing = rows.find((row) => row.get("Team Code") === teamCode);
+    const hasCompleted = !!existing;
+
+    console.log("Quiz completion check result:", {
+      teamCode,
+      hasCompleted,
+      existingScore: existing ? existing.get("Total Score") : "N/A",
+    });
+
+    return ok({
+      success: true,
+      completed: hasCompleted,
+      teamCode,
+      existingScore: existing ? existing.get("Total Score") : null,
+      existingCorrect: existing ? existing.get("Questions Correct") : null,
+      existingTotal: existing ? existing.get("Total Questions") : null,
+      message: hasCompleted
+        ? "Team has already completed the quiz"
+        : "Team can take the quiz",
+    });
+  } catch (err) {
+    console.error("Quiz completion check error:", err);
+    // Fail-safe: allow quiz to proceed on any error
+    return ok({
+      success: true,
+      completed: false,
+      message: "Check failed, allowing quiz to proceed",
+    });
   }
 };
