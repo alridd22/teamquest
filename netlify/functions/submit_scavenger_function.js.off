@@ -1,121 +1,115 @@
-// submit_scavenger.js — CommonJS, uses shared utils
+// netlify/functions/submit_scavenger_function.js
+const { ok, error, isPreflight, getSheets, tabRange, SHEET_ID } = require("./_utils.js");
 
-const {
-  ok, error, isPreflight,
-  getDoc, // exported from _utils.js: returns an authenticated GoogleSpreadsheet
-} = require("./_utils.js");
+async function ensureSheetExists(sheets, spreadsheetId, title, headers) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
+  if (exists) return;
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title } } }] }
+  });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${title}!A1`,
+    valueInputOption: "RAW",
+    requestBody: { values: [headers] }
+  });
+}
+
+function makeSubmissionId(teamCode, itemId) {
+  const nonce = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `scavenger-${teamCode}-${itemId || "item"}-${nonce}`;
+}
 
 module.exports.handler = async (event) => {
-  console.log("Scavenger item submission started");
-
   try {
-    // CORS preflight
     if (isPreflight(event)) return ok({});
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
-    // Only POST
-    if (event.httpMethod !== "POST") return error(405, "Method not allowed");
-
-    // Parse body
     let body = {};
-    try {
-      body = JSON.parse(event.body || "{}");
-    } catch {
-      return error(400, "Invalid JSON body");
-    }
+    try { body = JSON.parse(event.body || "{}"); }
+    catch { return error(400, "Invalid JSON body"); }
 
     const {
       teamCode,
-      teamName,
-      itemId,
-      itemTitle,
-      itemDescription,
-      photoUrl,
-      maxPoints,
+      teamName,          // optional
+      itemId,            // your internal id per item (e.g. 1..6)
+      itemTitle,         // the “name to find” shown to the player
+      itemDescription,   // optional
+      photoUrl,          // required
+      maxPoints          // optional (defaults 15)
     } = body;
 
-    if (!teamCode || !teamName || !itemId || !itemTitle || !photoUrl) {
-      return error(400, "Missing required fields");
+    if (!teamCode || !itemTitle || !photoUrl) {
+      return error(400, "teamCode, itemTitle and photoUrl are required");
     }
 
-    // Authenticated doc via shared utils (robust env/file fallback)
-    const doc = await getDoc?.();
-    if (!doc) return error(500, "Spreadsheet client not available");
+    const sheets = await getSheets();
+    const spreadsheetId = SHEET_ID;
 
-    // Find or create the Scavenger sheet
-    let scavengerSheet = doc.sheetsByTitle ? doc.sheetsByTitle["Scavenger"] : null;
+    // Make sure the canonical sheet exists
+    await ensureSheetExists(
+      sheets,
+      spreadsheetId,
+      "submissions",
+      [
+        "Timestamp",     // A
+        "Team Code",     // B
+        "Activity",      // C
+        "Nonce",         // D
+        "Payload",       // E (we'll store JSON: {itemId,itemTitle,itemDescription,photoUrl,maxPoints})
+        "AI Status",     // F
+        "AI Attempts",   // G
+        "AI Score",      // H
+        "Final Score",   // I (Zap writes this)
+        "Idempotency",   // J (generated)
+        "Event Id"       // K (optional)
+      ]
+    );
 
-    if (!scavengerSheet) {
-      console.log("Scavenger sheet not found, creating it with headers");
-      scavengerSheet = await doc.addSheet({
-        title: "Scavenger",
-        headerValues: [
-          "Team Code",
-          "Team Name",
-          "Item ID",
-          "Item Title",
-          "Item Description",
-          "Photo URL",
-          "Max Points",
-          "Submission Time",
-          "AI Score",
-          "Verified",
-        ],
-      });
-    } else {
-      await scavengerSheet.loadHeaderRow();
-      const needHeaders =
-        !scavengerSheet.headerValues || scavengerSheet.headerValues.length === 0;
-      if (needHeaders) {
-        console.log("No headers found, setting headers via setHeaderRow");
-        await scavengerSheet.setHeaderRow([
-          "Team Code",
-          "Team Name",
-          "Item ID",
-          "Item Title",
-          "Item Description",
-          "Photo URL",
-          "Max Points",
-          "Submission Time",
-          "AI Score",
-          "Verified",
-        ]);
-        await scavengerSheet.loadHeaderRow();
-      }
-    }
-
-    // Add submission
-    const submissionTime = new Date().toISOString();
-    const newRow = await scavengerSheet.addRow({
-      "Team Code": teamCode,
-      "Team Name": teamName,
-      "Item ID": itemId,
-      "Item Title": itemTitle,
-      "Item Description": itemDescription || "",
-      "Photo URL": photoUrl,
-      "Max Points": maxPoints || 10,
-      "Submission Time": submissionTime,
-      "AI Score": "Pending AI Verification",
-      "Verified": "Pending",
+    const timestamp = new Date().toISOString();
+    const payload = JSON.stringify({
+      itemId: itemId ?? null,
+      itemTitle,
+      itemDescription: itemDescription ?? "",
+      photoUrl,
+      maxPoints: maxPoints ?? 15
     });
 
-    console.log("Scavenger item saved at row:", newRow.rowNumber);
+    const submissionId = makeSubmissionId(teamCode, itemId);
 
-    // Mirror your original success payload
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: tabRange("submissions", "A1"),
+      valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS",
+      requestBody: {
+        values: [[
+          timestamp,       // Timestamp
+          teamCode,        // Team Code
+          "scavenger",     // Activity
+          "",              // Nonce (unused here)
+          payload,         // Payload JSON
+          "QUEUED",        // AI Status (so the Zap triggers)
+          "0",             // AI Attempts
+          "",              // AI Score
+          "",              // Final Score (Zap fills)
+          submissionId,    // Idempotency
+          ""               // Event Id (optional)
+        ]]
+      }
+    });
+
     return ok({
       success: true,
-      message: `${itemTitle} submitted successfully! AI is now analyzing your photo...`,
-      verified: false, // Until actual AI verification occurs
-      score: 0,        // Until AI scoring occurs
-      status: "pending_verification",
+      message: "Scavenger item submitted. AI will score shortly.",
+      submissionId,
       teamCode,
-      teamName,
-      itemTitle,
-      submissionTime,
-      note:
-        "Check back in 1-2 minutes for AI verification results, or refresh the leaderboard to see updated scores.",
+      itemTitle
     });
   } catch (e) {
-    console.error("Scavenger submission error:", e);
+    console.error("submit_scavenger_function error:", e);
     return error(500, e.message || "Unexpected error");
   }
 };
