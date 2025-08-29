@@ -1,94 +1,112 @@
-// submit_limerick.js — CommonJS, uses shared utils
-
+// netlify/functions/submit_limerick_function.js
 const {
   ok, error, isPreflight,
-  getDoc, // exported from _utils.js: returns an authenticated GoogleSpreadsheet
+  getSheets, tabRange, SHEET_ID
 } = require("./_utils.js");
 
+// Optional self-heal: create "submissions" tab with expected headers if missing
+async function ensureSheetExists(sheets, spreadsheetId, title, headers) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
+  if (exists) return;
+
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title } } }] }
+  });
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${title}!A1`,
+    valueInputOption: "RAW",
+    requestBody: { values: [headers] }
+  });
+}
+
+function makeSubmissionId(teamCode) {
+  const nonce = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `limerick-${teamCode}-${nonce}`;
+}
+
 module.exports.handler = async (event) => {
-  console.log("Limerick submission started");
-
   try {
-    // CORS preflight
     if (isPreflight(event)) return ok({});
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
-    // Only POST
-    if (event.httpMethod !== "POST") return error(405, "Method not allowed");
-
-    // Parse body
     let body = {};
-    try {
-      body = JSON.parse(event.body || "{}");
-    } catch {
-      return error(400, "Invalid JSON body");
+    try { body = JSON.parse(event.body || "{}"); }
+    catch { return error(400, "Invalid JSON body"); }
+
+    const teamCode = String(body.teamCode || "").trim();
+    const teamName = String(body.teamName || "").trim(); // optional in sheet
+    const topic = String(body.topic || "").trim();
+    const limerickText = String(body.limerickText || "").trim();
+
+    if (!teamCode || !limerickText) {
+      return error(400, "teamCode and limerickText are required");
     }
 
-    const { teamCode, teamName, topic, limerickText } = body;
-    if (!teamCode || !teamName || !limerickText) {
-      return error(400, "Missing required fields");
-    }
+    const sheets = await getSheets();
+    const spreadsheetId = SHEET_ID;
 
-    // Authenticated doc via shared utils (robust env/file fallback)
-    const doc = await getDoc?.();
-    if (!doc) return error(500, "Spreadsheet client not available");
+    // Ensure canonical "submissions" tab exists with your header layout
+    await ensureSheetExists(
+      sheets,
+      spreadsheetId,
+      "submissions",
+      [
+        "Timestamp",     // A
+        "Team Code",     // B
+        "Activity",      // C
+        "Nonce",         // D
+        "Payload",       // E (we store the poem text here)
+        "AI Status",     // F
+        "AI Attempts",   // G
+        "AI Score",      // H
+        "Final Score",   // I (Zap writes this)
+        "Idempotency",   // J (we generate)
+        "Event Id"       // K (optional)
+      ]
+    );
 
-    // Find or create the Limerick sheet
-    let limerickSheet = doc.sheetsByTitle ? doc.sheetsByTitle["Limerick"] : null;
+    const timestamp = new Date().toISOString();
+    const nonce = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const submissionId = makeSubmissionId(teamCode);
 
-    if (!limerickSheet) {
-      console.log("Limerick sheet not found, creating it");
-      limerickSheet = await doc.addSheet({
-        title: "Limerick",
-        headerValues: [
-          "Team Code",
-          "Team Name",
-          "Topic",
-          "Limerick Text",
-          "Submission Time",
-          "AI Score",
-        ],
-      });
-    } else {
-      await limerickSheet.loadHeaderRow();
-      if (!limerickSheet.headerValues || limerickSheet.headerValues.length === 0) {
-        console.log("Setting Limerick sheet headers");
-        await limerickSheet.setHeaderRow([
-          "Team Code",
-          "Team Name",
-          "Topic",
-          "Limerick Text",
-          "Submission Time",
-          "AI Score",
-        ]);
-        await limerickSheet.loadHeaderRow();
+    // Append a single row to "submissions"
+    await sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: tabRange("submissions", "A1"),
+      valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS",
+      requestBody: {
+        values: [[
+          timestamp,          // Timestamp
+          teamCode,           // Team Code
+          "limerick",         // Activity
+          nonce,              // Nonce
+          limerickText,       // Payload (poem)
+          "PENDING",          // AI Status (placeholder if you add AI later)
+          "0",                // AI Attempts
+          "",                 // AI Score
+          "",                 // Final Score (Zap fills)
+          submissionId,       // Idempotency
+          ""                  // Event Id (optional)
+        ]]
       }
-    }
-
-    // Add the submission
-    const submissionTime = new Date().toISOString();
-    const newRow = await limerickSheet.addRow({
-      "Team Code": teamCode,
-      "Team Name": teamName,
-      "Topic": topic || "No topic specified",
-      "Limerick Text": limerickText,
-      "Submission Time": submissionTime,
-      "AI Score": "Pending AI Score",
     });
 
-    console.log("Limerick submission saved:", newRow.rowNumber);
-
-    // Mirror your original success payload
-    const estimatedScore = "Will be scored by AI within 1-2 minutes";
+    // Return submissionId so Zapier (or the UI) can reference it later
     return ok({
       success: true,
-      message:
-        "Limerick submitted successfully! AI will score your submission within 1-2 minutes.",
-      estimatedScore,
+      message: "Limerick submitted!",
+      submissionId,
       teamCode,
       teamName,
+      topic
     });
   } catch (e) {
-    console.error("Limerick submission error:", e);
+    console.error("submit_limerick_function error:", e);
     return error(500, e.message || "Unexpected error");
   }
 };
