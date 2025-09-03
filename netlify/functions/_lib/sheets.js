@@ -1,33 +1,37 @@
 // /netlify/functions/_lib/sheets.js
-const { GoogleSpreadsheet } = require("google-spreadsheet");
+// Google Sheets helper (direct Google API, no google-spreadsheet wrapper)
+// Requires deps you already have: google-auth-library, googleapis
+
+const { google } = require("googleapis");
 const { JWT } = require("google-auth-library");
 const fs = require("fs");
 const path = require("path");
 
-// --- Your envs ---
-const SHEET_ID = process.env.GOOGLE_SHEET_ID;
+// --------- ENV / Config ----------
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_EMAIL_ENV = process.env.GOOGLE_SERVICE_EMAIL;
 
-// Tab names
+// Tab names in your doc
 const EVENTS_SHEET_TITLE = "events";
 const TEAMS_SHEET_TITLE  = "teams";
 const SCORES_SHEET_TITLE = "submissions";
 
-// Resolve SA creds from env or build-written files
+// Columns are dynamic; we read headers from row 1 for each sheet.
+// We'll fetch A:Z by default; expand if you know you'll exceed Z.
+const DEFAULT_RANGE = "A:Z";
+
+// --------- SA credentials resolution ----------
 function getServiceCreds() {
-  // 1) Runtime env pair (optional but supported)
+  // 1) Runtime env pair (if you ever add GOOGLE_SERVICE_ACCOUNT_KEY)
   const keyFromEnv = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
   if (keyFromEnv && SERVICE_EMAIL_ENV) {
-    return {
-      client_email: SERVICE_EMAIL_ENV,
-      private_key: keyFromEnv.replace(/\\n/g, "\n"),
-    };
+    return { client_email: SERVICE_EMAIL_ENV, private_key: keyFromEnv.replace(/\\n/g, "\n") };
   }
 
-  // 2) Build-written files
-  const p1 = path.join(__dirname, "_secrets", "sa.json");             // optional path
+  // 2) Build-written files (first valid wins)
+  const p1 = path.join(__dirname, "_secrets", "sa.json");             // optional earlier path
   const p2 = path.join(__dirname, "..", "sa_key.json");               // your current build output
-  const p3 = path.join(process.cwd(), "netlify", "functions", "sa_key.json"); // belt & braces
+  const p3 = path.join(process.cwd(), "netlify", "functions", "sa_key.json"); // cwd fallback
 
   for (const p of [p1, p2, p3]) {
     if (!fs.existsSync(p)) continue;
@@ -37,121 +41,164 @@ function getServiceCreds() {
       const client_email = json.client_email || SERVICE_EMAIL_ENV;
       const private_key  = String(json.private_key || "").replace(/\\n/g, "\n");
       if (client_email && private_key) return { client_email, private_key };
-    } catch {
-      // try next
-    }
+    } catch { /* try next */ }
   }
 
-  throw new Error(
-    "Google Service Account credentials not available at runtime. " +
-    "Checked env GOOGLE_SERVICE_ACCOUNT_KEY and files: _lib/_secrets/sa.json, ../sa_key.json, netlify/functions/sa_key.json."
-  );
+  throw new Error("Google Service Account credentials not available at runtime (checked env + sa.json/sa_key.json files).");
 }
 
-async function loadDoc() {
-  if (!SHEET_ID) throw new Error("Missing GOOGLE_SHEET_ID");
-
+// --------- Low-level client ----------
+async function getSheetsClient() {
+  if (!SPREADSHEET_ID) throw new Error("Missing GOOGLE_SHEET_ID");
   const { client_email, private_key } = getServiceCreds();
 
-  // JWT auth works across google-spreadsheet versions
-  const scopes = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive.readonly",
-  ];
   const jwt = new JWT({
     email: client_email,
     key: private_key,
-    scopes,
+    scopes: [
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/drive.readonly",
+    ],
   });
 
-  const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useOAuth2Client(jwt);   // <-- replaces useServiceAccountAuth
-  await doc.loadInfo();
-  return doc;
+  const sheets = google.sheets({ version: "v4", auth: jwt });
+  return sheets;
 }
 
-async function getSheets() {
-  const doc = await loadDoc();
-  const events = doc.sheetsByTitle[EVENTS_SHEET_TITLE];
-  const teams  = doc.sheetsByTitle[TEAMS_SHEET_TITLE];
-  const scores = doc.sheetsByTitle[SCORES_SHEET_TITLE];
+// Utility: read a whole sheet (A:Z), parse headers and rows
+async function readSheet(title) {
+  const sheets = await getSheetsClient();
 
-  if (!events || !teams || !scores) {
-    throw new Error(
-      `Missing one or more required tabs: "${EVENTS_SHEET_TITLE}" / "${TEAMS_SHEET_TITLE}" / "${SCORES_SHEET_TITLE}"`
-    );
+  const { data } = await sheets.spreadsheets.values.get({
+    spreadsheetId: SPREADSHEET_ID,
+    range: `${title}!${DEFAULT_RANGE}`,
+    valueRenderOption: "UNFORMATTED_VALUE",
+    dateTimeRenderOption: "FORMATTED_STRING",
+  });
+
+  const values = data.values || [];
+  if (values.length === 0) return { headers: [], rows: [], raw: [] };
+
+  const headers = (values[0] || []).map(String);
+  const rows = [];
+
+  for (let i = 1; i < values.length; i++) {
+    const arr = values[i] || [];
+    const obj = {};
+    headers.forEach((h, idx) => { obj[h] = arr[idx] !== undefined ? arr[idx] : ""; });
+    obj.__rowIndex = i + 1; // 1-based index in the sheet
+    rows.push(obj);
   }
-  return { events, teams, scores };
+
+  return { headers, rows, raw: values };
 }
+
+// Utility: write a single row (by index) with updates merged into existing row
+async function writeRow(title, rowIndex1, headers, updatedObj) {
+  const sheets = await getSheetsClient();
+
+  // Build the row array in header order
+  const rowArr = headers.map(h => (updatedObj[h] !== undefined ? updatedObj[h] : ""));
+
+  const range = `${title}!A${rowIndex1}:${colLetter(headers.length)}${rowIndex1}`;
+  await sheets.spreadsheets.values.update({
+    spreadsheetId: SPREADSHEET_ID,
+    range,
+    valueInputOption: "RAW",
+    requestBody: { values: [rowArr] },
+  });
+}
+
+function colLetter(n) {
+  // 1 -> A, 26 -> Z, 27 -> AA ...
+  let s = "";
+  while (n > 0) {
+    const m = (n - 1) % 26;
+    s = String.fromCharCode(65 + m) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s || "A";
+}
+
+// --------- High-level helpers (exported) ----------
 
 async function getEventById(eventId) {
-  const { events } = await getSheets();
-  const rows = await events.getRows();
-  return rows.find(r => String(r["Event Id"]).trim() === String(eventId).trim()) || null;
+  const { headers, rows } = await readSheet(EVENTS_SHEET_TITLE);
+  const row = rows.find(r => String(r["Event Id"]).trim() === String(eventId).trim()) || null;
+  if (!row) return null;
+
+  // Provide a light wrapper so callers can pass the same object to updateEventRow
+  row.__sheetTitle = EVENTS_SHEET_TITLE;
+  row.__headers = headers;
+  return row;
 }
 
 async function updateEventRow(eventRow, updates = {}) {
-  Object.entries(updates).forEach(([k, v]) => { eventRow[k] = v; });
-  eventRow["UpdatedAt (ISO)"] = new Date().toISOString();
-  await eventRow.save();
-  return eventRow;
+  const headers = eventRow.__headers || Object.keys(eventRow).filter(k => !k.startsWith("__"));
+  const rowIndex = eventRow.__rowIndex;
+  if (!rowIndex) throw new Error("updateEventRow: missing __rowIndex");
+
+  const merged = {};
+  headers.forEach(h => { merged[h] = eventRow[h]; });
+  Object.entries(updates).forEach(([k, v]) => { merged[k] = v; });
+  merged["UpdatedAt (ISO)"] = new Date().toISOString();
+
+  await writeRow(eventRow.__sheetTitle || EVENTS_SHEET_TITLE, rowIndex, headers, merged);
+  return merged;
 }
 
 async function listTeamsByEventId(eventId) {
-  const { teams } = await getSheets();
-  const rows = await teams.getRows();
-  return rows.filter(r => String(r["Event Id"]).trim() === String(eventId).trim());
+  const { rows } = await readSheet(TEAMS_SHEET_TITLE);
+  return rows
+    .filter(r => String(r["Event Id"]).trim() === String(eventId).trim())
+    .map(r => ({ ...r, __sheetTitle: TEAMS_SHEET_TITLE }));
 }
 
 async function setTeamReturnedLocked(eventId, teamCode, returnedAtISO, locked = true) {
-  const { teams } = await getSheets();
-  const rows = await teams.getRows();
+  const { headers, rows } = await readSheet(TEAMS_SHEET_TITLE);
   const row = rows.find(r =>
     String(r["Event Id"]).trim() === String(eventId).trim() &&
     String(r["Team Code"]).trim() === String(teamCode).trim()
   );
   if (!row) throw new Error("Team not found for this event");
-  row["ReturnedAt (ISO)"] = returnedAtISO;
-  row["Locked"] = locked ? "TRUE" : "FALSE";
-  await row.save();
-  return row;
+
+  const updates = {
+    "ReturnedAt (ISO)": returnedAtISO,
+    "Locked": locked ? "TRUE" : "FALSE",
+  };
+  const merged = { ...row, ...updates };
+  await writeRow(TEAMS_SHEET_TITLE, row.__rowIndex, headers, merged);
+  return merged;
 }
 
 async function setTeamLock(eventId, teamCode, locked) {
-  const { teams } = await getSheets();
-  const rows = await teams.getRows();
+  const { headers, rows } = await readSheet(TEAMS_SHEET_TITLE);
   const row = rows.find(r =>
     String(r["Event Id"]).trim() === String(eventId).trim() &&
     String(r["Team Code"]).trim() === String(teamCode).trim()
   );
   if (!row) throw new Error("Team not found for this event");
-  row["Locked"] = locked ? "TRUE" : "FALSE";
-  await row.save();
-  return row;
+
+  const merged = { ...row, "Locked": locked ? "TRUE" : "FALSE" };
+  await writeRow(TEAMS_SHEET_TITLE, row.__rowIndex, headers, merged);
+  return merged;
 }
 
 async function readScoresForEvent(eventId) {
-  const { scores, teams } = await getSheets();
-  const scoreRows = await scores.getRows();
+  const { headers, rows } = await readSheet(SCORES_SHEET_TITLE);
 
-  // Prefer EventId column; otherwise restrict by teams in this event
-  const hasEventIdCol = scores.headerValues.some(
-    h => h && h.toLowerCase().replace(/\s+/g, "") === "eventid"
-  );
-
+  // Prefer EventId column if present
+  const hasEventIdCol = headers.some(h => h && h.toLowerCase().replace(/\s+/g, "") === "eventid");
   if (hasEventIdCol) {
-    return scoreRows.filter(r =>
+    return rows.filter(r =>
       String(r["EventId"] || r["Event Id"] || "").trim() === String(eventId).trim()
     );
   }
 
-  const teamRows = await teams.getRows();
-  const eventTeamCodes = new Set(
-    teamRows
-      .filter(r => String(r["Event Id"]).trim() === String(eventId).trim())
-      .map(r => String(r["Team Code"]).trim())
-  );
-  return scoreRows.filter(r => eventTeamCodes.has(String(r["Team Code"] || "").trim()));
+  // Fallback: restrict to teams in this event
+  const teamRows = await listTeamsByEventId(eventId);
+  const teamSet = new Set(teamRows.map(t => String(t["Team Code"]).trim()));
+  return rows.filter(r => teamSet.has(String(r["Team Code"] || "").trim()));
 }
 
 module.exports = {
