@@ -1,18 +1,19 @@
 // /netlify/functions/_lib/sheets.js
 const { GoogleSpreadsheet } = require("google-spreadsheet");
+const { JWT } = require("google-auth-library");
 const fs = require("fs");
 const path = require("path");
 
-// --- Configuration (matches your project) ---
+// --- Your envs ---
 const SHEET_ID = process.env.GOOGLE_SHEET_ID;
 const SERVICE_EMAIL_ENV = process.env.GOOGLE_SERVICE_EMAIL;
 
-// Tab names in your spreadsheet
+// Tab names
 const EVENTS_SHEET_TITLE = "events";
 const TEAMS_SHEET_TITLE  = "teams";
 const SCORES_SHEET_TITLE = "submissions";
 
-// Resolve service account credentials from env OR build-written files
+// Resolve SA creds from env or build-written files
 function getServiceCreds() {
   // 1) Runtime env pair (optional but supported)
   const keyFromEnv = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
@@ -23,27 +24,21 @@ function getServiceCreds() {
     };
   }
 
-  // 2) Build-written files (first existing/valid wins)
-  //    a) earlier suggestion path
-  const p1 = path.join(__dirname, "_secrets", "sa.json");
-  //    b) your current build script output (../sa_key.json relative to _lib)
-  const p2 = path.join(__dirname, "..", "sa_key.json");
-  //    c) cwd fallback if bundling changes relative paths
-  const p3 = path.join(process.cwd(), "netlify", "functions", "sa_key.json");
+  // 2) Build-written files
+  const p1 = path.join(__dirname, "_secrets", "sa.json");             // optional path
+  const p2 = path.join(__dirname, "..", "sa_key.json");               // your current build output
+  const p3 = path.join(process.cwd(), "netlify", "functions", "sa_key.json"); // belt & braces
 
-  const candidates = [p1, p2, p3];
-  for (const p of candidates) {
+  for (const p of [p1, p2, p3]) {
     if (!fs.existsSync(p)) continue;
     try {
       const raw = fs.readFileSync(p, "utf8");
       const json = JSON.parse(raw);
       const client_email = json.client_email || SERVICE_EMAIL_ENV;
       const private_key  = String(json.private_key || "").replace(/\\n/g, "\n");
-      if (client_email && private_key) {
-        return { client_email, private_key };
-      }
+      if (client_email && private_key) return { client_email, private_key };
     } catch {
-      // try next candidate
+      // try next
     }
   }
 
@@ -54,13 +49,23 @@ function getServiceCreds() {
 }
 
 async function loadDoc() {
-  if (!SHEET_ID) {
-    throw new Error("Missing GOOGLE_SHEET_ID");
-  }
-  const creds = getServiceCreds();
+  if (!SHEET_ID) throw new Error("Missing GOOGLE_SHEET_ID");
+
+  const { client_email, private_key } = getServiceCreds();
+
+  // JWT auth works across google-spreadsheet versions
+  const scopes = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.readonly",
+  ];
+  const jwt = new JWT({
+    email: client_email,
+    key: private_key,
+    scopes,
+  });
 
   const doc = new GoogleSpreadsheet(SHEET_ID);
-  await doc.useServiceAccountAuth(creds);
+  await doc.useOAuth2Client(jwt);   // <-- replaces useServiceAccountAuth
   await doc.loadInfo();
   return doc;
 }
@@ -129,7 +134,7 @@ async function readScoresForEvent(eventId) {
   const { scores, teams } = await getSheets();
   const scoreRows = await scores.getRows();
 
-  // Filter by EventId column if present; otherwise filter by team membership.
+  // Prefer EventId column; otherwise restrict by teams in this event
   const hasEventIdCol = scores.headerValues.some(
     h => h && h.toLowerCase().replace(/\s+/g, "") === "eventid"
   );
@@ -140,7 +145,6 @@ async function readScoresForEvent(eventId) {
     );
   }
 
-  // Fallback: include only rows whose Team Code exists in this event's teams
   const teamRows = await teams.getRows();
   const eventTeamCodes = new Set(
     teamRows
