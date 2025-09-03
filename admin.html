@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terry's Treasure Hunt • Command Centre</title>
+  <style>
+    /* --- top logo nav (unchanged) --- */
+    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:70px;padding:0 20px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:center;align-items:center;height:100%}
+    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
+    .nav-logo:hover{transform:scale(1.05)}
+    .nav-logo img{height:45px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
+    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
+    @media (max-width:768px){.treasure-nav{height:90px}.nav-logo img{height:65px}}
+
+    /* --- base page --- */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;color:#3E2723;padding:20px;padding-top:90px;position:relative}
+    @media (max-width:768px){body{padding:10px;padding-top:110px}}
+    body::before{content:'';position:fixed;inset:0;background:
+      radial-gradient(circle at 20% 20%,rgba(255,215,0,.1) 0%,transparent 50%),
+      radial-gradient(circle at 80% 80%,rgba(255,140,0,.1) 0%,transparent 50%),
+      url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');pointer-events:none;z-index:0}
+
+    .header{text-align:center;margin-bottom:20px;position:relative;z-index:1}
+    .logo{font-size:2.2em;margin-bottom:6px;filter:drop-shadow(2px 2px 4px rgba(139,69,19,.3));animation:gentle-sway 3s ease-in-out infinite}
+    @keyframes gentle-sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+    h1{font-size:2em;font-weight:700;margin-bottom:6px;color:#2C1810;text-shadow:1px 1px 2px rgba(0,0,0,.6)}
+    .subtitle{color:#1A0E08;font-size:1.05em;font-weight:700}
+
+    .terry-greeting{display:flex;gap:15px;margin:16px auto 24px;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-radius:15px;padding:16px;border:3px solid #DAA520;box-shadow:0 5px 15px rgba(139,69,19,.2);max-width:900px;position:relative;z-index:1}
+    .terry-character img{width:90px;height:90px;border-radius:12px;border:3px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.3);object-fit:cover;background:linear-gradient(135deg,#8B4513,#A0522D);display:block}
+    .terry-speech{flex:1;position:relative}
+    .terry-speech::before{content:'';position:absolute;left:-12px;top:14px;border-style:solid;border-width:12px 12px 12px 0;border-color:transparent #FFD700 transparent transparent}
+    .terry-note{background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);color:#8B4513;padding:14px;border-radius:12px;border:2px solid #DAA520;font-weight:600;line-height:1.45}
+    @media (max-width:768px){.terry-greeting{flex-direction:column;text-align:center}.terry-speech::before{display:none}}
+
+    .admin-container{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px;position:relative;z-index:1}
+    @media (max-width:1200px){.admin-container{grid-template-columns:1fr}}
+    .panel{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border-radius:20px;padding:22px;box-shadow:0 20px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3);border:3px solid #8B4513;position:relative;overflow:hidden}
+    .panel::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    .section-title{font-size:1.25em;margin-bottom:14px;color:#8B4513;border-bottom:3px solid #DAA520;padding-bottom:6px;font-weight:800}
+
+    .timer-display{font-size:2em;font-weight:900;font-family:'Courier New',monospace;color:#8B4513;text-shadow:2px 2px 4px rgba(0,0,0,.3);margin-bottom:10px;padding:12px;background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);border-radius:12px;border:3px solid #DAA520;box-shadow:0 5px 15px rgba(255,215,0,.3)}
+    .timer-penalty{background:linear-gradient(135deg,#DC143C 0%,#B22222 100%);color:#fff;animation:pulse-pen 1s ease-in-out infinite;border-color:#8B0000}
+    @keyframes pulse-pen{0%,100%{transform:scale(1);box-shadow:0 5px 15px rgba(220,20,60,.4)}50%{transform:scale(1.02);box-shadow:0 8px 25px rgba(220,20,60,.6)}}
+    .adventure-status{font-size:1em;margin:10px 0 16px;padding:10px;border-radius:10px;font-weight:800;border:2px solid}
+    .status-running{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border-color:#32CD32;color:#006400}
+    .status-paused{background:linear-gradient(135deg,#FFE4B5 0%,#DEB887 100%);border-color:#FF8C00;color:#8B4513}
+    .status-stopped{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
+    .status-ended{background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);border-color:#DAA520;color:#8B4513}
+    .status-not-started{background:linear-gradient(135deg,#E6E6FA 0%,#D8BFD8 100%);border-color:#9370DB;color:#4B0082}
+
+    .penalty-warning{display:none;background:linear-gradient(145deg,#ffb6c1,#ffa0b4);border:3px solid #dc143c;border-radius:12px;padding:12px;text-align:center;color:#8b0000;font-weight:800;box-shadow:0 5px 15px rgba(220,20,60,.3)}
+    .penalty-warning.show{display:block}
+    .control-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+    @media (max-width:520px){.control-buttons{grid-template-columns:1fr}}
+    .btn{padding:14px;border:none;border-radius:10px;font-size:.95em;font-weight:900;cursor:pointer;transition:.3s;text-transform:uppercase;letter-spacing:.5px;border:3px solid #8B4513}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(0,0,0,.3)}
+    .btn:disabled{opacity:.55;cursor:not-allowed;transform:none;background:#6c757d!important;color:#fff!important}
+    .btn-start{background:linear-gradient(135deg,#32CD32,#228B22);color:#fff}
+    .btn-pause{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#8B4513}
+    .btn-stop{background:linear-gradient(135deg,#DC143C,#B22222);color:#fff}
+    .btn-reset{background:linear-gradient(135deg,#A0522D,#8B4513);color:#fff}
+    .btn-publish{background:linear-gradient(135deg,#FFD700,#FFA500);color:#8B4513;font-size:1.05em;border:4px solid #DAA520;grid-column:1/-1}
+
+    .leader-panel{background:#fff;border-radius:15px;padding:16px;border:2px solid #d2691e}
+    .crew-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-radius:12px;padding:14px;border:2px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.1);margin:10px 0}
+    .crew-card.late{background:linear-gradient(135deg,#FFCCCB 0%,#FFA0B4 100%);border:3px solid #DC143C}
+    .crew-card.returned{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border:3px solid #32CD32}
+    .crew-header{display:flex;justify-content:space-between;gap:10px;margin-bottom:10px}
+    .crew-name{font-size:1.1em;font-weight:900;color:#8B4513;display:flex;gap:8px;align-items:center}
+    .crew-status-badge{padding:3px 6px;border-radius:10px;font-size:.65em;font-weight:900;color:#fff}
+    .status-returned{background:#27ae60}.status-late{background:#e74c3c}.status-active{background:#3498db}
+    .crew-doubloons{font-weight:900;color:#DAA520}
+    .crew-doubloons .orig{font-size:.7em;color:#999;text-decoration:line-through;display:block}
+    .crew-controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+    .status-select{padding:8px;border-radius:8px;border:2px solid #DAA520;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%);color:#8B4513;font-weight:700}
+    .return-checkbox{display:flex;align-items:center;gap:6px;font-size:.85em;color:#8B4513;font-weight:600}
+    .penalty-info{background:linear-gradient(135deg,#FFCCCB 0%,#FFA0B4 100%);border:2px solid #DC143C;border-radius:6px;padding:8px;margin:8px 0;color:#8B0000;font-weight:800;font-size:.85em}
+    .grid{display:grid;gap:10px;max-height:600px;overflow:auto}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+    .stat{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:12px;padding:16px;text-align:center}
+    .stat .n{font-size:1.6em;font-weight:900;color:#8B4513}
+    .stat .l{font-weight:800;color:#A0522D;margin-top:6px}
+    .msg{padding:12px;border-radius:10px;margin:12px 0;font-weight:800;border:2px solid}
+    .msg.ok{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border-color:#32CD32;color:#006400}
+    .msg.err{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
+  </style>
+</head>
+<body>
+  <nav class="treasure-nav">
+    <div class="nav-container">
+      <a href="https://theteamquest.netlify.app/" class="nav-logo">
+        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
+      </a>
+    </div>
+  </nav>
+
+  <div class="header">
+    <div class="logo">🏴‍☠️</div>
+    <h1>Command Centre</h1>
+    <p class="subtitle">Start • Pause • End • Publish • Manage Crews</p>
+  </div>
+
+  <div class="terry-greeting">
+    <div class="terry-character"><img src="/terry-clock.png" alt="Captain Terry"></div>
+    <div class="terry-speech">
+      <div class="terry-note">
+        Keep it simple: launch the adventure, watch the clock, mark returns, and publish results. Late returns auto-deduct based on the configured rate.
+      </div>
+    </div>
+  </div>
+
+  <div class="admin-container">
+    <!-- Controls -->
+    <div class="panel">
+      <h2 class="section-title">⚓ Adventure Control</h2>
+
+      <div class="timer-display" id="timerDisplay">--:--:--</div>
+      <div class="penalty-warning" id="penaltyWarning">⚠️ Late penalties active</div>
+
+      <div id="statusChip" class="adventure-status status-not-started">Loading…</div>
+
+      <div class="control-buttons">
+        <button class="btn btn-start" id="startBtn" onclick="startAdventure()">🚀 Launch</button>
+        <button class="btn btn-pause" id="pauseBtn" onclick="pauseAdventure()" disabled>⏸️ Pause</button>
+        <button class="btn btn-stop" id="stopBtn" onclick="stopAdventure()" disabled>⏹️ End</button>
+        <button class="btn btn-reset" id="resetBtn" onclick="resetTimer()">🔄 Reset</button>
+        <button class="btn btn-publish" id="publishBtn" onclick="publishResults()" disabled>🏆 Publish Final Results</button>
+      </div>
+
+      <div class="leader-panel">
+        <h2 class="section-title" style="margin-top:0">👥 Crew Management</h2>
+        <div id="crewLoading" class="msg" style="border-color:#DAA520;background:linear-gradient(135deg,#FFFACD,#F0E68C);color:#8B4513">Loading crew data…</div>
+        <div class="grid" id="crewsGrid"></div>
+        <div id="messages"></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="n" id="totalCrews">-</div><div class="l">Total Crews</div></div>
+        <div class="stat"><div class="n" id="activeCrews">-</div><div class="l">Active</div></div>
+        <div class="stat"><div class="n" id="returnedCrews">-</div><div class="l">Returned</div></div>
+        <div class="stat"><div class="n" id="penalizedCrews">-</div><div class="l">Penalised</div></div>
+      </div>
+    </div>
+
+    <!-- Activity summary (simple counts from rows if present) -->
+    <div class="panel">
+      <h2 class="section-title">🗺️ Activity Overview</h2>
+      <div class="leader-panel" style="margin-top:6px">
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px">
+          <div class="stat"><div class="n" id="regCount">-</div><div class="l">Registration</div></div>
+          <div class="stat"><div class="n" id="clueCount">-</div><div class="l">Clue Hunt</div></div>
+          <div class="stat"><div class="n" id="quizCount">-</div><div class="l">Quiz</div></div>
+          <div class="stat"><div class="n" id="kindnessCount">-</div><div class="l">Kindness</div></div>
+          <div class="stat"><div class="n" id="limerickCount">-</div><div class="l">Limerick</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm return modal -->
+  <div id="confirmationModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center">
+    <div style="background:linear-gradient(145deg,#F5E6D3,#E8D7C3);border:3px solid #8B4513;border-radius:20px;padding:22px;max-width:520px;width:92%">
+      <div style="text-align:center">
+        <h3 id="confirmTitle" style="color:#8B4513;margin-bottom:10px">Confirm Team Return</h3>
+        <div id="confirmMessage" style="color:#8B4513;margin-bottom:14px"></div>
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button onclick="cancelReturn()" class="btn btn-reset">Cancel</button>
+          <button onclick="confirmReturn()" class="btn btn-start">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Optionally override via ?eventId=EVT-... 
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('eventId') || '';
+
+    let state = 'DRAFT';           // DRAFT | RUNNING | PUBLISHED
+    let endsAt = null;             // ISO string
+    let penaltyPerMin = 0;         // from backend
+    let crews = [];                // from leaderboard
+    let timerInterval = null;
+    let refreshInterval = null;
+    let pendingStatusChange = null;
+
+    const $ = s => document.querySelector(s);
+
+    function setStatusChip(){
+      const chip = $('#statusChip');
+      if (state === 'RUNNING'){ chip.className='adventure-status status-running'; chip.textContent='Adventure Running'; }
+      else if (state === 'PUBLISHED'){ chip.className='adventure-status status-ended'; chip.textContent='Final Results Published'; }
+      else { chip.className='adventure-status status-not-started'; chip.textContent='Not Started'; }
+    }
+
+    function setButtons(){
+      const startBtn = $('#startBtn'), pauseBtn=$('#pauseBtn'), stopBtn=$('#stopBtn'),
+            resetBtn=$('#resetBtn'), publishBtn=$('#publishBtn');
+
+      if (state === 'RUNNING'){
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        stopBtn.disabled = false;
+        resetBtn.disabled = true;
+        publishBtn.disabled = true; // guard until stop or overtime/all returned
+      } else if (state === 'PUBLISHED'){
+        startBtn.disabled = true;
+        pauseBtn.disabled = true;
+        stopBtn.disabled = true;
+        resetBtn.disabled = false;
+        publishBtn.disabled = true;
+      } else { // DRAFT / stopped
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        stopBtn.disabled = true;
+        resetBtn.disabled = false;
+        publishBtn.disabled = true;
+      }
+    }
+
+    function fmt(ms){
+      const sign = ms<0?'+':'';
+      const t = Math.abs(ms);
+      const h = Math.floor(t/3_600_000);
+      const m = Math.floor((t%3_600_000)/60_000);
+      const s = Math.floor((t%60_000)/1000);
+      return `${sign}${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    function tickTimer(){
+      const disp = $('#timerDisplay');
+      if (!endsAt){ disp.textContent='--:--:--'; $('#penaltyWarning').classList.remove('show'); disp.classList.remove('timer-penalty'); return; }
+      const diff = new Date(endsAt).getTime() - Date.now();
+
+      if (diff >= 0){
+        disp.textContent = fmt(diff);
+        disp.classList.remove('timer-penalty');
+        $('#penaltyWarning').classList.remove('show');
+      } else {
+        disp.textContent = fmt(diff);
+        if (penaltyPerMin > 0 && state === 'RUNNING'){
+          disp.classList.add('timer-penalty');
+          $('#penaltyWarning').classList.add('show');
+        } else {
+          disp.classList.remove('timer-penalty');
+          $('#penaltyWarning').classList.remove('show');
+        }
+      }
+    }
+
+    async function fetchEventState(){
+      const url = EVENT_ID ? `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`
+                           : '/.netlify/functions/get_event_state';
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!r.ok || j.success===false) throw new Error(j.message || 'Event state error');
+
+      state = j.state || 'DRAFT';
+      endsAt = j.endsAt || j["EndsAt (ISO)"] || null;
+      penaltyPerMin = Number(j.penaltyPerMin || j["PenaltyPerMin"] || 0);
+
+      setStatusChip();
+      setButtons();
+
+      if (!timerInterval){ timerInterval = setInterval(tickTimer, 1000); }
+      tickTimer();
+
+      // Enable publish when stopped or published-ready
+      if (state !== 'RUNNING'){ $('#publishBtn').disabled = !!(state === 'PUBLISHED'); }
+    }
+
+    function safe(v,d=0){ return (v===undefined||v===null)?d:v; }
+
+    function renderCrews(rows){
+      crews = Array.isArray(rows) ? rows : [];
+      const box = $('#crewsGrid');
+      $('#crewLoading').style.display = 'none';
+      box.innerHTML = '';
+
+      // sort by score desc
+      crews.sort((a,b)=> (safe(b.score,0)-safe(a.score,0)) || String(a.teamName||'').localeCompare(String(b.teamName||'')));
+
+      let counts = {reg:0, clue:0, quiz:0, kind:0, lim:0, total:crews.length, active:0, returned:0, pen:0};
+
+      crews.forEach(c=>{
+        const teamCode = c.teamCode || c.code || '';
+        const teamName = c.teamName || c.name || teamCode || 'Crew';
+        const status = (c.status || (c.returnedAt ? 'returned':'active'));
+        const penalty = safe(c.penaltyApplied ?? c.penalty, 0);
+        const score = safe(c.score, 0);
+        const orig = penalty>0 ? score+penalty : null;
+
+        if (status==='active') counts.active++; else counts.returned++;
+        if (penalty>0) counts.pen++;
+
+        counts.reg += safe(c.registration,0)>0 ? 1 : 0;
+        counts.clue += safe(c.clueHunt,0)>0 ? 1 : 0;
+        counts.quiz += safe(c.quiz,0)>0 ? 1 : 0;
+        counts.kind += safe(c.kindness,0)>0 ? 1 : 0;
+        counts.lim  += safe(c.limerick,0)>0 ? 1 : 0;
+
+        const card = document.createElement('div');
+        card.className = 'crew-card' + (status==='returned'?' returned':'') + ((penalty>0)?' late':'');
+
+        const badgeClass = status==='active' ? 'status-active' : (penalty>0 ? 'status-late' : 'status-returned');
+        const badgeText  = status==='active' ? 'Active' : 'Returned';
+
+        card.innerHTML = `
+          <div class="crew-header">
+            <div class="crew-name">
+              ${teamName}
+              <span class="crew-status-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="crew-doubloons">
+              ${orig!==null?`<span class="orig">${orig}</span>`:''}
+              ${score} 🪙
+            </div>
+          </div>
+          ${penalty>0 ? `<div class="penalty-info">⚠️ Late penalty: -${penalty}</div>` : ``}
+          <div class="crew-controls">
+            <select class="status-select" ${state!=='RUNNING'?'disabled':''}
+                    onchange="handleStatusChange('${teamCode}', this.value, ${score}, ${penalty})">
+              <option value="active" ${status==='active'?'selected':''}>🏴‍☠️ Active</option>
+              <option value="returned" ${status!=='active'?'selected':''}>⚓ Returned</option>
+            </select>
+            <label class="return-checkbox">
+              <input type="checkbox" ${c.locked ? 'checked':''} onchange="toggleCrewLock('${teamCode}', this.checked)" ${state!=='RUNNING'?'disabled':''}>
+              🔒 Lock Doubloons
+            </label>
+          </div>
+          <div style="margin-top:8px;font-size:.85em;color:#8B4513;font-weight:700">
+            ${teamCode} | Reg:${safe(c.registration,0)} • Map:${safe(c.clueHunt,0)} • Quiz:${safe(c.quiz,0)} • Kind:${safe(c.kindness,0)} • Lim:${safe(c.limerick,0)}
+          </div>
+        `;
+        box.appendChild(card);
+      });
+
+      // stats
+      $('#totalCrews').textContent = counts.total;
+      $('#activeCrews').textContent = counts.active;
+      $('#returnedCrews').textContent = counts.returned;
+      $('#penalizedCrews').textContent = counts.pen;
+      $('#regCount').textContent = counts.reg;
+      $('#clueCount').textContent = counts.clue;
+      $('#quizCount').textContent = counts.quiz;
+      $('#kindnessCount').textContent = counts.kind;
+      $('#limerickCount').textContent = counts.lim;
+    }
+
+    async function fetchLeaderboard(){
+      const url = EVENT_ID ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
+                           : '/.netlify/functions/get_leaderboard';
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!r.ok || j.success===false) throw new Error(j.message || 'Leaderboard error');
+      renderCrews(j.rows || []);
+    }
+
+    async function refreshAll(){
+      await fetchEventState();
+      await fetchLeaderboard();
+    }
+
+    function toast(text, ok=true){
+      const m = document.createElement('div');
+      m.className = 'msg ' + (ok?'ok':'err');
+      m.textContent = text;
+      $('#messages').appendChild(m);
+      setTimeout(()=>m.remove(), 4000);
+    }
+
+    // ----- Actions -----
+    async function startAdventure(){
+      if (state==='RUNNING') return toast('Already running');
+      const r = await fetch('/.netlify/functions/start_competition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start', eventId: EVENT_ID || undefined})});
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'Start failed', false);
+      await refreshAll(); toast('Adventure launched!');
+    }
+
+    async function pauseAdventure(){ // using stop as "pause" per backend contract
+      const r = await fetch('/.netlify/functions/start_competition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID || undefined})});
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'Pause failed', false);
+      await refreshAll(); toast('Adventure paused');
+    }
+
+    async function stopAdventure(){
+      const r = await fetch('/.netlify/functions/start_competition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID || undefined})});
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'End failed', false);
+      await refreshAll(); toast('Adventure ended');
+    }
+
+    async function resetTimer(){
+      if (!confirm('Reset competition? This clears timers and prepares for a new run.')) return;
+      const r = await fetch('/.netlify/functions/start_competition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset', eventId: EVENT_ID || undefined})});
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'Reset failed', false);
+      await refreshAll(); toast('Timer reset');
+    }
+
+    async function publishResults(){
+      if (!confirm('Publish final results and unfreeze everything? This cannot be undone.')) return;
+      const r = await fetch('/.netlify/functions/start_competition',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'publish_results', eventId: EVENT_ID || undefined})});
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'Publish failed', false);
+      await refreshAll(); toast('Results published 🎉');
+    }
+
+    // Crew status flow (with confirm for returns + late penalties)
+    function handleStatusChange(teamCode, newStatus, score, currentPenalty){
+      if (newStatus==='returned'){
+        // compute estimated penalty based on overtime & backend rate
+        const diff = endsAt ? (Date.now() - new Date(endsAt).getTime()) : 0;
+        const minutesLate = diff>0 ? Math.ceil(diff/60000) : 0;
+        const estPenalty = minutesLate>0 ? minutesLate * penaltyPerMin : 0;
+
+        pendingStatusChange = { teamCode, status:newStatus, penalty: estPenalty, score };
+        $('#confirmTitle').textContent = minutesLate>0 ? 'Confirm Late Return' : 'Confirm Team Return';
+        $('#confirmMessage').innerHTML = minutesLate>0
+          ? `Late by <strong>${minutesLate} min</strong> @ <strong>${penaltyPerMin}/min</strong><br>
+             Penalty: <strong>-${estPenalty}</strong><br>Final score: <strong>${Math.max(0, score - estPenalty)}</strong>`
+          : `Final score: <strong>${score}</strong><br>Doubloons will be frozen.`;
+        $('#confirmationModal').style.display = 'flex';
+      } else {
+        updateCrewStatus(teamCode, 'active', 0);
+      }
+    }
+
+    function cancelReturn(){ $('#confirmationModal').style.display='none'; pendingStatusChange=null; }
+    async function confirmReturn(){
+      if (!pendingStatusChange) return;
+      $('#confirmationModal').style.display='none';
+      const { teamCode, penalty } = pendingStatusChange;
+      await updateCrewStatus(teamCode, penalty>0?'late':'returned', penalty);
+      pendingStatusChange=null;
+    }
+
+    async function updateCrewStatus(teamCode, status, penalty=0){
+      const r = await fetch('/.netlify/functions/start_competition',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ action:'update_team_status', eventId: EVENT_ID || undefined, teamCode, status, penalty, returnTime:new Date().toISOString() })
+      });
+      const j = await r.json();
+      if (!r.ok || j.success===false) return toast(j.error||'Update failed', false);
+      await refreshAll();
+      toast(status==='active'?'Crew set to Active':(penalty>0?`Returned late (−${penalty})`:'Returned & locked'));
+    }
+
+    function toggleCrewLock(teamCode, locked){
+      // (Optional) If you later add a backend action for locks, wire here.
+      toast(`${teamCode} ${locked?'locked':'unlocked'}`);
+    }
+
+    // Boot
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      await refreshAll();
+      refreshInterval = setInterval(async ()=>{
+        await refreshAll();
+        if (state==='PUBLISHED' && refreshInterval){ clearInterval(refreshInterval); refreshInterval=null; }
+      }, 20000);
+    });
+
+    window.addEventListener('beforeunload', ()=>{
+      if (timerInterval) clearInterval(timerInterval);
+      if (refreshInterval) clearInterval(refreshInterval);
+    });
+  </script>
+</body>
+</html>
