@@ -1,381 +1,426 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Terry’s Treasure Quest — Command Centre</title>
-  <style>
-    :root{
-      --brown:#8B4513;--brown-2:#7a3e11;--gold:#DAA520;--gold-2:#FFD700;--sand:#F5E6D3;--sand-2:#E8D7C3;
-      --ink:#2C1810;--ink-2:#3E2723;--green:#1fbf5b;--red:#e46a6a;--amber:#f0b43a
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
-      color:var(--ink-2);
-      background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%) fixed;
-      min-height:100vh;
-      padding:18px;
-    }
-    .bar{
-      background:linear-gradient(145deg,#F5E6D3,#F0E1CB);
-      border:3px solid var(--gold);
-      border-radius:16px;
-      padding:14px 16px;
-      box-shadow:0 8px 22px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.4);
-      display:flex;align-items:center;gap:14px;justify-content:space-between;max-width:1200px;margin:0 auto 18px;
-    }
-    .bar .left{display:flex;gap:12px;align-items:center}
-    .pill{
-      background:linear-gradient(135deg,#FFEB99,#FFD36E);
-      border:2px solid var(--gold);
-      border-radius:12px;padding:10px 14px;color:var(--ink-2);box-shadow:inset 0 1px 0 rgba(255,255,255,.5)
-    }
-    .admin-btn{
-      background:linear-gradient(135deg,#FFDB77,#FFC44D);
-      border:3px solid var(--gold);
-      border-radius:12px;
-      font-weight:700;color:var(--ink-2);
-      padding:10px 14px;cursor:pointer
-    }
-    .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-    @media (max-width:960px){.wrap{grid-template-columns:1fr}}
-    .panel{
-      background:linear-gradient(145deg,var(--sand),var(--sand-2));
-      border:3px solid var(--brown);
-      border-radius:16px;padding:16px;
-      box-shadow:0 18px 40px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35)
-    }
-    .panel h2{
-      margin:0 0 10px;
-      font-size:1.1rem;color:var(--ink);
-      border-bottom:3px solid var(--gold);padding-bottom:8px
-    }
-    .timer{
-      background:linear-gradient(135deg,#ffc21f,#ffb114);
-      border:3px solid var(--gold);
-      border-radius:14px;
-      color:#3b250c;font-weight:900;letter-spacing:.12em;text-align:center;
-      font-family:ui-monospace,Menlo,Consolas,monospace;
-      font-size:2.1rem;padding:22px 8px;margin-bottom:10px
-    }
-    .status{
-      background:#efe6ff;border:2px solid #b9a7ff;color:#3a2f66;
-      border-radius:12px;padding:12px;text-align:center;font-weight:700;margin-bottom:14px
-    }
-    .btnrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-    .btn{border:3px solid var(--brown);border-radius:12px;padding:12px;cursor:pointer;font-weight:800}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    .btn--launch{background:linear-gradient(135deg,#22cc66,#18b357);color:#fff}
-    .btn--pause{background:linear-gradient(135deg,#ffe09a,#ffd077);color:#532f04}
-    .btn--end{background:linear-gradient(135deg,#f59b9b,#e46a6a);color:#5a1212}
-    .btn--reset{background:linear-gradient(135deg,#8b5a3c,#6b3e25);color:#fff}
-    .btn--publish{background:linear-gradient(135deg,#ffd95e,#ffc52a);color:#4b2d00;border-color:var(--gold);width:100%;margin-bottom:12px}
-    .flash{background:#ffe6e6;border:2px solid #ff8686;border-radius:12px;padding:12px;color:#7a0000;font-weight:700}
-    /* right */
-    .crewlist{display:grid;gap:12px;max-height:580px;overflow:auto}
-    .card{
-      background:linear-gradient(135deg,#FFF8DC,#F5E6D3);
-      border:2px solid var(--gold);border-radius:12px;padding:12px
-    }
-    .card-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px}
-    .badge{font-size:.8rem;padding:6px 10px;border-radius:999px;font-weight:800}
-    .badge--active{background:#e8f6ff;border:1px solid #a6d8ff;color:#10507d}
-    .badge--locked{background:#fff0f0;border:1px solid #ffc3c3;color:#7f1620}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    select,input[type="checkbox"]{transform:translateY(1px)}
-    /* stats */
-    .stats{max-width:1200px;margin:18px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    @media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
-    .stat{
-      background:linear-gradient(145deg,var(--sand),var(--sand-2));
-      border:3px solid var(--brown);border-radius:16px;padding:16px;text-align:center;
-      box-shadow:0 10px 24px rgba(0,0,0,.2)
-    }
-    .stat .n{font-size:1.8rem;font-weight:900;color:var(--ink)}
-    .stat .l{font-size:.95rem;color:#7b553d;font-weight:800;margin-top:6px}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Terry’s Treasure Quest — Command Centre</title>
+<style>
+  :root{
+    --bg1:#b85d22; --bg2:#f4a261; --panel:#f3e6d6; --panel2:#efe0c8;
+    --gold:#f6c33b; --gold-deep:#d9a21f; --brown:#8b4513; --brown-2:#6d3710;
+    --accent:#ffd875; --ok:#2ecc71; --warn:#ffb037; --danger:#e76f51;
+    --ink:#3d2411; --muted:#8a6b4b;
+    --shadow:0 10px 25px rgba(0,0,0,.25);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Ubuntu, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+    background: radial-gradient(1200px 600px at 30% -10%, #ffdfb3 0%, transparent 60%) ,
+                radial-gradient(1000px 600px at 90% 0%, #ffc78e 0%, transparent 60%),
+                linear-gradient(135deg, var(--bg1), var(--bg2));
+    color:var(--ink); min-height:100vh; padding:24px;
+  }
+  .topbar{
+    max-width:1200px; margin:0 auto 18px; background:linear-gradient(145deg,#ffeaaf,#ffd36b);
+    border:3px solid var(--gold-deep); border-radius:14px; padding:12px 16px; box-shadow:var(--shadow);
+    display:flex; align-items:center; gap:14px;
+  }
+  .topbar .logo{width:42px;height:42px;border-radius:10px;border:3px solid var(--gold-deep);background:linear-gradient(135deg,#8b4513,#a15c23)}
+  .topbar h1{margin:0;font-size:18px}
+  .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:960px){ .wrap{grid-template-columns:1fr} }
+
+  .panel{
+    background:linear-gradient(145deg,var(--panel),var(--panel2));
+    border:3px solid var(--brown); border-radius:16px; padding:16px; box-shadow:var(--shadow);
+  }
+  .panel h2{
+    margin:0 0 10px; font-size:20px; font-weight:800; color:var(--brown);
+    border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; align-items:center; gap:8px;
+  }
+
+  /* timer/status */
+  .timer{
+    background:linear-gradient(145deg,#ffc233,#ffb300);
+    border:3px solid var(--gold-deep); border-radius:14px; padding:22px; text-align:center; font-weight:900;
+    font-size:34px; letter-spacing:6px; color: #3b220f; text-shadow:0 2px 0 rgba(255,255,255,.35);
+    margin-bottom:10px;
+  }
+  .status{
+    background:#eee0ff; border:2px solid #c6a8ff; color:#4b2b8d;
+    border-radius:12px; padding:12px; text-align:center; font-weight:700; margin-bottom:12px;
+  }
+  .status.running{ background:#d8ffdb; border-color:#78d38a; color:#0f6a22; }
+  .status.paused{ background:#fff0cc; border-color:#ffc463; color:#8a5406; }
+  .status.ended{ background:#fff6cc; border-color:#eecb4e; color:#7a5710; }
+
+  /* buttons */
+  .grid-btns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
+    border:3px solid var(--brown); border-radius:12px; padding:14px 10px; font-weight:800; cursor:pointer;
+    background:linear-gradient(145deg,#ffffff,#fff2d8); color:var(--brown);
+    box-shadow:0 4px 10px rgba(0,0,0,.12); transition:.15s transform,.15s box-shadow,.15s filter;
+    text-transform:capitalize;
+  }
+  .btn:hover{ transform:translateY(-1px); box-shadow:0 7px 16px rgba(0,0,0,.18) }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; filter:grayscale(.3)}
+  .btn--green{ background:linear-gradient(145deg,#50e48a,#22c55e); color:white; border-color:#1c8a47 }
+  .btn--amber{ background:linear-gradient(145deg,#ffd48a,#ffb63a); color:#5f3806; border-color:#b2740a }
+  .btn--red{ background:linear-gradient(145deg,#ff9b93,#e86052); color:white; border-color:#a9352a }
+  .btn--brown{ background:linear-gradient(145deg,#9a5a24,#6f3a12); color:white; border-color:#3b1f0b }
+
+  .btn-wide{ width:100%; margin-top:8px }
+
+  /* crews */
+  .crew-list{ display:flex; flex-direction:column; gap:12px; max-height:560px; overflow:auto; padding-right:8px }
+  .crew{
+    background:linear-gradient(145deg,#fff9eb,#fff3dc);
+    border:2px solid #e4c17a; border-radius:12px; padding:12px 12px;
+    display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px;
+  }
+  .crew h3{ margin:0 0 6px; font-size:16px; color:var(--brown) }
+  .meta{ font-size:12px; color:var(--muted); }
+  .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
+  select, input[type="checkbox"]{ accent-color: var(--gold-deep); }
+  select{
+    padding:8px 10px; border:2px solid #e0c48a; border-radius:10px; background:white; color:var(--ink); font-weight:700;
+  }
+  .badge{ border-radius:999px; padding:4px 10px; font-size:12px; font-weight:800; }
+  .badge.blue{ background:#e7f2ff; color:#1563c1; border:1px solid #b7d2ff }
+  .badge.gray{ background:#f0f1f4; color:#4c4f57; border:1px solid #dde0e6 }
+
+  /* stats */
+  .stats{ max-width:1200px; margin:18px auto 0; display:grid; grid-template-columns:repeat(4,1fr); gap:18px }
+  @media (max-width:960px){ .stats{ grid-template-columns:repeat(2,1fr) } }
+  .stat{
+    background:linear-gradient(145deg,#fff4dd,#fff); border:3px solid var(--gold);
+    border-radius:14px; padding:16px; text-align:center; box-shadow:var(--shadow)
+  }
+  .stat .n{ font-size:32px; font-weight:900; color:var(--brown) }
+
+  /* flash/error */
+  .flash{
+    margin-top:10px; padding:12px 14px; border-radius:12px; font-weight:700; border:2px solid;
+  }
+  .flash.ok{ background:#eaffea; border-color:#85d789; color:#0d6f1f }
+  .flash.err{ background:#ffe8e6; border-color:#ff9a90; color:#9f1f12 }
+</style>
 </head>
 <body>
-  <!-- Header / key -->
-  <div class="bar">
-    <div class="left">
-      <div style="width:42px;height:42px;border-radius:10px;border:3px solid var(--gold);background:linear-gradient(135deg,#8B4513,#A0522D)"></div>
-      <div class="pill">
-        <div style="font-weight:800">Command Centre</div>
-        <div style="font-size:.9rem">Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
-      </div>
-    </div>
-    <div class="left" style="gap:10px">
-      <div id="keyState" class="pill">Admin key: <b>unset</b></div>
-      <button id="setKeyBtn" class="admin-btn">Set / Change</button>
-    </div>
+  <div class="topbar">
+    <div class="logo"></div>
+    <h1>Command Centre</h1>
+    <div style="margin-left:auto;font-weight:700;color:#6b4b2a">Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
   </div>
 
   <div class="wrap">
-    <!-- Left: control -->
-    <section class="panel" id="left">
+    <!-- LEFT: Controls -->
+    <section class="panel" id="leftPanel">
       <h2>⚓ Adventure Control</h2>
-      <div id="timer" class="timer">01 : 30 : 00</div>
-      <div id="status" class="status">Not started</div>
+      <div class="timer" id="timerDisplay">01 : 30 : 00</div>
+      <div class="status" id="statusText">Not started</div>
 
-      <div class="btnrow">
-        <button class="btn btn--launch" id="btnLaunch">🚀 Launch</button>
-        <button class="btn btn--pause" id="btnPause">⏸️ Pause</button>
-        <button class="btn btn--end" id="btnEnd">⏹️ End</button>
-        <button class="btn btn--reset" id="btnReset">🔄 Reset</button>
+      <div class="grid-btns">
+        <button id="btnLaunch" class="btn btn--green">🚀 Launch</button>
+        <button id="btnPause"  class="btn btn--amber" disabled>⏸️ Pause</button>
+        <button id="btnEnd"    class="btn btn--red">⏹️ End</button>
+        <button id="btnReset"  class="btn btn--brown">🔄 Reset</button>
       </div>
 
-      <button class="btn btn--publish" id="btnPublish">🏆 Publish Final Results</button>
+      <button id="btnPublish" class="btn btn--amber btn-wide">🏆 Publish Final Results</button>
+
       <div id="flash" class="flash" style="display:none"></div>
     </section>
 
-    <!-- Right: crews -->
+    <!-- RIGHT: Crew management -->
     <section class="panel">
       <h2>👥 Crew Management</h2>
-      <div id="crewList" class="crewlist"><div class="pill">Loading crews...</div></div>
+      <div id="crewList" class="crew-list">
+        <div class="flash" id="crewLoading">Loading crews…</div>
+      </div>
     </section>
   </div>
 
   <div class="stats">
-    <div class="stat"><div id="statTotal" class="n">0</div><div class="l">Total Crews</div></div>
-    <div class="stat"><div id="statActive" class="n">0</div><div class="l">Active</div></div>
-    <div class="stat"><div id="statReturned" class="n">0</div><div class="l">Returned</div></div>
-    <div class="stat"><div id="statPenalised" class="n">0</div><div class="l">Penalised</div></div>
+    <div class="stat"><div class="n" id="statTotal">0</div>Total Crews</div>
+    <div class="stat"><div class="n" id="statActive">0</div>Active</div>
+    <div class="stat"><div class="n" id="statReturned">0</div>Returned</div>
+    <div class="stat"><div class="n" id="statPenalised">0</div>Penalised</div>
   </div>
 
-  <script>
-    // ---------- Small utilities ----------
-    const qs = (s, el=document) => el.querySelector(s);
-    const qsa = (s, el=document) => [...el.querySelectorAll(s)];
-    const ADMIN_KEY_STORAGE = "tq_admin_secret";
-    const getEventIdFromURL = () => new URLSearchParams(location.search).get("event") || "EVT-19-08-2025";
+<script>
+/* ---------- helpers ---------- */
+const qs = sel => document.querySelector(sel);
+const qsa = sel => [...document.querySelectorAll(sel)];
+const getEventIdFromURL = () => new URLSearchParams(location.search).get("event") || "EVT-19-08-2025";
 
-    function setKeyUI(isSet){ qs("#keyState").innerHTML = 'Admin key: <b>'+(isSet?'set':'unset')+'</b>'; }
-    function ensureKey(onCancel){
-      let key = localStorage.getItem(ADMIN_KEY_STORAGE);
-      if(!key){
-        // Auto-prompt on first load if missing
-        key = window.prompt("Enter Admin Secret (same as Netlify env TQ_ADMIN_SECRET):","");
-        if(!key){
-          onCancel && onCancel();
-          return null;
-        }
-        localStorage.setItem(ADMIN_KEY_STORAGE, key);
-      }
-      setKeyUI(!!key);
-      return key;
-    }
-    function changeKey(){
-      const current = localStorage.getItem(ADMIN_KEY_STORAGE) || "";
-      const next = window.prompt("Enter Admin Secret (same as Netlify env TQ_ADMIN_SECRET):", current);
-      if(next===null) return;
-      if(next.trim()===""){ localStorage.removeItem(ADMIN_KEY_STORAGE); setKeyUI(false); return; }
-      localStorage.setItem(ADMIN_KEY_STORAGE, next.trim());
-      setKeyUI(true);
-      // Immediately refresh data when key changes
-      boot();
-    }
+function showFlash(msg, isErr=true){
+  const el = qs("#flash");
+  el.textContent = msg;
+  el.className = "flash " + (isErr ? "err" : "ok");
+  el.style.display = "block";
+  clearTimeout(showFlash._t);
+  showFlash._t = setTimeout(()=>{ el.style.display="none"; }, 5000);
+}
 
-    async function fetchAdmin(path, options = {}){
-      const key = ensureKey();
-      if(!key) throw new Error("Admin key not set");
-      const headers = Object.assign({}, options.headers || {}, { "x-tq-admin": key });
-      const res = await fetch(path, { ...options, headers });
-      if(!res.ok){
-        const t = await res.text().catch(()=> "");
-        throw new Error(`${res.status} — ${t || res.statusText}`);
-      }
-      return res.json();
-    }
+async function fetchJSON(url, opts={}){
+  const res  = await fetch(url, opts);
+  const txt  = await res.text();
+  let data;
+  try{ data = JSON.parse(txt); }catch{ data = null; }
+  if(!res.ok || (data && data.success === false)){
+    const msg = (data && data.message) ? data.message : (`HTTP ${res.status} ${res.statusText}`);
+    throw new Error(msg);
+  }
+  return data || {};
+}
 
-    // ---------- UI helpers ----------
-    function showFlash(msg, isError=true){
-      const el = qs("#flash");
-      el.style.display = "block";
-      el.textContent = msg;
-      el.style.background = isError ? "#ffe6e6" : "#e9ffe9";
-      el.style.borderColor = isError ? "#ff8686" : "#7bd97b";
-      setTimeout(()=>{ el.style.display = "none"; }, 4000);
-    }
-    const fmt = (s)=> {
-      s = Math.max(0, s|0);
-      const h = String(Math.floor(s/3600)).padStart(2,"0");
-      const m = String(Math.floor((s%3600)/60)).padStart(2,"0");
-      const sec = String(s%60).padStart(2,"0");
-      return `${h} : ${m} : ${sec}`;
-    };
+/* ---------- state + rendering ---------- */
+let state = {
+  running:false, paused:false, ended:false,
+  resultsPublished:false, durationMinutes:90, startTime:null
+};
 
-    // ---------- Render crews ----------
-    function renderCrews(teams){
-      const root = qs("#crewList");
-      if(!teams || teams.length===0){
-        root.innerHTML = '<div class="pill">No crews yet.</div>'; 
-        qs("#statTotal").textContent = "0";
-        qs("#statActive").textContent = "0";
-        qs("#statReturned").textContent = "0";
-        qs("#statPenalised").textContent = "0";
-        return;
-      }
-      const total = teams.length;
-      const active = teams.filter(t => (t.status||"active")==="active").length;
-      const returned = teams.filter(t => (t.status||"") === "returned" || (t.status||"")==="late").length;
-      const penalised = teams.filter(t => (t.penalty||0) > 0).length;
-      qs("#statTotal").textContent = total;
-      qs("#statActive").textContent = active;
-      qs("#statReturned").textContent = returned;
-      qs("#statPenalised").textContent = penalised;
+function formatTimer(msLeft){
+  if (msLeft < 0) msLeft = 0;
+  const totalSec = Math.floor(msLeft/1000);
+  const h = String(Math.floor(totalSec/3600)).padStart(2,'0');
+  const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
+  const s = String(totalSec%60).padStart(2,'0');
+  return `${h} : ${m} : ${s}`;
+}
 
-      root.innerHTML = "";
-      teams.forEach(t=>{
-        const div = document.createElement("div");
-        div.className = "card";
-        const isLate = (t.status||"")==="late";
-        div.innerHTML = `
-          <div class="card-top">
-            <div style="font-weight:900">${t.teamName || t.teamCode}</div>
-            <div class="row">
-              <span class="badge badge--active">${isLate? "Returned (late)":"Active"}</span>
-              <span class="badge ${t.locked? "badge--locked": "badge--active"}">${t.locked? "Locked":"Unlocked"}</span>
-            </div>
-          </div>
-          <div class="row">
-            <select data-team="${t.teamCode}">
-              <option value="active" ${ (t.status||"active")==="active"?"selected":""}>Active</option>
-              <option value="returned" ${ (t.status||"")==="returned"?"selected":""}>Returned</option>
-            </select>
-            <label class="row" style="gap:6px"><input type="checkbox" data-lock="${t.teamCode}" ${t.locked?"checked":""}/> Lock doubloons</label>
-            <button class="admin-btn" data-apply="${t.teamCode}">APPLY</button>
-          </div>
-        `;
-        root.appendChild(div);
+function paintStatus(){
+  const st = qs("#statusText");
+  st.className = "status";
+  if (state.resultsPublished){
+    st.textContent = "Final results published";
+    st.classList.add("ended");
+  } else if (state.ended){
+    st.textContent = "Adventure complete";
+    st.classList.add("ended");
+  } else if (state.running && !state.paused){
+    st.textContent = "Adventure running";
+    st.classList.add("running");
+  } else if (state.paused){
+    st.textContent = "Paused";
+    st.classList.add("paused");
+  } else {
+    st.textContent = "Not started";
+  }
+
+  // buttons
+  qs("#btnLaunch").disabled = state.running && !state.paused;
+  qs("#btnPause").disabled  = !state.running || state.paused;
+  qs("#btnEnd").disabled    = !state.running && !state.paused;
+}
+
+let timerTick = null;
+function startLocalTimer(){
+  clearInterval(timerTick);
+  const disp = qs("#timerDisplay");
+  if (!state.startTime || !state.durationMinutes){
+    disp.textContent = "01 : 30 : 00";
+    return;
+  }
+  timerTick = setInterval(()=>{
+    const endAt = new Date(state.startTime).getTime() + (state.durationMinutes*60*1000);
+    const left  = endAt - Date.now();
+    disp.textContent = formatTimer(left);
+  }, 1000);
+}
+
+function renderCrewList(teams){
+  const root = qs("#crewList");
+  root.innerHTML = "";
+  if (!teams || teams.length === 0){
+    root.innerHTML = `<div class="flash">No crews found for this event.</div>`;
+    return;
+  }
+
+  teams.forEach(t=>{
+    const code  = t.teamCode || "";
+    const name  = t.teamName || code;
+    const status= (t.status || (t.returnedAt ? "returned" : "active")).toLowerCase();
+    const locked= !!t.locked;
+
+    const row = document.createElement("div");
+    row.className = "crew";
+    row.innerHTML = `
+      <div>
+        <h3>${name}</h3>
+        <div class="meta">${code}</div>
+      </div>
+
+      <div class="row">
+        <span class="badge ${status==="active"?"blue":"gray"}">${status==="active"?"Active":"Returned"}</span>
+
+        <select data-team="${code}">
+          <option value="active"   ${status==="active"?"selected":""}>Active</option>
+          <option value="returned" ${status!=="active"?"selected":""}>Returned</option>
+        </select>
+
+        <label class="row" style="gap:6px;">
+          <input type="checkbox" data-lock="${code}" ${locked?"checked":""}/> Lock doubloons
+        </label>
+
+        <button class="btn btn--amber" data-apply="${code}">APPLY</button>
+
+        <span class="badge ${locked?"gray":"blue"}">${locked?"Locked":"Unlocked"}</span>
+      </div>
+    `;
+    root.appendChild(row);
+  });
+
+  // delegate “APPLY”
+  root.addEventListener("click", async (ev)=>{
+    const btn = ev.target.closest("[data-apply]");
+    if(!btn) return;
+    const code = btn.getAttribute("data-apply");
+    const sel  = root.querySelector(`select[data-team="${code}"]`);
+    const chk  = root.querySelector(`input[data-lock="${code}"]`);
+    const eventId = getEventIdFromURL();
+
+    try{
+      // lock/unlock first
+      await fetchJSON("/.netlify/functions/admin_toggle_lock_team",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ eventId, teamCode: code, locked: !!chk.checked })
+      });
+      // status update
+      await fetchJSON("/.netlify/functions/admin_checkin_team",{
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ eventId, teamCode: code, status: sel.value })
       });
 
-      // Bind per-card actions
-      root.addEventListener("click", async (ev)=>{
-        const btn = ev.target.closest("[data-apply]");
-        if(!btn) return;
-        const code = btn.getAttribute("data-apply");
-        const sel = root.querySelector(`select[data-team="${code}"]`);
-        const lock = root.querySelector(`input[data-lock="${code}"]`);
-        try{
-          await fetchAdmin("/.netlify/functions/admin_toggle_lock_team",{
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ teamCode: code, locked: !!lock.checked })
-          });
-          await fetchAdmin("/.netlify/functions/admin_checkin_team",{
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ teamCode: code, status: sel.value })
-          });
-          showFlash(`Updated ${code}`, false);
-          await refresh();
-        }catch(e){ showFlash(`Failed to update ${code}: ${e.message}`); }
-      }, { once:true }); // re-bound on each render
+      showFlash(`Updated ${code}`, false);
+      refresh();
+
+    }catch(err){
+      showFlash(`Failed to update ${code}: ${err.message}`);
     }
+  }, { once:true });
+}
 
-    // ---------- Loaders ----------
-    async function refresh(){
-      const eventId = getEventIdFromURL();
-      // competition state (status/timer/results)
-      try{
-        const st = await fetchAdmin(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`);
-        const status = (st.status || "not started").toLowerCase();
-        qs("#status").textContent = status.replace(/\b\w/g,m=>m.toUpperCase());
-        const remaining = st.secondsRemaining ?? (st.durationSeconds ?? 5400);
-        qs("#timer").textContent = fmt(remaining);
-        // publish button enable
-        qs("#btnPublish").disabled = !!st.resultsPublished;
-      }catch(e){
-        qs("#status").textContent = "Failed to load current status: " + e.message.replace(/^[0-9]+ — /,'');
-      }
+function paintStats(teams){
+  const total = teams.length;
+  const active = teams.filter(t => (t.status || (t.returnedAt? "returned":"active")) === "active").length;
+  const returned = total - active;
+  const penalised = teams.filter(t => (t.penalty || 0) > 0).length;
 
-      // crew list
-      try{
-        const data = await fetchAdmin(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`);
-        renderCrews(data.teams || []);
-      }catch(e){
-        qs("#crewList").innerHTML = `<div class="flash">Failed to load crew list: ${e.message}</div>`;
-        qs("#statTotal").textContent = "0";
-        qs("#statActive").textContent = "0";
-        qs("#statReturned").textContent = "0";
-        qs("#statPenalised").textContent = "0";
-      }
-    }
+  qs("#statTotal").textContent = total;
+  qs("#statActive").textContent = active;
+  qs("#statReturned").textContent = returned;
+  qs("#statPenalised").textContent = penalised;
+}
 
-    // ---------- Control button handlers ----------
-    function bindControls(){
-      qs("#setKeyBtn").addEventListener("click", changeKey);
+/* ---------- data flow ---------- */
+async function loadState(){
+  const eventId = getEventIdFromURL();
+  const data = await fetchJSON(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`);
+  // normalise keys from your function
+  state.running  = data.status === "start" || data.status === "running";
+  state.paused   = data.status === "paused";
+  state.ended    = data.status === "stop" || data.status === "stopped" || data.hasEnded;
+  state.resultsPublished = !!data.resultsPublished;
+  state.durationMinutes  = data.durationMinutes || 90;
+  state.startTime        = data.startTime || null;
 
-      qs("#btnLaunch").addEventListener("click", async ()=>{
-        try{
-          await fetchAdmin("/.netlify/functions/admin_start_event", { method:"POST" });
-          showFlash("Adventure launched!", false);
-          refresh();
-        }catch(e){ showFlash("Failed to launch: " + e.message); }
-      });
+  paintStatus();
+  startLocalTimer();
+}
 
-      qs("#btnPause").addEventListener("click", async ()=>{
-        try{
-          await fetchAdmin("/.netlify/functions/admin_start_event", {
-            method:"POST", headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ action:"pause" })
-          });
-          showFlash("Adventure paused.", false);
-          refresh();
-        }catch(e){ showFlash("Failed to pause: " + e.message); }
-      });
+async function loadTeams(){
+  const eventId = getEventIdFromURL();
+  const data = await fetchJSON(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`);
+  const teams = data.teams || [];
+  renderCrewList(teams);
+  paintStats(teams);
+}
 
-      qs("#btnEnd").addEventListener("click", async ()=>{
-        if(!confirm("End the adventure for all crews?")) return;
-        try{
-          await fetchAdmin("/.netlify/functions/admin_start_event", {
-            method:"POST", headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ action:"stop" })
-          });
-          showFlash("Adventure ended.", false);
-          refresh();
-        }catch(e){ showFlash("Failed to end: " + e.message); }
-      });
+async function refresh(){
+  try{
+    await Promise.all([loadState(), loadTeams()]);
+  }catch(err){
+    showFlash("Failed to load current status: " + err.message);
+  }
+}
 
-      qs("#btnReset").addEventListener("click", async ()=>{
-        if(!confirm("Reset the event (timer & state) and prepare for a new adventure?")) return;
-        try{
-          await fetchAdmin("/.netlify/functions/admin_start_event", {
-            method:"POST", headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({ action:"reset" })
-          });
-          showFlash("Event reset.", false);
-          refresh();
-        }catch(e){ showFlash("Failed to reset: " + e.message); }
-      });
+/* ---------- actions ---------- */
+qs("#btnLaunch").addEventListener("click", async ()=>{
+  try{
+    const eventId = getEventIdFromURL();
+    await fetchJSON("/.netlify/functions/admin_start_event",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ eventId, action:"start" })
+    });
+    showFlash("Adventure launched!", false);
+    refresh();
+  }catch(err){ showFlash("Failed to launch: " + err.message); }
+});
 
-      qs("#btnPublish").addEventListener("click", async ()=>{
-        if(!confirm("Publish final results and unlock gallery for everyone?")) return;
-        try{
-          await fetchAdmin("/.netlify/functions/admin_publish_final", { method:"POST" });
-          showFlash("Final results published.", false);
-          refresh();
-        }catch(e){ showFlash("Failed to publish: " + e.message); }
-      });
-    }
+qs("#btnPause").addEventListener("click", async ()=>{
+  try{
+    const eventId = getEventIdFromURL();
+    await fetchJSON("/.netlify/functions/admin_start_event",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ eventId, action:"pause" })
+    });
+    showFlash("Adventure paused.", false);
+    refresh();
+  }catch(err){ showFlash("Failed to pause: " + err.message); }
+});
 
-    // ---------- Boot ----------
-    async function boot(){
-      // Force admin key on first load if missing
-      ensureKey(()=>{
-        showFlash("Admin key is required to use the Command Centre.");
-      });
-      bindControls();
-      await refresh();
-      // refresh every 30s
-      if(window.__tqInt) clearInterval(window.__tqInt);
-      window.__tqInt = setInterval(refresh, 30000);
-    }
+qs("#btnEnd").addEventListener("click", async ()=>{
+  if(!confirm("End the adventure for all crews?")) return;
+  try{
+    const eventId = getEventIdFromURL();
+    await fetchJSON("/.netlify/functions/admin_start_event",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ eventId, action:"stop" })
+    });
+    showFlash("Adventure ended.", false);
+    refresh();
+  }catch(err){ showFlash("Failed to end: " + err.message); }
+});
 
-    document.addEventListener("DOMContentLoaded", boot);
-  </script>
+qs("#btnReset").addEventListener("click", async ()=>{
+  if(!confirm("Reset the event and prepare for a new adventure?")) return;
+  try{
+    const eventId = getEventIdFromURL();
+    await fetchJSON("/.netlify/functions/admin_start_event",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ eventId, action:"reset" })
+    });
+    showFlash("Event reset.", false);
+    refresh();
+  }catch(err){ showFlash("Failed to reset: " + err.message); }
+});
+
+qs("#btnPublish").addEventListener("click", async ()=>{
+  if(!confirm("Publish final results and unlock the gallery for all crews?")) return;
+  try{
+    const eventId = getEventIdFromURL();
+    await fetchJSON("/.netlify/functions/admin_publish_final",{
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ eventId })
+    });
+    showFlash("Final results published.", false);
+    refresh();
+  }catch(err){ showFlash("Failed to publish: " + err.message); }
+});
+
+/* ---------- boot ---------- */
+refresh();
+setInterval(refresh, 30000); // auto-refresh every 30s
+</script>
 </body>
 </html>
