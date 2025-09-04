@@ -1,995 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Terry's Treasure Hunt — Command Centre</title>
   <style>
-    /* ————————— Top Nav ————————— */
-    .treasure-nav{
-      position:fixed;top:0;left:0;right:0;height:70px;z-index:1000;
-      background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);
-      border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);
-      font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:0 20px
+    /* ====== Base / Layout ====== */
+    :root{
+      --brown:#8B4513; --brown-2:#654321; --gold:#DAA520; --amber:#FF8C00;
+      --cream:#F5E6D3; --cream-2:#E8D7C3; --paper:#FFF8DC; --red:#DC143C; --green:#2E8B57;
     }
-    .nav-container{max-width:1200px;margin:0 auto;height:100%;display:flex;justify-content:center;align-items:center}
-    .nav-logo{display:flex;align-items:center;text-decoration:none;transition:.3s}
-    .nav-logo:hover{transform:scale(1.05)}
-    .nav-logo img{height:45px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
-    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
-    @media(max-width:768px){.treasure-nav{height:90px}.nav-logo img{height:65px}}
-
-    /* ————————— Base ————————— */
-    *{margin:0;padding:0;box-sizing:border-box}
+    *{box-sizing:border-box;margin:0;padding:0}
     body{
       font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+      min-height:100vh; padding:20px; padding-top:90px; color:#3E2723;
       background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
-      min-height:100vh;color:#3E2723;padding:20px 20px 40px;padding-top:90px;position:relative
+      position:relative;
     }
-    @media(max-width:768px){body{padding:10px;padding-top:110px}}
     body::before{
-      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
       background:
         radial-gradient(circle at 20% 20%,rgba(255,215,0,.1) 0%,transparent 50%),
         radial-gradient(circle at 80% 80%,rgba(255,140,0,.1) 0%,transparent 50%),
-        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>')
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
     }
 
-    /* ————————— Header ————————— */
-    .header{text-align:center;margin-bottom:30px;position:relative;z-index:1}
-    .logo{font-size:2.2em;margin-bottom:8px;filter:drop-shadow(2px 2px 4px rgba(139,69,19,.3));animation:gentle-sway 3s ease-in-out infinite}
-    @keyframes gentle-sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
-    h1{
-      font-size:2.2em;font-weight:800;margin-bottom:6px;color:#2C1810;
-      text-shadow:4px 4px 8px rgba(255,255,255,.9),2px 2px 4px rgba(255,255,255,.7),1px 1px 2px rgba(0,0,0,.9),-1px -1px 2px rgba(255,255,255,.6)
+    /* ====== Top Nav (logo only) ====== */
+    .treasure-nav{
+      position:fixed; inset:0 0 auto 0; height:70px; z-index:1000;
+      background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);
+      border-bottom:3px solid var(--gold); box-shadow:0 4px 15px rgba(0,0,0,.3);
+      display:flex; align-items:center; justify-content:center; padding:0 20px;
     }
-    .subtitle{
-      color:#1A0E08;font-size:1.02em;font-weight:700;
-      text-shadow:3px 3px 6px rgba(255,255,255,.8),1px 1px 2px rgba(255,255,255,.6),1px 1px 3px rgba(0,0,0,.8),-1px -1px 1px rgba(255,255,255,.5)
+    .nav-logo img{height:45px; width:auto; filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5))}
+    @media (max-width:768px){ .treasure-nav{height:90px} .nav-logo img{height:65px} body{padding-top:110px}}
+
+    /* ====== Hero note ====== */
+    .hero{
+      max-width:1100px; margin:0 auto 20px; display:flex; gap:14px; align-items:center;
+      background:linear-gradient(145deg,#F5E6D3 0%,rgba(245,230,211,.95) 100%);
+      border:3px solid var(--brown); border-radius:18px; padding:16px 18px;
+      box-shadow:0 12px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
+      position:relative;
     }
+    .hero::before{content:''; position:absolute; left:0; right:0; top:0; height:6px;
+      background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    .hero-img{flex:0 0 64px; height:64px; border-radius:10px; border:3px solid var(--gold);
+      background:linear-gradient(135deg,#8B4513,#A0522D); box-shadow:0 4px 12px rgba(139,69,19,.3)}
+    .hero-copy{flex:1; background:linear-gradient(135deg,#FFD700,#FFA500); color:var(--brown);
+      border:2px solid var(--gold); border-radius:12px; padding:14px; font-weight:600}
 
-    /* ————————— Terry note ————————— */
-    .terry-greeting{display:flex;gap:15px;margin:18px auto 26px;max-width:900px;padding:18px;border-radius:15px;
-      border:3px solid #DAA520;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);box-shadow:0 5px 15px rgba(139,69,19,.2);position:relative;z-index:1}
-    .terry-character img{width:92px;height:92px;border-radius:12px;border:3px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.3);object-fit:cover}
-    .terry-speech{flex:1;position:relative}
-    .terry-speech::before{content:'';position:absolute;left:-12px;top:15px;border-style:solid;border-width:12px 12px 12px 0;border-color:transparent #FFD700 transparent transparent}
-    .terry-note{background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);color:#8B4513;padding:16px;border-radius:12px;border:2px solid #DAA520;font-weight:600}
+    /* ====== Two-column panels ====== */
+    .grid{
+      max-width:1200px; margin:0 auto; display:grid; gap:18px; grid-template-columns:1fr 1fr;
+    }
+    @media (max-width:1100px){ .grid{grid-template-columns:1fr} }
 
-    /* ————————— Layout ————————— */
-    .admin-container{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:20px;position:relative;z-index:1}
-    @media(max-width:1200px){.admin-container{grid-template-columns:1fr}}
     .panel{
-      background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:20px;padding:22px;
-      box-shadow:0 20px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3);position:relative;overflow:hidden
+      background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%); border-radius:20px; padding:20px;
+      border:3px solid var(--brown); box-shadow:0 18px 36px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.35);
+      position:relative; overflow:hidden;
     }
-    .panel::before{content:'';position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
-    .inner-outline{position:absolute;inset:12px;border:2px solid #DAA520;border-radius:15px;pointer-events:none}
-
-    .section-title{font-size:1.25em;font-weight:800;color:#8B4513;border-bottom:3px solid #DAA520;padding-bottom:8px;margin-bottom:16px}
-
-    /* ——— Adventure controls ——— */
-    .timer-display{
-      font-size:2.2em;font-weight:800;font-family:'Courier New',monospace;color:#8B4513;
-      padding:14px;text-align:center;margin:10px auto;border-radius:12px;border:3px solid #DAA520;
-      background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);box-shadow:0 5px 15px rgba(255,215,0,.3)
+    .panel::before{content:''; position:absolute; inset:0 0 auto 0; height:6px;
+      background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    .panel::after{content:''; position:absolute; inset:10px; border:2px solid var(--gold); border-radius:14px; pointer-events:none}
+    .panel h2{
+      margin-bottom:12px; color:var(--brown); font-size:1.25rem; font-weight:800;
+      border-bottom:3px solid var(--gold); padding-bottom:8px; display:flex; align-items:center; gap:8px;
     }
-    .timer-penalty{background:linear-gradient(135deg,#DC143C 0%,#B22222 100%);color:#fff;border-color:#8B0000;animation:pulse-pen 1s ease-in-out infinite}
-    @keyframes pulse-pen{0%,100%{transform:scale(1);box-shadow:0 5px 15px rgba(220,20,60,.4)}50%{transform:scale(1.02);box-shadow:0 8px 25px rgba(220,20,60,.6)}}
 
-    .status{font-weight:800;border:2px solid;border-radius:10px;padding:10px;text-align:center;margin:10px auto 18px}
-    .status.stopped{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
-    .status.running{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border-color:#32CD32;color:#006400}
-    .status.ended{background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);border-color:#DAA520;color:#8B4513}
-    .status.not-started{background:linear-gradient(135deg,#E6E6FA 0%,#D8BFD8 100%);border-color:#9370DB;color:#4B0082}
+    /* ====== Timer / buttons ====== */
+    .timer{
+      font-family:'Courier New',monospace; font-weight:900; font-size:2.4rem; text-align:center;
+      color:var(--brown); background:linear-gradient(135deg,#FFD700,#FFA500);
+      border:3px solid var(--gold); border-radius:12px; padding:16px; box-shadow:0 5px 15px rgba(255,215,0,.35);
+      margin-bottom:12px;
+    }
+    .timer.penalty{ background:linear-gradient(135deg,#dc143c,#b22222); color:#fff; border-color:#8b0000;
+      animation:penpulse 1s ease-in-out infinite }
+    @keyframes penpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+    .status{
+      text-align:center; font-weight:800; border-radius:10px; padding:10px; margin-bottom:14px; border:2px solid;
+      background:linear-gradient(135deg,#E6E6FA,#D8BFD8); color:#4B0082; border-color:#9370DB;  /* default - Not Started */
+    }
+    .status.running{ background:linear-gradient(135deg,#98FB98,#90EE90); color:#006400; border-color:#32CD32 }
+    .status.ended{ background:linear-gradient(135deg,#FFD700,#FFA500); color:var(--brown); border-color:var(--gold) }
 
-    .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-    @media(max-width:480px){.controls{grid-template-columns:1fr}}
+    .btns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px }
     .btn{
-      padding:14px 18px;border:none;border-radius:10px;font-weight:800;letter-spacing:.5px;cursor:pointer;
-      border:3px solid #8B4513;text-shadow:1px 1px 2px rgba(0,0,0,.2);transition:.2s
+      border:3px solid var(--brown); border-radius:10px; padding:14px 16px; font-weight:900; letter-spacing:.5px;
+      text-transform:uppercase; cursor:pointer; box-shadow:0 6px 14px rgba(0,0,0,.25); transition:.2s;
+      background:linear-gradient(135deg,#ffe9c7,#ffe0a6);
     }
-    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 15px rgba(0,0,0,.25)}
-    .btn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;transform:none}
-    .btn-start{background:linear-gradient(135deg,#32CD32,#228B22);color:#fff}
-    .btn-pause{background:linear-gradient(135deg,#FFD700,#FF8C00);color:#8B4513}
-    .btn-stop{background:linear-gradient(135deg,#DC143C,#B22222);color:#fff}
-    .btn-reset{background:linear-gradient(135deg,#A0522D,#8B4513);color:#fff}
-    .btn-publish{grid-column:1/-1;background:linear-gradient(135deg,#FFD700,#FFA500);color:#8B4513;border-width:4px}
+    .btn:hover{ transform:translateY(-2px) }
+    .btn:disabled{ opacity:.55; cursor:not-allowed; transform:none; box-shadow:none }
+    .btn.launch{ background:linear-gradient(135deg,#32cd32,#228b22); color:#fff }
+    .btn.pause{ background:linear-gradient(135deg,#ffd700,#ff8c00); color:var(--brown) }
+    .btn.end{   background:linear-gradient(135deg,#dc143c,#b22222); color:#fff }
+    .btn.reset{ background:linear-gradient(135deg,#a0522d,#8b4513); color:#fff }
 
-    /* ——— Results block ——— */
-    .results-box{background:linear-gradient(135deg,#FFFACD 0%,#F0E68C 100%);border:3px solid #DAA520;border-radius:12px;padding:14px;margin-top:12px}
-    .results-status{font-weight:800;text-align:center;border-radius:8px;padding:10px;margin-top:10px}
-    .rs-unpub{background:linear-gradient(135deg,#FFE4B5 0%,#DEB887 100%);border:2px solid #FF8C00;color:#8B4513}
-    .rs-pub{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border:2px solid #32CD32;color:#006400}
-
-    /* ——— Crew panel ——— */
-    .grid{display:grid;gap:12px;max-height:600px;overflow:auto}
-    .card{
-      background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px solid #DAA520;border-radius:12px;
-      padding:14px;box-shadow:0 4px 12px rgba(139,69,19,.1)
+    .notice{
+      border:3px solid var(--gold); border-radius:12px; padding:12px; text-align:center; font-weight:700;
+      background:linear-gradient(135deg,#FFFACD,#F0E68C);
     }
-    .card.returned{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border:3px solid #32CD32}
-    .card.late{background:linear-gradient(135deg,#FFCCCB 0%,#FFA0B4 100%);border:3px solid #DC143C}
-    .card.penalized{border-left:6px solid #DC143C}
-    .card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .name{font-weight:900;color:#8B4513}
-    .badge{padding:3px 6px;border-radius:10px;font-size:.65em;font-weight:800;margin-left:8px}
-    .b-active{background:#3498db;color:#fff}.b-returned{background:#27ae60;color:#fff}.b-late{background:#e74c3c;color:#fff}
-    .score{font-weight:900;color:#DAA520;display:flex;flex-direction:column;align-items:flex-end}
-    .score.pen{color:#DC143C}.orig{font-size:.65em;color:#888;text-decoration:line-through;margin-bottom:2px}
-    .controls-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
-    .select{padding:8px 10px;border:2px solid #DAA520;border-radius:8px;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%);font-weight:600;color:#8B4513}
-    .lock{display:flex;align-items:center;gap:6px;font-size:.85em;font-weight:600}
-    .pen-box{display:none;background:linear-gradient(135deg,#FFE4B5 0%,#DEB887 100%);border:2px solid #FF8C00;border-radius:8px;padding:10px}
-    .pen-box.show{display:block}
-    .pen-in{width:70px;text-align:center;padding:6px 8px;border:2px solid #DAA520;border-radius:6px;font-weight:800;color:#8B4513}
-    .pen-btn{background:linear-gradient(135deg,#FF8C00,#FF7700);color:#fff;border:none;border-radius:6px;padding:6px 10px;font-weight:800;cursor:pointer}
-    .pill{font-size:.78em;color:#8B4513;margin-top:6px}
+    .notice.ok{ background:linear-gradient(135deg,#98FB98,#90EE90); border-color:#32CD32; color:#006400 }
+    .notice.warn{ background:linear-gradient(135deg,#FFE4B5,#DEB887); border-color:#FF8C00; color:var(--brown) }
 
-    .loading{text-align:center;color:#8B4513;font-weight:700;padding:16px}
-    .msg{padding:12px;border-radius:10px;margin:12px 0;font-weight:700;border:2px solid}
-    .msg.ok{background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%);border-color:#32CD32;color:#064d06}
-    .msg.err{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
+    /* ====== Crew list & cards ====== */
+    .crews{
+      background:linear-gradient(145deg,#fff,#fff9ed); border:2px solid #d2691e; border-radius:14px; padding:16px;
+      min-height:260px; box-shadow:inset 0 2px 10px rgba(0,0,0,.08);
+    }
+    .crews-grid{ display:grid; gap:10px; max-height:520px; overflow:auto }
+    .crew{
+      background:linear-gradient(145deg,#FFF8DC,#F5E6D3); border:2px solid var(--gold); border-radius:12px; padding:12px;
+      display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
+    }
+    .crew.late{ background:linear-gradient(135deg,#FFCCCB,#FFA0B4); border-color:#DC143C }
+    .crew.returned{ background:linear-gradient(135deg,#98FB98,#90EE90); border-color:#32CD32 }
+    .c-title{ font-weight:900; color:var(--brown); display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+    .badge{ font-size:.72rem; border-radius:999px; padding:4px 8px; font-weight:800; color:#fff }
+    .b-active{ background:#3498db } .b-returned{ background:#27ae60 } .b-late{ background:#e74c3c }
+    .score{ text-align:right; font-weight:900; color:var(--gold); }
+    .score .orig{ font-size:.75rem; color:#999; text-decoration:line-through; display:block }
+    .pen{ font-size:.85rem; color:#8b0000; margin-top:4px }
 
-    /* ——— Stats ——— */
-    .stats{max-width:1400px;margin:18px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-    .s{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:12px;padding:16px;text-align:center}
-    .s:before{content:'';display:block;height:4px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700);margin:-16px -16px 12px;border-top-left-radius:12px;border-top-right-radius:12px}
-    .s-num{font-size:1.6em;font-weight:900;color:#8B4513}
-    .s-lbl{font-weight:700;color:#A0522D;margin-top:6px}
-    @media(max-width:768px){.admin-container{gap:14px}.stats{grid-template-columns:repeat(2,1fr)}}
+    /* ====== Stats footer ====== */
+    .stats{ max-width:1200px; margin:18px auto 0; display:grid; gap:14px; grid-template-columns:repeat(4,1fr)}
+    .stat{
+      background:linear-gradient(145deg,#F5E6D3,#E8D7C3); border:3px solid var(--brown); border-radius:12px;
+      padding:16px; text-align:center; box-shadow:0 5px 15px rgba(139,69,19,.2);
+      position:relative; overflow:hidden;
+    }
+    .stat::before{ content:''; position:absolute; left:0; right:0; top:0; height:4px;
+      background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    .stat-val{ font-weight:900; font-size:1.6rem; color:var(--brown) }
+    .stat-lab{ font-weight:700; color:#a0522d; margin-top:6px }
+
+    /* ====== Modal ====== */
+    .modal{ position:fixed; inset:0; background:rgba(0,0,0,.65); display:none; align-items:center; justify-content:center; z-index:1500 }
+    .modal-card{ max-width:520px; width:92%; background:linear-gradient(145deg,#F5E6D3,#E8D7C3);
+      border:3px solid var(--brown); border-radius:18px; padding:22px; box-shadow:0 24px 48px rgba(0,0,0,.35)}
+    .modal h3{ color:var(--brown); margin-bottom:10px }
+    .modal .row{ display:flex; gap:10px; justify-content:center; margin-top:16px}
+    .ghost{ opacity:.65 }
   </style>
 </head>
 <body>
-  <!-- Nav -->
+  <!-- NAV -->
   <nav class="treasure-nav">
-    <div class="nav-container">
-      <a class="nav-logo" href="/">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
-      </a>
-    </div>
+    <a class="nav-logo" href="/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
   </nav>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="logo">🏴‍☠️</div>
-    <h1>Command Centre</h1>
-    <p class="subtitle">Start • Pause • End • Publish • Manage Crews</p>
+  <!-- HERO -->
+  <div class="hero">
+    <img class="hero-img" src="/terry-clock.png" alt="">
+    <div class="hero-copy">
+      Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.
+    </div>
   </div>
 
-  <!-- Terry note -->
-  <div class="terry-greeting">
-    <div class="terry-character"><img src="/terry-clock.png" alt="Captain Terry"></div>
-    <div class="terry-speech">
-      <div class="terry-note">
-        Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.
+  <!-- GRID -->
+  <div class="grid">
+    <!-- LEFT: CONTROL -->
+    <section class="panel" id="leftPanel">
+      <h2>⚓ Adventure Control</h2>
+
+      <div class="timer" id="timer">01:30:00</div>
+      <div class="status" id="status">Not Started</div>
+
+      <div class="btns">
+        <button class="btn launch" id="btnStart">🚀 Launch</button>
+        <button class="btn pause" id="btnPause" disabled>⏸️ Pause</button>
+        <button class="btn end"   id="btnEnd"   disabled>⏹️ End</button>
+        <button class="btn reset" id="btnReset">🔄 Reset</button>
+      </div>
+
+      <button class="btn" id="btnPublish" style="width:100%; border-width:4px; background:linear-gradient(135deg,#FFD700,#FFA500); color:var(--brown); font-size:1.05rem" disabled>
+        🏆 Publish Final Results
+      </button>
+
+      <div id="resultsNotice" class="notice" style="margin-top:12px">🔒 Results not published</div>
+    </section>
+
+    <!-- RIGHT: CREWS -->
+    <section class="panel">
+      <h2>👥 Crew Management</h2>
+      <div class="crews">
+        <div id="crewLoading" class="notice warn">🔎 Loading crews…</div>
+        <div id="crewError" class="notice" style="display:none; background:linear-gradient(135deg,#FFB6C1,#FFA0B4); border-color:#DC143C; color:#8B0000">Failed to load crew list.</div>
+        <div id="crewsGrid" class="crews-grid" style="display:none;"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="stTotal">0</div><div class="stat-lab">Total Crews</div></div>
+    <div class="stat"><div class="stat-val" id="stActive">0</div><div class="stat-lab">Active</div></div>
+    <div class="stat"><div class="stat-val" id="stReturned">0</div><div class="stat-lab">Returned</div></div>
+    <div class="stat"><div class="stat-val" id="stPenalised">0</div><div class="stat-lab">Penalised</div></div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirmModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmTitle">
+    <div class="modal-card">
+      <h3 id="confirmTitle">Confirm</h3>
+      <div id="confirmMsg" class="ghost">Are you sure?</div>
+      <div class="row">
+        <button class="btn reset" id="confirmCancel">Cancel</button>
+        <button class="btn launch" id="confirmOk">Confirm</button>
       </div>
     </div>
   </div>
 
-  <div class="admin-container">
-    <!-- Adventure control -->
-    <section class="panel">
-      <div class="inner-outline"></div>
-      <h2 class="section-title">⚓ Adventure Control</h2>
-
-      <div id="timerDisplay" class="timer-display">--:--:--</div>
-      <div id="timerStatus" class="status not-started">Not Started</div>
-
-      <div class="controls">
-        <button id="startBtn"  class="btn btn-start" onclick="startAdventure()">🚀 Launch</button>
-        <button id="pauseBtn"  class="btn btn-pause" onclick="pauseAdventure()" disabled>⏸️ Pause</button>
-        <button id="stopBtn"   class="btn btn-stop"  onclick="stopAdventure()"  disabled>⏹️ End</button>
-        <button id="resetBtn"  class="btn btn-reset" onclick="resetTimer()">🔄 Reset</button>
-        <button id="publishBtn"class="btn btn-publish" onclick="publishResults()" disabled>🏆 Publish Final Results</button>
-      </div>
-
-      <div class="results-box">
-        <div id="resultsStatus" class="results-status rs-unpub">🔒 Results not published</div>
-      </div>
-    </section>
-
-    <!-- Crew management -->
-    <section class="panel">
-      <div class="inner-outline"></div>
-      <h2 class="section-title">👥 Crew Management</h2>
-
-      <div id="loading" class="loading">🔎 Loading crews…</div>
-
-      <div id="crewsContent" style="display:none">
-        <div id="crewsGrid" class="grid"></div>
-      </div>
-
-      <div id="messages"></div>
-    </section>
-  </div>
-
-  <!-- Stats -->
-  <div class="stats">
-    <div class="s"><div id="totalCrews"   class="s-num">-</div><div class="s-lbl">Total Crews</div></div>
-    <div class="s"><div id="activeCrews"  class="s-num">-</div><div class="s-lbl">Active</div></div>
-    <div class="s"><div id="returnedCrews"class="s-num">-</div><div class="s-lbl">Returned</div></div>
-    <div class="s"><div id="penalizedCrews"class="s-num">-</div><div class="s-lbl">Penalised</div></div>
-  </div>
-
   <script>
-    /* =======================
-       Endpoints (new names)
-       ======================= */
-    const FN = (n) => `${location.origin}/.netlify/functions/${n}`;
-    const GET_STATE_FN       = 'get_event_state';
-    const GET_LEADERBOARD_FN = 'get_leaderboard';
-    const START_EVENT_FN     = 'admin_start_event';
-    const PUBLISH_RESULTS_FN = 'admin_publish_final';
-    const CHECKIN_TEAM_FN    = 'admin_checkin_team';
-    const TOGGLE_LOCK_FN     = 'admin_toggle_lock_team';
-
-    /* =======================
-       State
-       ======================= */
-    let adventureState = {
-      backendStatus:null,
-      isRunning:false,
-      isPaused:false,
-      hasEnded:false,
-      timeRemaining:90*60,
-      startTime:null,
-      crews:[],
-      resultsPublished:false,
-      competitionData:null,
-      penaltyMode:false,
-      penaltyMinutes:0,
-      allTeamsReturned:false
+  (function(){
+    // ---- state ----
+    let state = {
+      eventId: null,
+      status: 'not_started',   // not_started | running | stopped
+      startTime: null,         // ISO
+      durationMin: 90,
+      endsAt: null,            // ISO
+      penaltyPerMin: 0,
+      resultsPublished: false,
+      crews: [],
+      timerTick: null,
+      refreshTick: null
     };
 
-    let timerInterval=null, dataInterval=null;
+    // ---- els ----
+    const elTimer = document.getElementById('timer');
+    const elStatus = document.getElementById('status');
+    const btnStart = document.getElementById('btnStart');
+    const btnPause = document.getElementById('btnPause');
+    const btnEnd   = document.getElementById('btnEnd');
+    const btnReset = document.getElementById('btnReset');
+    const btnPublish = document.getElementById('btnPublish');
+    const resultsNotice = document.getElementById('resultsNotice');
 
-    document.addEventListener('DOMContentLoaded', () => {
-      loadCurrentState();
-      dataInterval = setInterval(loadCurrentState, 30000);
-    });
+    const crewLoading = document.getElementById('crewLoading');
+    const crewError   = document.getElementById('crewError');
+    const crewsGrid   = document.getElementById('crewsGrid');
 
-    window.addEventListener('beforeunload', () => {
-      if (timerInterval) clearInterval(timerInterval);
-      if (dataInterval) clearInterval(dataInterval);
-    });
+    const stTotal = document.getElementById('stTotal');
+    const stActive = document.getElementById('stActive');
+    const stReturned = document.getElementById('stReturned');
+    const stPenalised = document.getElementById('stPenalised');
 
-    /* =======================
-       Load / Sync
-       ======================= */
-    async function loadCurrentState(){
+    // ---- helpers ----
+    const pad = n => String(n).padStart(2,'0');
+    function msToHMS(ms){
+      if (ms < 0) ms = 0;
+      const s = Math.floor(ms/1000);
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const r = s%60;
+      return `${pad(h)}:${pad(m)}:${pad(r)}`;
+    }
+    function setStatus(label, cls){
+      elStatus.textContent = label;
+      elStatus.className = `status ${cls||''}`;
+    }
+    function setButtons(){
+      const running = state.status === 'running';
+      const stopped = state.status === 'stopped';
+      const notStarted = state.status === 'not_started';
+      btnStart.disabled  = running || state.resultsPublished;
+      btnPause.disabled  = !running || state.resultsPublished;
+      btnEnd.disabled    = (!running && !notStarted) ? false : !running;
+      btnReset.disabled  = running;
+      btnPublish.disabled = !stopped || state.resultsPublished;
+    }
+    function showModal(title, msg, onConfirm){
+      const modal = document.getElementById('confirmModal');
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmMsg').innerHTML = msg;
+      modal.style.display='flex';
+      const cancel = document.getElementById('confirmCancel');
+      const ok = document.getElementById('confirmOk');
+      const cleanup = ()=>{ modal.style.display='none'; ok.onclick = cancel.onclick = null; };
+      cancel.onclick = cleanup;
+      ok.onclick = async ()=>{ try{ await onConfirm?.(); } finally{ cleanup(); } };
+    }
+
+    // ---- fetchers ----
+    async function fetchJSON(url, opts){
+      const res = await fetch(url, opts);
+      if(!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+      return res.json();
+    }
+
+    async function loadEvent(){
+      const data = await fetchJSON('/.netlify/functions/get_event_state');
+      if(!data.success) throw new Error(data.message || 'get_event_state failed');
+      state.eventId = data.eventId;
+      state.penaltyPerMin = Number(data.penaltyPerMin || 0);
+      // state mapping
+      const st = (data.state || '').toUpperCase();
+      if(st === 'READY' || st === 'NOT_STARTED' || !data.startedAt){
+        state.status = 'not_started';
+        state.startTime = null; state.endsAt = null;
+      } else if (st === 'RUNNING' || st === 'STARTED'){
+        state.status = 'running';
+        state.startTime = data.startedAt;
+        state.endsAt = data.endsAt || null;
+      } else if (st === 'STOP' || st === 'STOPPED' || st === 'ENDED'){
+        state.status = 'stopped';
+        state.startTime = data.startedAt || null;
+        state.endsAt = data.endsAt || null;
+      }
+      // update duration if provided
+      if (data.durationMin || data.durationMinutes) {
+        state.durationMin = Number(data.durationMin || data.durationMinutes);
+      }
+      // UI
+      if (state.status==='running'){
+        setStatus('Adventure in Progress','running');
+      } else if (state.status==='stopped'){
+        setStatus('Adventure Complete','ended');
+      } else {
+        setStatus('Not Started','');
+      }
+      setButtons();
+      startTimerLoop();
+    }
+
+    async function loadCrews(){
+      if(!state.eventId) return;
+      crewLoading.style.display='block';
+      crewError.style.display='none';
+      crewsGrid.style.display='none';
+
       try{
-        // primary state
-        let res = await fetch(FN(GET_STATE_FN));
-        let data = await res.json();
-        if(!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
-
-        // fallback to leaderboard if needed
-        if(!data || (!data.success && !Array.isArray(data.teams) && !Array.isArray(data.leaderboard))){
-          const r2 = await fetch(FN(GET_LEADERBOARD_FN));
-          const d2 = await r2.json();
-          if(r2.ok) data = d2;
-        }
-
-        adventureState.backendStatus    = (data.competitionStatus || data.status || '').toLowerCase();
-        adventureState.resultsPublished = data.resultsPublished === true || data.resultsPublished === 'yes';
-        adventureState.crews            = data.teams || data.leaderboard || [];
-        adventureState.competitionData  = data;
-
-        // compute timer if we have times
-        if(data.startTime && data.durationMinutes){
-          const end = new Date(data.startTime).getTime() + data.durationMinutes*60*1000;
-          const now = Date.now();
-          adventureState.timeRemaining = Math.max(0, Math.floor((end-now)/1000));
-          adventureState.penaltyMode   = now > end;
-          adventureState.penaltyMinutes= adventureState.penaltyMode ? Math.ceil((now-end)/60000) : 0;
-        }
-
-        syncWithBackendState();
-        updateTimerDisplay();
-        updateButtons();
-        updateResultsBox();
-        renderCrews(adventureState.crews);
-        updateStats(adventureState.crews);
-
-        document.getElementById('loading').style.display='none';
-        document.getElementById('crewsContent').style.display='block';
+        const data = await fetchJSON(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(state.eventId)}`);
+        if(!data.success) throw new Error(data.message || 'admin_list_teams failed');
+        state.crews = data.teams || data.leaderboard || [];
+        renderCrews();
       }catch(e){
-        show('Failed to load current status: '+e.message,'err');
+        crewError.style.display='block';
+        crewError.textContent = `Failed to load crew list: ${e.message}`;
+      }finally{
+        crewLoading.style.display='none';
       }
     }
 
-    function syncWithBackendState(){
-      const st = adventureState.backendStatus;
-      if(st==='start' || st==='running'){
-        adventureState.isRunning = true;
-        adventureState.isPaused  = false;
-        adventureState.hasEnded  = false;
-        if(!timerInterval) startTicker();
-      }else if(st==='stop' || st==='stopped'){
-        adventureState.isRunning=false;
-        adventureState.isPaused=false;
-        adventureState.hasEnded=true;
-        if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    // ---- render ----
+    function renderCrews(){
+      crewsGrid.innerHTML='';
+      const list = state.crews.slice(); // already sorted server-side usually
+      if(list.length===0){
+        crewsGrid.style.display='block';
+        crewsGrid.innerHTML = `<div class="notice warn">No registered crews yet.</div>`;
       }else{
-        adventureState.isRunning=false;
-        adventureState.isPaused=false;
-        adventureState.hasEnded=false;
-        adventureState.timeRemaining = adventureState.timeRemaining || 90*60;
-        if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-      }
-      // all returned?
-      const active = adventureState.crews.filter(c => (c.status||'active')==='active').length;
-      adventureState.allTeamsReturned = adventureState.crews.length>0 && active===0;
-    }
+        crewsGrid.style.display='grid';
+        list.forEach(team=>{
+          const code = team.teamCode || team.code || '';
+          const name = team.teamName || team.name || code || 'Crew';
+          const status = (team.status || 'active').toLowerCase(); // active | returned | late
+          const total = Number(team.totalScore || team.total || 0);
+          const penalty = Number(team.penalty || 0);
+          const adj = Math.max(0, total - penalty);
+          const minsLate = Number(team.penaltyMinutes || 0);
 
-    /* =======================
-       Timer
-       ======================= */
-    function startTicker(){
-      if(timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(()=>{
-        if(adventureState.isRunning && !adventureState.isPaused){
-          if(adventureState.timeRemaining>0){
-            adventureState.timeRemaining--;
-            if(adventureState.timeRemaining<=0){
-              adventureState.penaltyMode = true;
-              adventureState.penaltyMinutes = 1;
-              show('⚠️ Time expired — late penalties active','err');
-            }
-          }else if(adventureState.penaltyMode && !adventureState.allTeamsReturned){
-            // derive from real time if startTime present
-            const d = adventureState.competitionData;
-            if(d?.startTime && d?.durationMinutes){
-              const end = new Date(d.startTime).getTime()+d.durationMinutes*60*1000;
-              adventureState.penaltyMinutes = Math.max(1, Math.ceil((Date.now()-end)/60000));
-            }else{
-              adventureState.penaltyMinutes++;
-            }
-          }
-          updateTimerDisplay(); updateResultsBox();
-        }
-      },1000);
-    }
-
-    function fmt(sec){
-      const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
-      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    }
-
-    function updateTimerDisplay(){
-      const el = document.getElementById('timerDisplay');
-      const st = document.getElementById('timerStatus');
-
-      if(adventureState.penaltyMode && adventureState.isRunning){
-        const p = adventureState.penaltyMinutes*60;
-        el.textContent = `+${fmt(p)}`;
-        el.className = 'timer-display timer-penalty';
-        st.textContent = adventureState.allTeamsReturned ? 'All Crews Returned' : 'Penalty Phase';
-        st.className = 'status stopped';
-      }else{
-        el.textContent = fmt(Math.max(0, adventureState.timeRemaining));
-        el.className = 'timer-display';
-        if(adventureState.resultsPublished){ st.textContent='Final Results Published'; st.className='status ended'; }
-        else if(adventureState.hasEnded){     st.textContent='Adventure Complete';     st.className='status ended'; }
-        else if(adventureState.isRunning){    st.textContent='Adventure in Progress';  st.className='status running'; }
-        else{                                  st.textContent='Not Started';            st.className='status not-started'; }
-      }
-    }
-
-    /* =======================
-       Buttons / Results UI
-       ======================= */
-    function updateButtons(){
-      const start=document.getElementById('startBtn');
-      const pause=document.getElementById('pauseBtn');
-      const stop =document.getElementById('stopBtn');
-      const reset=document.getElementById('resetBtn');
-      const pub  =document.getElementById('publishBtn');
-
-      if(adventureState.resultsPublished){
-        start.disabled=pause.disabled=stop.disabled=true; reset.disabled=false; pub.disabled=true;
-        start.textContent='🏆 Results Published';
-      }else if(adventureState.hasEnded || adventureState.allTeamsReturned){
-        start.disabled=true; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=false;
-        start.textContent='🔒 Adventure Ended';
-      }else if(adventureState.isRunning){
-        start.disabled=true; pause.disabled=false; stop.disabled=false; reset.disabled=true; pub.disabled=true;
-        start.textContent='✅ Running';
-      }else{
-        start.disabled=false; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=true;
-        start.textContent='🚀 Launch';
-      }
-    }
-
-    function updateResultsBox(){
-      const box = document.getElementById('resultsStatus');
-      if(adventureState.resultsPublished){
-        box.textContent='🏆 Results Published — Gallery Unlocked';
-        box.className='results-status rs-pub';
-      }else{
-        box.textContent='🔒 Results not published';
-        box.className='results-status rs-unpub';
-      }
-    }
-
-    /* =======================
-       Crew rendering
-       ======================= */
-    function renderCrews(list){
-      const grid = document.getElementById('crewsGrid');
-      grid.innerHTML='';
-      (list||[]).forEach(team=>{
-        const code = team.teamCode||team.code||'';
-        const name = team.teamName||team.name||code;
-        const status = team.status||'active';
-        const total = team.totalScore||team.total||0;
-        const penalty = team.penalty||0;
-        const penMin  = team.penaltyMinutes||0;
-        const locked = !!team.locked;
-
-        const adjusted = Math.max(0, total - penalty);
-        const card = document.createElement('div');
-        let cls = 'card';
-        if(status==='returned') cls+=' returned';
-        if(status==='late')     cls+=' late';
-        if(penalty>0)           cls+=' penalized';
-        card.className = cls;
-
-        const badge =
-          `<span class="badge ${status==='active'?'b-active':(penalty>0?'b-late':'b-returned')}">
-             ${status==='active'?'Active':'Returned'}
-           </span>`;
-
-        const score =
-          penalty>0
-            ? `<div class="score pen"><div class="orig">${total}</div>${adjusted} 🪙</div>`
-            : `<div class="score">${total} 🪙</div>`;
-
-        const penInfo = penalty>0
-          ? `<div class="pill">⚠️ Late penalty: -${penalty} (${penMin} min)</div>`
-          : '';
-
-        const disableControls = !adventureState.isRunning ? 'disabled' : '';
-
-        card.innerHTML = `
-          <div class="card-head">
-            <div class="name">${name} ${badge}</div>
-            ${score}
-          </div>
-
-          ${penInfo}
-
-          <div class="controls-row">
-            <select class="select ${penalty>0?'b-late':''}"
-                    onchange="handleStatusChange('${code}', this.value, ${total}, ${penalty})"
-                    ${disableControls}>
-              <option value="active"   ${status==='active'?'selected':''}>🏴‍☠️ Active</option>
-              <option value="returned" ${status!=='active'?'selected':''}>⚓ Returned</option>
-            </select>
-
-            <label class="lock">
-              <input type="checkbox" ${locked?'checked':''} ${disableControls}
-                     onchange="toggleCrewLock('${code}', this.checked)"/>
-              🔒 Lock Doubloons
-            </label>
-          </div>
-
-          <div class="pen-box ${penalty>0 && adventureState.isRunning?'show':''}" id="penalty-override-${code}">
-            <strong>Manual Penalty</strong>
-            <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-              <input id="penalty-input-${code}" class="pen-in" type="number" min="0" step="1" value="${penalty}">
-              <span>doubloons</span>
-              <button class="pen-btn" onclick="applyManualPenalty('${code}')">Apply</button>
+          const div = document.createElement('div');
+          div.className = 'crew' + (status==='late' ? ' late' : status==='returned' ? ' returned' : '');
+          div.innerHTML = `
+            <div>
+              <div class="c-title">
+                ${name}
+                <span class="badge ${status==='active'?'b-active':status==='late'?'b-late':'b-returned'}">
+                  ${status==='active'?'Active':status==='late'?'Returned (Late)':'Returned'}
+                </span>
+              </div>
+              ${penalty>0 ? `<div class="pen">⚠️ Late penalty: -${penalty} (${minsLate} min)</div>`:''}
             </div>
-          </div>
-
-          <div class="pill">${code} | Reg: ${team.registration||0} • Map: ${team.clueHunt||0} • Quiz: ${team.quiz||0}</div>
-        `;
-        grid.appendChild(card);
-      });
-    }
-
-    /* =======================
-       Actions (endpoints)
-       ======================= */
-    async function startAdventure(){
-      try{
-        const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start'})});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        adventureState.isRunning=true; adventureState.isPaused=false; startTicker();
-        updateButtons(); updateTimerDisplay(); updateResultsBox(); show('🚀 Adventure launched!','ok');
-        setTimeout(loadCurrentState,1000);
-      }catch(e){show('Failed to launch: '+e.message,'err')}
-    }
-
-    async function pauseAdventure(){
-      try{
-        const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop'})});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        adventureState.isPaused=true; adventureState.isRunning=false;
-        updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⏸️ Paused','ok');
-      }catch(e){show('Failed to pause: '+e.message,'err')}
-    }
-
-    async function stopAdventure(){
-      try{
-        const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop'})});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        adventureState.isRunning=false; adventureState.isPaused=false; adventureState.hasEnded=true;
-        if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-        updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⚓ Adventure ended','ok');
-      }catch(e){show('Failed to end: '+e.message,'err')}
-    }
-
-    async function resetTimer(){
-      if(!confirm('Reset for a new adventure?')) return;
-      try{
-        const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset'})});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-
-        adventureState = {backendStatus:null,isRunning:false,isPaused:false,hasEnded:false,timeRemaining:90*60,startTime:null,
-                          crews:[],resultsPublished:false,competitionData:null,penaltyMode:false,penaltyMinutes:0,allTeamsReturned:false};
-        if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-        updateButtons(); updateTimerDisplay(); updateResultsBox(); renderCrews([]);
-        show('🔄 Reset complete','ok');
-      }catch(e){show('Failed to reset: '+e.message,'err')}
-    }
-
-    async function publishResults(){
-      if(!confirm('Publish final results and unlock the gallery?')) return;
-      try{
-        const r = await fetch(FN(PUBLISH_RESULTS_FN), {method:'POST'});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        adventureState.resultsPublished=true; updateButtons(); updateTimerDisplay(); updateResultsBox();
-        show('🏆 Results published','ok');
-      }catch(e){show('Failed to publish: '+e.message,'err')}
-    }
-
-    // Status changes / penalties / locking
-    let pendingChange=null;
-    function handleStatusChange(code,newStatus,currentScore,currentPenalty){
-      if(newStatus==='returned'){
-        // auto late if in penalty window
-        const penalty = (adventureState.penaltyMode && adventureState.penaltyMinutes>0)
-          ? adventureState.penaltyMinutes*3 : 0;
-        updateCrewStatus(code, penalty>0?'late':'returned', penalty);
-      }else{
-        updateCrewStatus(code,'active',0);
+            <div class="score">
+              ${penalty>0 ? `<span class="orig">${total}</span>`:''}
+              ${adj} 🪙
+            </div>
+          `;
+          crewsGrid.appendChild(div);
+        });
       }
+      // stats
+      const totalCrews = list.length;
+      const active = list.filter(t=> (t.status||'active')==='active').length;
+      const returned = list.filter(t=> ['returned','late'].includes((t.status||'active'))).length;
+      const penalised = list.filter(t=> Number(t.penalty||0)>0).length;
+      stTotal.textContent = totalCrews;
+      stActive.textContent = active;
+      stReturned.textContent = returned;
+      stPenalised.textContent = penalised;
     }
 
-    async function updateCrewStatus(teamCode,status,penalty){
-      try{
-        const payload = {
-          teamCode,
-          status,
-          penalty: penalty||0,
-          penaltyMinutes: penalty ? Math.ceil(penalty/3) : (adventureState.penaltyMinutes||0),
-          returnTime: new Date().toISOString()
-        };
-        const r = await fetch(FN(CHECKIN_TEAM_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        await loadCurrentState();
-        show(status==='active'?'Crew set active': (penalty>0? `Returned late (-${penalty})` : 'Returned'),'ok');
-      }catch(e){show('Failed to update crew: '+e.message,'err')}
-    }
-
-    async function applyManualPenalty(teamCode){
-      const v = parseInt(document.getElementById(`penalty-input-${teamCode}`).value)||0;
-      await updateCrewStatus(teamCode, v>0?'late':'returned', v);
-    }
-
-    async function toggleCrewLock(teamCode,locked){
-      try{
-        const r = await fetch(FN(TOGGLE_LOCK_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({teamCode,locked:!!locked})});
-        const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-        show(`Crew ${teamCode} ${locked?'locked':'unlocked'}`,'ok');
-      }catch(e){show('Failed to toggle lock: '+e.message,'err')}
-    }
-
-    /* =======================
-       Stats / Messages
-       ======================= */
-    function updateStats(crews){
-      const total = crews.length;
-      const active = crews.filter(c=>(c.status||'active')==='active').length;
-      const returned = crews.filter(c=>['returned','late'].includes(c.status)).length;
-      const penalized = crews.filter(c=>(c.penalty||0)>0).length;
-      document.getElementById('totalCrews').textContent=total;
-      document.getElementById('activeCrews').textContent=active;
-      document.getElementById('returnedCrews').textContent=returned;
-      document.getElementById('penalizedCrews').textContent=penalized;
-    }
-
-    function show(text,type){
-      const box=document.getElementById('messages');
-      const el=document.createElement('div');
-      el.className='msg '+(type==='err'?'err':'ok');
-      el.textContent=text;
-      box.appendChild(el);
-      setTimeout(()=>{el.remove()},4500);
-    }
-  </script>
-  <script>
-  /* =======================
-     Endpoints (new names)
-     ======================= */
-  const FN = (n, q) => {
-    const url = new URL(`${location.origin}/.netlify/functions/${n}`);
-    if (q) Object.entries(q).forEach(([k, v]) => (v !== undefined && v !== null) && url.searchParams.set(k, v));
-    return url.toString();
-  };
-  const urlParams = new URLSearchParams(location.search);
-  const EVENT_ID = urlParams.get('event') || undefined;
-
-  const GET_STATE_FN       = 'get_event_state';
-  const LIST_TEAMS_FN      = 'admin_list_teams';
-  const GET_LEADERBOARD_FN = 'get_leaderboard';
-  const START_EVENT_FN     = 'admin_start_event';
-  const PUBLISH_RESULTS_FN = 'admin_publish_final';
-  const CHECKIN_TEAM_FN    = 'admin_checkin_team';
-  const TOGGLE_LOCK_FN     = 'admin_toggle_lock_team';
-
-  /* =======================
-     State
-     ======================= */
-  let adventureState = {
-    backendStatus:null,
-    isRunning:false,
-    isPaused:false,
-    hasEnded:false,
-    timeRemaining:90*60,
-    startTime:null,
-    crews:[],
-    resultsPublished:false,
-    competitionData:null,
-    penaltyMode:false,
-    penaltyMinutes:0,
-    allTeamsReturned:false
-  };
-
-  let timerInterval=null, dataInterval=null;
-
-  document.addEventListener('DOMContentLoaded', () => {
-    loadCurrentState();
-    dataInterval = setInterval(loadCurrentState, 30000);
-  });
-
-  window.addEventListener('beforeunload', () => {
-    if (timerInterval) clearInterval(timerInterval);
-    if (dataInterval) clearInterval(dataInterval);
-  });
-
-  /* =======================
-     Load / Sync
-     ======================= */
-  async function loadCurrentState(){
-    try{
-      // 1) Timer / status / results flags
-      const stRes = await fetch(FN(GET_STATE_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
-      const st = await stRes.json();
-      if(!stRes.ok) throw new Error(st?.error || `HTTP ${stRes.status}`);
-
-      adventureState.backendStatus    = (st.competitionStatus || st.status || '').toLowerCase();
-      adventureState.resultsPublished = st.resultsPublished === true || st.resultsPublished === 'yes';
-      adventureState.competitionData  = st;
-
-      // 2) Crews — primary: admin_list_teams
-      let teams = [];
-      try{
-        const listRes = await fetch(FN(LIST_TEAMS_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
-        const list = await listRes.json();
-        if (listRes.ok && (list.success || Array.isArray(list.teams))) {
-          teams = list.teams || [];
+    // ---- timer ----
+    function startTimerLoop(){
+      if(state.timerTick){ clearInterval(state.timerTick); state.timerTick=null; }
+      const compute = ()=>{
+        if (state.status==='not_started'){
+          elTimer.classList.remove('penalty');
+          elTimer.textContent = msToHMS(state.durationMin*60*1000);
+          resultsNotice.className = 'notice';
+          resultsNotice.innerHTML = '🔒 Results not published';
+          return;
         }
-      }catch(e){
-        // soft-fail; we’ll try leaderboard next
-        console.warn('admin_list_teams failed:', e);
-      }
-
-      // 3) Fallback to leaderboard if needed
-      if (teams.length === 0) {
-        try{
-          const lbRes = await fetch(FN(GET_LEADERBOARD_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
-          const lb = await lbRes.json();
-          if (lbRes.ok && (lb.success || Array.isArray(lb.teams) || Array.isArray(lb.leaderboard))) {
-            teams = lb.teams || lb.leaderboard || [];
-            // adopt published flag from leaderboard if present
-            if (typeof lb.resultsPublished !== 'undefined') {
-              adventureState.resultsPublished = lb.resultsPublished === true || lb.resultsPublished === 'yes';
-            }
-          }
-        }catch(e){
-          console.warn('get_leaderboard fallback failed:', e);
+        if (!state.startTime || !state.durationMin){
+          elTimer.classList.remove('penalty');
+          elTimer.textContent = '— : — — : — —';
+          return;
         }
-      }
-
-      adventureState.crews = Array.isArray(teams) ? teams : [];
-
-      // 4) Compute timer / penalty from state
-      if(st.startTime && st.durationMinutes){
-        const end = new Date(st.startTime).getTime() + st.durationMinutes*60*1000;
+        const start = new Date(state.startTime).getTime();
+        const end = start + state.durationMin*60*1000;
         const now = Date.now();
-        adventureState.timeRemaining = Math.max(0, Math.floor((end-now)/1000));
-        adventureState.penaltyMode   = now > end;
-        adventureState.penaltyMinutes= adventureState.penaltyMode ? Math.ceil((now-end)/60000) : 0;
-      }
+        const delta = end - now;
 
-      syncWithBackendState();
-      updateTimerDisplay();
-      updateButtons();
-      updateResultsBox();
-      renderCrews(adventureState.crews);
-      updateStats(adventureState.crews);
-
-      document.getElementById('loading').style.display='none';
-      document.getElementById('crewsContent').style.display='block';
-    }catch(e){
-      show('Failed to load current status: '+e.message,'err');
-      console.error(e);
-    }
-  }
-
-  function syncWithBackendState(){
-    const st = adventureState.backendStatus;
-    if(st==='start' || st==='running'){
-      adventureState.isRunning = true;
-      adventureState.isPaused  = false;
-      adventureState.hasEnded  = false;
-      if(!timerInterval) startTicker();
-    }else if(st==='stop' || st==='stopped'){
-      adventureState.isRunning=false;
-      adventureState.isPaused=false;
-      adventureState.hasEnded=true;
-      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-    }else{
-      adventureState.isRunning=false;
-      adventureState.isPaused=false;
-      adventureState.hasEnded=false;
-      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-    }
-    const active = adventureState.crews.filter(c => (c.status||'active')==='active').length;
-    adventureState.allTeamsReturned = adventureState.crews.length>0 && active===0;
-  }
-
-  /* =======================
-     Timer helpers (unchanged)
-     ======================= */
-  function startTicker(){
-    if(timerInterval) clearInterval(timerInterval);
-    timerInterval = setInterval(()=>{
-      if(adventureState.isRunning && !adventureState.isPaused){
-        if(adventureState.timeRemaining>0){
-          adventureState.timeRemaining--;
-          if(adventureState.timeRemaining<=0){
-            adventureState.penaltyMode = true;
-            adventureState.penaltyMinutes = 1;
-            show('⚠️ Time expired — late penalties active','err');
-          }
-        }else if(adventureState.penaltyMode && !adventureState.allTeamsReturned){
-          const d = adventureState.competitionData;
-          if(d?.startTime && d?.durationMinutes){
-            const end = new Date(d.startTime).getTime()+d.durationMinutes*60*1000;
-            adventureState.penaltyMinutes = Math.max(1, Math.ceil((Date.now()-end)/60000));
-          }else{
-            adventureState.penaltyMinutes++;
-          }
+        if (delta >= 0){
+          // countdown
+          elTimer.classList.remove('penalty');
+          elTimer.textContent = msToHMS(delta);
+        }else{
+          // overtime (penalty phase visual)
+          elTimer.classList.add('penalty');
+          const over = now - end;
+          const s = Math.floor(over/1000);
+          const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), r = s%60;
+          elTimer.textContent = `+${pad(h)}:${pad(m)}:${pad(r)}`;
         }
-        updateTimerDisplay(); updateResultsBox();
-      }
-    },1000);
-  }
-  function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
-  function updateTimerDisplay(){
-    const el=document.getElementById('timerDisplay');
-    const st=document.getElementById('timerStatus');
-    if(adventureState.penaltyMode && adventureState.isRunning){
-      el.textContent = `+${fmt(adventureState.penaltyMinutes*60)}`;
-      el.className='timer-display timer-penalty';
-      st.textContent = adventureState.allTeamsReturned ? 'All Crews Returned' : 'Penalty Phase';
-      st.className='status stopped';
-    }else{
-      el.textContent = fmt(Math.max(0, adventureState.timeRemaining));
-      el.className='timer-display';
-      if(adventureState.resultsPublished){st.textContent='Final Results Published';st.className='status ended';}
-      else if(adventureState.hasEnded){st.textContent='Adventure Complete';st.className='status ended';}
-      else if(adventureState.isRunning){st.textContent='Adventure in Progress';st.className='status running';}
-      else{st.textContent='Not Started';st.className='status not-started';}
-    }
-  }
 
-  /* =======================
-     Buttons / Results UI (unchanged)
-     ======================= */
-  function updateButtons(){
-    const start=document.getElementById('startBtn');
-    const pause=document.getElementById('pauseBtn');
-    const stop =document.getElementById('stopBtn');
-    const reset=document.getElementById('resetBtn');
-    const pub  =document.getElementById('publishBtn');
-
-    if(adventureState.resultsPublished){
-      start.disabled=pause.disabled=stop.disabled=true; reset.disabled=false; pub.disabled=true; start.textContent='🏆 Results Published';
-    }else if(adventureState.hasEnded || adventureState.allTeamsReturned){
-      start.disabled=true; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=false; start.textContent='🔒 Adventure Ended';
-    }else if(adventureState.isRunning){
-      start.disabled=true; pause.disabled=false; stop.disabled=false; reset.disabled=true; pub.disabled=true; start.textContent='✅ Running';
-    }else{
-      start.disabled=false; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=true; start.textContent='🚀 Launch';
-    }
-  }
-  function updateResultsBox(){
-    const box = document.getElementById('resultsStatus');
-    if(adventureState.resultsPublished){ box.textContent='🏆 Results Published — Gallery Unlocked'; box.className='results-status rs-pub'; }
-    else { box.textContent='🔒 Results not published'; box.className='results-status rs-unpub'; }
-  }
-
-  /* =======================
-     Crew rendering (unchanged)
-     ======================= */
-  function renderCrews(list){
-    const grid = document.getElementById('crewsGrid');
-    grid.innerHTML='';
-    (list||[]).forEach(team=>{
-      const code = team.teamCode||team.code||'';
-      const name = team.teamName||team.name||code;
-      const status = team.status||'active';
-      const total = team.totalScore||team.total||0;
-      const penalty = team.penalty||0;
-      const penMin  = team.penaltyMinutes||0;
-      const locked = !!team.locked;
-      const adjusted = Math.max(0, total - penalty);
-
-      const card = document.createElement('div');
-      let cls='card'; if(status==='returned')cls+=' returned'; if(status==='late')cls+=' late'; if(penalty>0)cls+=' penalized';
-      card.className=cls;
-
-      const badge = `<span class="badge ${status==='active'?'b-active':(penalty>0?'b-late':'b-returned')}">${status==='active'?'Active':'Returned'}</span>`;
-      const score = penalty>0 ? `<div class="score pen"><div class="orig">${total}</div>${adjusted} 🪙</div>` : `<div class="score">${total} 🪙</div>`;
-      const penInfo = penalty>0 ? `<div class="pill">⚠️ Late penalty: -${penalty} (${penMin} min)</div>` : '';
-      const disableControls = !adventureState.isRunning ? 'disabled' : '';
-
-      card.innerHTML = `
-        <div class="card-head">
-          <div class="name">${name} ${badge}</div>
-          ${score}
-        </div>
-        ${penInfo}
-        <div class="controls-row">
-          <select class="select ${penalty>0?'b-late':''}"
-                  onchange="handleStatusChange('${code}', this.value, ${total}, ${penalty})"
-                  ${disableControls}>
-            <option value="active"   ${status==='active'?'selected':''}>🏴‍☠️ Active</option>
-            <option value="returned" ${status!=='active'?'selected':''}>⚓ Returned</option>
-          </select>
-          <label class="lock">
-            <input type="checkbox" ${locked?'checked':''} ${disableControls}
-                   onchange="toggleCrewLock('${code}', this.checked)"/>
-            🔒 Lock Doubloons
-          </label>
-        </div>
-        <div class="pen-box ${penalty>0 && adventureState.isRunning?'show':''}" id="penalty-override-${code}">
-          <strong>Manual Penalty</strong>
-          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input id="penalty-input-${code}" class="pen-in" type="number" min="0" step="1" value="${penalty}">
-            <span>doubloons</span>
-            <button class="pen-btn" onclick="applyManualPenalty('${code}')">Apply</button>
-          </div>
-        </div>
-        <div class="pill">${code} | Reg: ${team.registration||0} • Map: ${team.clueHunt||0} • Quiz: ${team.quiz||0}</div>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  /* =======================
-     Actions (endpoints) — unchanged except all requests carry eventId when present
-     ======================= */
-  async function startAdventure(){
-    try{
-      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start', eventId: EVENT_ID})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      adventureState.isRunning=true; adventureState.isPaused=false; startTicker();
-      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('🚀 Adventure launched!','ok');
-      setTimeout(loadCurrentState,1000);
-    }catch(e){show('Failed to launch: '+e.message,'err')}
-  }
-  async function pauseAdventure(){
-    try{
-      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      adventureState.isPaused=true; adventureState.isRunning=false;
-      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⏸️ Paused','ok');
-    }catch(e){show('Failed to pause: '+e.message,'err')}
-  }
-  async function stopAdventure(){
-    try{
-      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      adventureState.isRunning=false; adventureState.isPaused=false; adventureState.hasEnded=true;
-      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⚓ Adventure ended','ok');
-    }catch(e){show('Failed to end: '+e.message,'err')}
-  }
-  async function resetTimer(){
-    if(!confirm('Reset for a new adventure?')) return;
-    try{
-      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset', eventId: EVENT_ID})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      adventureState = {backendStatus:null,isRunning:false,isPaused:false,hasEnded:false,timeRemaining:90*60,startTime:null,crews:[],resultsPublished:false,competitionData:null,penaltyMode:false,penaltyMinutes:0,allTeamsReturned:false};
-      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
-      updateButtons(); updateTimerDisplay(); updateResultsBox(); renderCrews([]);
-      show('🔄 Reset complete','ok');
-    }catch(e){show('Failed to reset: '+e.message,'err')}
-  }
-  async function publishResults(){
-    if(!confirm('Publish final results and unlock the gallery?')) return;
-    try{
-      const r = await fetch(FN(PUBLISH_RESULTS_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId: EVENT_ID})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      adventureState.resultsPublished=true; updateButtons(); updateTimerDisplay(); updateResultsBox();
-      show('🏆 Results published','ok');
-    }catch(e){show('Failed to publish: '+e.message,'err')}
-  }
-
-  function handleStatusChange(code,newStatus,currentScore,currentPenalty){
-    if(newStatus==='returned'){
-      const penalty = (adventureState.penaltyMode && adventureState.penaltyMinutes>0) ? adventureState.penaltyMinutes*3 : 0;
-      updateCrewStatus(code, penalty>0?'late':'returned', penalty);
-    }else{
-      updateCrewStatus(code,'active',0);
-    }
-  }
-  async function updateCrewStatus(teamCode,status,penalty){
-    try{
-      const payload = {
-        eventId: EVENT_ID,
-        teamCode,
-        status,
-        penalty: penalty||0,
-        penaltyMinutes: penalty ? Math.ceil(penalty/3) : (adventureState.penaltyMinutes||0),
-        returnTime: new Date().toISOString()
+        if (state.status==='stopped'){
+          elTimer.classList.remove('penalty');
+        }
       };
-      const r = await fetch(FN(CHECKIN_TEAM_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      await loadCurrentState();
-      show(status==='active'?'Crew set active': (penalty>0? `Returned late (-${penalty})` : 'Returned'),'ok');
-    }catch(e){show('Failed to update crew: '+e.message,'err')}
-  }
-  async function applyManualPenalty(teamCode){
-    const v = parseInt(document.getElementById(`penalty-input-${teamCode}`).value)||0;
-    await updateCrewStatus(teamCode, v>0?'late':'returned', v);
-  }
-  async function toggleCrewLock(teamCode,locked){
-    try{
-      const r = await fetch(FN(TOGGLE_LOCK_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId: EVENT_ID, teamCode, locked:!!locked})});
-      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
-      show(`Crew ${teamCode} ${locked?'locked':'unlocked'}`,'ok');
-    }catch(e){show('Failed to toggle lock: '+e.message,'err')}
-  }
+      compute();
+      state.timerTick = setInterval(compute, 1000);
+    }
 
-  /* =======================
-     Stats / Messages
-     ======================= */
-  function updateStats(crews){
-    const total = crews.length;
-    const active = crews.filter(c=>(c.status||'active')==='active').length;
-    const returned = crews.filter(c=>['returned','late'].includes(c.status)).length;
-    const penalized = crews.filter(c=>(c.penalty||0)>0).length;
-    document.getElementById('totalCrews').textContent=total;
-    document.getElementById('activeCrews').textContent=active;
-    document.getElementById('returnedCrews').textContent=returned;
-    document.getElementById('penalizedCrews').textContent=penalized;
-  }
-  function show(text,type){
-    const box=document.getElementById('messages');
-    const el=document.createElement('div');
-    el.className='msg '+(type==='err'?'err':'ok'); el.textContent=text;
-    box.appendChild(el); setTimeout(()=>el.remove(),4500);
-  }
-</script>
+    // ---- actions ----
+    async function postAction(action){
+      const res = await fetchJSON('/.netlify/functions/admin_start_event',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ action })
+      });
+      if(!res.success) throw new Error(res.message || 'admin_start_event failed');
+      return res;
+    }
 
+    btnStart.addEventListener('click', ()=>{
+      // simple confirm when already running or stopped
+      showModal('Launch Adventure','Start the 90-minute adventure?', async ()=>{
+        await postAction('start');
+        await refreshAll();
+      });
+    });
+
+    btnPause.addEventListener('click', async ()=>{
+      await postAction('stop'); // using stop as pause in your backend list (no dedicated pause)
+      await refreshAll();
+    });
+
+    btnEnd.addEventListener('click', ()=>{
+      showModal('End Adventure','End the adventure now?', async ()=>{
+        await postAction('stop');
+        await refreshAll();
+      });
+    });
+
+    btnReset.addEventListener('click', ()=>{
+      showModal('Reset Timer','Reset the competition and timer to 90 minutes? (Keeps teams but clears live timer state.)', async ()=>{
+        await postAction('reset');
+        await refreshAll();
+      });
+    });
+
+    btnPublish.addEventListener('click', ()=>{
+      showModal('Publish Final Results','Publish final results and unlock the gallery?', async ()=>{
+        const res = await fetchJSON('/.netlify/functions/admin_publish_final',{ method:'POST' });
+        if(!res.success) throw new Error(res.message || 'admin_publish_final failed');
+        state.resultsPublished = true;
+        resultsNotice.className = 'notice ok';
+        resultsNotice.innerHTML = '🏆 Results published';
+        setButtons();
+      });
+    });
+
+    // ---- refresh together ----
+    async function refreshAll(){
+      await loadEvent();
+      await loadCrews();
+      // publish state
+      state.resultsPublished = Boolean((state.competitionData && state.competitionData.resultsPublished) || false);
+      if (state.status==='stopped' && !state.resultsPublished){
+        resultsNotice.className = 'notice warn';
+        resultsNotice.innerHTML = '📣 Final results ready to publish';
+      } else if (state.resultsPublished){
+        resultsNotice.className = 'notice ok';
+        resultsNotice.innerHTML = '🏆 Results published';
+      } else {
+        resultsNotice.className = 'notice';
+        resultsNotice.innerHTML = '🔒 Results not published';
+      }
+      setButtons();
+    }
+
+    // ---- init ----
+    (async function init(){
+      try{
+        await loadEvent();
+        await loadCrews();
+      }catch(e){
+        console.error(e);
+      }
+      // background refresh (teams/state)
+      if(state.refreshTick) clearInterval(state.refreshTick);
+      state.refreshTick = setInterval(async ()=>{
+        try{
+          await loadEvent();
+          await loadCrews();
+        }catch(e){ /* swallow */ }
+      }, 30000);
+    })();
+
+    // cleanup
+    window.addEventListener('beforeunload', ()=>{
+      if(state.timerTick) clearInterval(state.timerTick);
+      if(state.refreshTick) clearInterval(state.refreshTick);
+    });
+  })();
+  </script>
 </body>
 </html>
