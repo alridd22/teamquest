@@ -612,5 +612,384 @@
       setTimeout(()=>{el.remove()},4500);
     }
   </script>
+  <script>
+  /* =======================
+     Endpoints (new names)
+     ======================= */
+  const FN = (n, q) => {
+    const url = new URL(`${location.origin}/.netlify/functions/${n}`);
+    if (q) Object.entries(q).forEach(([k, v]) => (v !== undefined && v !== null) && url.searchParams.set(k, v));
+    return url.toString();
+  };
+  const urlParams = new URLSearchParams(location.search);
+  const EVENT_ID = urlParams.get('event') || undefined;
+
+  const GET_STATE_FN       = 'get_event_state';
+  const LIST_TEAMS_FN      = 'admin_list_teams';
+  const GET_LEADERBOARD_FN = 'get_leaderboard';
+  const START_EVENT_FN     = 'admin_start_event';
+  const PUBLISH_RESULTS_FN = 'admin_publish_final';
+  const CHECKIN_TEAM_FN    = 'admin_checkin_team';
+  const TOGGLE_LOCK_FN     = 'admin_toggle_lock_team';
+
+  /* =======================
+     State
+     ======================= */
+  let adventureState = {
+    backendStatus:null,
+    isRunning:false,
+    isPaused:false,
+    hasEnded:false,
+    timeRemaining:90*60,
+    startTime:null,
+    crews:[],
+    resultsPublished:false,
+    competitionData:null,
+    penaltyMode:false,
+    penaltyMinutes:0,
+    allTeamsReturned:false
+  };
+
+  let timerInterval=null, dataInterval=null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCurrentState();
+    dataInterval = setInterval(loadCurrentState, 30000);
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (timerInterval) clearInterval(timerInterval);
+    if (dataInterval) clearInterval(dataInterval);
+  });
+
+  /* =======================
+     Load / Sync
+     ======================= */
+  async function loadCurrentState(){
+    try{
+      // 1) Timer / status / results flags
+      const stRes = await fetch(FN(GET_STATE_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
+      const st = await stRes.json();
+      if(!stRes.ok) throw new Error(st?.error || `HTTP ${stRes.status}`);
+
+      adventureState.backendStatus    = (st.competitionStatus || st.status || '').toLowerCase();
+      adventureState.resultsPublished = st.resultsPublished === true || st.resultsPublished === 'yes';
+      adventureState.competitionData  = st;
+
+      // 2) Crews — primary: admin_list_teams
+      let teams = [];
+      try{
+        const listRes = await fetch(FN(LIST_TEAMS_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
+        const list = await listRes.json();
+        if (listRes.ok && (list.success || Array.isArray(list.teams))) {
+          teams = list.teams || [];
+        }
+      }catch(e){
+        // soft-fail; we’ll try leaderboard next
+        console.warn('admin_list_teams failed:', e);
+      }
+
+      // 3) Fallback to leaderboard if needed
+      if (teams.length === 0) {
+        try{
+          const lbRes = await fetch(FN(GET_LEADERBOARD_FN, EVENT_ID ? {eventId: EVENT_ID} : undefined));
+          const lb = await lbRes.json();
+          if (lbRes.ok && (lb.success || Array.isArray(lb.teams) || Array.isArray(lb.leaderboard))) {
+            teams = lb.teams || lb.leaderboard || [];
+            // adopt published flag from leaderboard if present
+            if (typeof lb.resultsPublished !== 'undefined') {
+              adventureState.resultsPublished = lb.resultsPublished === true || lb.resultsPublished === 'yes';
+            }
+          }
+        }catch(e){
+          console.warn('get_leaderboard fallback failed:', e);
+        }
+      }
+
+      adventureState.crews = Array.isArray(teams) ? teams : [];
+
+      // 4) Compute timer / penalty from state
+      if(st.startTime && st.durationMinutes){
+        const end = new Date(st.startTime).getTime() + st.durationMinutes*60*1000;
+        const now = Date.now();
+        adventureState.timeRemaining = Math.max(0, Math.floor((end-now)/1000));
+        adventureState.penaltyMode   = now > end;
+        adventureState.penaltyMinutes= adventureState.penaltyMode ? Math.ceil((now-end)/60000) : 0;
+      }
+
+      syncWithBackendState();
+      updateTimerDisplay();
+      updateButtons();
+      updateResultsBox();
+      renderCrews(adventureState.crews);
+      updateStats(adventureState.crews);
+
+      document.getElementById('loading').style.display='none';
+      document.getElementById('crewsContent').style.display='block';
+    }catch(e){
+      show('Failed to load current status: '+e.message,'err');
+      console.error(e);
+    }
+  }
+
+  function syncWithBackendState(){
+    const st = adventureState.backendStatus;
+    if(st==='start' || st==='running'){
+      adventureState.isRunning = true;
+      adventureState.isPaused  = false;
+      adventureState.hasEnded  = false;
+      if(!timerInterval) startTicker();
+    }else if(st==='stop' || st==='stopped'){
+      adventureState.isRunning=false;
+      adventureState.isPaused=false;
+      adventureState.hasEnded=true;
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    }else{
+      adventureState.isRunning=false;
+      adventureState.isPaused=false;
+      adventureState.hasEnded=false;
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+    }
+    const active = adventureState.crews.filter(c => (c.status||'active')==='active').length;
+    adventureState.allTeamsReturned = adventureState.crews.length>0 && active===0;
+  }
+
+  /* =======================
+     Timer helpers (unchanged)
+     ======================= */
+  function startTicker(){
+    if(timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(()=>{
+      if(adventureState.isRunning && !adventureState.isPaused){
+        if(adventureState.timeRemaining>0){
+          adventureState.timeRemaining--;
+          if(adventureState.timeRemaining<=0){
+            adventureState.penaltyMode = true;
+            adventureState.penaltyMinutes = 1;
+            show('⚠️ Time expired — late penalties active','err');
+          }
+        }else if(adventureState.penaltyMode && !adventureState.allTeamsReturned){
+          const d = adventureState.competitionData;
+          if(d?.startTime && d?.durationMinutes){
+            const end = new Date(d.startTime).getTime()+d.durationMinutes*60*1000;
+            adventureState.penaltyMinutes = Math.max(1, Math.ceil((Date.now()-end)/60000));
+          }else{
+            adventureState.penaltyMinutes++;
+          }
+        }
+        updateTimerDisplay(); updateResultsBox();
+      }
+    },1000);
+  }
+  function fmt(sec){const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;}
+  function updateTimerDisplay(){
+    const el=document.getElementById('timerDisplay');
+    const st=document.getElementById('timerStatus');
+    if(adventureState.penaltyMode && adventureState.isRunning){
+      el.textContent = `+${fmt(adventureState.penaltyMinutes*60)}`;
+      el.className='timer-display timer-penalty';
+      st.textContent = adventureState.allTeamsReturned ? 'All Crews Returned' : 'Penalty Phase';
+      st.className='status stopped';
+    }else{
+      el.textContent = fmt(Math.max(0, adventureState.timeRemaining));
+      el.className='timer-display';
+      if(adventureState.resultsPublished){st.textContent='Final Results Published';st.className='status ended';}
+      else if(adventureState.hasEnded){st.textContent='Adventure Complete';st.className='status ended';}
+      else if(adventureState.isRunning){st.textContent='Adventure in Progress';st.className='status running';}
+      else{st.textContent='Not Started';st.className='status not-started';}
+    }
+  }
+
+  /* =======================
+     Buttons / Results UI (unchanged)
+     ======================= */
+  function updateButtons(){
+    const start=document.getElementById('startBtn');
+    const pause=document.getElementById('pauseBtn');
+    const stop =document.getElementById('stopBtn');
+    const reset=document.getElementById('resetBtn');
+    const pub  =document.getElementById('publishBtn');
+
+    if(adventureState.resultsPublished){
+      start.disabled=pause.disabled=stop.disabled=true; reset.disabled=false; pub.disabled=true; start.textContent='🏆 Results Published';
+    }else if(adventureState.hasEnded || adventureState.allTeamsReturned){
+      start.disabled=true; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=false; start.textContent='🔒 Adventure Ended';
+    }else if(adventureState.isRunning){
+      start.disabled=true; pause.disabled=false; stop.disabled=false; reset.disabled=true; pub.disabled=true; start.textContent='✅ Running';
+    }else{
+      start.disabled=false; pause.disabled=true; stop.disabled=true; reset.disabled=false; pub.disabled=true; start.textContent='🚀 Launch';
+    }
+  }
+  function updateResultsBox(){
+    const box = document.getElementById('resultsStatus');
+    if(adventureState.resultsPublished){ box.textContent='🏆 Results Published — Gallery Unlocked'; box.className='results-status rs-pub'; }
+    else { box.textContent='🔒 Results not published'; box.className='results-status rs-unpub'; }
+  }
+
+  /* =======================
+     Crew rendering (unchanged)
+     ======================= */
+  function renderCrews(list){
+    const grid = document.getElementById('crewsGrid');
+    grid.innerHTML='';
+    (list||[]).forEach(team=>{
+      const code = team.teamCode||team.code||'';
+      const name = team.teamName||team.name||code;
+      const status = team.status||'active';
+      const total = team.totalScore||team.total||0;
+      const penalty = team.penalty||0;
+      const penMin  = team.penaltyMinutes||0;
+      const locked = !!team.locked;
+      const adjusted = Math.max(0, total - penalty);
+
+      const card = document.createElement('div');
+      let cls='card'; if(status==='returned')cls+=' returned'; if(status==='late')cls+=' late'; if(penalty>0)cls+=' penalized';
+      card.className=cls;
+
+      const badge = `<span class="badge ${status==='active'?'b-active':(penalty>0?'b-late':'b-returned')}">${status==='active'?'Active':'Returned'}</span>`;
+      const score = penalty>0 ? `<div class="score pen"><div class="orig">${total}</div>${adjusted} 🪙</div>` : `<div class="score">${total} 🪙</div>`;
+      const penInfo = penalty>0 ? `<div class="pill">⚠️ Late penalty: -${penalty} (${penMin} min)</div>` : '';
+      const disableControls = !adventureState.isRunning ? 'disabled' : '';
+
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="name">${name} ${badge}</div>
+          ${score}
+        </div>
+        ${penInfo}
+        <div class="controls-row">
+          <select class="select ${penalty>0?'b-late':''}"
+                  onchange="handleStatusChange('${code}', this.value, ${total}, ${penalty})"
+                  ${disableControls}>
+            <option value="active"   ${status==='active'?'selected':''}>🏴‍☠️ Active</option>
+            <option value="returned" ${status!=='active'?'selected':''}>⚓ Returned</option>
+          </select>
+          <label class="lock">
+            <input type="checkbox" ${locked?'checked':''} ${disableControls}
+                   onchange="toggleCrewLock('${code}', this.checked)"/>
+            🔒 Lock Doubloons
+          </label>
+        </div>
+        <div class="pen-box ${penalty>0 && adventureState.isRunning?'show':''}" id="penalty-override-${code}">
+          <strong>Manual Penalty</strong>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="penalty-input-${code}" class="pen-in" type="number" min="0" step="1" value="${penalty}">
+            <span>doubloons</span>
+            <button class="pen-btn" onclick="applyManualPenalty('${code}')">Apply</button>
+          </div>
+        </div>
+        <div class="pill">${code} | Reg: ${team.registration||0} • Map: ${team.clueHunt||0} • Quiz: ${team.quiz||0}</div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  /* =======================
+     Actions (endpoints) — unchanged except all requests carry eventId when present
+     ======================= */
+  async function startAdventure(){
+    try{
+      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start', eventId: EVENT_ID})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      adventureState.isRunning=true; adventureState.isPaused=false; startTicker();
+      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('🚀 Adventure launched!','ok');
+      setTimeout(loadCurrentState,1000);
+    }catch(e){show('Failed to launch: '+e.message,'err')}
+  }
+  async function pauseAdventure(){
+    try{
+      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      adventureState.isPaused=true; adventureState.isRunning=false;
+      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⏸️ Paused','ok');
+    }catch(e){show('Failed to pause: '+e.message,'err')}
+  }
+  async function stopAdventure(){
+    try{
+      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'stop', eventId: EVENT_ID})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      adventureState.isRunning=false; adventureState.isPaused=false; adventureState.hasEnded=true;
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+      updateButtons(); updateTimerDisplay(); updateResultsBox(); show('⚓ Adventure ended','ok');
+    }catch(e){show('Failed to end: '+e.message,'err')}
+  }
+  async function resetTimer(){
+    if(!confirm('Reset for a new adventure?')) return;
+    try{
+      const r = await fetch(FN(START_EVENT_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'reset', eventId: EVENT_ID})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      adventureState = {backendStatus:null,isRunning:false,isPaused:false,hasEnded:false,timeRemaining:90*60,startTime:null,crews:[],resultsPublished:false,competitionData:null,penaltyMode:false,penaltyMinutes:0,allTeamsReturned:false};
+      if(timerInterval){clearInterval(timerInterval);timerInterval=null;}
+      updateButtons(); updateTimerDisplay(); updateResultsBox(); renderCrews([]);
+      show('🔄 Reset complete','ok');
+    }catch(e){show('Failed to reset: '+e.message,'err')}
+  }
+  async function publishResults(){
+    if(!confirm('Publish final results and unlock the gallery?')) return;
+    try{
+      const r = await fetch(FN(PUBLISH_RESULTS_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId: EVENT_ID})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      adventureState.resultsPublished=true; updateButtons(); updateTimerDisplay(); updateResultsBox();
+      show('🏆 Results published','ok');
+    }catch(e){show('Failed to publish: '+e.message,'err')}
+  }
+
+  function handleStatusChange(code,newStatus,currentScore,currentPenalty){
+    if(newStatus==='returned'){
+      const penalty = (adventureState.penaltyMode && adventureState.penaltyMinutes>0) ? adventureState.penaltyMinutes*3 : 0;
+      updateCrewStatus(code, penalty>0?'late':'returned', penalty);
+    }else{
+      updateCrewStatus(code,'active',0);
+    }
+  }
+  async function updateCrewStatus(teamCode,status,penalty){
+    try{
+      const payload = {
+        eventId: EVENT_ID,
+        teamCode,
+        status,
+        penalty: penalty||0,
+        penaltyMinutes: penalty ? Math.ceil(penalty/3) : (adventureState.penaltyMinutes||0),
+        returnTime: new Date().toISOString()
+      };
+      const r = await fetch(FN(CHECKIN_TEAM_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      await loadCurrentState();
+      show(status==='active'?'Crew set active': (penalty>0? `Returned late (-${penalty})` : 'Returned'),'ok');
+    }catch(e){show('Failed to update crew: '+e.message,'err')}
+  }
+  async function applyManualPenalty(teamCode){
+    const v = parseInt(document.getElementById(`penalty-input-${teamCode}`).value)||0;
+    await updateCrewStatus(teamCode, v>0?'late':'returned', v);
+  }
+  async function toggleCrewLock(teamCode,locked){
+    try{
+      const r = await fetch(FN(TOGGLE_LOCK_FN), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId: EVENT_ID, teamCode, locked:!!locked})});
+      const j = await r.json(); if(!r.ok || !j.success) throw new Error(j.error||`HTTP ${r.status}`);
+      show(`Crew ${teamCode} ${locked?'locked':'unlocked'}`,'ok');
+    }catch(e){show('Failed to toggle lock: '+e.message,'err')}
+  }
+
+  /* =======================
+     Stats / Messages
+     ======================= */
+  function updateStats(crews){
+    const total = crews.length;
+    const active = crews.filter(c=>(c.status||'active')==='active').length;
+    const returned = crews.filter(c=>['returned','late'].includes(c.status)).length;
+    const penalized = crews.filter(c=>(c.penalty||0)>0).length;
+    document.getElementById('totalCrews').textContent=total;
+    document.getElementById('activeCrews').textContent=active;
+    document.getElementById('returnedCrews').textContent=returned;
+    document.getElementById('penalizedCrews').textContent=penalized;
+  }
+  function show(text,type){
+    const box=document.getElementById('messages');
+    const el=document.createElement('div');
+    el.className='msg '+(type==='err'?'err':'ok'); el.textContent=text;
+    box.appendChild(el); setTimeout(()=>el.remove(),4500);
+  }
+</script>
+
 </body>
 </html>
