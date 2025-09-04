@@ -1,398 +1,425 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Terry’s Treasure Hunt – Command Centre</title>
-  <style>
-    :root{
-      --brown:#8B4513;--brown-2:#6c2f0e;--gold:#DAA520;--gold-2:#FFD700;--sand:#F5E6D3;--sand-2:#E8D7C3;--ink:#2C1810;
-      --ok:#27ae60;--warn:#ff8c00;--stop:#dc143c;--muted:#b7a99a;
-    }
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
-      background:linear-gradient(135deg,#8B4513 0%,#D2691E 35%,#F4A460 100%); color:#3E2723; min-height:100vh}
-    .wrap{max-width:1200px;margin:28px auto;padding:0 16px}
-    .brand{display:flex;justify-content:center;margin-bottom:14px}
-    .brand img{height:40px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
-    .note{display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,#ffdb74,#ffc63f);
-      border:3px solid var(--gold); border-radius:14px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
-    .note .thumb{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#8B4513,#A0522D);border:3px solid var(--gold)}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
-    .panel{background:linear-gradient(145deg,var(--sand),var(--sand-2)); border:3px solid var(--brown);
-      border-radius:16px; box-shadow:0 14px 28px rgba(0,0,0,.25); overflow:hidden}
-    .panel h2{margin:0;padding:12px 16px;font-size:1.05rem;border-bottom:2px solid rgba(0,0,0,.08);
-      background:linear-gradient(135deg,#fff8dc,#f6e7cf)}
-    .timer{background:linear-gradient(135deg,#ffc21d,#ffad00); margin:14px; padding:18px; border-radius:12px;
-      text-align:center; font:700 34px/1.1 ui-monospace,Consolas,Menlo,monospace; border:3px solid var(--gold)}
-    .status{margin:0 14px 14px; padding:12px; border-radius:10px; text-align:center; font-weight:700; border:2px solid}
-    .status.stopped{background:#ffe0ea;border-color:#dc143c;color:#8b0000}
-    .status.running{background:#e5ffe7;border-color:#27ae60;color:#0c6b2a}
-    .status.ready{background:#efe8ff;border-color:#7a5afd;color:#2b1c6e}
-    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 14px 14px}
-    .btn{padding:14px 16px;border-radius:12px;border:3px solid var(--brown);font-weight:800;text-transform:uppercase;
-      letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.15); display:flex;justify-content:center;gap:8px}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    .btn.start{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff}
-    .btn.pause{background:linear-gradient(135deg,#ffd166,#ffb703)}
-    .btn.stop{background:linear-gradient(135deg,#ff6b6b,#dc143c);color:#fff}
-    .btn.reset{background:linear-gradient(135deg,#8B4513,#5a3212);color:#fff}
-    .btn.publish{grid-column:1/-1;background:linear-gradient(135deg,#ffd700,#f7c52a);border-color:#b8860b}
-    .badge{display:inline-flex;gap:8px;align-items:center;background:#fff3cd;border:2px solid #b8860b;border-radius:10px;padding:8px 12px;margin:10px 14px;font-weight:700}
-    /* crews list */
-    .crew-wrap{padding:14px}
-    .msg{background:#ffe6e8;border:2px solid #dc143c;color:#8b0000;border-radius:10px;padding:12px;font-weight:700}
-    .crew{border:2px solid var(--gold); background:linear-gradient(135deg,#fff8dc,#f7ecd2); border-radius:12px; padding:12px; margin:10px 0}
-    .crew .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
-    .crew .name{font-weight:900;color:var(--brown);font-size:1.05rem}
-    .crew .right{display:flex;gap:8px;align-items:center}
-    .pill{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:800}
-    .pill.green{background:#27ae60;color:#fff}
-    .pill.red{background:#dc143c;color:#fff}
-    .small{font-size:.85rem;color:#5a432f}
-    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-    select,input[type="number"]{padding:8px 10px;border:2px solid var(--gold);border-radius:10px;background:#fff}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:16px 0}
-    @media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
-    .card{background:linear-gradient(145deg,var(--sand),var(--sand-2)); border:3px solid var(--brown);
-      border-radius:14px; padding:18px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,.2)}
-    .card .n{font-size:28px;font-weight:900;color:var(--brown)}
-    .keybox{margin-left:auto}
-    .keybox button{padding:8px 10px;border-radius:10px;border:2px solid var(--gold);background:#fff8dc;font-weight:800;cursor:pointer}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Terry’s Treasure Quest — Command Centre</title>
+<style>
+  :root{
+    --bg1:#8B4513; --bg2:#D2691E; --bg3:#F4A460;
+    --brown:#8b4513; --gold:#DAA520; --gold2:#FFD54F; --amber:#ffb300;
+    --cream:#f5e6d3; --paper:#efe0c9; --ink:#2c1810;
+    --green:#28a745; --red:#c0392b; --blue:#3498db; --muted:#b9a999;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: "Segoe UI", system-ui, -apple-system, sans-serif; color:var(--ink);
+    background: radial-gradient(1200px 600px at 20% -10%, #b8682a55, transparent 60%),
+                radial-gradient(1200px 600px at 120% 110%, #b8682a55, transparent 60%),
+                linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 35%, var(--bg3) 100%);
+    min-height:100vh; padding:18px;
+  }
+
+  /* Top banner */
+  .banner{
+    background: linear-gradient(180deg,#ffecb380,#ffe08280), var(--paper);
+    border:3px solid var(--gold);
+    border-radius:16px; padding:14px 16px; box-shadow:0 8px 24px #00000026;
+    display:flex; align-items:center; gap:14px; max-width:1100px; margin:0 auto 16px;
+  }
+  .banner .dot{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#9b5b1f,#6d3c13);border:3px solid #f0d28a;box-shadow: inset 0 0 0 2px #00000022;}
+  .banner h1{margin:0;font-size:18px;font-weight:800}
+  .banner p{margin:2px 0 0;font-size:14px}
+  .banner .key{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .banner .key small{opacity:.8}
+  .btn{
+    border:none; border-radius:10px; padding:10px 14px; font-weight:800; letter-spacing:.3px;
+    box-shadow: 0 3px 0 #0000002a; cursor:pointer; transition:transform .1s ease, filter .15s ease;
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn-gold{background:linear-gradient(180deg,#ffd54f,#f6b93b); border:2px solid #c58f0a; color:#4b3000}
+  .btn-green{background:linear-gradient(180deg,#53d769,#2bb24b); border:2px solid #1e7e34; color:white}
+  .btn-red{background:linear-gradient(180deg,#ff8a80,#e74c3c); border:2px solid #922b21; color:white}
+  .btn-brown{background:linear-gradient(180deg,#8d5a38,#6b3d1c); border:2px solid #45260f; color:#fff}
+  .btn-grey{background:linear-gradient(180deg,#e0d5c4,#cdbfa9); border:2px solid #b09e84; color:#5b4633}
+
+  /* Two column shell */
+  .shell{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media (max-width:920px){ .shell{grid-template-columns:1fr} }
+
+  .panel{
+    background: linear-gradient(180deg,#fff7eae6,#f3e6d2e6);
+    border:3px solid var(--brown);
+    border-radius:18px; padding:16px; position:relative; box-shadow:0 16px 40px #0000002a;
+  }
+  .panel h2{margin:0 0 12px;font-size:18px;font-weight:900;color:#4b2a16; display:flex; align-items:center; gap:8px}
+  .divider{height:3px;background:linear-gradient(90deg,#f0c374,#e3b25c,transparent); border-radius:2px;margin:8px 0 12px}
+
+  /* Control left */
+  .timer{
+    background:linear-gradient(180deg,#ffbd2f,#ff9f1a); color:#331c00;
+    border:3px solid #b7770e; border-radius:14px; text-align:center; padding:20px; font-weight:900;
+    font-size:36px; letter-spacing:.18em; box-shadow: inset 0 2px 0 #ffe8b6;
+  }
+  .status{
+    margin-top:10px; border:2px solid #c6b8a0; border-radius:12px; padding:10px; text-align:center;
+    font-weight:800; color:#4b2a16; background:#efe3cf;
+  }
+  .status.badge-running{background:#e2f8e9;border-color:#86d2a1}
+  .status.badge-ended{background:#fff4c1;border-color:#dab33a}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+  .stack{display:grid;gap:12px;margin-top:12px}
+
+  /* Right list */
+  .crew{
+    background:linear-gradient(180deg,#fff8ee,#f7eddc); border:2px solid #e0cda9; border-radius:14px;
+    padding:12px; display:grid; grid-template-columns: 1fr auto; gap:10px; margin-bottom:12px;
+  }
+  .crew h3{margin:0 0 4px;font-size:16px}
+  .code{color:#8b6b4d;font-weight:700;font-size:12px}
+  .pill{padding:3px 8px;border-radius:999px;font-size:12px;font-weight:800;display:inline-flex;gap:6px;align-items:center}
+  .pill-blue{background:#e9f2ff;border:1px solid #90caf9;color:#0d47a1}
+  .pill-green{background:#e8f7ee;border:1px solid #9ad4ac;color:#155724}
+  .pill-red{background:#ffe8e6;border:1px solid #ef9a9a;color:#7b1f1f}
+  .controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+  select, label{font-weight:700}
+  select{
+    border:2px solid #d4c3a8; border-radius:10px; padding:8px 10px; background:#fffdf8; color:#4b2a16;
+    min-width:120px;
+  }
+  .small-note{font-size:12px;color:#7c644e}
+
+  /* Stats */
+  .stats{max-width:1100px;margin:16px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media (max-width:880px){ .stats{grid-template-columns:repeat(2,1fr)} }
+  .stat{
+    background:linear-gradient(180deg,#fff7ec,#f5e7d0); border:3px solid #b58149; border-radius:16px;
+    padding:16px; text-align:center; box-shadow: 0 10px 24px #00000022;
+  }
+  .stat b{display:block;font-size:30px;line-height:1.1}
+  .stat span{opacity:.85;font-weight:800}
+  .alert{background:#ffe3e3;border:2px solid #e57373;color:#7b1f1f;border-radius:12px;padding:10px;margin-top:10px;font-weight:800}
+  .ok{background:#e8f5e9;border:2px solid #81c784;color:#1b5e20;border-radius:12px;padding:10px;margin-top:10px;font-weight:800}
+
+  .muted{opacity:.7}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="brand">
-      <img src="/Team Quest Logo-01.png" alt="TeamQuest" />
+
+  <div class="banner">
+    <div class="dot" aria-hidden="true"></div>
+    <div>
+      <h1>Command Centre</h1>
+      <p>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</p>
     </div>
-
-    <div class="note">
-      <div class="thumb"></div>
-      <div>
-        <div style="font-weight:900;margin-bottom:4px">Command Centre</div>
-        <div>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
-      </div>
-      <div class="keybox">
-        <div class="small" id="keyState">Admin key: <strong>unknown</strong></div>
-        <div style="text-align:right;margin-top:6px">
-          <button id="setKeyBtn">Set / Change</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <!-- LEFT: Controls -->
-      <div class="panel">
-        <h2>⚓ Adventure Control</h2>
-        <div class="timer" id="timerText">01:30:00</div>
-        <div class="status ready" id="statusText">Not started</div>
-
-        <div class="controls">
-          <button class="btn start"  id="btnStart">🚀 Launch</button>
-          <button class="btn pause"  id="btnPause" disabled>⏸️ Pause</button>
-          <button class="btn stop"   id="btnStop"  disabled>⏹️ End</button>
-          <button class="btn reset"  id="btnReset">🔄 Reset</button>
-          <button class="btn publish" id="btnPublish" disabled>🏆 Publish Final Results</button>
-        </div>
-
-        <div class="badge">🔒 <span id="resultsState">Results not published</span></div>
-      </div>
-
-      <!-- RIGHT: Crews -->
-      <div class="panel">
-        <h2>👥 Crew Management</h2>
-        <div class="crew-wrap" id="crewWrap">
-          <div class="small">🔍 Loading crews…</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="stats">
-      <div class="card"><div class="n" id="statTotal">0</div><div>Total Crews</div></div>
-      <div class="card"><div class="n" id="statActive">0</div><div>Active</div></div>
-      <div class="card"><div class="n" id="statReturned">0</div><div>Returned</div></div>
-      <div class="card"><div class="n" id="statPenalised">0</div><div>Penalised</div></div>
+    <div class="key">
+      <small>Admin key: <span id="keyState" class="muted">unset</span></small>
+      <button id="setKeyBtn" class="btn btn-gold">Set / Change</button>
     </div>
   </div>
 
-  <script>
-    // ===== Config / helpers =====
-    const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || 'EVT-19-08-2025';
-    const LS_KEY = 'tq_admin_secret';
+  <div class="shell">
+    <!-- LEFT: controls -->
+    <section class="panel" id="leftPanel">
+      <h2>⚓ Adventure Control</h2>
+      <div class="divider"></div>
 
-    const endpoints = {
-      state:           (eventId) => `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`,
-      listTeams:       (eventId) => `/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`,
-      startEvent:      `/.netlify/functions/admin_start_event`,
-      checkinTeam:     `/.netlify/functions/admin_checkin_team`,
-      toggleLock:      `/.netlify/functions/admin_toggle_lock_team`,
-      publish:         `/.netlify/functions/admin_publish_final`,
-    };
+      <div class="timer" id="timer">01 : 30 : 00</div>
+      <div class="status" id="statusBadge">Not started</div>
 
-    function adminKey() { return localStorage.getItem(LS_KEY) || ''; }
-    function setAdminKey(key){ localStorage.setItem(LS_KEY, key); paintKeyState(); }
-    function ensureKey(){
-      if (!adminKey()) {
-        const k = prompt('Enter Admin Secret (used by requireAdmin):') || '';
-        if (k) setAdminKey(k);
-      }
-    }
-    function authHeaders(){
-      return { 'x-tq-admin': adminKey() };   // <— this matches requireAdmin(event)
-    }
-    function paintKeyState(){
-      const el = document.getElementById('keyState');
-      el.innerHTML = `Admin key: <strong>${adminKey() ? 'set' : 'not set'}</strong>`;
-    }
+      <div class="grid-2">
+        <button class="btn btn-green" id="btnStart">🚀 Launch</button>
+        <button class="btn btn-grey" id="btnPause">⏸️ Pause</button>
+      </div>
+      <div class="grid-2">
+        <button class="btn btn-red" id="btnStop">⏹️ End</button>
+        <button class="btn btn-brown" id="btnReset">🔁 Reset</button>
+      </div>
 
-    document.getElementById('setKeyBtn').addEventListener('click', () => {
-      const v = prompt('Enter Admin Secret (used by requireAdmin):', adminKey() || '');
-      if (v !== null) setAdminKey(v.trim());
-      loadAll(); // try again with new key
+      <div class="stack">
+        <button class="btn btn-gold" id="btnPublish" disabled>🏆 Publish Final Results</button>
+        <div id="leftMsg"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: crews -->
+    <section class="panel" id="rightPanel">
+      <h2>👥 Crew Management</h2>
+      <div class="divider"></div>
+      <div id="crewList">
+        <div class="muted small-note">Loading crews…</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat">
+      <b id="statTotal">0</b>
+      <span>Total Crews</span>
+    </div>
+    <div class="stat">
+      <b id="statActive">0</b>
+      <span>Active</span>
+    </div>
+    <div class="stat">
+      <b id="statReturned">0</b>
+      <span>Returned</span>
+    </div>
+    <div class="stat">
+      <b id="statPenalised">0</b>
+      <span>Penalised</span>
+    </div>
+  </div>
+
+<script>
+(() => {
+  // ---------- Config / helpers ----------
+  const DEFAULT_EVENT = 'EVT-19-08-2025';
+  const url = new URL(location.href);
+  const EVENT_ID = url.searchParams.get('event') || DEFAULT_EVENT;
+
+  // Functions that expect eventId *in the query string*
+  const endpoints = {
+    state:      (eid) => `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eid)}`,
+    listTeams:  (eid) => `/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eid)}`,
+    startEvent: (eid) => `/.netlify/functions/admin_start_event?eventId=${encodeURIComponent(eid)}`,
+    publish:    (eid) => `/.netlify/functions/admin_publish_final?eventId=${encodeURIComponent(eid)}`,
+    // These accept body fields (teamCode etc.)
+    checkinTeam:        `/.netlify/functions/admin_checkin_team`,
+    toggleLock:         `/.netlify/functions/admin_toggle_lock_team`,
+  };
+
+  const els = {
+    timer: document.getElementById('timer'),
+    status: document.getElementById('statusBadge'),
+    crewList: document.getElementById('crewList'),
+    keyState: document.getElementById('keyState'),
+    msg: document.getElementById('leftMsg'),
+
+    start: document.getElementById('btnStart'),
+    pause: document.getElementById('btnPause'),
+    stop: document.getElementById('btnStop'),
+    reset: document.getElementById('btnReset'),
+    publish: document.getElementById('btnPublish'),
+    setKey: document.getElementById('setKeyBtn'),
+
+    statTotal: document.getElementById('statTotal'),
+    statActive: document.getElementById('statActive'),
+    statReturned: document.getElementById('statReturned'),
+    statPenalised: document.getElementById('statPenalised'),
+  };
+
+  function getKey(){ return localStorage.getItem('tq_admin_key') || '' }
+  function setKey(k){ k ? localStorage.setItem('tq_admin_key', k) : localStorage.removeItem('tq_admin_key'); updateKeyBadge(); }
+  function updateKeyBadge(){ els.keyState.textContent = getKey() ? 'set' : 'unset' }
+
+  function authHeaders(){
+    const key = getKey();
+    return key ? { 'x-tq-admin': key } : {};
+  }
+  async function jsonGet(url){
+    const res = await fetch(url, { headers: authHeaders() });
+    const txt = await res.text().catch(()=> '');
+    let data = {};
+    try{ data = txt ? JSON.parse(txt) : {} }catch{}
+    if(!res.ok || data.success === false){ throw new Error(data.message || `HTTP ${res.status}`); }
+    return data;
+  }
+  async function actionPost(url, body){
+    const res = await fetch(url, {
+      method:'POST',
+      headers: { 'Content-Type':'application/json', ...authHeaders() },
+      body: JSON.stringify(body || {})
     });
+    const txt = await res.text().catch(()=> '');
+    let data = {};
+    try{ data = txt ? JSON.parse(txt) : {} }catch{}
+    if(!res.ok || data.success === false){ throw new Error(data.message || `HTTP ${res.status}: ${txt || res.statusText}`); }
+    return data;
+  }
+  function ensureKey(){
+    if(getKey()) return true;
+    const val = prompt('Enter Admin Secret (used by requireAdmin):');
+    if(!val) return false;
+    setKey(val.trim());
+    return true;
+  }
+  function setStatus(text, kind=''){ els.status.textContent = text; els.status.className = 'status ' + (kind || '') }
+  function setMsg(html, ok=false){
+    els.msg.innerHTML = html ? `<div class="${ok?'ok':'alert'}">${html}</div>` : '';
+  }
 
-    // ===== UI elements =====
-    const timerEl   = document.getElementById('timerText');
-    const statusEl  = document.getElementById('statusText');
-    const resultsEl = document.getElementById('resultsState');
-    const crewWrap  = document.getElementById('crewWrap');
+  // ---------- Data loading ----------
+  let refreshTimer = null;
+  async function loadAll(){
+    setMsg('');
+    try{
+      const state = await jsonGet(endpoints.state(EVENT_ID));
+      // state fields expected:
+      // { success, status: 'start'|'stop'|..., startTime, durationMinutes, resultsPublished, teams / leaderboard }
+      const st = (state.status || state.competitionStatus || '').toString().toLowerCase();
+      const running = (st === 'start' || st === 'running');
+      const stopped = (st === 'stop' || st === 'stopped');
+      const published = (state.resultsPublished === true || state.resultsPublished === 'yes');
 
-    const btnStart   = document.getElementById('btnStart');
-    const btnPause   = document.getElementById('btnPause');
-    const btnStop    = document.getElementById('btnStop');
-    const btnReset   = document.getElementById('btnReset');
-    const btnPublish = document.getElementById('btnPublish');
+      // Timer
+      let display = '01 : 30 : 00';
+      if(state.startTime && state.durationMinutes){
+        const end = new Date(state.startTime).getTime() + (state.durationMinutes*60*1000);
+        const now = Date.now();
+        let diff = Math.max(0, Math.floor((end-now)/1000));
+        const h = String(Math.floor(diff/3600)).padStart(2,'0');
+        const m = String(Math.floor((diff%3600)/60)).padStart(2,'0');
+        const s = String(diff%60).padStart(2,'0');
+        display = `${h} : ${m} : ${s}`;
+      }
+      els.timer.textContent = display;
 
-    // Stats
-    const statTotal      = document.getElementById('statTotal');
-    const statActive     = document.getElementById('statActive');
-    const statReturned   = document.getElementById('statReturned');
-    const statPenalised  = document.getElementById('statPenalised');
+      // Status badge + buttons
+      if(published){
+        setStatus('Final results published', 'badge-ended');
+        els.publish.disabled = true;
+        els.start.disabled = true; els.pause.disabled = true; els.stop.disabled = true;
+      }else if(running){
+        setStatus('Adventure in progress', 'badge-running');
+        els.start.disabled = true; els.pause.disabled = false; els.stop.disabled = false; els.publish.disabled = false;
+      }else if(stopped){
+        setStatus('Adventure paused / ended', 'badge-ended');
+        els.start.disabled = false; els.pause.disabled = true; els.stop.disabled = true; els.publish.disabled = false;
+      }else{
+        setStatus('Not started');
+        els.start.disabled = false; els.pause.disabled = true; els.stop.disabled = true; els.publish.disabled = true;
+      }
 
-    // ===== Data refresh =====
-    async function loadState(){
-      try{
-        const res = await fetch(endpoints.state(EVENT_ID), { headers: authHeaders() });
-        if (!res.ok) throw new Error(`${res.status}`);
-        const data = await res.json(); // { success, ... }
-        if (!data.success) throw new Error(data.message || 'state error');
+      // Teams
+      const listResp = await jsonGet(endpoints.listTeams(EVENT_ID));
+      const teams = listResp.teams || [];
+      drawTeams(teams);
 
-        // paint timer/status/results
-        // expected fields: startTime, durationMinutes, competitionStatus, resultsPublished
-        const st = data.startTime ? new Date(data.startTime) : null;
-        const durMs = (data.durationMinutes || 90) * 60 * 1000;
-        const status = (data.competitionStatus || 'not_started').toLowerCase();
-        const resultsPublished = !!data.resultsPublished;
+      // Stats
+      const total = teams.length;
+      const returned = teams.filter(t => !!t.returnedAt || t.status === 'returned' || t.status === 'late').length;
+      const penalised = teams.filter(t => (t.penalty||0) > 0).length;
+      const active = Math.max(0, total - returned);
 
-        if (st){
-          const end = new Date(st.getTime() + durMs);
-          updateTimer(end, status);
-        } else {
-          timerEl.textContent = '01:30:00';
+      els.statTotal.textContent = total;
+      els.statReturned.textContent = returned;
+      els.statActive.textContent = active;
+      els.statPenalised.textContent = penalised;
+
+    }catch(e){
+      setMsg(`Failed to load current status: ${e.message}`, false);
+    }
+  }
+
+  function drawTeams(teams){
+    if(!teams || !teams.length){
+      els.crewList.innerHTML = `<div class="muted small-note">No crews found for <b>${EVENT_ID}</b>.</div>`;
+      return;
+    }
+    els.crewList.innerHTML = '';
+    teams.forEach(t => {
+      const wrap = document.createElement('div');
+      wrap.className = 'crew';
+
+      const left = document.createElement('div');
+      left.innerHTML = `
+        <h3>${escapeHtml(t.teamName || t.teamCode || 'Crew')}</h3>
+        <div class="small-note code">${escapeHtml(t.teamCode || '')}</div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap;">
+          <span class="pill ${t.returnedAt ? 'pill-green' : 'pill-blue'}">${t.returnedAt?'Returned':'Active'}</span>
+          <span class="pill ${t.locked ? 'pill-red' : 'pill-blue'}">${t.locked?'Locked':'Unlocked'}</span>
+        </div>
+      `;
+
+      const right = document.createElement('div');
+      right.className = 'controls';
+      right.innerHTML = `
+        <select>
+          <option value="active" ${!t.returnedAt?'selected':''}>Active</option>
+          <option value="returned" ${t.returnedAt?'selected':''}>Returned</option>
+        </select>
+        <label><input type="checkbox" ${t.locked?'checked':''}/> Lock doubloons</label>
+        <button class="btn btn-gold">APPLY</button>
+      `;
+
+      const select = right.querySelector('select');
+      const lockCb = right.querySelector('input[type="checkbox"]');
+      const applyBtn = right.querySelector('button');
+
+      applyBtn.addEventListener('click', async () => {
+        if(!ensureKey()) return;
+        try{
+          // Update status (check-in) first
+          const status = select.value;
+          await actionPost(endpoints.checkinTeam, {
+            eventId: EVENT_ID,
+            teamCode: t.teamCode,
+            status
+          });
+          // Toggle lock if changed
+          await actionPost(endpoints.toggleLock, {
+            eventId: EVENT_ID,
+            teamCode: t.teamCode,
+            lock: !!lockCb.checked
+          });
+          await loadAll();
+          setMsg(`✅ Updated ${t.teamCode}`, true);
+        }catch(e){
+          setMsg(`Failed to update ${t.teamCode}: ${e.message}`, false);
         }
-
-        // status pill
-        statusEl.className = 'status ' + (status==='start' || status==='running' ? 'running' :
-                           status==='stop' || status==='stopped' ? 'stopped' : 'ready');
-        statusEl.textContent =
-          status==='running' || status==='start' ? 'Adventure in progress' :
-          status==='stopped' || status==='stop' ? 'Ended' : 'Not started';
-
-        // results
-        resultsEl.textContent = resultsPublished ? 'Results published' : 'Results not published';
-        btnPublish.disabled = resultsPublished;
-
-        // buttons
-        btnStart.disabled = status==='running' || resultsPublished;
-        btnPause.disabled = !(status==='running');
-        btnStop.disabled  = !(status==='running');
-        btnReset.disabled = status==='running';
-
-      }catch(e){
-        console.error('loadState', e);
-        statusEl.className='status stopped';
-        statusEl.textContent='Status unavailable';
-      }
-    }
-
-    function updateTimer(endTime, status){
-      if (!endTime || (status!=='running' && status!=='start')) { timerEl.textContent = '01:30:00'; return; }
-      const tick = () => {
-        const now = new Date();
-        let ms = endTime - now;
-        const sign = ms < 0 ? '-' : '';
-        ms = Math.abs(ms);
-        const h = String(Math.floor(ms / 36e5)).padStart(2,'0');
-        const m = String(Math.floor((ms%36e5)/6e4)).padStart(2,'0');
-        const s = String(Math.floor((ms%6e4)/1e3)).padStart(2,'0');
-        timerEl.textContent = (sign==='' ? '' : '+') + `${h}:${m}:${s}`;
-      };
-      tick();
-      clearInterval(window.__tqTimer);
-      window.__tqTimer = setInterval(tick, 1000);
-    }
-
-    async function loadCrews(){
-      try{
-        const res = await fetch(endpoints.listTeams(EVENT_ID), { headers: authHeaders() });
-        if (!res.ok){
-          const body = await res.text().catch(()=> '');
-          throw new Error(`Failed to load crew list: ${res.status} — ${body||''}`);
-        }
-        const data = await res.json(); // { success:true, teams:[...] }
-        const teams = (data.teams || []).map(t => ({
-          teamCode: t.teamCode,
-          teamName: t.teamName || t.teamCode,
-          locked: !!t.locked,
-          returnedAt: t.returnedAt || null
-        }));
-
-        renderCrews(teams);
-        paintStats(teams);
-      }catch(e){
-        console.error(e);
-        crewWrap.innerHTML = `<div class="msg">${e.message || 'Failed to load crew list'}</div>`;
-        paintStats([]);
-      }
-    }
-
-    function renderCrews(teams){
-      if (!teams.length){
-        crewWrap.innerHTML = `<div class="small">No crews yet.</div>`;
-        return;
-      }
-      crewWrap.innerHTML = teams.map(t => {
-        const statusPill = t.returnedAt
-          ? `<span class="pill green">Returned</span>`
-          : `<span class="pill" style="background:#3498db;color:#fff">Active</span>`;
-        const lockPill = t.locked
-          ? `<span class="pill red">Locked</span>`
-          : `<span class="pill" style="background:#e3e1da">Unlocked</span>`;
-        return `
-          <div class="crew" data-code="${t.teamCode}">
-            <div class="row">
-              <div class="name">${escapeHtml(t.teamName)}</div>
-              <div class="right">${statusPill}${lockPill}</div>
-            </div>
-            <div class="small">${t.teamCode} ${t.returnedAt ? `• Returned: ${new Date(t.returnedAt).toLocaleTimeString()}`:''}</div>
-            <div class="toolbar">
-              <select class="statusSel">
-                <option value="active" ${!t.returnedAt?'selected':''}>Active</option>
-                <option value="returned" ${t.returnedAt?'selected':''}>Returned</option>
-              </select>
-              <label class="small">
-                <input type="checkbox" class="lockChk" ${t.locked?'checked':''}/> Lock doubloons
-              </label>
-              <button class="btn reset smallBtn applyBtn" style="padding:8px 12px">Apply</button>
-            </div>
-          </div>`;
-      }).join('');
-
-      // bind actions
-      crewWrap.querySelectorAll('.crew').forEach(card => {
-        const code = card.dataset.code;
-        const sel  = card.querySelector('.statusSel');
-        const lock = card.querySelector('.lockChk');
-        const apply= card.querySelector('.applyBtn');
-
-        apply.addEventListener('click', async () => {
-          try {
-            // lock toggle first (independent)
-            await fetch(endpoints.toggleLock, {
-              method:'POST',
-              headers: { 'Content-Type':'application/json', ...authHeaders() },
-              body: JSON.stringify({ eventId: EVENT_ID, teamCode: code, locked: !!lock.checked })
-            });
-
-            // status update
-            const statusVal = sel.value; // 'active' | 'returned'
-            await fetch(endpoints.checkinTeam, {
-              method:'POST',
-              headers: { 'Content-Type':'application/json', ...authHeaders() },
-              body: JSON.stringify({
-                eventId: EVENT_ID,
-                teamCode: code,
-                status: statusVal,
-                returnTime: statusVal==='returned' ? new Date().toISOString() : null
-              })
-            });
-            await loadCrews();
-          } catch(err){
-            alert('Failed to update team: ' + (err?.message || err));
-          }
-        });
       });
-    }
 
-    function paintStats(teams){
-      statTotal.textContent = teams.length;
-      const returned = teams.filter(t=>!!t.returnedAt).length;
-      const active = teams.length - returned;
-      statActive.textContent = active;
-      statReturned.textContent = returned;
-      // penalised is not in this list call; set to 0 for now
-      statPenalised.textContent = 0;
-    }
-
-    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
-
-    // ===== Actions =====
-    btnStart.addEventListener('click', async ()=>{
-      ensureKey();
-      await actionPost(endpoints.startEvent, { action:'start', eventId: EVENT_ID });
-      await loadAll();
+      wrap.appendChild(left); wrap.appendChild(right);
+      els.crewList.appendChild(wrap);
     });
-    btnPause.addEventListener('click', async ()=>{
-      await actionPost(endpoints.startEvent, { action:'stop', eventId: EVENT_ID });
-      await loadAll();
-    });
-    btnStop.addEventListener('click', async ()=>{
-      await actionPost(endpoints.startEvent, { action:'stop', eventId: EVENT_ID });
-      await loadAll();
-    });
-    btnReset.addEventListener('click', async ()=>{
-      if(!confirm('Reset competition?')) return;
-      await actionPost(endpoints.startEvent, { action:'reset', eventId: EVENT_ID });
-      await loadAll();
-    });
-    btnPublish.addEventListener('click', async ()=>{
-      if(!confirm('Publish final results?')) return;
-      await actionPost(endpoints.publish, { eventId: EVENT_ID });
-      await loadAll();
-    });
+  }
 
-    async function actionPost(url, body){
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', ...authHeaders() },
-        body: JSON.stringify(body || {})
-      });
-      if (!res.ok){
-        const t = await res.text().catch(()=> '');
-        throw new Error(`HTTP ${res.status}: ${t || res.statusText}`);
-      }
-      return res.json().catch(()=> ({}));
-    }
+  function escapeHtml(s){ return String(s||'').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])) }
 
-    async function loadAll(){
-      paintKeyState();
-      await Promise.all([ loadState(), loadCrews() ]);
-    }
+  // ---------- Controls ----------
+  els.setKey.addEventListener('click', () => {
+    const val = prompt('Enter Admin Secret (used by requireAdmin):', getKey());
+    if(val===null) return;
+    setKey(val.trim());
+    loadAll();
+  });
 
-    // boot
-    (async function init(){
-      paintKeyState();
-      if (!adminKey()){
-        // gentle prompt on first load
-        setTimeout(()=>ensureKey(), 100);
-      }
-      await loadAll();
-      // poll periodically
-      clearInterval(window.__tqPoll);
-      window.__tqPoll = setInterval(loadAll, 30000);
-    })();
-  </script>
+  els.start.addEventListener('click', async () => {
+    if(!ensureKey()) return;
+    try{ await actionPost(endpoints.startEvent(EVENT_ID), { action:'start' }); await loadAll(); }
+    catch(e){ setMsg(`Launch failed: ${e.message}`, false); }
+  });
+  els.pause.addEventListener('click', async () => {
+    if(!ensureKey()) return;
+    try{ await actionPost(endpoints.startEvent(EVENT_ID), { action:'stop' }); await loadAll(); }
+    catch(e){ setMsg(`Pause failed: ${e.message}`, false); }
+  });
+  els.stop.addEventListener('click', async () => {
+    if(!ensureKey()) return;
+    try{ await actionPost(endpoints.startEvent(EVENT_ID), { action:'stop' }); await loadAll(); }
+    catch(e){ setMsg(`End failed: ${e.message}`, false); }
+  });
+  els.reset.addEventListener('click', async () => {
+    if(!ensureKey()) return;
+    if(!confirm('Reset competition? This prepares for a new adventure.')) return;
+    try{ await actionPost(endpoints.startEvent(EVENT_ID), { action:'reset' }); await loadAll(); }
+    catch(e){ setMsg(`Reset failed: ${e.message}`, false); }
+  });
+  els.publish.addEventListener('click', async () => {
+    if(!ensureKey()) return;
+    if(!confirm('Publish final results and unlock the gallery?')) return;
+    try{ await actionPost(endpoints.publish(EVENT_ID), {}); await loadAll(); }
+    catch(e){ setMsg(`Publish failed: ${e.message}`, false); }
+  });
+
+  // ---------- Init ----------
+  updateKeyBadge();
+  loadAll();
+  // auto-refresh every 30s
+  setInterval(loadAll, 30000);
+})();
+</script>
 </body>
 </html>
