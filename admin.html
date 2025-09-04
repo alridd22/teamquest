@@ -1,449 +1,398 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Terry’s Treasure Quest — Command Centre</title>
-<style>
-  :root{
-    --brown:#8B4513;--brown-2:#6b3610;--gold:#DAA520;--gold-2:#FFD700;--orange:#FF8C00;
-    --cream:#F5E6D3;--cream-2:#E8D7C3;--ink:#2C1810;--ink-2:#3E2723;--green:#2ecc71;--red:#e74c3c;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    min-height:100vh; padding:24px; color:var(--ink-2);
-    background:linear-gradient(135deg,#8B4513 0%,#D2691E 28%,#F4A460 100%);
-  }
-  .wrap{max-width:1200px;margin:0 auto}
-  .mast{
-    display:flex;align-items:center;gap:12px;
-    background:linear-gradient(145deg,#ffe08a,#ffc02f);
-    border:3px solid var(--gold); border-radius:14px; padding:14px 16px;
-    box-shadow:0 10px 24px rgba(0,0,0,.25); margin:4px auto 20px;
-  }
-  .mast-badge{width:48px;height:48px;border-radius:10px;
-    background:linear-gradient(145deg,#8B4513,#A0522D);
-    border:3px solid var(--gold); box-shadow:0 4px 12px rgba(0,0,0,.25)}
-  .mast p{font-weight:700;color:#4a2f16}
-  .admin-key{
-    margin-left:auto; display:flex; align-items:center; gap:8px;
-    font-size:.9rem; font-weight:700; color:#4a2f16
-  }
-  .admin-key button{
-    background:linear-gradient(135deg,#ffe39b,#ffd24e);
-    border:2px solid var(--gold); border-radius:10px; padding:6px 10px; cursor:pointer
-  }
-
-  .grid{display:grid;grid-template-columns:1fr 1fr; gap:18px}
-  @media (max-width:980px){.grid{grid-template-columns:1fr}}
-
-  .panel{
-    background:linear-gradient(145deg,var(--cream),var(--cream-2));
-    border:3px solid var(--brown); border-radius:18px; padding:16px;
-    position:relative; box-shadow:0 14px 30px rgba(0,0,0,.25); overflow:hidden;
-  }
-  .panel::before{content:""; position:absolute; inset:0 0 auto 0; height:6px;
-    background:linear-gradient(90deg,var(--gold-2),var(--orange),var(--gold),var(--gold-2))}
-  .pane-title{
-    display:flex; align-items:center; gap:8px; font-weight:900; color:var(--brown);
-    border-bottom:3px solid var(--gold); padding:8px 2px; margin-bottom:12px
-  }
-
-  .timer{
-    background:linear-gradient(145deg,#ffc01f,#ffae00);
-    border:3px solid var(--gold); border-radius:14px; padding:16px; text-align:center;
-    font:900 36px/1.1 "Courier New",monospace; color:#4a2f16; letter-spacing:2px;
-    box-shadow:inset 0 2px 10px rgba(0,0,0,.1), 0 6px 16px rgba(0,0,0,.15)
-  }
-  .status{
-    margin-top:10px; border-radius:12px; padding:10px; text-align:center;
-    font-weight:800; border:2px solid #b9a27a; background:#efe3cd
-  }
-  .status.ok{background:linear-gradient(135deg,#c5f7c5,#a6f0a6); border-color:#32CD32; color:#045c04}
-  .status.stop{background:linear-gradient(135deg,#ffd2d7,#ffb4be); border-color:#DC143C; color:#7a0412}
-  .status.wait{background:linear-gradient(135deg,#e6e5ff,#dad0ff); border-color:#7a67ff; color:#3c2db2}
-
-  .row{display:grid;grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
-  @media (max-width:500px){.row{grid-template-columns:1fr}}
-
-  .btn{
-    border:3px solid var(--brown); border-radius:12px; padding:14px 16px; font-weight:900;
-    letter-spacing:.5px; cursor:pointer; color:white; display:flex; align-items:center; gap:8px;
-    justify-content:center; text-transform:uppercase; box-shadow:0 6px 16px rgba(0,0,0,.2)
-  }
-  .btn:disabled{opacity:.55; cursor:not-allowed; filter:grayscale(.2)}
-  .start{background:linear-gradient(135deg,#37cf6a,#1aa74b)}
-  .pause{background:linear-gradient(135deg,#ffd45a,#ff9f1a); color:#4a2f16}
-  .stop{background:linear-gradient(135deg,#f35a63,#c62f39)}
-  .reset{background:linear-gradient(135deg,#8B4513,#6b3610)}
-  .publish{grid-column:1 / -1; background:linear-gradient(135deg,#ffe479,#ffc52f); color:#4a2f16;
-    border-color:var(--gold); padding:16px}
-
-  .crew-list{display:grid; gap:10px; max-height:560px; overflow:auto}
-  .card{
-    background:linear-gradient(135deg,#FFF8DC,#F5E6D3); border:2px solid var(--gold);
-    border-radius:12px; padding:12px; display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center
-  }
-  .c-title{font-weight:900; color:var(--brown); display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-  .badge{font-size:.72rem; padding:4px 8px; border-radius:999px; color:#fff; font-weight:900}
-  .b-active{background:#3498db}
-  .b-return{background:#27ae60}
-  .b-late{background:#e74c3c}
-  .score{font-weight:900; color:var(--gold); text-shadow:0 1px 0 #00000018}
-
-  .tiny{font-size:.9rem; color:#6b3610}
-
-  .stats{
-    margin-top:18px; display:grid; grid-template-columns:repeat(4,1fr); gap:14px
-  }
-  @media (max-width:980px){.stats{grid-template-columns:repeat(2,1fr)}}
-  .stat{
-    background:linear-gradient(145deg,var(--cream),var(--cream-2));
-    border:3px solid var(--brown); border-radius:16px; padding:16px; text-align:center;
-    box-shadow:0 10px 24px rgba(0,0,0,.2); position:relative; overflow:hidden;
-  }
-  .stat::before{content:""; position:absolute; inset:0 0 auto 0; height:4px;
-    background:linear-gradient(90deg,var(--gold-2),var(--gold),var(--gold-2))}
-  .stat .num{font-size:28px; font-weight:900; color:var(--brown); line-height:1}
-  .stat .lbl{margin-top:6px; font-weight:800; color:#7a4e2a}
-  .msg{margin-top:12px; padding:12px; border-radius:10px; font-weight:700}
-  .msg.ok{background:#eafbea; border:2px solid #2ecc71; color:#106d2e}
-  .msg.err{background:#ffe6ea; border:2px solid #ff5c74; color:#7a1020}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Terry’s Treasure Hunt – Command Centre</title>
+  <style>
+    :root{
+      --brown:#8B4513;--brown-2:#6c2f0e;--gold:#DAA520;--gold-2:#FFD700;--sand:#F5E6D3;--sand-2:#E8D7C3;--ink:#2C1810;
+      --ok:#27ae60;--warn:#ff8c00;--stop:#dc143c;--muted:#b7a99a;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Helvetica,Arial,sans-serif;
+      background:linear-gradient(135deg,#8B4513 0%,#D2691E 35%,#F4A460 100%); color:#3E2723; min-height:100vh}
+    .wrap{max-width:1200px;margin:28px auto;padding:0 16px}
+    .brand{display:flex;justify-content:center;margin-bottom:14px}
+    .brand img{height:40px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5))}
+    .note{display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,#ffdb74,#ffc63f);
+      border:3px solid var(--gold); border-radius:14px; padding:14px 16px; box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .note .thumb{width:46px;height:46px;border-radius:10px;background:linear-gradient(135deg,#8B4513,#A0522D);border:3px solid var(--gold)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    .panel{background:linear-gradient(145deg,var(--sand),var(--sand-2)); border:3px solid var(--brown);
+      border-radius:16px; box-shadow:0 14px 28px rgba(0,0,0,.25); overflow:hidden}
+    .panel h2{margin:0;padding:12px 16px;font-size:1.05rem;border-bottom:2px solid rgba(0,0,0,.08);
+      background:linear-gradient(135deg,#fff8dc,#f6e7cf)}
+    .timer{background:linear-gradient(135deg,#ffc21d,#ffad00); margin:14px; padding:18px; border-radius:12px;
+      text-align:center; font:700 34px/1.1 ui-monospace,Consolas,Menlo,monospace; border:3px solid var(--gold)}
+    .status{margin:0 14px 14px; padding:12px; border-radius:10px; text-align:center; font-weight:700; border:2px solid}
+    .status.stopped{background:#ffe0ea;border-color:#dc143c;color:#8b0000}
+    .status.running{background:#e5ffe7;border-color:#27ae60;color:#0c6b2a}
+    .status.ready{background:#efe8ff;border-color:#7a5afd;color:#2b1c6e}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 14px 14px}
+    .btn{padding:14px 16px;border-radius:12px;border:3px solid var(--brown);font-weight:800;text-transform:uppercase;
+      letter-spacing:.5px;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.15); display:flex;justify-content:center;gap:8px}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn.start{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff}
+    .btn.pause{background:linear-gradient(135deg,#ffd166,#ffb703)}
+    .btn.stop{background:linear-gradient(135deg,#ff6b6b,#dc143c);color:#fff}
+    .btn.reset{background:linear-gradient(135deg,#8B4513,#5a3212);color:#fff}
+    .btn.publish{grid-column:1/-1;background:linear-gradient(135deg,#ffd700,#f7c52a);border-color:#b8860b}
+    .badge{display:inline-flex;gap:8px;align-items:center;background:#fff3cd;border:2px solid #b8860b;border-radius:10px;padding:8px 12px;margin:10px 14px;font-weight:700}
+    /* crews list */
+    .crew-wrap{padding:14px}
+    .msg{background:#ffe6e8;border:2px solid #dc143c;color:#8b0000;border-radius:10px;padding:12px;font-weight:700}
+    .crew{border:2px solid var(--gold); background:linear-gradient(135deg,#fff8dc,#f7ecd2); border-radius:12px; padding:12px; margin:10px 0}
+    .crew .row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .crew .name{font-weight:900;color:var(--brown);font-size:1.05rem}
+    .crew .right{display:flex;gap:8px;align-items:center}
+    .pill{padding:4px 10px;border-radius:999px;font-size:.8rem;font-weight:800}
+    .pill.green{background:#27ae60;color:#fff}
+    .pill.red{background:#dc143c;color:#fff}
+    .small{font-size:.85rem;color:#5a432f}
+    .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    select,input[type="number"]{padding:8px 10px;border:2px solid var(--gold);border-radius:10px;background:#fff}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:16px 0}
+    @media (max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+    .card{background:linear-gradient(145deg,var(--sand),var(--sand-2)); border:3px solid var(--brown);
+      border-radius:14px; padding:18px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,.2)}
+    .card .n{font-size:28px;font-weight:900;color:var(--brown)}
+    .keybox{margin-left:auto}
+    .keybox button{padding:8px 10px;border-radius:10px;border:2px solid var(--gold);background:#fff8dc;font-weight:800;cursor:pointer}
+  </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="mast">
-      <div class="mast-badge"></div>
-      <p>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</p>
-      <div class="admin-key">
-        <span id="keyLabel">Admin key: <em>not set</em></span>
-        <button id="changeKeyBtn" type="button">Set / Change</button>
+    <div class="brand">
+      <img src="/Team Quest Logo-01.png" alt="TeamQuest" />
+    </div>
+
+    <div class="note">
+      <div class="thumb"></div>
+      <div>
+        <div style="font-weight:900;margin-bottom:4px">Command Centre</div>
+        <div>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
+      </div>
+      <div class="keybox">
+        <div class="small" id="keyState">Admin key: <strong>unknown</strong></div>
+        <div style="text-align:right;margin-top:6px">
+          <button id="setKeyBtn">Set / Change</button>
+        </div>
       </div>
     </div>
 
     <div class="grid">
       <!-- LEFT: Controls -->
-      <section class="panel">
-        <div class="pane-title">⚓ Adventure Control</div>
+      <div class="panel">
+        <h2>⚓ Adventure Control</h2>
+        <div class="timer" id="timerText">01:30:00</div>
+        <div class="status ready" id="statusText">Not started</div>
 
-        <div class="timer" id="timer">01 : 30 : 00</div>
-        <div class="status wait" id="status">Not started</div>
-
-        <div class="row" style="margin-top:12px">
-          <button class="btn start" id="btnStart">💥 Launch</button>
-          <button class="btn pause" id="btnPause" disabled>⏸️ Pause</button>
-          <button class="btn stop" id="btnStop" disabled>⏹️ End</button>
-          <button class="btn reset" id="btnReset">🔁 Reset</button>
+        <div class="controls">
+          <button class="btn start"  id="btnStart">🚀 Launch</button>
+          <button class="btn pause"  id="btnPause" disabled>⏸️ Pause</button>
+          <button class="btn stop"   id="btnStop"  disabled>⏹️ End</button>
+          <button class="btn reset"  id="btnReset">🔄 Reset</button>
           <button class="btn publish" id="btnPublish" disabled>🏆 Publish Final Results</button>
         </div>
 
-        <div id="controlMsg" class="msg" style="display:none"></div>
-      </section>
+        <div class="badge">🔒 <span id="resultsState">Results not published</span></div>
+      </div>
 
       <!-- RIGHT: Crews -->
-      <section class="panel">
-        <div class="pane-title">👥 Crew Management</div>
-        <div id="crewList" class="crew-list">
-          <div class="msg" id="crewInfo">🔎 Loading crews…</div>
+      <div class="panel">
+        <h2>👥 Crew Management</h2>
+        <div class="crew-wrap" id="crewWrap">
+          <div class="small">🔍 Loading crews…</div>
         </div>
-      </section>
+      </div>
     </div>
 
-    <!-- Stats -->
     <div class="stats">
-      <div class="stat">
-        <div class="num" id="statTotal">0</div>
-        <div class="lbl">Total Crews</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="statActive">0</div>
-        <div class="lbl">Active</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="statReturned">0</div>
-        <div class="lbl">Returned</div>
-      </div>
-      <div class="stat">
-        <div class="num" id="statPenalised">0</div>
-        <div class="lbl">Penalised</div>
-      </div>
+      <div class="card"><div class="n" id="statTotal">0</div><div>Total Crews</div></div>
+      <div class="card"><div class="n" id="statActive">0</div><div>Active</div></div>
+      <div class="card"><div class="n" id="statReturned">0</div><div>Returned</div></div>
+      <div class="card"><div class="n" id="statPenalised">0</div><div>Penalised</div></div>
     </div>
   </div>
 
-<script>
-/* ----------------------- Admin key storage ----------------------- */
-const ADMIN_KEY_STORAGE = 'tq_admin_secret';
-function getAdminKey() {
-  return localStorage.getItem(ADMIN_KEY_STORAGE) || '';
-}
-function promptForAdminKey() {
-  const k = prompt('Enter Admin Secret (used by requireAdmin):', getAdminKey() || '');
-  if (k !== null) {
-    localStorage.setItem(ADMIN_KEY_STORAGE, k.trim());
-    updateKeyLabel();
-  }
-}
-function updateKeyLabel() {
-  const k = getAdminKey();
-  document.getElementById('keyLabel').innerHTML = 'Admin key: ' + (k ? '<strong>set</strong>' : '<em>not set</em>');
-}
-document.getElementById('changeKeyBtn').addEventListener('click', promptForAdminKey);
-updateKeyLabel();
+  <script>
+    // ===== Config / helpers =====
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('event') || 'EVT-19-08-2025';
+    const LS_KEY = 'tq_admin_secret';
 
-/* --------------------- Utilities & Endpoints --------------------- */
-const EVENT_ID = (new URLSearchParams(location.search)).get('event') || 'EVT-19-08-2025';
+    const endpoints = {
+      state:           (eventId) => `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`,
+      listTeams:       (eventId) => `/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`,
+      startEvent:      `/.netlify/functions/admin_start_event`,
+      checkinTeam:     `/.netlify/functions/admin_checkin_team`,
+      toggleLock:      `/.netlify/functions/admin_toggle_lock_team`,
+      publish:         `/.netlify/functions/admin_publish_final`,
+    };
 
-function withAdminHeaders(h={}) {
-  const key = getAdminKey();
-  if (!key) return h;
-  return {
-    ...h,
-    // This matches your server-side `requireAdmin(event)` check pattern
-    'x-admin-secret': key
-    // If your requireAdmin expects Bearer instead, swap to:
-    // 'Authorization': 'Bearer ' + key
-  };
-}
-
-async function fetchJSON(url, opts = {}) {
-  const headers = withAdminHeaders({
-    'Content-Type': 'application/json',
-    ...(opts.headers || {})
-  });
-  const res = await fetch(url, { ...opts, headers });
-  if (!res.ok) {
-    // bubble a helpful error
-    const txt = await res.text().catch(()=> '');
-    throw new Error(`${res.status} ${res.statusText} ${txt ? '— ' + txt : ''}`);
-  }
-  return res.json();
-}
-
-// Endpoints based on your current functions list
-const API = {
-  listTeams: (eventId) => `/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`,
-  startEvent: '/.netlify/functions/admin_start_event',            // POST { action: 'start'|'stop'|'reset' }
-  publishFinal: '/.netlify/functions/admin_publish_final',        // POST {}
-  toggleLock: '/.netlify/functions/admin_toggle_lock_team',       // POST { teamCode, locked }
-  eventState: (eventId) => `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`
-};
-
-/* -------------------------- UI Helpers --------------------------- */
-function showControlMsg(text, ok=true){
-  const el = document.getElementById('controlMsg');
-  el.textContent = text;
-  el.className = 'msg ' + (ok ? 'ok' : 'err');
-  el.style.display = 'block';
-  setTimeout(()=>{ el.style.display='none'; }, 4000);
-}
-function setStatus(text, cls){
-  const st = document.getElementById('status');
-  st.textContent = text;
-  st.className = 'status ' + cls;
-}
-
-/* --------------------- Crew Rendering Logic ---------------------- */
-function renderCrews(teams){
-  const container = document.getElementById('crewList');
-  container.innerHTML = '';
-  if (!teams || teams.length === 0){
-    const empty = document.createElement('div');
-    empty.className = 'msg';
-    empty.textContent = 'No crews yet.';
-    container.appendChild(empty);
-    updateStats(teams);
-    return;
-  }
-
-  teams.forEach(t => {
-    const card = document.createElement('div');
-    card.className = 'card';
-
-    const title = document.createElement('div');
-    title.className = 'c-title';
-    title.innerHTML = `${t.teamName || t.teamCode || 'Unknown'} <span class="tiny">(${t.teamCode})</span>`;
-
-    // Simple status guess based on returnedAt presence (adjust if you track status differently)
-    let badge = document.createElement('span');
-    badge.className = 'badge ' + (t.returnedAt ? 'b-return' : 'b-active');
-    badge.textContent = t.returnedAt ? 'Returned' : 'Active';
-    title.appendChild(badge);
-
-    const right = document.createElement('div');
-    right.style.display = 'flex';
-    right.style.alignItems = 'center';
-    right.style.gap = '8px';
-
-    // Lock toggle
-    const lockLbl = document.createElement('label');
-    lockLbl.className = 'tiny';
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = !!t.locked;
-    cb.addEventListener('change', async () => {
-      try{
-        await fetchJSON(API.toggleLock, {
-          method:'POST',
-          body: JSON.stringify({ teamCode: t.teamCode, locked: cb.checked, eventId: EVENT_ID })
-        });
-        showControlMsg(`${t.teamCode} ${cb.checked ? 'locked' : 'unlocked'}.`, true);
-      }catch(e){
-        cb.checked = !cb.checked; // revert
-        showControlMsg(`Failed to toggle lock: ${e.message}`, false);
+    function adminKey() { return localStorage.getItem(LS_KEY) || ''; }
+    function setAdminKey(key){ localStorage.setItem(LS_KEY, key); paintKeyState(); }
+    function ensureKey(){
+      if (!adminKey()) {
+        const k = prompt('Enter Admin Secret (used by requireAdmin):') || '';
+        if (k) setAdminKey(k);
       }
-    });
-    lockLbl.appendChild(cb);
-    lockLbl.append(' Lock');
-
-    right.appendChild(lockLbl);
-
-    card.appendChild(title);
-    card.appendChild(right);
-    container.appendChild(card);
-  });
-
-  updateStats(teams);
-}
-
-function updateStats(teams){
-  const total = teams?.length || 0;
-  const returned = teams?.filter(t => !!t.returnedAt).length || 0;
-  const active = total - returned;
-  // Penalised requires your scoring data; leave 0 here or extend when you expose it.
-  const penalised = 0;
-
-  document.getElementById('statTotal').textContent = total;
-  document.getElementById('statActive').textContent = active;
-  document.getElementById('statReturned').textContent = returned;
-  document.getElementById('statPenalised').textContent = penalised;
-}
-
-/* --------------------- Data Loading & Timer ---------------------- */
-async function loadCrews(){
-  try{
-    const data = await fetchJSON(API.listTeams(EVENT_ID));
-    renderCrews(data.teams || []);
-  }catch(e){
-    const box = document.getElementById('crewList');
-    box.innerHTML = `<div class="msg err">Failed to load crew list: ${e.message}</div>`;
-  }
-}
-
-let tickHandle = null;
-function startTicking(){
-  if (tickHandle) return;
-  tickHandle = setInterval(async () => {
-    // Timer state from server (if available)
-    try{
-      const s = await fetchJSON(API.eventState(EVENT_ID));
-      // s looks like: { success:true, eventId, state:'READY'|'RUNNING'|..., startedAt, endsAt, penaltyPerMin }
-      if (s.state === 'RUNNING' && s.endsAt){
-        setStatus('Adventure in progress', 'ok');
-        // Countdown
-        const ms = new Date(s.endsAt).getTime() - Date.now();
-        updateTimerFromMs(ms);
-        enableButtons({start:false, pause:true, stop:true, reset:false, publish:false});
-      } else if (s.state === 'READY'){
-        setStatus('Not started', 'wait');
-        setTimerText('01 : 30 : 00');
-        enableButtons({start:true, pause:false, stop:false, reset:true, publish:false});
-      } else if (s.state === 'ENDED'){
-        setStatus('Adventure complete', 'stop');
-        enableButtons({start:false, pause:false, stop:false, reset:true, publish:true});
-      } else {
-        // Fallback neutral
-        enableButtons({start:true, pause:false, stop:false, reset:true, publish:false});
-      }
-    }catch{
-      // ignore timer errors so the page still loads crews
     }
-  }, 1000);
-}
-function stopTicking(){ if (tickHandle){ clearInterval(tickHandle); tickHandle=null; } }
+    function authHeaders(){
+      return { 'x-tq-admin': adminKey() };   // <— this matches requireAdmin(event)
+    }
+    function paintKeyState(){
+      const el = document.getElementById('keyState');
+      el.innerHTML = `Admin key: <strong>${adminKey() ? 'set' : 'not set'}</strong>`;
+    }
 
-function setTimerText(t){ document.getElementById('timer').textContent = t; }
-function updateTimerFromMs(ms){
-  if (ms <= 0) { setTimerText('+00 : 00 : 00'); return; }
-  const h = Math.floor(ms/3_600_000);
-  const m = Math.floor((ms%3_600_000)/60_000);
-  const s = Math.floor((ms%60_000)/1000);
-  setTimerText(`${String(h).padStart(2,'0')} : ${String(m).padStart(2,'0')} : ${String(s).padStart(2,'0')}`);
-}
+    document.getElementById('setKeyBtn').addEventListener('click', () => {
+      const v = prompt('Enter Admin Secret (used by requireAdmin):', adminKey() || '');
+      if (v !== null) setAdminKey(v.trim());
+      loadAll(); // try again with new key
+    });
 
-/* -------------------------- Controls ----------------------------- */
-function enableButtons(map){
-  document.getElementById('btnStart').disabled = map.start === false ? true : !map.start;
-  document.getElementById('btnPause').disabled = map.pause === true ? false : true;
-  document.getElementById('btnStop').disabled  = map.stop  === true ? false : true;
-  document.getElementById('btnReset').disabled = map.reset === true ? false : false;
-  document.getElementById('btnPublish').disabled = map.publish === true ? false : true;
-}
+    // ===== UI elements =====
+    const timerEl   = document.getElementById('timerText');
+    const statusEl  = document.getElementById('statusText');
+    const resultsEl = document.getElementById('resultsState');
+    const crewWrap  = document.getElementById('crewWrap');
 
-async function postStartEvent(action){
-  return fetchJSON(API.startEvent, { method:'POST', body: JSON.stringify({ action, eventId: EVENT_ID }) });
-}
-async function publishFinal(){
-  return fetchJSON(API.publishFinal, { method:'POST', body: JSON.stringify({ eventId: EVENT_ID }) });
-}
+    const btnStart   = document.getElementById('btnStart');
+    const btnPause   = document.getElementById('btnPause');
+    const btnStop    = document.getElementById('btnStop');
+    const btnReset   = document.getElementById('btnReset');
+    const btnPublish = document.getElementById('btnPublish');
 
-document.getElementById('btnStart').addEventListener('click', async ()=>{
-  try{
-    await postStartEvent('start');
-    showControlMsg('Adventure launched!', true);
-    setStatus('Adventure in progress', 'ok');
-    enableButtons({start:false, pause:true, stop:true, reset:false, publish:false});
-  }catch(e){ showControlMsg(e.message, false); }
-});
+    // Stats
+    const statTotal      = document.getElementById('statTotal');
+    const statActive     = document.getElementById('statActive');
+    const statReturned   = document.getElementById('statReturned');
+    const statPenalised  = document.getElementById('statPenalised');
 
-document.getElementById('btnPause').addEventListener('click', async ()=>{
-  try{
-    await postStartEvent('pause'); // if your function expects 'stop' for pause, change here
-    showControlMsg('Adventure paused.', true);
-    setStatus('Paused', 'wait');
-    enableButtons({start:true, pause:false, stop:true, reset:false, publish:false});
-  }catch(e){ showControlMsg(e.message, false); }
-});
+    // ===== Data refresh =====
+    async function loadState(){
+      try{
+        const res = await fetch(endpoints.state(EVENT_ID), { headers: authHeaders() });
+        if (!res.ok) throw new Error(`${res.status}`);
+        const data = await res.json(); // { success, ... }
+        if (!data.success) throw new Error(data.message || 'state error');
 
-document.getElementById('btnStop').addEventListener('click', async ()=>{
-  try{
-    await postStartEvent('stop');
-    showControlMsg('Adventure ended.', true);
-    setStatus('Adventure complete', 'stop');
-    enableButtons({start:false, pause:false, stop:false, reset:true, publish:true});
-  }catch(e){ showControlMsg(e.message, false); }
-});
+        // paint timer/status/results
+        // expected fields: startTime, durationMinutes, competitionStatus, resultsPublished
+        const st = data.startTime ? new Date(data.startTime) : null;
+        const durMs = (data.durationMinutes || 90) * 60 * 1000;
+        const status = (data.competitionStatus || 'not_started').toLowerCase();
+        const resultsPublished = !!data.resultsPublished;
 
-document.getElementById('btnReset').addEventListener('click', async ()=>{
-  if (!confirm('Reset competition? This clears the current session and prepares for a new one.')) return;
-  try{
-    await postStartEvent('reset');
-    showControlMsg('Timer reset. Ready to launch.', true);
-    setStatus('Not started', 'wait');
-    setTimerText('01 : 30 : 00');
-    enableButtons({start:true, pause:false, stop:false, reset:true, publish:false});
-    loadCrews();
-  }catch(e){ showControlMsg(e.message, false); }
-});
+        if (st){
+          const end = new Date(st.getTime() + durMs);
+          updateTimer(end, status);
+        } else {
+          timerEl.textContent = '01:30:00';
+        }
 
-document.getElementById('btnPublish').addEventListener('click', async ()=>{
-  if (!confirm('Publish final results and unlock the gallery?')) return;
-  try{
-    await publishFinal();
-    showControlMsg('Final results published.', true);
-    enableButtons({start:false, pause:false, stop:false, reset:true, publish:false});
-  }catch(e){ showControlMsg(e.message, false); }
-});
+        // status pill
+        statusEl.className = 'status ' + (status==='start' || status==='running' ? 'running' :
+                           status==='stop' || status==='stopped' ? 'stopped' : 'ready');
+        statusEl.textContent =
+          status==='running' || status==='start' ? 'Adventure in progress' :
+          status==='stopped' || status==='stop' ? 'Ended' : 'Not started';
 
-/* --------------------------- Boot ------------------------------- */
-(async function init(){
-  if (!getAdminKey()) promptForAdminKey(); // ask on first run
-  await loadCrews();
-  startTicking();
-  // refresh crews every 30s
-  setInterval(loadCrews, 30000);
-})();
-</script>
+        // results
+        resultsEl.textContent = resultsPublished ? 'Results published' : 'Results not published';
+        btnPublish.disabled = resultsPublished;
+
+        // buttons
+        btnStart.disabled = status==='running' || resultsPublished;
+        btnPause.disabled = !(status==='running');
+        btnStop.disabled  = !(status==='running');
+        btnReset.disabled = status==='running';
+
+      }catch(e){
+        console.error('loadState', e);
+        statusEl.className='status stopped';
+        statusEl.textContent='Status unavailable';
+      }
+    }
+
+    function updateTimer(endTime, status){
+      if (!endTime || (status!=='running' && status!=='start')) { timerEl.textContent = '01:30:00'; return; }
+      const tick = () => {
+        const now = new Date();
+        let ms = endTime - now;
+        const sign = ms < 0 ? '-' : '';
+        ms = Math.abs(ms);
+        const h = String(Math.floor(ms / 36e5)).padStart(2,'0');
+        const m = String(Math.floor((ms%36e5)/6e4)).padStart(2,'0');
+        const s = String(Math.floor((ms%6e4)/1e3)).padStart(2,'0');
+        timerEl.textContent = (sign==='' ? '' : '+') + `${h}:${m}:${s}`;
+      };
+      tick();
+      clearInterval(window.__tqTimer);
+      window.__tqTimer = setInterval(tick, 1000);
+    }
+
+    async function loadCrews(){
+      try{
+        const res = await fetch(endpoints.listTeams(EVENT_ID), { headers: authHeaders() });
+        if (!res.ok){
+          const body = await res.text().catch(()=> '');
+          throw new Error(`Failed to load crew list: ${res.status} — ${body||''}`);
+        }
+        const data = await res.json(); // { success:true, teams:[...] }
+        const teams = (data.teams || []).map(t => ({
+          teamCode: t.teamCode,
+          teamName: t.teamName || t.teamCode,
+          locked: !!t.locked,
+          returnedAt: t.returnedAt || null
+        }));
+
+        renderCrews(teams);
+        paintStats(teams);
+      }catch(e){
+        console.error(e);
+        crewWrap.innerHTML = `<div class="msg">${e.message || 'Failed to load crew list'}</div>`;
+        paintStats([]);
+      }
+    }
+
+    function renderCrews(teams){
+      if (!teams.length){
+        crewWrap.innerHTML = `<div class="small">No crews yet.</div>`;
+        return;
+      }
+      crewWrap.innerHTML = teams.map(t => {
+        const statusPill = t.returnedAt
+          ? `<span class="pill green">Returned</span>`
+          : `<span class="pill" style="background:#3498db;color:#fff">Active</span>`;
+        const lockPill = t.locked
+          ? `<span class="pill red">Locked</span>`
+          : `<span class="pill" style="background:#e3e1da">Unlocked</span>`;
+        return `
+          <div class="crew" data-code="${t.teamCode}">
+            <div class="row">
+              <div class="name">${escapeHtml(t.teamName)}</div>
+              <div class="right">${statusPill}${lockPill}</div>
+            </div>
+            <div class="small">${t.teamCode} ${t.returnedAt ? `• Returned: ${new Date(t.returnedAt).toLocaleTimeString()}`:''}</div>
+            <div class="toolbar">
+              <select class="statusSel">
+                <option value="active" ${!t.returnedAt?'selected':''}>Active</option>
+                <option value="returned" ${t.returnedAt?'selected':''}>Returned</option>
+              </select>
+              <label class="small">
+                <input type="checkbox" class="lockChk" ${t.locked?'checked':''}/> Lock doubloons
+              </label>
+              <button class="btn reset smallBtn applyBtn" style="padding:8px 12px">Apply</button>
+            </div>
+          </div>`;
+      }).join('');
+
+      // bind actions
+      crewWrap.querySelectorAll('.crew').forEach(card => {
+        const code = card.dataset.code;
+        const sel  = card.querySelector('.statusSel');
+        const lock = card.querySelector('.lockChk');
+        const apply= card.querySelector('.applyBtn');
+
+        apply.addEventListener('click', async () => {
+          try {
+            // lock toggle first (independent)
+            await fetch(endpoints.toggleLock, {
+              method:'POST',
+              headers: { 'Content-Type':'application/json', ...authHeaders() },
+              body: JSON.stringify({ eventId: EVENT_ID, teamCode: code, locked: !!lock.checked })
+            });
+
+            // status update
+            const statusVal = sel.value; // 'active' | 'returned'
+            await fetch(endpoints.checkinTeam, {
+              method:'POST',
+              headers: { 'Content-Type':'application/json', ...authHeaders() },
+              body: JSON.stringify({
+                eventId: EVENT_ID,
+                teamCode: code,
+                status: statusVal,
+                returnTime: statusVal==='returned' ? new Date().toISOString() : null
+              })
+            });
+            await loadCrews();
+          } catch(err){
+            alert('Failed to update team: ' + (err?.message || err));
+          }
+        });
+      });
+    }
+
+    function paintStats(teams){
+      statTotal.textContent = teams.length;
+      const returned = teams.filter(t=>!!t.returnedAt).length;
+      const active = teams.length - returned;
+      statActive.textContent = active;
+      statReturned.textContent = returned;
+      // penalised is not in this list call; set to 0 for now
+      statPenalised.textContent = 0;
+    }
+
+    function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c])); }
+
+    // ===== Actions =====
+    btnStart.addEventListener('click', async ()=>{
+      ensureKey();
+      await actionPost(endpoints.startEvent, { action:'start', eventId: EVENT_ID });
+      await loadAll();
+    });
+    btnPause.addEventListener('click', async ()=>{
+      await actionPost(endpoints.startEvent, { action:'stop', eventId: EVENT_ID });
+      await loadAll();
+    });
+    btnStop.addEventListener('click', async ()=>{
+      await actionPost(endpoints.startEvent, { action:'stop', eventId: EVENT_ID });
+      await loadAll();
+    });
+    btnReset.addEventListener('click', async ()=>{
+      if(!confirm('Reset competition?')) return;
+      await actionPost(endpoints.startEvent, { action:'reset', eventId: EVENT_ID });
+      await loadAll();
+    });
+    btnPublish.addEventListener('click', async ()=>{
+      if(!confirm('Publish final results?')) return;
+      await actionPost(endpoints.publish, { eventId: EVENT_ID });
+      await loadAll();
+    });
+
+    async function actionPost(url, body){
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type':'application/json', ...authHeaders() },
+        body: JSON.stringify(body || {})
+      });
+      if (!res.ok){
+        const t = await res.text().catch(()=> '');
+        throw new Error(`HTTP ${res.status}: ${t || res.statusText}`);
+      }
+      return res.json().catch(()=> ({}));
+    }
+
+    async function loadAll(){
+      paintKeyState();
+      await Promise.all([ loadState(), loadCrews() ]);
+    }
+
+    // boot
+    (async function init(){
+      paintKeyState();
+      if (!adminKey()){
+        // gentle prompt on first load
+        setTimeout(()=>ensureKey(), 100);
+      }
+      await loadAll();
+      // poll periodically
+      clearInterval(window.__tqPoll);
+      window.__tqPoll = setInterval(loadAll, 30000);
+    })();
+  </script>
 </body>
 </html>
