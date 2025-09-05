@@ -18,20 +18,33 @@
     }
     .wrap{max-width:1180px; margin:24px auto; padding:0 16px}
     .row{display:grid; grid-template-columns: 420px 1fr; gap:20px}
-    .header{display:flex; align-items:center; gap:16px; background:var(--panel); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)}
-    .header .badge{width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center; box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)}
+    .header{
+      display:flex; align-items:center; gap:16px; background:var(--panel);
+      border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)
+    }
+    .header .badge{
+      width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)
+    }
     .header h1{margin:0; line-height:1.1}
     .header small{display:block; color:#6d553b}
+
     .panel{background:var(--panel); border-radius:18px; box-shadow:var(--shadow); padding:16px}
     .section-title{font-weight:700; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 12px}
-    .timer{background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px; padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em}
+    .timer{
+      background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px;
+      padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em
+    }
     .status{margin-top:10px; background:#f0e5d9; border-radius:12px; padding:10px 12px; display:flex; justify-content:center}
     .pill{padding:6px 12px; border-radius:999px; font-size:13px; font-weight:700; display:inline-block}
     .pill.running{background:#e6fbf1; color:#106a3e; border:1px solid #b8efcf}
     .pill.paused{background:#fff6e9; color:#7a5a13; border:1px solid #f1d093}
     .pill.ended{background:#fdeeee; color:#8b1f1f; border:1px solid #f3b3b3}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
-    button{appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
+    button{
+      appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)
+    }
     .btn{background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px}
     .btn.pause{background:#fff6e9; border-color:#f3d49c; color:#6b4b0a}
     .btn.end{background:#ffe9e9; border-color:#f5b1b1; color:#7d2323}
@@ -46,8 +59,13 @@
     .k{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
     .tag{font-size:12px; font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee}
     .apply{padding:8px 10px; border-radius:10px; background:#fff3f6; border:1px solid #f3c4d6; font-weight:800}
-    .help{background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px}
-    @media (max-width: 980px){.row{grid-template-columns:1fr} .teams{max-height:unset}}
+    .help{
+      background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px
+    }
+    @media (max-width: 980px){
+      .row{grid-template-columns:1fr}
+      .teams{max-height:unset}
+    }
   </style>
 </head>
 <body>
@@ -64,24 +82,35 @@
       <!-- LEFT: Adventure Control -->
       <section class="panel">
         <div class="section-title">⚓ Adventure Control</div>
+
         <div id="timer" class="timer">-- : -- : --</div>
+
         <div class="status"><span id="statusPill" class="pill">Checking…</span></div>
 
         <div class="grid2" style="margin-top:14px">
           <button id="btnStart" class="btn">🍭 Launch</button>
           <button id="btnPause" class="btn pause">⏸ Pause</button>
           <button id="btnEnd" class="btn end">🟥 End</button>
-          <button id="btnReset" class="btn reset">🧹 Reset (UI only)</button>
+          <button id="btnReset" class="btn reset">🔁 Reset</button>
         </div>
 
         <div class="stats">
-          <div class="stat"><div style="font-size:13px; opacity:.8">Total Crews</div><h3 id="statTotal">—</h3></div>
-          <div class="stat"><div style="font-size:13px; opacity:.8">Active</div><h3 id="statActive">—</h3></div>
-          <div class="stat"><div style="font-size:13px; opacity:.8">Returned</div><h3 id="statReturned">0</h3></div>
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Total Crews</div>
+            <h3 id="statTotal">—</h3>
+          </div>
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Active</div>
+            <h3 id="statActive">—</h3>
+          </div>
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Returned</div>
+            <h3 id="statReturned">0</h3>
+          </div>
         </div>
 
         <div class="help">
-          Tip: If the page looks out of sync, it will auto-correct on the next refresh (every 3s) based on the Sheet’s state.
+          Tip: The page auto-syncs with the Sheet every 3s. Reset sets the event back to “Not started.”
         </div>
       </section>
 
@@ -94,17 +123,18 @@
   </div>
 
   <script>
-    // ---- Config / helpers ----
+    // --------- Config / Helpers ----------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
     if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
 
+    // Admin token: ?key=... or localStorage
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
     if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
-      start: '/.netlify/functions/admin_start_event',
+      start: '/.netlify/functions/admin_start_event', // start/pause/end/reset via action
       teams: '/.netlify/functions/admin_list_teams',
     };
 
@@ -145,7 +175,7 @@
       return `${hh} : ${mm} : ${ss}`;
     };
 
-    // ---- Event snapshot (authoritative in UI) ----
+    // --------- Event Snapshot ----------
     let current = {
       state: 'unknown',
       startedAt: null,     // ISO
@@ -155,8 +185,7 @@
       lastUpdateAt: 0,
       prevState: 'unknown',
     };
-    let initialDurationSec = null; // captured from the first successful fetch
-    let uiOverride = false;        // while true, ignore poll updates (for Reset mode)
+    let initialDurationSec = null;
 
     function setStatusPill(state){
       const s = normState(state);
@@ -181,11 +210,10 @@
         displayMs = new Date(current.endsAt).getTime() - now;
         current.remainingMs = displayMs; // keep fresh fallback
       } else if (s === 'paused'){
-        displayMs = Math.max(0, current.remainingMs || 0); // freeze
+        displayMs = Math.max(0, current.remainingMs || 0);
       } else if (s === 'ended'){
         displayMs = 0;
       } else {
-        // Not started/unknown -> show full duration if we have it
         const dur = current.durationSec ?? initialDurationSec;
         if (dur != null) displayMs = dur * 1000;
       }
@@ -193,12 +221,9 @@
       rafId = requestAnimationFrame(tick);
     }
 
-    // ---- API calls ----
+    // --------- API calls ----------
     async function fetchState({force=false}={}){
       const callAt = Date.now();
-      // In UI override (after Reset) we ignore backend state until Launch is pressed
-      if (uiOverride && !force) return;
-
       const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({}));
       if (!force && callAt < current.lastUpdateAt) return;
@@ -211,7 +236,6 @@
         initialDurationSec = data.durationSec;
       }
 
-      // Respect backend remaining if provided; otherwise keep client snapshot
       let remainingMs = current.remainingMs;
       if (typeof data.remainingMs === 'number') {
         remainingMs = data.remainingMs;
@@ -237,7 +261,7 @@
     }
 
     async function postAction(action){
-      // Optimistic UI for pause/end to avoid flicker
+      // Optimistic UI to avoid flicker for pause/end/reset
       if (action === 'pause'){
         const ms = (current.endsAt ? new Date(current.endsAt).getTime() - Date.now() : current.remainingMs) || 0;
         current.remainingMs = Math.max(0, ms);
@@ -249,6 +273,15 @@
         current.remainingMs = 0;
         current.state = 'ended';
         setStatusPill('ended');
+        tick();
+      }
+      if (action === 'reset'){
+        const dur = current.durationSec ?? initialDurationSec ?? 0;
+        current.startedAt = null;
+        current.endsAt = null;
+        current.remainingMs = dur * 1000;
+        current.state = 'notstarted';
+        setStatusPill('notstarted');
         tick();
       }
 
@@ -289,41 +322,22 @@
             </div>
           </div>`;
       }).join('');
-      el.teams.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
         alert('Team-level admin actions coming soon.');
       }));
     }
 
-    // ---- Wire UI ----
-    el.btnStart.addEventListener('click', async () => {
-      // Leave override mode and start for real
-      uiOverride = false;
-      await postAction('start');
-    });
-
+    // --------- Wire UI ----------
+    el.btnStart.addEventListener('click', () => postAction('start'));
     el.btnPause.addEventListener('click', () => postAction('pause'));
-
-    el.btnEnd.addEventListener('click', () => {
-      uiOverride = false; // end follows backend
-      postAction('end');
-    });
-
+    el.btnEnd.addEventListener('click',   () => postAction('end'));
     el.btnReset.addEventListener('click', () => {
-      // UI-only reset: ignore poll updates until Launch is pressed
-      uiOverride = true;
-
-      // Revert to "not started" with full duration
-      const dur = current.durationSec ?? initialDurationSec;
-      current.startedAt = null;
-      current.endsAt = null;
-      current.remainingMs = dur != null ? dur * 1000 : 0;
-      current.state = 'notstarted';
-
-      setStatusPill('notstarted'); // enables Launch
-      tick();                      // shows full duration again
+      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times in the Sheet, and re-enable Launch.');
+      if (!ok) return;
+      postAction('reset');
     });
 
-    // ---- Boot ----
+    // --------- Boot ----------
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
