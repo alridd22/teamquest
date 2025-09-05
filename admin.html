@@ -17,63 +17,58 @@
       color:var(--ink);
     }
     .wrap{max-width:1180px; margin:24px auto; padding:0 16px}
-    .row{display:grid; grid-template-columns: 420px 1fr; gap:20px}
+    .row{display:grid; grid-template-columns: 440px 1fr; gap:22px}
     .header{
       display:flex; align-items:center; gap:16px; background:var(--panel);
-      border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)
+      border-radius:18px; padding:16px 18px; box-shadow:var(--shadow)
     }
-    .header .badge{
-      width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)
+    .badge{
+      width:54px; height:54px; border-radius:14px; background:#ffe9c8; display:grid; place-items:center;
+      font-size:28px; box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)
     }
-    .header h1{margin:0; line-height:1.1}
+    .header h1{margin:0; line-height:1.05; font-size:36px}
     .header small{display:block; color:#6d553b}
 
-    .panel{background:var(--panel); border-radius:18px; box-shadow:var(--shadow); padding:16px}
-    .section-title{font-weight:700; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 12px}
+    .panel{background:var(--panel); border-radius:20px; box-shadow:var(--shadow); padding:16px}
+    .section-title{font-weight:800; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 14px}
     .timer{
-      background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px;
-      padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em
+      background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:18px;
+      padding:28px 12px; text-align:center; color:#2c1d10; font-weight:900; font-size:48px; letter-spacing:.16em
     }
-    .status{margin-top:10px; background:#f0e5d9; border-radius:12px; padding:10px 12px; display:flex; justify-content:center}
-    .pill{padding:6px 12px; border-radius:999px; font-size:13px; font-weight:700; display:inline-block}
+    .status{margin-top:12px; background:#efe3d6; border-radius:12px; padding:10px 12px; display:flex; justify-content:center}
+    .pill{padding:6px 12px; border-radius:999px; font-size:13px; font-weight:800; display:inline-block}
     .pill.running{background:#e6fbf1; color:#106a3e; border:1px solid #b8efcf}
     .pill.paused{background:#fff6e9; color:#7a5a13; border:1px solid #f1d093}
     .pill.ended{background:#fdeeee; color:#8b1f1f; border:1px solid #f3b3b3}
-    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
-    button{
-      appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer;
-      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)
-    }
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+    button{appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
     .btn{background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px}
     .btn.pause{background:#fff6e9; border-color:#f3d49c; color:#6b4b0a}
     .btn.end{background:#ffe9e9; border-color:#f5b1b1; color:#7d2323}
     .btn.reset{background:#f7efe7; border-color:#dfd1c2; color:#4e3b25}
+    .btn.secondary{background:#fffdf8; border:1px solid #e5d5c4; color:#3b2d16}
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .stats{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:18px}
     .stat{background:var(--card); border:1px solid #ecdac7; border-radius:16px; text-align:center; padding:14px 12px; box-shadow:var(--shadow)}
     .stat h3{margin:0; font-size:28px}
+
     .teams{max-height:620px; overflow:auto; padding-right:6px}
-    .team{background:#fffdf8; border:1px solid #ecdac7; border-radius:14px; padding:12px; margin-bottom:10px}
-    .team .row1{display:flex; justify-content:space-between; gap:12px; align-items:center}
-    .k{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .tag{font-size:12px; font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee}
-    .apply{padding:8px 10px; border-radius:10px; background:#fff3f6; border:1px solid #f3c4d6; font-weight:800}
-    .help{
-      background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px
-    }
-    @media (max-width: 980px){
-      .row{grid-template-columns:1fr}
-      .teams{max-height:unset}
-    }
+    .team{background:#fffdf8; border:1px solid #ecdac7; border-radius:16px; padding:12px; margin-bottom:12px}
+    .team.returned{opacity:.7}
+    .row1{display:flex; justify-content:space-between; gap:12px; align-items:center}
+    .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px}
+    .tag{font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee}
+    .actions{display:flex; gap:8px; flex-wrap:wrap}
+    .help{background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:10px}
+    @media (max-width: 980px){.row{grid-template-columns:1fr} .teams{max-height:unset}}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header">
-      <div class="badge">🧭</div>
+      <div class="badge" title="Explorer">🧭</div>
       <div>
-        <h1 style="margin:0">Command&nbsp;Centre</h1>
+        <h1>Command&nbsp;Centre</h1>
         <small>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct at the configured rate.</small>
       </div>
     </div>
@@ -82,12 +77,10 @@
       <!-- LEFT: Adventure Control -->
       <section class="panel">
         <div class="section-title">⚓ Adventure Control</div>
-
         <div id="timer" class="timer">-- : -- : --</div>
-
         <div class="status"><span id="statusPill" class="pill">Checking…</span></div>
 
-        <div class="grid2" style="margin-top:14px">
+        <div class="grid2">
           <button id="btnStart" class="btn">🍭 Launch</button>
           <button id="btnPause" class="btn pause">⏸ Pause</button>
           <button id="btnEnd" class="btn end">🟥 End</button>
@@ -95,47 +88,36 @@
         </div>
 
         <div class="stats">
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Total Crews</div>
-            <h3 id="statTotal">—</h3>
-          </div>
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Active</div>
-            <h3 id="statActive">—</h3>
-          </div>
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Returned</div>
-            <h3 id="statReturned">0</h3>
-          </div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Total Crews</div><h3 id="statTotal">—</h3></div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Active</div><h3 id="statActive">—</h3></div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Returned</div><h3 id="statReturned">0</h3></div>
         </div>
 
-        <div class="help">
-          Tip: The page auto-syncs with the Sheet every 3s. Reset sets the event back to “Not started.”
-        </div>
+        <div class="help">Tip: The page auto-syncs with the Sheet every 3s. “Reset” sets the event back to “Not started” (if the backend supports it).</div>
       </section>
 
       <!-- RIGHT: Crew Management -->
       <section class="panel">
-        <div class="section-title">👥 Crew Management</div>
+        <div class="section-title">🧑‍✈️ Crew Management</div>
         <div id="teams" class="teams"></div>
       </section>
     </div>
   </div>
 
   <script>
-    // --------- Config / Helpers ----------
+    // ---------- Config ----------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
     if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
 
-    // Admin token: ?key=... or localStorage
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
     if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
-      start: '/.netlify/functions/admin_start_event', // start/pause/end/reset via action
+      start: '/.netlify/functions/admin_start_event',   // start/pause/end/stop/reset
       teams: '/.netlify/functions/admin_list_teams',
+      markReturn: '/.netlify/functions/admin_mark_return', // POST {eventId, teamCode, returnedAt, undo?}
     };
 
     const el = {
@@ -161,7 +143,7 @@
       const v = (s || '').toString().trim().toLowerCase();
       if (['running','started','start','active'].includes(v)) return 'running';
       if (['paused','pause'].includes(v)) return 'paused';
-      if (['ended','end','stopped','complete','completed','finished'].includes(v)) return 'ended';
+      if (['ended','end','stopped','stop','complete','completed','finished'].includes(v)) return 'ended';
       if (['notstarted','idle','ready','pending',''].includes(v)) return 'notstarted';
       return 'unknown';
     };
@@ -175,15 +157,12 @@
       return `${hh} : ${mm} : ${ss}`;
     };
 
-    // --------- Event Snapshot ----------
+    // ---------- Event snapshot ----------
     let current = {
       state: 'unknown',
-      startedAt: null,     // ISO
-      endsAt: null,        // ISO
-      durationSec: null,   // number
-      remainingMs: 0,      // frozen when paused
-      lastUpdateAt: 0,
-      prevState: 'unknown',
+      startedAt: null, endsAt: null,
+      durationSec: null, remainingMs: 0,
+      lastUpdateAt: 0, prevState: 'unknown',
     };
     let initialDurationSec = null;
 
@@ -199,6 +178,7 @@
       el.btnEnd.disabled   = (s==='ended' || s==='notstarted');
     }
 
+    // Animation loop
     let rafId = null;
     function tick(){
       cancelAnimationFrame(rafId);
@@ -208,7 +188,7 @@
 
       if (s === 'running' && current.startedAt && current.endsAt){
         displayMs = new Date(current.endsAt).getTime() - now;
-        current.remainingMs = displayMs; // keep fresh fallback
+        current.remainingMs = displayMs;
       } else if (s === 'paused'){
         displayMs = Math.max(0, current.remainingMs || 0);
       } else if (s === 'ended'){
@@ -221,7 +201,7 @@
       rafId = requestAnimationFrame(tick);
     }
 
-    // --------- API calls ----------
+    // ---------- API ----------
     async function fetchState({force=false}={}){
       const callAt = Date.now();
       const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
@@ -232,18 +212,12 @@
         data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : 'notstarted')
       );
 
-      if (initialDurationSec == null && typeof data.durationSec === 'number') {
-        initialDurationSec = data.durationSec;
-      }
+      if (initialDurationSec == null && typeof data.durationSec === 'number') initialDurationSec = data.durationSec;
 
       let remainingMs = current.remainingMs;
-      if (typeof data.remainingMs === 'number') {
-        remainingMs = data.remainingMs;
-      } else if (typeof data.remainingSec === 'number') {
-        remainingMs = Math.max(0, Math.floor(data.remainingSec * 1000));
-      } else if (nextState === 'running' && data.endsAt) {
-        remainingMs = new Date(data.endsAt).getTime() - Date.now();
-      }
+      if (typeof data.remainingMs === 'number')       remainingMs = data.remainingMs;
+      else if (typeof data.remainingSec === 'number') remainingMs = Math.max(0, Math.floor(data.remainingSec * 1000));
+      else if (nextState === 'running' && data.endsAt) remainingMs = new Date(data.endsAt).getTime() - Date.now();
 
       current = {
         ...current,
@@ -260,40 +234,47 @@
       tick();
     }
 
-    async function postAction(action){
-      // Optimistic UI to avoid flicker for pause/end/reset
+    // Admin action helper that tries synonyms (stop/end)
+    async function postActionSmart(action){
+      const tryActions = (action === 'end') ? ['stop','end'] :
+                         (action === 'reset') ? ['reset'] :
+                         [action];
+
+      let lastErr = null;
+      for (const a of tryActions){
+        const body = { eventId: EVENT_ID, action: a };
+        try{
+          const res = await fetch(endpoints.start, { method:'POST', headers: headers(), body: JSON.stringify(body) });
+          const data = await res.json().catch(()=>({success:false, message:'Bad JSON'}));
+          if (data && data.success) return {ok:true, data};
+          lastErr = data?.message || `Failed ${a}`;
+        }catch(e){ lastErr = e.message; }
+      }
+      return {ok:false, error:lastErr || 'Unknown error'};
+    }
+
+    async function doAction(action){
+      // Optimistic UI for pause/end/reset
       if (action === 'pause'){
         const ms = (current.endsAt ? new Date(current.endsAt).getTime() - Date.now() : current.remainingMs) || 0;
         current.remainingMs = Math.max(0, ms);
         current.state = 'paused';
-        setStatusPill('paused');
-        tick();
+        setStatusPill('paused'); tick();
       }
       if (action === 'end'){
-        current.remainingMs = 0;
-        current.state = 'ended';
-        setStatusPill('ended');
-        tick();
+        current.remainingMs = 0; current.state = 'ended';
+        setStatusPill('ended'); tick();
       }
       if (action === 'reset'){
         const dur = current.durationSec ?? initialDurationSec ?? 0;
-        current.startedAt = null;
-        current.endsAt = null;
-        current.remainingMs = dur * 1000;
-        current.state = 'notstarted';
-        setStatusPill('notstarted');
-        tick();
+        current.startedAt = null; current.endsAt = null;
+        current.remainingMs = dur * 1000; current.state = 'notstarted';
+        setStatusPill('notstarted'); tick();
       }
 
-      const body = { eventId: EVENT_ID, action };
-      const res = await fetch(endpoints.start, {
-        method:'POST', headers: headers(), body: JSON.stringify(body)
-      });
-      const data = await res.json().catch(()=>({success:false}));
-      if (!data.success) {
-        alert(data.message || `Failed to ${action}.`);
-        await fetchState({force:true});
-        return;
+      const r = await postActionSmart(action);
+      if (!r.ok){
+        alert(`Failed to ${action}. ${r.error || ''}`.trim());
       }
       await fetchState({force:true});
     }
@@ -302,46 +283,81 @@
       const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({teams:[]}));
       const teams = Array.isArray(data.teams) ? data.teams : [];
+
+      const returnedCount = teams.filter(t => !!(t.returned || t.hasReturned || t.returnedAt)).length;
       el.statTotal.textContent = teams.length || 0;
       el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
+      el.statReturned.textContent = returnedCount;
 
       el.teams.innerHTML = teams.map(t => {
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
-        const badgeA = `<span class="tag">${(t.label || t.alias || code || 'TEAM')}</span>`;
-        const badgeB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
-        const badgeC = `<span class="tag">${t.active===false ? 'Inactive' : 'Active'}</span>`;
+        const tagA = `<span class="tag">${t.active===false ? 'Inactive' : 'Active'}</span>`;
+        const tagB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
+        const tagC = (t.returned || t.hasReturned || t.returnedAt) ? `<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>` : '';
+        const returned = !!(t.returned || t.hasReturned || t.returnedAt);
         return `
-          <div class="team">
+          <div class="team ${returned?'returned':''}">
             <div class="row1">
               <div>
-                <div style="font-weight:800">${name}</div>
-                <div class="k">${badgeC}${badgeB}${badgeA}</div>
+                <div style="font-weight:900">${name}</div>
+                <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${code || 'TEAM'}</span></div>
               </div>
-              <button class="apply" data-team="${code}">APPLY</button>
+              <div class="actions">
+                <button class="btn secondary" data-action="${returned?'undoReturn':'markReturn'}" data-team="${code}">
+                  ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
+                </button>
+              </div>
             </div>
           </div>`;
       }).join('');
-      document.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
-        alert('Team-level admin actions coming soon.');
-      }));
+
+      // Wire return buttons
+      el.teams.querySelectorAll('button[data-action]').forEach(btn=>{
+        btn.addEventListener('click', async ()=>{
+          const teamCode = btn.getAttribute('data-team');
+          const action = btn.getAttribute('data-action');
+          try{
+            const payload = {
+              eventId: EVENT_ID,
+              teamCode,
+              returnedAt: new Date().toISOString(),
+              undo: action === 'undoReturn'
+            };
+            const res = await fetch(endpoints.markReturn, {
+              method:'POST', headers: headers(), body: JSON.stringify(payload)
+            });
+            const data = await res.json().catch(()=>({success:false}));
+            if (!data.success) {
+              alert(data.message || 'Failed to mark/undo return. Do you have the admin_mark_return function deployed?');
+              return;
+            }
+            await loadTeams();  // refresh list/stats
+          }catch(e){
+            alert('admin_mark_return not available (or network error).');
+          }
+        });
+      });
     }
 
-    // --------- Wire UI ----------
-    el.btnStart.addEventListener('click', () => postAction('start'));
-    el.btnPause.addEventListener('click', () => postAction('pause'));
-    el.btnEnd.addEventListener('click',   () => postAction('end'));
-    el.btnReset.addEventListener('click', () => {
-      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times in the Sheet, and re-enable Launch.');
+    // ---------- Wire UI ----------
+    el.btnStart.addEventListener('click', () => doAction('start'));
+    el.btnPause.addEventListener('click', () => doAction('pause'));
+    el.btnEnd.addEventListener('click',   () => doAction('end'));
+    el.btnReset.addEventListener('click', async () => {
+      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times (if your backend supports reset), and re-enable Launch.');
       if (!ok) return;
-      postAction('reset');
+      await doAction('reset');
     });
 
-    // --------- Boot ----------
+    // ---------- Boot ----------
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
-      setInterval(fetchState, 3000);
+      setInterval(async ()=>{
+        await fetchState();
+        await loadTeams();
+      }, 3000);
     })();
   </script>
 </body>
