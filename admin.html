@@ -1,368 +1,317 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>TeamQuest – Command Centre</title>
-<link rel="icon" href="/favicon.ico" />
-<style>
-  :root{
-    --bg:#d9803a;
-    --bg2:#eaa165;
-    --card:#f6ecd9;
-    --ink:#3e2a1a;
-    --gold:#ffc83d;
-    --amber:#ffb423;
-    --line:#d9a35b;
-    --ok:#27ae60;
-    --warn:#ff8c00;
-    --bad:#e74c3c;
-    --muted:#a07956;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0; background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), var(--bg));
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-    color:var(--ink);
-  }
-  .shell{max-width:1200px; margin:24px auto; padding:0 16px;}
-  .top{
-    background:linear-gradient(180deg,#ffdd8b,#ffd16a);
-    border:3px solid var(--line); border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18);
-    padding:12px 16px; display:flex; align-items:center; gap:14px;
-  }
-  .top-logo{width:44px; height:44px; border-radius:10px; background:#8b5a2b; border:3px solid var(--line);}
-  .top-title{font-weight:800; font-size:18px}
-  .top-sub{color:#6b4a2e; font-weight:600}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TeamQuest • Command Centre</title>
+  <style>
+    :root{
+      --bg:#e79754; --panel:#f7efe7; --card:#fff6ec; --ink:#3b2d16;
+      --accent:#1594d2; --success:#2fbf71; --warn:#f5a623; --danger:#e5564f;
+      --muted:#d8c7b7; --shadow:0 6px 18px rgba(0,0,0,.12)
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family: ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg,#cd7e3f 0%, #e79754 40%, #d88948 100%);
+      color:var(--ink);
+    }
+    .wrap{max-width:1180px; margin:24px auto; padding:0 16px}
+    .row{display:grid; grid-template-columns: 420px 1fr; gap:20px}
+    .header{
+      display:flex; align-items:center; gap:16px; background:var(--panel);
+      border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)
+    }
+    .header .badge{
+      width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)
+    }
+    .header h1{margin:0; line-height:1.1}
+    .header small{display:block; color:#6d553b}
 
-  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px}
-  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
-
-  .card{
-    background:linear-gradient(180deg,#fff7ea,#f4e6cf);
-    border:3px solid var(--line); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.16);
-    padding:16px;
-  }
-  .card h2{margin:0 0 12px; font-size:18px; display:flex; align-items:center; gap:10px}
-  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent); margin:10px 0}
-
-  /* Adventure left */
-  .timer{
-    background:linear-gradient(180deg,#ffc83d,#ffaf2f); border:3px solid var(--line); border-radius:14px;
-    text-align:center; font-weight:900; letter-spacing:.12em; font-size:40px; padding:22px 12px; color:#3b250f;
-  }
-  .status{
-    margin-top:10px; background:#efe5d4; border:2px solid var(--line); border-radius:10px; padding:10px;
-    text-align:center; font-weight:800; color:#5c3b22;
-  }
-  .pill{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:800; color:white; font-size:12px}
-  .pill.idle{background:#9aa0a6}
-  .pill.running{background:var(--ok)}
-  .pill.paused{background:var(--warn)}
-  .pill.ended{background:var(--bad)}
-
-  .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
-  .btn{appearance:none; border:none; border-radius:12px; padding:14px 12px; font-weight:900; cursor:pointer;
-       border:3px solid var(--line); box-shadow:0 6px 18px rgba(0,0,0,.1)}
-  .btn:disabled{opacity:.55; cursor:not-allowed}
-  .btn.launch{background:linear-gradient(180deg,#37d67a,#1ebc5d); color:white}
-  .btn.pause {background:linear-gradient(180deg,#ffd36b,#ffae31); color:#4b2f12}
-  .btn.end   {background:linear-gradient(180deg,#ff7d6b,#f0533f); color:white}
-  .btn.reset {background:linear-gradient(180deg,#8b5a2b,#6e451f); color:#ffe0ae}
-
-  .alert{margin-top:12px; background:#ffe5e5; border:2px solid #ff9fa1; color:#8a2327; padding:10px 12px; border-radius:10px; font-weight:800; display:none}
-
-  /* Crew right */
-  .crew-list{display:flex; flex-direction:column; gap:12px; max-height:560px; overflow:auto; padding-right:4px}
-  .crew{
-    background:#fffaf0; border:2px solid var(--line); border-radius:12px; padding:12px; display:grid; gap:8px;
-    grid-template-columns: 1fr auto;
-  }
-  .crew h3{margin:0; font-size:16px}
-  .crew small{color:#735236; font-weight:700}
-  .badge{display:inline-block; padding:4px 10px; border-radius:999px; background:#eef0f3; color:#5a6572; font-weight:800; font-size:12px}
-  .krow{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
-  .apply{background:linear-gradient(180deg,#ffc83d,#ffaf2f); border:2px solid var(--line); border-radius:10px; font-weight:900; padding:8px 12px; cursor:pointer}
-
-  /* Stats bar */
-  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:18px 0}
-  .stat{
-    background:linear-gradient(180deg,#fff7ea,#f4e6cf);
-    border:3px solid var(--line); border-radius:14px; text-align:center; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.15)
-  }
-  .stat .n{font-size:26px; font-weight:900}
-  .stat .l{color:#7a5639; font-weight:800}
-</style>
+    .panel{
+      background:var(--panel); border-radius:18px; box-shadow:var(--shadow); padding:16px
+    }
+    .section-title{
+      font-weight:700; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 12px
+    }
+    .timer{
+      background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px;
+      padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em
+    }
+    .status{
+      margin-top:10px; background:#f0e5d9; border-radius:12px; padding:10px 12px; display:flex; justify-content:center
+    }
+    .pill{padding:6px 12px; border-radius:999px; font-size:13px; font-weight:700; display:inline-block}
+    .pill.running{background:#e6fbf1; color:#106a3e; border:1px solid #b8efcf}
+    .pill.paused{background:#fff6e9; color:#7a5a13; border:1px solid #f1d093}
+    .pill.ended{background:#fdeeee; color:#8b1f1f; border:1px solid #f3b3b3}
+    .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
+    button{
+      appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer;
+      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)
+    }
+    .btn{
+      background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px
+    }
+    .btn.pause{background:#fff6e9; border-color:#f3d49c; color:#6b4b0a}
+    .btn.end{background:#ffe9e9; border-color:#f5b1b1; color:#7d2323}
+    .btn.reset{background:#f7efe7; border-color:#dfd1c2; color:#4e3b25}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .stats{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:18px}
+    .stat{
+      background:var(--card); border:1px solid #ecdac7; border-radius:16px; text-align:center; padding:14px 12px;
+      box-shadow:var(--shadow)
+    }
+    .stat h3{margin:0; font-size:28px}
+    .teams{
+      max-height:620px; overflow:auto; padding-right:6px
+    }
+    .team{
+      background:#fffdf8; border:1px solid #ecdac7; border-radius:14px; padding:12px; margin-bottom:10px
+    }
+    .team .row1{display:flex; justify-content:space-between; gap:12px; align-items:center}
+    .k{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+    .tag{font-size:12px; font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee}
+    .apply{padding:8px 10px; border-radius:10px; background:#fff3f6; border:1px solid #f3c4d6; font-weight:800}
+    .help{
+      background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px
+    }
+    @media (max-width: 980px){
+      .row{grid-template-columns:1fr}
+      .teams{max-height:unset}
+    }
+  </style>
 </head>
 <body>
-  <div class="shell">
-    <div class="top">
-      <div class="top-logo"></div>
-      <div class="top-title">Command Centre</div>
-      <div class="top-sub">Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
+  <div class="wrap">
+    <div class="header">
+      <div class="badge">🧭</div>
+      <div>
+        <h1 style="margin:0">Command&nbsp;Centre</h1>
+        <small>Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct at the configured rate.</small>
+      </div>
     </div>
 
-    <div class="grid">
-      <!-- LEFT: Adventure control -->
-      <section class="card" id="leftCard">
-        <h2>⚓ Adventure Control</h2>
-        <div class="timer" id="timerDisplay">01 : 30 : 00</div>
-        <div class="status">
-          <span id="timerStatus" class="pill idle">Not started</span>
+    <div class="row" style="margin-top:18px">
+      <!-- LEFT: Adventure Control -->
+      <section class="panel">
+        <div class="section-title">⚓ Adventure Control</div>
+
+        <div id="timer" class="timer">-- : -- : --</div>
+
+        <div class="status"><span id="statusPill" class="pill">Checking…</span></div>
+
+        <div class="grid2" style="margin-top:14px">
+          <button id="btnStart" class="btn">🍭 Launch</button>
+          <button id="btnPause" class="btn pause">⏸ Pause</button>
+          <button id="btnEnd" class="btn end">🟥 End</button>
+          <button id="btnReset" class="btn reset">🧹 Reset (UI only)</button>
         </div>
 
-        <div class="btnrow">
-          <button id="startBtn" class="btn launch">🚀 Launch</button>
-          <button id="pauseBtn" class="btn pause" disabled>⏸️ Pause</button>
-          <button id="stopBtn" class="btn end" disabled>⏹️ End</button>
-          <button id="resetBtn" class="btn reset">🔁 Reset (UI only)</button>
-        </div>
-
-        <div class="alert" id="leftAlert"></div>
-      </section>
-
-      <!-- RIGHT: Crew management -->
-      <section class="card">
-        <h2>👥 Crew Management</h2>
-        <div class="rule"></div>
-        <div id="crewsList" class="crew-list">
-          <div class="crew" style="grid-template-columns:1fr;">
-            <div><strong>Loading crews…</strong></div>
+        <div class="stats">
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Total Crews</div>
+            <h3 id="statTotal">—</h3>
+          </div>
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Active</div>
+            <h3 id="statActive">—</h3>
+          </div>
+          <div class="stat">
+            <div style="font-size:13px; opacity:.8">Returned</div>
+            <h3 id="statReturned">0</h3>
           </div>
         </div>
-      </section>
-    </div>
 
-    <!-- Stats -->
-    <div class="stats">
-      <div class="stat">
-        <div class="n" id="totalCrews">0</div>
-        <div class="l">Total Crews</div>
-      </div>
-      <div class="stat">
-        <div class="n" id="activeCrews">0</div>
-        <div class="l">Active</div>
-      </div>
-      <div class="stat">
-        <div class="n" id="returnedCrews">0</div>
-        <div class="l">Returned</div>
-      </div>
-      <div class="stat">
-        <div class="n" id="penalisedCrews">0</div>
-        <div class="l">Penalised</div>
-      </div>
+        <div class="help">
+          Tip: If the page looks out of sync, it will auto-correct on the next refresh (every 3s) based on the Sheet’s state.
+        </div>
+      </section>
+
+      <!-- RIGHT: Crew Management -->
+      <section class="panel">
+        <div class="section-title">👥 Crew Management</div>
+        <div id="teams" class="teams"></div>
+      </section>
     </div>
   </div>
 
-<script>
-/* ========= CONFIG ========= */
-let ui = {
-  eventId: new URLSearchParams(location.search).get('event') || 'EVT-19-08-2025',
-  tickTimer: null,
-  els: {}
-};
-
-/* ========= HELPERS ========= */
-function $(sel){ return document.querySelector(sel); }
-function setText(el, txt){ if(el) el.textContent = txt; }
-function showAlert(msg){ const a=ui.els.leftAlert; if(!a) return; a.style.display='block'; a.textContent=msg; setTimeout(()=>a.style.display='none', 4500); }
-
-/* ========= NORMALIZER (handles old & new shapes) ========= */
-function normalizeEventState(data) {
-  const raw = (data?.state || data?.competitionStatus || data?.status || '').toLowerCase();
-  const running = raw === 'running' || raw === 'start' || raw === 'started';
-  const paused  = raw === 'paused';
-  const ended   = raw === 'ended' || raw === 'stop' || raw === 'stopped';
-  const notStarted = !running && !paused && !ended;
-
-  const startIso    = data?.startedAtIso || data?.startTime || null;
-  const durationSec = Number(data?.durationSec ?? (data?.durationMinutes ? data.durationMinutes * 60 : data?.duration) ?? 0);
-  const penaltyPerMin = Number(data?.penaltyPerMin ?? data?.penaltyRate ?? 0);
-  const published   = Boolean(data?.resultsPublished || data?.publishedAtIso);
-
-  return { running, paused, ended, notStarted, startIso, durationSec, penaltyPerMin, published };
-}
-
-/* ========= RENDER ========= */
-function renderFromState(norm) {
-  const pill = ui.els.timerStatus;
-  if (norm.running){ pill.className='pill running'; setText(pill,'Running'); }
-  else if (norm.paused){ pill.className='pill paused'; setText(pill,'Paused'); }
-  else if (norm.ended){ pill.className='pill ended'; setText(pill,'Ended'); }
-  else { pill.className='pill idle'; setText(pill,'Not started'); }
-
-  // Buttons
-  ui.els.startBtn.disabled = norm.running || norm.paused || norm.ended;
-  ui.els.pauseBtn.disabled = !norm.running;
-  ui.els.stopBtn.disabled  = !(norm.running || norm.paused);
-
-  // Timer
-  startOrStopTick(norm);
-}
-
-function startOrStopTick(norm){
-  const display = ui.els.timer;
-  if (ui.tickTimer){ clearInterval(ui.tickTimer); ui.tickTimer = null; }
-  if (!norm.startIso || !norm.durationSec){ setText(display,'01 : 30 : 00'); return; }
-
-  const startMs = Date.parse(norm.startIso);
-  const endMs   = startMs + norm.durationSec * 1000;
-
-  function tick(){
-    const now = Date.now();
-    const remain = endMs - now;
-    const sign = remain >= 0 ? '' : '+';
-    const t = Math.abs(remain);
-    const h = Math.floor(t / 3_600_000);
-    const m = Math.floor((t % 3_600_000) / 60_000);
-    const s = Math.floor((t % 60_000) / 1000);
-    setText(display, `${sign}${String(h).padStart(2,'0')} : ${String(m).padStart(2,'0')} : ${String(s).padStart(2,'0')}`);
-  }
-  tick();
-  ui.tickTimer = setInterval(tick, 1000);
-}
-
-/* ========= LOAD EVENT STATE ========= */
-async function refreshStatus(silent=false){
-  try{
-    const res = await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(ui.eventId)}`, { cache:'no-store' });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const norm = normalizeEventState(data);
-    renderFromState(norm);
-    if (!silent) console.debug('State:', data, '→', norm);
-  }catch(err){
-    console.error('Failed to load current status:', err);
-    if(!silent) showAlert('Failed to load current status.');
-  }
-}
-
-/* ========= CREWS ========= */
-async function loadCrews(){
-  const list = ui.els.crewsList;
-  list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;"><div><strong>Loading crews…</strong></div></div>`;
-  try{
-    const res = await fetch(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(ui.eventId)}`, { cache:'no-store' });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const teams = data?.teams || [];
-    // Stats
-    setText($('#totalCrews'), teams.length);
-    setText($('#activeCrews'), teams.filter(t => (t.status||'active')==='active').length);
-    setText($('#returnedCrews'), teams.filter(t => (t.status||'')==='returned' || (t.status||'')==='late').length);
-    setText($('#penalisedCrews'), teams.filter(t => Number(t.penalty||0) > 0).length);
-
-    if(!teams.length){
-      list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;"><div><strong>No crews yet.</strong></div></div>`;
-      return;
+  <script>
+    // --------- Config / Helpers ----------
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('event');
+    if (!EVENT_ID) {
+      alert('Missing ?event=EVT-... in the URL'); // keep it loud—admin page only
     }
 
-    list.innerHTML = '';
-    teams.forEach(team => {
-      const status = (team.status || 'active');
-      const penal  = Number(team.penalty || 0);
-      const locked = team.locked ? 'Locked' : 'Unlocked';
+    // Admin token: pick up from ?key=... first, else localStorage
+    const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
+    if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
-      const row = document.createElement('div');
-      row.className = 'crew';
-      row.innerHTML = `
-        <div>
-          <h3>${team.teamName || 'Unnamed crew'}</h3>
-          <small>${team.teamCode || ''}</small>
-          <div class="krow" style="margin-top:6px">
-            <span class="badge">${status[0].toUpperCase()+status.slice(1)}</span>
-            <span class="badge">${locked}</span>
-            ${penal>0 ? `<span class="badge" style="background:#ffe2e0;color:#8a2327;">Penalty: -${penal}</span>`:''}
-          </div>
-        </div>
-        <div class="krow">
-          <button class="apply" data-code="${team.teamCode}">APPLY</button>
-        </div>
-      `;
-      list.appendChild(row);
+    const endpoints = {
+      state: '/.netlify/functions/get_event_state',
+      start: '/.netlify/functions/admin_start_event',
+      teams: '/.netlify/functions/admin_list_teams',
+    };
+
+    const el = {
+      timer: document.getElementById('timer'),
+      statusPill: document.getElementById('statusPill'),
+      btnStart: document.getElementById('btnStart'),
+      btnPause: document.getElementById('btnPause'),
+      btnEnd: document.getElementById('btnEnd'),
+      btnReset: document.getElementById('btnReset'),
+      teams: document.getElementById('teams'),
+      statTotal: document.getElementById('statTotal'),
+      statActive: document.getElementById('statActive'),
+      statReturned: document.getElementById('statReturned'),
+    };
+
+    let current = {
+      state: 'unknown',
+      startedAt: null,
+      endsAt: null,
+      durationSec: null,
+      lastUpdateAt: 0,
+    };
+
+    const headers = () => {
+      const h = {'Content-Type':'application/json'};
+      if (ADMIN_KEY) h['Authorization'] = 'Bearer ' + ADMIN_KEY;
+      return h;
+    };
+
+    const normState = (s='') => {
+      const v = (s || '').toString().trim().toLowerCase();
+      if (['running','started','start','active'].includes(v)) return 'running';
+      if (['paused','pause'].includes(v)) return 'paused';
+      if (['ended','end','stopped','complete','completed','finished'].includes(v)) return 'ended';
+      if (['notstarted','idle','ready','pending',''].includes(v)) return 'notstarted';
+      return 'unknown';
+    };
+
+    function setStatusPill(state){
+      const s = normState(state);
+      el.statusPill.className = 'pill ' + (s==='running'?'running':s==='paused'?'paused':s==='ended'?'ended':'');
+      el.statusPill.textContent =
+        s==='running' ? 'Running' :
+        s==='paused'  ? 'Paused'  :
+        s==='ended'   ? 'Ended'   : 'Not Started';
+      // Buttons
+      el.btnStart.disabled = (s==='running' || s==='paused' || s==='ended'); // only available before start
+      el.btnPause.disabled = !(s==='running'); // only while running
+      el.btnEnd.disabled   = (s==='ended' || s==='notstarted'); // not when ended or not yet started
+    }
+
+    function fmt(ms){
+      if (ms < 0) ms = 0;
+      const t = Math.floor(ms/1000);
+      const hh = String(Math.floor(t/3600)).padStart(2,'0');
+      const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
+      const ss = String(t%60).padStart(2,'0');
+      return `${hh} : ${mm} : ${ss}`;
+    }
+
+    let rafId = null;
+    function tick(){
+      cancelAnimationFrame(rafId);
+      const now = Date.now();
+      let remaining = 0;
+      if (current.startedAt && current.endsAt && normState(current.state) !== 'ended'){
+        remaining = new Date(current.endsAt).getTime() - now;
+      }
+      el.timer.textContent = fmt(remaining);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    // --------- API calls ----------
+    async function fetchState({force=false}={}){
+      // Debounce: avoid clobbering a fresh state with a slow old response
+      const startedCallAt = Date.now();
+      const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
+      const data = await res.json().catch(()=>({}));
+      // If another newer update already applied, ignore this older one
+      if (!force && startedCallAt < current.lastUpdateAt) return;
+
+      // Derive values defensively
+      const state = normState(data.state || (data.running ? 'running' :
+                                            data.paused ? 'paused' :
+                                            data.ended ? 'ended' : 'notstarted'));
+      current = {
+        ...current,
+        state,
+        startedAt: data.startedAt || data.startIso || null,
+        endsAt: data.endsAt || data.endIso || null,
+        durationSec: data.durationSec ?? null,
+        lastUpdateAt: startedCallAt,
+      };
+      setStatusPill(state);
+      // If backend changed the endsAt/start, adopt it
+      tick();
+      console.log('State:', data, {running:state==='running', paused:state==='paused', ended:state==='ended', notStarted:state==='notstarted', startIso:data.startIso});
+    }
+
+    async function postAction(action){
+      const body = { eventId: EVENT_ID, action };
+      const res = await fetch(endpoints.start, {
+        method:'POST', headers: headers(), body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(()=>({success:false}));
+      if (!data.success) {
+        alert(data.message || `Failed to ${action}.`);
+        return;
+      }
+      // Immediately refresh state after successful action
+      await fetchState({force:true});
+    }
+
+    async function loadTeams(){
+      const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
+      const data = await res.json().catch(()=>({teams:[]}));
+      const teams = Array.isArray(data.teams) ? data.teams : [];
+      el.statTotal.textContent = teams.length || 0;
+      el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
+
+      el.teams.innerHTML = teams.map(t => {
+        const name = (t.teamName || t.name || 'Unnamed crew');
+        const code = t.teamCode || t.code || '';
+        const badgeA = `<span class="tag">${(t.label || t.alias || code || 'TEAM')}</span>`;
+        const badgeB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
+        const badgeC = `<span class="tag">${t.active===false ? 'Inactive' : 'Active'}</span>`;
+        return `
+          <div class="team">
+            <div class="row1">
+              <div>
+                <div style="font-weight:800">${name}</div>
+                <div class="k">${badgeC}${badgeB}${badgeA}</div>
+              </div>
+              <button class="apply" data-team="${code}">APPLY</button>
+            </div>
+          </div>`;
+      }).join('');
+      // (apply buttons are placeholders for future admin actions)
+      el.teams.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
+        alert('Team-level admin actions coming soon.');
+      }));
+    }
+
+    // --------- Wire UI ----------
+    el.btnStart.addEventListener('click', () => postAction('start'));
+    el.btnPause.addEventListener('click', () => postAction('pause'));
+    el.btnEnd.addEventListener('click', () => postAction('end'));
+    el.btnReset.addEventListener('click', () => {
+      // UI-only: zero the display, but do not touch backend
+      current.startedAt = null; current.endsAt = null; tick();
     });
-  }catch(e){
-    console.error('Failed to load crews:', e);
-    list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;">
-      <div><strong style="color:#8a2327">Failed to load crew list.</strong></div></div>`;
-  }
-}
 
-/* ========= ACTIONS ========= */
-async function callStart(){
-  ui.els.startBtn.disabled = true; // snappy feedback
-  try{
-    const res = await fetch('/.netlify/functions/admin_start_event', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ eventId: ui.eventId })
-    });
-    const data = await res.json();
-    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
-    setTimeout(() => refreshStatus(), 500); // allow Sheets write
-  }catch(e){
-    console.error('Launch failed:', e);
-    ui.els.startBtn.disabled = false;
-    showAlert(`Failed to launch: ${e.message}`);
-  }
-}
-
-async function callPause(){
-  try{
-    const res = await fetch('/.netlify/functions/admin_start_event', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ eventId: ui.eventId, action:'pause' })
-    });
-    const data = await res.json();
-    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
-    setTimeout(() => refreshStatus(), 300);
-  }catch(e){
-    console.error('Pause failed:', e);
-    showAlert(`Failed to pause: ${e.message}`);
-  }
-}
-
-async function callEnd(){
-  try{
-    const res = await fetch('/.netlify/functions/admin_start_event', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({ eventId: ui.eventId, action:'stop' })
-    });
-    const data = await res.json();
-    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
-    setTimeout(() => refreshStatus(), 300);
-  }catch(e){
-    console.error('End failed:', e);
-    showAlert(`Failed to end: ${e.message}`);
-  }
-}
-
-/* ========= BOOT ========= */
-document.addEventListener('DOMContentLoaded', () => {
-  ui.els = {
-    timer: $('#timerDisplay'),
-    timerStatus: $('#timerStatus'),
-    startBtn: $('#startBtn'),
-    pauseBtn: $('#pauseBtn'),
-    stopBtn:  $('#stopBtn'),
-    resetBtn: $('#resetBtn'),
-    leftAlert: $('#leftAlert'),
-    crewsList: $('#crewsList')
-  };
-
-  ui.els.startBtn.addEventListener('click', callStart);
-  ui.els.pauseBtn.addEventListener('click', callPause);
-  ui.els.stopBtn.addEventListener('click', callEnd);
-  ui.els.resetBtn.addEventListener('click', () => { if (ui.tickTimer) { clearInterval(ui.tickTimer); ui.tickTimer = null; } setText(ui.els.timer, '01 : 30 : 00'); });
-
-  // Initial loads + periodic refresh to keep in sync
-  refreshStatus(true);
-  loadCrews();
-  setInterval(() => refreshStatus(true), 10000); // state poll
-  setInterval(() => loadCrews(), 30000);         // crew list poll
-});
-</script>
+    // --------- Boot ----------
+    (async function init(){
+      await fetchState({force:true});
+      await loadTeams();
+      // Poll
+      setInterval(fetchState, 3000);
+    })();
+  </script>
 </body>
 </html>
