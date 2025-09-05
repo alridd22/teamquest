@@ -18,69 +18,36 @@
     }
     .wrap{max-width:1180px; margin:24px auto; padding:0 16px}
     .row{display:grid; grid-template-columns: 420px 1fr; gap:20px}
-    .header{
-      display:flex; align-items:center; gap:16px; background:var(--panel);
-      border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)
-    }
-    .header .badge{
-      width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center;
-      box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)
-    }
+    .header{display:flex; align-items:center; gap:16px; background:var(--panel); border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)}
+    .header .badge{width:46px; height:46px; border-radius:10px; background:#e9d8c7; display:grid; place-items:center; box-shadow: inset 0 2px 0 rgba(255,255,255,.6), inset 0 -2px 0 rgba(0,0,0,.06)}
     .header h1{margin:0; line-height:1.1}
     .header small{display:block; color:#6d553b}
-
-    .panel{
-      background:var(--panel); border-radius:18px; box-shadow:var(--shadow); padding:16px
-    }
-    .section-title{
-      font-weight:700; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 12px
-    }
-    .timer{
-      background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px;
-      padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em
-    }
-    .status{
-      margin-top:10px; background:#f0e5d9; border-radius:12px; padding:10px 12px; display:flex; justify-content:center
-    }
+    .panel{background:var(--panel); border-radius:18px; box-shadow:var(--shadow); padding:16px}
+    .section-title{font-weight:700; display:flex; align-items:center; gap:8px; color:#2c1d10; margin:4px 0 12px}
+    .timer{background:linear-gradient(180deg,#f9b23d 0%, #f59a27 100%); border-radius:16px; padding:26px 12px; text-align:center; color:#2c1d10; font-weight:800; font-size:46px; letter-spacing:.16em}
+    .status{margin-top:10px; background:#f0e5d9; border-radius:12px; padding:10px 12px; display:flex; justify-content:center}
     .pill{padding:6px 12px; border-radius:999px; font-size:13px; font-weight:700; display:inline-block}
     .pill.running{background:#e6fbf1; color:#106a3e; border:1px solid #b8efcf}
     .pill.paused{background:#fff6e9; color:#7a5a13; border:1px solid #f1d093}
     .pill.ended{background:#fdeeee; color:#8b1f1f; border:1px solid #f3b3b3}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
-    button{
-      appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer;
-      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)
-    }
-    .btn{
-      background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px
-    }
+    button{appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
+    .btn{background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px}
     .btn.pause{background:#fff6e9; border-color:#f3d49c; color:#6b4b0a}
     .btn.end{background:#ffe9e9; border-color:#f5b1b1; color:#7d2323}
     .btn.reset{background:#f7efe7; border-color:#dfd1c2; color:#4e3b25}
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .stats{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:18px}
-    .stat{
-      background:var(--card); border:1px solid #ecdac7; border-radius:16px; text-align:center; padding:14px 12px;
-      box-shadow:var(--shadow)
-    }
+    .stat{background:var(--card); border:1px solid #ecdac7; border-radius:16px; text-align:center; padding:14px 12px; box-shadow:var(--shadow)}
     .stat h3{margin:0; font-size:28px}
-    .teams{
-      max-height:620px; overflow:auto; padding-right:6px
-    }
-    .team{
-      background:#fffdf8; border:1px solid #ecdac7; border-radius:14px; padding:12px; margin-bottom:10px
-    }
+    .teams{max-height:620px; overflow:auto; padding-right:6px}
+    .team{background:#fffdf8; border:1px solid #ecdac7; border-radius:14px; padding:12px; margin-bottom:10px}
     .team .row1{display:flex; justify-content:space-between; gap:12px; align-items:center}
     .k{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
     .tag{font-size:12px; font-weight:700; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee}
     .apply{padding:8px 10px; border-radius:10px; background:#fff3f6; border:1px solid #f3c4d6; font-weight:800}
-    .help{
-      background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px
-    }
-    @media (max-width: 980px){
-      .row{grid-template-columns:1fr}
-      .teams{max-height:unset}
-    }
+    .help{background:var(--panel); border-left:4px solid #e3d3c2; padding:12px 14px; border-radius:10px; color:#5e4b35; margin-top:8px}
+    @media (max-width: 980px){.row{grid-template-columns:1fr} .teams{max-height:unset}}
   </style>
 </head>
 <body>
@@ -97,9 +64,7 @@
       <!-- LEFT: Adventure Control -->
       <section class="panel">
         <div class="section-title">⚓ Adventure Control</div>
-
         <div id="timer" class="timer">-- : -- : --</div>
-
         <div class="status"><span id="statusPill" class="pill">Checking…</span></div>
 
         <div class="grid2" style="margin-top:14px">
@@ -110,18 +75,9 @@
         </div>
 
         <div class="stats">
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Total Crews</div>
-            <h3 id="statTotal">—</h3>
-          </div>
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Active</div>
-            <h3 id="statActive">—</h3>
-          </div>
-          <div class="stat">
-            <div style="font-size:13px; opacity:.8">Returned</div>
-            <h3 id="statReturned">0</h3>
-          </div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Total Crews</div><h3 id="statTotal">—</h3></div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Active</div><h3 id="statActive">—</h3></div>
+          <div class="stat"><div style="font-size:13px; opacity:.8">Returned</div><h3 id="statReturned">0</h3></div>
         </div>
 
         <div class="help">
@@ -141,11 +97,8 @@
     // --------- Config / Helpers ----------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
-    if (!EVENT_ID) {
-      alert('Missing ?event=EVT-... in the URL'); // keep it loud—admin page only
-    }
+    if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
 
-    // Admin token: pick up from ?key=... first, else localStorage
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
     if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
@@ -168,14 +121,6 @@
       statReturned: document.getElementById('statReturned'),
     };
 
-    let current = {
-      state: 'unknown',
-      startedAt: null,
-      endsAt: null,
-      durationSec: null,
-      lastUpdateAt: 0,
-    };
-
     const headers = () => {
       const h = {'Content-Type':'application/json'};
       if (ADMIN_KEY) h['Authorization'] = 'Bearer ' + ADMIN_KEY;
@@ -191,19 +136,6 @@
       return 'unknown';
     };
 
-    function setStatusPill(state){
-      const s = normState(state);
-      el.statusPill.className = 'pill ' + (s==='running'?'running':s==='paused'?'paused':s==='ended'?'ended':'');
-      el.statusPill.textContent =
-        s==='running' ? 'Running' :
-        s==='paused'  ? 'Paused'  :
-        s==='ended'   ? 'Ended'   : 'Not Started';
-      // Buttons
-      el.btnStart.disabled = (s==='running' || s==='paused' || s==='ended'); // only available before start
-      el.btnPause.disabled = !(s==='running'); // only while running
-      el.btnEnd.disabled   = (s==='ended' || s==='notstarted'); // not when ended or not yet started
-    }
-
     function fmt(ms){
       if (ms < 0) ms = 0;
       const t = Math.floor(ms/1000);
@@ -213,56 +145,96 @@
       return `${hh} : ${mm} : ${ss}`;
     }
 
+    // Current event snapshot
+    let current = {
+      state: 'unknown',
+      startedAt: null, // ISO
+      endsAt: null,    // ISO
+      durationSec: null,
+      remainingMs: 0,  // authoritative when paused
+      lastUpdateAt: 0,
+      prevState: 'unknown',
+    };
+
+    function setStatusPill(state){
+      const s = normState(state);
+      el.statusPill.className = 'pill ' + (s==='running'?'running':s==='paused'?'paused':s==='ended'?'ended':'');
+      el.statusPill.textContent =
+        s==='running' ? 'Running' :
+        s==='paused'  ? 'Paused'  :
+        s==='ended'   ? 'Ended'   : 'Not Started';
+      el.btnStart.disabled = (s==='running' || s==='paused' || s==='ended');
+      el.btnPause.disabled = !(s==='running');
+      el.btnEnd.disabled   = (s==='ended' || s==='notstarted');
+    }
+
     let rafId = null;
     function tick(){
       cancelAnimationFrame(rafId);
       const now = Date.now();
-      let remaining = 0;
-      if (current.startedAt && current.endsAt && normState(current.state) !== 'ended'){
-        remaining = new Date(current.endsAt).getTime() - now;
+      let displayMs = 0;
+
+      const s = normState(current.state);
+      if (s === 'running' && current.startedAt && current.endsAt){
+        displayMs = new Date(current.endsAt).getTime() - now;
+        current.remainingMs = displayMs; // keep an always-fresh fallback
+      } else if (s === 'paused'){
+        // When paused, we freeze the last known remaining time
+        displayMs = current.remainingMs > 0 ? current.remainingMs : 0;
+      } else if (s === 'ended'){
+        displayMs = 0;
+      } else {
+        // not started/unknown: show full duration if we have it
+        if (current.durationSec != null) displayMs = current.durationSec * 1000;
       }
-      el.timer.textContent = fmt(remaining);
+
+      el.timer.textContent = fmt(displayMs);
       rafId = requestAnimationFrame(tick);
     }
 
-    // --------- API calls ----------
     async function fetchState({force=false}={}){
-      // Debounce: avoid clobbering a fresh state with a slow old response
       const startedCallAt = Date.now();
       const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({}));
-      // If another newer update already applied, ignore this older one
       if (!force && startedCallAt < current.lastUpdateAt) return;
 
-      // Derive values defensively
-      const state = normState(data.state || (data.running ? 'running' :
-                                            data.paused ? 'paused' :
-                                            data.ended ? 'ended' : 'notstarted'));
+      const nextState = normState(data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : 'notstarted'));
+
+      // Compute remaining
+      let remainingMs = current.remainingMs;
+      if (typeof data.remainingMs === 'number') {
+        remainingMs = data.remainingMs;
+      } else if (typeof data.remainingSec === 'number') {
+        remainingMs = Math.max(0, Math.floor(data.remainingSec * 1000));
+      } else if (nextState === 'running' && data.endsAt) {
+        remainingMs = new Date(data.endsAt).getTime() - Date.now();
+      } else if (nextState === 'paused' && current.prevState === 'running' && data.endsAt) {
+        // Transition to paused but API didn’t give remaining — freeze now
+        remainingMs = new Date(data.endsAt).getTime() - Date.now();
+      }
+
       current = {
         ...current,
-        state,
-        startedAt: data.startedAt || data.startIso || null,
-        endsAt: data.endsAt || data.endIso || null,
-        durationSec: data.durationSec ?? null,
+        prevState: current.state,
+        state: nextState,
+        startedAt: data.startedAt || data.startIso || current.startedAt,
+        endsAt: data.endsAt || data.endIso || current.endsAt,
+        durationSec: data.durationSec ?? current.durationSec,
+        remainingMs: Math.max(0, remainingMs),
         lastUpdateAt: startedCallAt,
       };
-      setStatusPill(state);
-      // If backend changed the endsAt/start, adopt it
+
+      setStatusPill(nextState);
       tick();
-      console.log('State:', data, {running:state==='running', paused:state==='paused', ended:state==='ended', notStarted:state==='notstarted', startIso:data.startIso});
+      // console.log('State:', data, {nextState, remainingMs: current.remainingMs});
     }
 
     async function postAction(action){
       const body = { eventId: EVENT_ID, action };
-      const res = await fetch(endpoints.start, {
-        method:'POST', headers: headers(), body: JSON.stringify(body)
-      });
+      const res = await fetch(endpoints.start, { method:'POST', headers: headers(), body: JSON.stringify(body) });
       const data = await res.json().catch(()=>({success:false}));
-      if (!data.success) {
-        alert(data.message || `Failed to ${action}.`);
-        return;
-      }
-      // Immediately refresh state after successful action
+      if (!data.success) { alert(data.message || `Failed to ${action}.`); return; }
+      // Force refresh; if API returns remainingSec on pause/end we'll adopt it
       await fetchState({force:true});
     }
 
@@ -270,10 +242,10 @@
       const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({teams:[]}));
       const teams = Array.isArray(data.teams) ? data.teams : [];
-      el.statTotal.textContent = teams.length || 0;
-      el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
+      document.getElementById('statTotal').textContent = teams.length || 0;
+      document.getElementById('statActive').textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
 
-      el.teams.innerHTML = teams.map(t => {
+      document.getElementById('teams').innerHTML = teams.map(t => {
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
         const badgeA = `<span class="tag">${(t.label || t.alias || code || 'TEAM')}</span>`;
@@ -290,26 +262,27 @@
             </div>
           </div>`;
       }).join('');
-      // (apply buttons are placeholders for future admin actions)
-      el.teams.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
+      document.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
         alert('Team-level admin actions coming soon.');
       }));
     }
 
-    // --------- Wire UI ----------
-    el.btnStart.addEventListener('click', () => postAction('start'));
-    el.btnPause.addEventListener('click', () => postAction('pause'));
-    el.btnEnd.addEventListener('click', () => postAction('end'));
-    el.btnReset.addEventListener('click', () => {
-      // UI-only: zero the display, but do not touch backend
-      current.startedAt = null; current.endsAt = null; tick();
+    // Wire UI
+    document.getElementById('btnStart').addEventListener('click', () => postAction('start'));
+    document.getElementById('btnPause').addEventListener('click', () => postAction('pause'));
+    document.getElementById('btnEnd').addEventListener('click',   () => postAction('end'));
+    document.getElementById('btnReset').addEventListener('click', () => {
+      // UI-only: zero the display without touching backend
+      current.remainingMs = 0;
+      current.startedAt = null;
+      current.endsAt = null;
+      el.timer.textContent = fmt(0);
     });
 
-    // --------- Boot ----------
+    // Boot
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
-      // Poll
       setInterval(fetchState, 3000);
     })();
   </script>
