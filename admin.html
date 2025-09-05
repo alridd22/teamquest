@@ -1,426 +1,368 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Terry’s Treasure Quest — Command Centre</title>
+<title>TeamQuest – Command Centre</title>
+<link rel="icon" href="/favicon.ico" />
 <style>
   :root{
-    --bg1:#b85d22; --bg2:#f4a261; --panel:#f3e6d6; --panel2:#efe0c8;
-    --gold:#f6c33b; --gold-deep:#d9a21f; --brown:#8b4513; --brown-2:#6d3710;
-    --accent:#ffd875; --ok:#2ecc71; --warn:#ffb037; --danger:#e76f51;
-    --ink:#3d2411; --muted:#8a6b4b;
-    --shadow:0 10px 25px rgba(0,0,0,.25);
+    --bg:#d9803a;
+    --bg2:#eaa165;
+    --card:#f6ecd9;
+    --ink:#3e2a1a;
+    --gold:#ffc83d;
+    --amber:#ffb423;
+    --line:#d9a35b;
+    --ok:#27ae60;
+    --warn:#ff8c00;
+    --bad:#e74c3c;
+    --muted:#a07956;
   }
   *{box-sizing:border-box}
   body{
-    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Ubuntu, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-    background: radial-gradient(1200px 600px at 30% -10%, #ffdfb3 0%, transparent 60%) ,
-                radial-gradient(1000px 600px at 90% 0%, #ffc78e 0%, transparent 60%),
-                linear-gradient(135deg, var(--bg1), var(--bg2));
-    color:var(--ink); min-height:100vh; padding:24px;
+    margin:0; background: radial-gradient(1200px 800px at 20% 10%, var(--bg2), var(--bg));
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    color:var(--ink);
   }
-  .topbar{
-    max-width:1200px; margin:0 auto 18px; background:linear-gradient(145deg,#ffeaaf,#ffd36b);
-    border:3px solid var(--gold-deep); border-radius:14px; padding:12px 16px; box-shadow:var(--shadow);
-    display:flex; align-items:center; gap:14px;
+  .shell{max-width:1200px; margin:24px auto; padding:0 16px;}
+  .top{
+    background:linear-gradient(180deg,#ffdd8b,#ffd16a);
+    border:3px solid var(--line); border-radius:14px; box-shadow:0 8px 24px rgba(0,0,0,.18);
+    padding:12px 16px; display:flex; align-items:center; gap:14px;
   }
-  .topbar .logo{width:42px;height:42px;border-radius:10px;border:3px solid var(--gold-deep);background:linear-gradient(135deg,#8b4513,#a15c23)}
-  .topbar h1{margin:0;font-size:18px}
-  .wrap{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
-  @media (max-width:960px){ .wrap{grid-template-columns:1fr} }
+  .top-logo{width:44px; height:44px; border-radius:10px; background:#8b5a2b; border:3px solid var(--line);}
+  .top-title{font-weight:800; font-size:18px}
+  .top-sub{color:#6b4a2e; font-weight:600}
 
-  .panel{
-    background:linear-gradient(145deg,var(--panel),var(--panel2));
-    border:3px solid var(--brown); border-radius:16px; padding:16px; box-shadow:var(--shadow);
-  }
-  .panel h2{
-    margin:0 0 10px; font-size:20px; font-weight:800; color:var(--brown);
-    border-bottom:2px solid var(--gold); padding-bottom:8px; display:flex; align-items:center; gap:8px;
-  }
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px}
+  @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
 
-  /* timer/status */
+  .card{
+    background:linear-gradient(180deg,#fff7ea,#f4e6cf);
+    border:3px solid var(--line); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.16);
+    padding:16px;
+  }
+  .card h2{margin:0 0 12px; font-size:18px; display:flex; align-items:center; gap:10px}
+  .rule{height:1px; background:linear-gradient(90deg,transparent,var(--line),transparent); margin:10px 0}
+
+  /* Adventure left */
   .timer{
-    background:linear-gradient(145deg,#ffc233,#ffb300);
-    border:3px solid var(--gold-deep); border-radius:14px; padding:22px; text-align:center; font-weight:900;
-    font-size:34px; letter-spacing:6px; color: #3b220f; text-shadow:0 2px 0 rgba(255,255,255,.35);
-    margin-bottom:10px;
+    background:linear-gradient(180deg,#ffc83d,#ffaf2f); border:3px solid var(--line); border-radius:14px;
+    text-align:center; font-weight:900; letter-spacing:.12em; font-size:40px; padding:22px 12px; color:#3b250f;
   }
   .status{
-    background:#eee0ff; border:2px solid #c6a8ff; color:#4b2b8d;
-    border-radius:12px; padding:12px; text-align:center; font-weight:700; margin-bottom:12px;
+    margin-top:10px; background:#efe5d4; border:2px solid var(--line); border-radius:10px; padding:10px;
+    text-align:center; font-weight:800; color:#5c3b22;
   }
-  .status.running{ background:#d8ffdb; border-color:#78d38a; color:#0f6a22; }
-  .status.paused{ background:#fff0cc; border-color:#ffc463; color:#8a5406; }
-  .status.ended{ background:#fff6cc; border-color:#eecb4e; color:#7a5710; }
+  .pill{display:inline-block; padding:6px 12px; border-radius:999px; font-weight:800; color:white; font-size:12px}
+  .pill.idle{background:#9aa0a6}
+  .pill.running{background:var(--ok)}
+  .pill.paused{background:var(--warn)}
+  .pill.ended{background:var(--bad)}
 
-  /* buttons */
-  .grid-btns{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px; }
-  .btn{
-    display:flex; align-items:center; justify-content:center; gap:8px; width:100%;
-    border:3px solid var(--brown); border-radius:12px; padding:14px 10px; font-weight:800; cursor:pointer;
-    background:linear-gradient(145deg,#ffffff,#fff2d8); color:var(--brown);
-    box-shadow:0 4px 10px rgba(0,0,0,.12); transition:.15s transform,.15s box-shadow,.15s filter;
-    text-transform:capitalize;
-  }
-  .btn:hover{ transform:translateY(-1px); box-shadow:0 7px 16px rgba(0,0,0,.18) }
-  .btn:disabled{ opacity:.55; cursor:not-allowed; filter:grayscale(.3)}
-  .btn--green{ background:linear-gradient(145deg,#50e48a,#22c55e); color:white; border-color:#1c8a47 }
-  .btn--amber{ background:linear-gradient(145deg,#ffd48a,#ffb63a); color:#5f3806; border-color:#b2740a }
-  .btn--red{ background:linear-gradient(145deg,#ff9b93,#e86052); color:white; border-color:#a9352a }
-  .btn--brown{ background:linear-gradient(145deg,#9a5a24,#6f3a12); color:white; border-color:#3b1f0b }
+  .btnrow{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px}
+  .btn{appearance:none; border:none; border-radius:12px; padding:14px 12px; font-weight:900; cursor:pointer;
+       border:3px solid var(--line); box-shadow:0 6px 18px rgba(0,0,0,.1)}
+  .btn:disabled{opacity:.55; cursor:not-allowed}
+  .btn.launch{background:linear-gradient(180deg,#37d67a,#1ebc5d); color:white}
+  .btn.pause {background:linear-gradient(180deg,#ffd36b,#ffae31); color:#4b2f12}
+  .btn.end   {background:linear-gradient(180deg,#ff7d6b,#f0533f); color:white}
+  .btn.reset {background:linear-gradient(180deg,#8b5a2b,#6e451f); color:#ffe0ae}
 
-  .btn-wide{ width:100%; margin-top:8px }
+  .alert{margin-top:12px; background:#ffe5e5; border:2px solid #ff9fa1; color:#8a2327; padding:10px 12px; border-radius:10px; font-weight:800; display:none}
 
-  /* crews */
-  .crew-list{ display:flex; flex-direction:column; gap:12px; max-height:560px; overflow:auto; padding-right:8px }
+  /* Crew right */
+  .crew-list{display:flex; flex-direction:column; gap:12px; max-height:560px; overflow:auto; padding-right:4px}
   .crew{
-    background:linear-gradient(145deg,#fff9eb,#fff3dc);
-    border:2px solid #e4c17a; border-radius:12px; padding:12px 12px;
-    display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px;
+    background:#fffaf0; border:2px solid var(--line); border-radius:12px; padding:12px; display:grid; gap:8px;
+    grid-template-columns: 1fr auto;
   }
-  .crew h3{ margin:0 0 6px; font-size:16px; color:var(--brown) }
-  .meta{ font-size:12px; color:var(--muted); }
-  .row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-  select, input[type="checkbox"]{ accent-color: var(--gold-deep); }
-  select{
-    padding:8px 10px; border:2px solid #e0c48a; border-radius:10px; background:white; color:var(--ink); font-weight:700;
-  }
-  .badge{ border-radius:999px; padding:4px 10px; font-size:12px; font-weight:800; }
-  .badge.blue{ background:#e7f2ff; color:#1563c1; border:1px solid #b7d2ff }
-  .badge.gray{ background:#f0f1f4; color:#4c4f57; border:1px solid #dde0e6 }
+  .crew h3{margin:0; font-size:16px}
+  .crew small{color:#735236; font-weight:700}
+  .badge{display:inline-block; padding:4px 10px; border-radius:999px; background:#eef0f3; color:#5a6572; font-weight:800; font-size:12px}
+  .krow{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+  .apply{background:linear-gradient(180deg,#ffc83d,#ffaf2f); border:2px solid var(--line); border-radius:10px; font-weight:900; padding:8px 12px; cursor:pointer}
 
-  /* stats */
-  .stats{ max-width:1200px; margin:18px auto 0; display:grid; grid-template-columns:repeat(4,1fr); gap:18px }
-  @media (max-width:960px){ .stats{ grid-template-columns:repeat(2,1fr) } }
+  /* Stats bar */
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin:18px 0}
   .stat{
-    background:linear-gradient(145deg,#fff4dd,#fff); border:3px solid var(--gold);
-    border-radius:14px; padding:16px; text-align:center; box-shadow:var(--shadow)
+    background:linear-gradient(180deg,#fff7ea,#f4e6cf);
+    border:3px solid var(--line); border-radius:14px; text-align:center; padding:16px; box-shadow:0 10px 28px rgba(0,0,0,.15)
   }
-  .stat .n{ font-size:32px; font-weight:900; color:var(--brown) }
-
-  /* flash/error */
-  .flash{
-    margin-top:10px; padding:12px 14px; border-radius:12px; font-weight:700; border:2px solid;
-  }
-  .flash.ok{ background:#eaffea; border-color:#85d789; color:#0d6f1f }
-  .flash.err{ background:#ffe8e6; border-color:#ff9a90; color:#9f1f12 }
+  .stat .n{font-size:26px; font-weight:900}
+  .stat .l{color:#7a5639; font-weight:800}
 </style>
 </head>
 <body>
-  <div class="topbar">
-    <div class="logo"></div>
-    <h1>Command Centre</h1>
-    <div style="margin-left:auto;font-weight:700;color:#6b4b2a">Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
-  </div>
+  <div class="shell">
+    <div class="top">
+      <div class="top-logo"></div>
+      <div class="top-title">Command Centre</div>
+      <div class="top-sub">Keep it simple: launch the adventure, watch the clock, mark returns — late returns auto-deduct based on the configured rate.</div>
+    </div>
 
-  <div class="wrap">
-    <!-- LEFT: Controls -->
-    <section class="panel" id="leftPanel">
-      <h2>⚓ Adventure Control</h2>
-      <div class="timer" id="timerDisplay">01 : 30 : 00</div>
-      <div class="status" id="statusText">Not started</div>
+    <div class="grid">
+      <!-- LEFT: Adventure control -->
+      <section class="card" id="leftCard">
+        <h2>⚓ Adventure Control</h2>
+        <div class="timer" id="timerDisplay">01 : 30 : 00</div>
+        <div class="status">
+          <span id="timerStatus" class="pill idle">Not started</span>
+        </div>
 
-      <div class="grid-btns">
-        <button id="btnLaunch" class="btn btn--green">🚀 Launch</button>
-        <button id="btnPause"  class="btn btn--amber" disabled>⏸️ Pause</button>
-        <button id="btnEnd"    class="btn btn--red">⏹️ End</button>
-        <button id="btnReset"  class="btn btn--brown">🔄 Reset</button>
+        <div class="btnrow">
+          <button id="startBtn" class="btn launch">🚀 Launch</button>
+          <button id="pauseBtn" class="btn pause" disabled>⏸️ Pause</button>
+          <button id="stopBtn" class="btn end" disabled>⏹️ End</button>
+          <button id="resetBtn" class="btn reset">🔁 Reset (UI only)</button>
+        </div>
+
+        <div class="alert" id="leftAlert"></div>
+      </section>
+
+      <!-- RIGHT: Crew management -->
+      <section class="card">
+        <h2>👥 Crew Management</h2>
+        <div class="rule"></div>
+        <div id="crewsList" class="crew-list">
+          <div class="crew" style="grid-template-columns:1fr;">
+            <div><strong>Loading crews…</strong></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="n" id="totalCrews">0</div>
+        <div class="l">Total Crews</div>
       </div>
-
-      <button id="btnPublish" class="btn btn--amber btn-wide">🏆 Publish Final Results</button>
-
-      <div id="flash" class="flash" style="display:none"></div>
-    </section>
-
-    <!-- RIGHT: Crew management -->
-    <section class="panel">
-      <h2>👥 Crew Management</h2>
-      <div id="crewList" class="crew-list">
-        <div class="flash" id="crewLoading">Loading crews…</div>
+      <div class="stat">
+        <div class="n" id="activeCrews">0</div>
+        <div class="l">Active</div>
       </div>
-    </section>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><div class="n" id="statTotal">0</div>Total Crews</div>
-    <div class="stat"><div class="n" id="statActive">0</div>Active</div>
-    <div class="stat"><div class="n" id="statReturned">0</div>Returned</div>
-    <div class="stat"><div class="n" id="statPenalised">0</div>Penalised</div>
+      <div class="stat">
+        <div class="n" id="returnedCrews">0</div>
+        <div class="l">Returned</div>
+      </div>
+      <div class="stat">
+        <div class="n" id="penalisedCrews">0</div>
+        <div class="l">Penalised</div>
+      </div>
+    </div>
   </div>
 
 <script>
-/* ---------- helpers ---------- */
-const qs = sel => document.querySelector(sel);
-const qsa = sel => [...document.querySelectorAll(sel)];
-const getEventIdFromURL = () => new URLSearchParams(location.search).get("event") || "EVT-19-08-2025";
-
-function showFlash(msg, isErr=true){
-  const el = qs("#flash");
-  el.textContent = msg;
-  el.className = "flash " + (isErr ? "err" : "ok");
-  el.style.display = "block";
-  clearTimeout(showFlash._t);
-  showFlash._t = setTimeout(()=>{ el.style.display="none"; }, 5000);
-}
-
-async function fetchJSON(url, opts={}){
-  const res  = await fetch(url, opts);
-  const txt  = await res.text();
-  let data;
-  try{ data = JSON.parse(txt); }catch{ data = null; }
-  if(!res.ok || (data && data.success === false)){
-    const msg = (data && data.message) ? data.message : (`HTTP ${res.status} ${res.statusText}`);
-    throw new Error(msg);
-  }
-  return data || {};
-}
-
-/* ---------- state + rendering ---------- */
-let state = {
-  running:false, paused:false, ended:false,
-  resultsPublished:false, durationMinutes:90, startTime:null
+/* ========= CONFIG ========= */
+let ui = {
+  eventId: new URLSearchParams(location.search).get('event') || 'EVT-19-08-2025',
+  tickTimer: null,
+  els: {}
 };
 
-function formatTimer(msLeft){
-  if (msLeft < 0) msLeft = 0;
-  const totalSec = Math.floor(msLeft/1000);
-  const h = String(Math.floor(totalSec/3600)).padStart(2,'0');
-  const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
-  const s = String(totalSec%60).padStart(2,'0');
-  return `${h} : ${m} : ${s}`;
+/* ========= HELPERS ========= */
+function $(sel){ return document.querySelector(sel); }
+function setText(el, txt){ if(el) el.textContent = txt; }
+function showAlert(msg){ const a=ui.els.leftAlert; if(!a) return; a.style.display='block'; a.textContent=msg; setTimeout(()=>a.style.display='none', 4500); }
+
+/* ========= NORMALIZER (handles old & new shapes) ========= */
+function normalizeEventState(data) {
+  const raw = (data?.state || data?.competitionStatus || data?.status || '').toLowerCase();
+  const running = raw === 'running' || raw === 'start' || raw === 'started';
+  const paused  = raw === 'paused';
+  const ended   = raw === 'ended' || raw === 'stop' || raw === 'stopped';
+  const notStarted = !running && !paused && !ended;
+
+  const startIso    = data?.startedAtIso || data?.startTime || null;
+  const durationSec = Number(data?.durationSec ?? (data?.durationMinutes ? data.durationMinutes * 60 : data?.duration) ?? 0);
+  const penaltyPerMin = Number(data?.penaltyPerMin ?? data?.penaltyRate ?? 0);
+  const published   = Boolean(data?.resultsPublished || data?.publishedAtIso);
+
+  return { running, paused, ended, notStarted, startIso, durationSec, penaltyPerMin, published };
 }
 
-function paintStatus(){
-  const st = qs("#statusText");
-  st.className = "status";
-  if (state.resultsPublished){
-    st.textContent = "Final results published";
-    st.classList.add("ended");
-  } else if (state.ended){
-    st.textContent = "Adventure complete";
-    st.classList.add("ended");
-  } else if (state.running && !state.paused){
-    st.textContent = "Adventure running";
-    st.classList.add("running");
-  } else if (state.paused){
-    st.textContent = "Paused";
-    st.classList.add("paused");
-  } else {
-    st.textContent = "Not started";
+/* ========= RENDER ========= */
+function renderFromState(norm) {
+  const pill = ui.els.timerStatus;
+  if (norm.running){ pill.className='pill running'; setText(pill,'Running'); }
+  else if (norm.paused){ pill.className='pill paused'; setText(pill,'Paused'); }
+  else if (norm.ended){ pill.className='pill ended'; setText(pill,'Ended'); }
+  else { pill.className='pill idle'; setText(pill,'Not started'); }
+
+  // Buttons
+  ui.els.startBtn.disabled = norm.running || norm.paused || norm.ended;
+  ui.els.pauseBtn.disabled = !norm.running;
+  ui.els.stopBtn.disabled  = !(norm.running || norm.paused);
+
+  // Timer
+  startOrStopTick(norm);
+}
+
+function startOrStopTick(norm){
+  const display = ui.els.timer;
+  if (ui.tickTimer){ clearInterval(ui.tickTimer); ui.tickTimer = null; }
+  if (!norm.startIso || !norm.durationSec){ setText(display,'01 : 30 : 00'); return; }
+
+  const startMs = Date.parse(norm.startIso);
+  const endMs   = startMs + norm.durationSec * 1000;
+
+  function tick(){
+    const now = Date.now();
+    const remain = endMs - now;
+    const sign = remain >= 0 ? '' : '+';
+    const t = Math.abs(remain);
+    const h = Math.floor(t / 3_600_000);
+    const m = Math.floor((t % 3_600_000) / 60_000);
+    const s = Math.floor((t % 60_000) / 1000);
+    setText(display, `${sign}${String(h).padStart(2,'0')} : ${String(m).padStart(2,'0')} : ${String(s).padStart(2,'0')}`);
   }
-
-  // buttons
-  qs("#btnLaunch").disabled = state.running && !state.paused;
-  qs("#btnPause").disabled  = !state.running || state.paused;
-  qs("#btnEnd").disabled    = !state.running && !state.paused;
+  tick();
+  ui.tickTimer = setInterval(tick, 1000);
 }
 
-let timerTick = null;
-function startLocalTimer(){
-  clearInterval(timerTick);
-  const disp = qs("#timerDisplay");
-  if (!state.startTime || !state.durationMinutes){
-    disp.textContent = "01 : 30 : 00";
-    return;
-  }
-  timerTick = setInterval(()=>{
-    const endAt = new Date(state.startTime).getTime() + (state.durationMinutes*60*1000);
-    const left  = endAt - Date.now();
-    disp.textContent = formatTimer(left);
-  }, 1000);
-}
-
-function renderCrewList(teams){
-  const root = qs("#crewList");
-  root.innerHTML = "";
-  if (!teams || teams.length === 0){
-    root.innerHTML = `<div class="flash">No crews found for this event.</div>`;
-    return;
-  }
-
-  teams.forEach(t=>{
-    const code  = t.teamCode || "";
-    const name  = t.teamName || code;
-    const status= (t.status || (t.returnedAt ? "returned" : "active")).toLowerCase();
-    const locked= !!t.locked;
-
-    const row = document.createElement("div");
-    row.className = "crew";
-    row.innerHTML = `
-      <div>
-        <h3>${name}</h3>
-        <div class="meta">${code}</div>
-      </div>
-
-      <div class="row">
-        <span class="badge ${status==="active"?"blue":"gray"}">${status==="active"?"Active":"Returned"}</span>
-
-        <select data-team="${code}">
-          <option value="active"   ${status==="active"?"selected":""}>Active</option>
-          <option value="returned" ${status!=="active"?"selected":""}>Returned</option>
-        </select>
-
-        <label class="row" style="gap:6px;">
-          <input type="checkbox" data-lock="${code}" ${locked?"checked":""}/> Lock doubloons
-        </label>
-
-        <button class="btn btn--amber" data-apply="${code}">APPLY</button>
-
-        <span class="badge ${locked?"gray":"blue"}">${locked?"Locked":"Unlocked"}</span>
-      </div>
-    `;
-    root.appendChild(row);
-  });
-
-  // delegate “APPLY”
-  root.addEventListener("click", async (ev)=>{
-    const btn = ev.target.closest("[data-apply]");
-    if(!btn) return;
-    const code = btn.getAttribute("data-apply");
-    const sel  = root.querySelector(`select[data-team="${code}"]`);
-    const chk  = root.querySelector(`input[data-lock="${code}"]`);
-    const eventId = getEventIdFromURL();
-
-    try{
-      // lock/unlock first
-      await fetchJSON("/.netlify/functions/admin_toggle_lock_team",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ eventId, teamCode: code, locked: !!chk.checked })
-      });
-      // status update
-      await fetchJSON("/.netlify/functions/admin_checkin_team",{
-        method:"POST",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify({ eventId, teamCode: code, status: sel.value })
-      });
-
-      showFlash(`Updated ${code}`, false);
-      refresh();
-
-    }catch(err){
-      showFlash(`Failed to update ${code}: ${err.message}`);
-    }
-  }, { once:true });
-}
-
-function paintStats(teams){
-  const total = teams.length;
-  const active = teams.filter(t => (t.status || (t.returnedAt? "returned":"active")) === "active").length;
-  const returned = total - active;
-  const penalised = teams.filter(t => (t.penalty || 0) > 0).length;
-
-  qs("#statTotal").textContent = total;
-  qs("#statActive").textContent = active;
-  qs("#statReturned").textContent = returned;
-  qs("#statPenalised").textContent = penalised;
-}
-
-/* ---------- data flow ---------- */
-async function loadState(){
-  const eventId = getEventIdFromURL();
-  const data = await fetchJSON(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(eventId)}`);
-  // normalise keys from your function
-  state.running  = data.status === "start" || data.status === "running";
-  state.paused   = data.status === "paused";
-  state.ended    = data.status === "stop" || data.status === "stopped" || data.hasEnded;
-  state.resultsPublished = !!data.resultsPublished;
-  state.durationMinutes  = data.durationMinutes || 90;
-  state.startTime        = data.startTime || null;
-
-  paintStatus();
-  startLocalTimer();
-}
-
-async function loadTeams(){
-  const eventId = getEventIdFromURL();
-  const data = await fetchJSON(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(eventId)}`);
-  const teams = data.teams || [];
-  renderCrewList(teams);
-  paintStats(teams);
-}
-
-async function refresh(){
+/* ========= LOAD EVENT STATE ========= */
+async function refreshStatus(silent=false){
   try{
-    await Promise.all([loadState(), loadTeams()]);
+    const res = await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(ui.eventId)}`, { cache:'no-store' });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const norm = normalizeEventState(data);
+    renderFromState(norm);
+    if (!silent) console.debug('State:', data, '→', norm);
   }catch(err){
-    showFlash("Failed to load current status: " + err.message);
+    console.error('Failed to load current status:', err);
+    if(!silent) showAlert('Failed to load current status.');
   }
 }
 
-/* ---------- actions ---------- */
-qs("#btnLaunch").addEventListener("click", async ()=>{
+/* ========= CREWS ========= */
+async function loadCrews(){
+  const list = ui.els.crewsList;
+  list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;"><div><strong>Loading crews…</strong></div></div>`;
   try{
-    const eventId = getEventIdFromURL();
-    await fetchJSON("/.netlify/functions/admin_start_event",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ eventId, action:"start" })
-    });
-    showFlash("Adventure launched!", false);
-    refresh();
-  }catch(err){ showFlash("Failed to launch: " + err.message); }
-});
+    const res = await fetch(`/.netlify/functions/admin_list_teams?eventId=${encodeURIComponent(ui.eventId)}`, { cache:'no-store' });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const teams = data?.teams || [];
+    // Stats
+    setText($('#totalCrews'), teams.length);
+    setText($('#activeCrews'), teams.filter(t => (t.status||'active')==='active').length);
+    setText($('#returnedCrews'), teams.filter(t => (t.status||'')==='returned' || (t.status||'')==='late').length);
+    setText($('#penalisedCrews'), teams.filter(t => Number(t.penalty||0) > 0).length);
 
-qs("#btnPause").addEventListener("click", async ()=>{
+    if(!teams.length){
+      list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;"><div><strong>No crews yet.</strong></div></div>`;
+      return;
+    }
+
+    list.innerHTML = '';
+    teams.forEach(team => {
+      const status = (team.status || 'active');
+      const penal  = Number(team.penalty || 0);
+      const locked = team.locked ? 'Locked' : 'Unlocked';
+
+      const row = document.createElement('div');
+      row.className = 'crew';
+      row.innerHTML = `
+        <div>
+          <h3>${team.teamName || 'Unnamed crew'}</h3>
+          <small>${team.teamCode || ''}</small>
+          <div class="krow" style="margin-top:6px">
+            <span class="badge">${status[0].toUpperCase()+status.slice(1)}</span>
+            <span class="badge">${locked}</span>
+            ${penal>0 ? `<span class="badge" style="background:#ffe2e0;color:#8a2327;">Penalty: -${penal}</span>`:''}
+          </div>
+        </div>
+        <div class="krow">
+          <button class="apply" data-code="${team.teamCode}">APPLY</button>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+  }catch(e){
+    console.error('Failed to load crews:', e);
+    list.innerHTML = `<div class="crew" style="grid-template-columns:1fr;">
+      <div><strong style="color:#8a2327">Failed to load crew list.</strong></div></div>`;
+  }
+}
+
+/* ========= ACTIONS ========= */
+async function callStart(){
+  ui.els.startBtn.disabled = true; // snappy feedback
   try{
-    const eventId = getEventIdFromURL();
-    await fetchJSON("/.netlify/functions/admin_start_event",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ eventId, action:"pause" })
+    const res = await fetch('/.netlify/functions/admin_start_event', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ eventId: ui.eventId })
     });
-    showFlash("Adventure paused.", false);
-    refresh();
-  }catch(err){ showFlash("Failed to pause: " + err.message); }
-});
+    const data = await res.json();
+    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
+    setTimeout(() => refreshStatus(), 500); // allow Sheets write
+  }catch(e){
+    console.error('Launch failed:', e);
+    ui.els.startBtn.disabled = false;
+    showAlert(`Failed to launch: ${e.message}`);
+  }
+}
 
-qs("#btnEnd").addEventListener("click", async ()=>{
-  if(!confirm("End the adventure for all crews?")) return;
+async function callPause(){
   try{
-    const eventId = getEventIdFromURL();
-    await fetchJSON("/.netlify/functions/admin_start_event",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ eventId, action:"stop" })
+    const res = await fetch('/.netlify/functions/admin_start_event', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ eventId: ui.eventId, action:'pause' })
     });
-    showFlash("Adventure ended.", false);
-    refresh();
-  }catch(err){ showFlash("Failed to end: " + err.message); }
-});
+    const data = await res.json();
+    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
+    setTimeout(() => refreshStatus(), 300);
+  }catch(e){
+    console.error('Pause failed:', e);
+    showAlert(`Failed to pause: ${e.message}`);
+  }
+}
 
-qs("#btnReset").addEventListener("click", async ()=>{
-  if(!confirm("Reset the event and prepare for a new adventure?")) return;
+async function callEnd(){
   try{
-    const eventId = getEventIdFromURL();
-    await fetchJSON("/.netlify/functions/admin_start_event",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ eventId, action:"reset" })
+    const res = await fetch('/.netlify/functions/admin_start_event', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ eventId: ui.eventId, action:'stop' })
     });
-    showFlash("Event reset.", false);
-    refresh();
-  }catch(err){ showFlash("Failed to reset: " + err.message); }
-});
+    const data = await res.json();
+    if(!res.ok || data?.success === false) throw new Error(data?.message || `HTTP ${res.status}`);
+    setTimeout(() => refreshStatus(), 300);
+  }catch(e){
+    console.error('End failed:', e);
+    showAlert(`Failed to end: ${e.message}`);
+  }
+}
 
-qs("#btnPublish").addEventListener("click", async ()=>{
-  if(!confirm("Publish final results and unlock the gallery for all crews?")) return;
-  try{
-    const eventId = getEventIdFromURL();
-    await fetchJSON("/.netlify/functions/admin_publish_final",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ eventId })
-    });
-    showFlash("Final results published.", false);
-    refresh();
-  }catch(err){ showFlash("Failed to publish: " + err.message); }
-});
+/* ========= BOOT ========= */
+document.addEventListener('DOMContentLoaded', () => {
+  ui.els = {
+    timer: $('#timerDisplay'),
+    timerStatus: $('#timerStatus'),
+    startBtn: $('#startBtn'),
+    pauseBtn: $('#pauseBtn'),
+    stopBtn:  $('#stopBtn'),
+    resetBtn: $('#resetBtn'),
+    leftAlert: $('#leftAlert'),
+    crewsList: $('#crewsList')
+  };
 
-/* ---------- boot ---------- */
-refresh();
-setInterval(refresh, 30000); // auto-refresh every 30s
+  ui.els.startBtn.addEventListener('click', callStart);
+  ui.els.pauseBtn.addEventListener('click', callPause);
+  ui.els.stopBtn.addEventListener('click', callEnd);
+  ui.els.resetBtn.addEventListener('click', () => { if (ui.tickTimer) { clearInterval(ui.tickTimer); ui.tickTimer = null; } setText(ui.els.timer, '01 : 30 : 00'); });
+
+  // Initial loads + periodic refresh to keep in sync
+  refreshStatus(true);
+  loadCrews();
+  setInterval(() => refreshStatus(true), 10000); // state poll
+  setInterval(() => loadCrews(), 30000);         // crew list poll
+});
 </script>
 </body>
 </html>
