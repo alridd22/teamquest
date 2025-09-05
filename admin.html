@@ -94,7 +94,7 @@
   </div>
 
   <script>
-    // --------- Config / Helpers ----------
+    // ---- Config / helpers ----
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
     if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
@@ -136,22 +136,22 @@
       return 'unknown';
     };
 
-    function fmt(ms){
+    const fmt = (ms) => {
       if (ms < 0) ms = 0;
       const t = Math.floor(ms/1000);
       const hh = String(Math.floor(t/3600)).padStart(2,'0');
       const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
       const ss = String(t%60).padStart(2,'0');
       return `${hh} : ${mm} : ${ss}`;
-    }
+    };
 
-    // Current event snapshot
+    // ---- Event snapshot (authoritative in UI) ----
     let current = {
       state: 'unknown',
-      startedAt: null, // ISO
-      endsAt: null,    // ISO
-      durationSec: null,
-      remainingMs: 0,  // authoritative when paused
+      startedAt: null,     // ISO
+      endsAt: null,        // ISO
+      durationSec: null,   // number
+      remainingMs: 0,      // frozen when paused
       lastUpdateAt: 0,
       prevState: 'unknown',
     };
@@ -173,43 +173,40 @@
       cancelAnimationFrame(rafId);
       const now = Date.now();
       let displayMs = 0;
-
       const s = normState(current.state);
+
       if (s === 'running' && current.startedAt && current.endsAt){
         displayMs = new Date(current.endsAt).getTime() - now;
-        current.remainingMs = displayMs; // keep an always-fresh fallback
+        current.remainingMs = displayMs; // keep fresh fallback
       } else if (s === 'paused'){
-        // When paused, we freeze the last known remaining time
-        displayMs = current.remainingMs > 0 ? current.remainingMs : 0;
+        displayMs = Math.max(0, current.remainingMs || 0); // freeze
       } else if (s === 'ended'){
         displayMs = 0;
       } else {
-        // not started/unknown: show full duration if we have it
         if (current.durationSec != null) displayMs = current.durationSec * 1000;
       }
-
       el.timer.textContent = fmt(displayMs);
       rafId = requestAnimationFrame(tick);
     }
 
+    // ---- API calls ----
     async function fetchState({force=false}={}){
-      const startedCallAt = Date.now();
+      const callAt = Date.now();
       const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({}));
-      if (!force && startedCallAt < current.lastUpdateAt) return;
+      if (!force && callAt < current.lastUpdateAt) return;
 
-      const nextState = normState(data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : 'notstarted'));
+      const nextState = normState(
+        data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : 'notstarted')
+      );
 
-      // Compute remaining
+      // Respect backend remaining if provided; otherwise keep client snapshot
       let remainingMs = current.remainingMs;
       if (typeof data.remainingMs === 'number') {
         remainingMs = data.remainingMs;
       } else if (typeof data.remainingSec === 'number') {
         remainingMs = Math.max(0, Math.floor(data.remainingSec * 1000));
       } else if (nextState === 'running' && data.endsAt) {
-        remainingMs = new Date(data.endsAt).getTime() - Date.now();
-      } else if (nextState === 'paused' && current.prevState === 'running' && data.endsAt) {
-        // Transition to paused but API didn’t give remaining — freeze now
         remainingMs = new Date(data.endsAt).getTime() - Date.now();
       }
 
@@ -221,20 +218,42 @@
         endsAt: data.endsAt || data.endIso || current.endsAt,
         durationSec: data.durationSec ?? current.durationSec,
         remainingMs: Math.max(0, remainingMs),
-        lastUpdateAt: startedCallAt,
+        lastUpdateAt: callAt,
       };
 
       setStatusPill(nextState);
       tick();
-      // console.log('State:', data, {nextState, remainingMs: current.remainingMs});
     }
 
     async function postAction(action){
+      // Snapshot BEFORE hitting the API to avoid visual reset
+      if (action === 'pause'){
+        // Freeze the remaining ms right now
+        const ms = (current.endsAt ? new Date(current.endsAt).getTime() - Date.now() : current.remainingMs) || 0;
+        current.remainingMs = Math.max(0, ms);
+        current.state = 'paused';
+        setStatusPill('paused');
+        tick();
+      }
+      if (action === 'end'){
+        current.remainingMs = 0;
+        current.state = 'ended';
+        setStatusPill('ended');
+        tick();
+      }
+
       const body = { eventId: EVENT_ID, action };
-      const res = await fetch(endpoints.start, { method:'POST', headers: headers(), body: JSON.stringify(body) });
+      const res = await fetch(endpoints.start, {
+        method:'POST', headers: headers(), body: JSON.stringify(body)
+      });
       const data = await res.json().catch(()=>({success:false}));
-      if (!data.success) { alert(data.message || `Failed to ${action}.`); return; }
-      // Force refresh; if API returns remainingSec on pause/end we'll adopt it
+      if (!data.success) {
+        alert(data.message || `Failed to ${action}.`);
+        // Roll back optimistic UI if needed
+        await fetchState({force:true});
+        return;
+      }
+      // Hard refresh from backend (will reconcile endsAt/remaining)
       await fetchState({force:true});
     }
 
@@ -242,10 +261,10 @@
       const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({teams:[]}));
       const teams = Array.isArray(data.teams) ? data.teams : [];
-      document.getElementById('statTotal').textContent = teams.length || 0;
-      document.getElementById('statActive').textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
+      el.statTotal.textContent = teams.length || 0;
+      el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
 
-      document.getElementById('teams').innerHTML = teams.map(t => {
+      el.teams.innerHTML = teams.map(t => {
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
         const badgeA = `<span class="tag">${(t.label || t.alias || code || 'TEAM')}</span>`;
@@ -262,24 +281,22 @@
             </div>
           </div>`;
       }).join('');
-      document.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
+      el.teams.querySelectorAll('.apply').forEach(b => b.addEventListener('click', () => {
         alert('Team-level admin actions coming soon.');
       }));
     }
 
-    // Wire UI
-    document.getElementById('btnStart').addEventListener('click', () => postAction('start'));
-    document.getElementById('btnPause').addEventListener('click', () => postAction('pause'));
-    document.getElementById('btnEnd').addEventListener('click',   () => postAction('end'));
-    document.getElementById('btnReset').addEventListener('click', () => {
-      // UI-only: zero the display without touching backend
-      current.remainingMs = 0;
-      current.startedAt = null;
-      current.endsAt = null;
+    // ---- Wire UI ----
+    el.btnStart.addEventListener('click', () => postAction('start'));
+    el.btnPause.addEventListener('click', () => postAction('pause'));
+    el.btnEnd.addEventListener('click',   () => postAction('end'));
+    el.btnReset.addEventListener('click', () => {
+      // UI-only: zero the display (no backend effect)
+      current.remainingMs = 0; current.startedAt = null; current.endsAt = null;
       el.timer.textContent = fmt(0);
     });
 
-    // Boot
+    // ---- Boot ----
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
