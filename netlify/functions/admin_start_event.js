@@ -1,31 +1,38 @@
-// admin_start_event.js
-const { ok, bad, requireAdmin, getBody } = require("./_lib/http");
-const { getEventById, updateEventRow } = require("./_lib/sheets");
+// inside your handler, after you've validated admin auth and loaded the event row
+// Assumes headers: Event Id | Name | State | DurationSec | PenaltyPerMin | StartedAt (ISO) | EndsAt (ISO) | ... | UpdatedAt (ISO)
 
-exports.handler = async (event) => {
-  try {
-    requireAdmin(event);
-    const { eventId, durationSec, penaltyPerMin } = getBody(event);
-    if (!eventId) return bad(400, "eventId required");
+switch ((body.action || 'start').toLowerCase()) {
+  case 'start':
+    // ... your existing start logic
+    break;
 
-    const row = await getEventById(eventId);
-    if (!row) return bad(404, "Event not found");
+  case 'pause':
+    // ... your existing pause logic
+    break;
 
-    const now = new Date();
-    const dur = Number(durationSec || row["DurationSec"] || 0);
-    if (!dur) return bad(400, "durationSec required");
+  case 'end':
+    // ... your existing end logic
+    break;
 
-    const ends = new Date(now.getTime() + dur * 1000);
-
-    await updateEventRow(row, {
-      "State": "RUNNING",
-      "StartedAt (ISO)": now.toISOString(),
-      "EndsAt (ISO)": ends.toISOString(),
-      "PenaltyPerMin": Number(penaltyPerMin ?? row["PenaltyPerMin"] ?? 0)
+  case 'reset': {
+    const nowIso = new Date().toISOString();
+    // Update the row for this eventId
+    await eventsSheet.updateRow(rowIndex, {
+      'State': 'NOT_STARTED',
+      'StartedAt (ISO)': '',
+      'EndsAt (ISO)': '',
+      'UpdatedAt (ISO)': nowIso,
+      // keep DurationSec + PenaltyPerMin as they are
     });
 
-    return ok({ eventId, startedAt: row["StartedAt (ISO)"], endsAt: row["EndsAt (ISO)"] });
-  } catch (e) {
-    return bad(e.status || 500, e.message || "Error");
+    return ok({
+      success: true,
+      eventId,
+      state: 'NOT_STARTED',
+      message: 'Event reset to not started.',
+    });
   }
-};
+
+  default:
+    return bad(400, `Unknown action: ${body.action}`);
+}
