@@ -28,10 +28,11 @@
     .subtitle{font-size:1.05em;color:#a0522d;margin-bottom:12px}
     .timer-display{
       background:linear-gradient(145deg,#ff8c00,#ffa500);color:#fff;padding:10px 20px;border-radius:25px;
-      font-size:1.1em;font-weight:bold;text-align:center;margin:10px auto 0;max-width:320px;
+      font-size:1.1em;font-weight:bold;text-align:center;margin:10px auto 0;max-width:360px;
       box-shadow:0 5px 15px rgba(0,0,0,.2);border:3px solid #8b4513;transition:all .3s ease
     }
     .timer-display.penalty{background:linear-gradient(145deg,#dc143c,#b22222);animation:penalty-pulse 1s ease-in-out infinite;border-color:#8b0000}
+    .timer-display.paused{background:linear-gradient(145deg,#b9b9b9,#9e9e9e);border-color:#6b6b6b}
     @keyframes penalty-pulse{0%,100%{box-shadow:0 5px 15px rgba(220,20,60,.4);transform:scale(1)}50%{box-shadow:0 8px 25px rgba(220,20,60,.7);transform:scale(1.02)}}
     .penalty-warning{
       background:linear-gradient(145deg,#ffb6c1,#ffa0b4);border:3px solid #dc143c;color:#8b0000;padding:12px 18px;border-radius:20px;
@@ -78,7 +79,7 @@
       <p class="subtitle" id="pageSubtitle">Live standings</p>
 
       <div class="timer-display" id="timerDisplay">
-        <span>⏰</span> <span id="timer">Loading…</span>
+        <span id="timerIcon">⏰</span> <span id="timer">Loading…</span>
       </div>
 
       <div class="penalty-warning" id="penaltyWarning">⚠️ Late penalties are active</div>
@@ -98,17 +99,18 @@
   </div>
 
   <script>
-    // You can override via ?eventId=EVT-... in the URL if needed
+    // Accept ?event=... or ?eventId=...
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('eventId') || '';
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     let refreshInterval = null;
+    let refreshMs = 20000;
     let timerInterval = null;
     let endsAt = null;
     let penaltyPerMin = 0;
-    let state = 'DRAFT'; // DRAFT | RUNNING | PUBLISHED
+    let state = 'NOT_STARTED'; // NOT_STARTED | RUNNING | PAUSED | ENDED | PUBLISHED
 
-    const el = sel => document.querySelector(sel);
+    const $ = (sel) => document.querySelector(sel);
 
     function fmtTime(ms){
       const sign = ms < 0 ? '+' : '';
@@ -118,34 +120,55 @@
       const s = Math.floor((t%60_000)/1000);
       return `${sign}${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
+    function prettyClock(d=new Date()){
+      return d.toTimeString().split(' ')[0];
+    }
 
     function setTimerUI(){
-      const tEl = el('#timer');
-      const card = el('#timerDisplay');
-      if (!endsAt || (state !== 'RUNNING' && state !== 'PUBLISHED')) {
-        tEl.textContent = 'Waiting to start';
-        card.classList.remove('penalty');
-        el('#penaltyWarning').classList.remove('show');
+      const tEl = $('#timer');
+      const card = $('#timerDisplay');
+      const icon = $('#timerIcon');
+
+      card.classList.remove('penalty','paused');
+
+      if (!endsAt) {
+        tEl.textContent = state === 'PAUSED' ? 'Paused' : 'Waiting to start';
+        icon.textContent = state === 'PAUSED' ? '⏸' : '⏰';
         return;
       }
+
       const now = Date.now();
       const diff = new Date(endsAt).getTime() - now;
 
+      if (state === 'PAUSED') {
+        tEl.textContent = 'Paused';
+        icon.textContent = '⏸';
+        return;
+      }
+
       if (diff >= 0) {
         tEl.textContent = `Time remaining: ${fmtTime(diff)}`;
-        card.classList.remove('penalty');
-        el('#penaltyWarning').classList.remove('show');
+        icon.textContent = '⏰';
       } else {
-        // Overtime → penalties active (if configured)
+        // Overtime
         tEl.textContent = `Overtime: ${fmtTime(diff)}`;
+        icon.textContent = '⏱';
         if (penaltyPerMin > 0 && state === 'RUNNING') {
           card.classList.add('penalty');
-          el('#penaltyWarning').classList.add('show');
+          $('#penaltyWarning').classList.add('show');
         } else {
-          card.classList.remove('penalty');
-          el('#penaltyWarning').classList.remove('show');
+          $('#penaltyWarning').classList.remove('show');
         }
       }
+    }
+
+    function normalizeState(s=''){
+      const v = String(s||'').trim().toUpperCase();
+      if (['RUNNING','STARTED','ACTIVE'].includes(v)) return 'RUNNING';
+      if (['PAUSED','PAUSE'].includes(v)) return 'PAUSED';
+      if (['ENDED','END','STOPPED','STOP','COMPLETE','COMPLETED','FINISHED','PUBLISHED'].includes(v)) return v==='PUBLISHED'?'PUBLISHED':'ENDED';
+      if (['NOT_STARTED','NOTSTARTED','READY','PENDING','DRAFT',''].includes(v)) return 'NOT_STARTED';
+      return 'NOT_STARTED';
     }
 
     async function fetchEventState(){
@@ -155,74 +178,105 @@
       const j = await r.json();
       if (!r.ok || j.success === false) throw new Error(j.message || 'Event state error');
 
-      state = j.state || 'DRAFT';
-      endsAt = j.endsAt || j["EndsAt (ISO)"] || null;
-      penaltyPerMin = Number(j.penaltyPerMin || j["PenaltyPerMin"] || 0);
+      state = normalizeState(j.state || j.State);
+      endsAt = j.endsAt || j['EndsAt (ISO)'] || null;
+      penaltyPerMin = Number(j.penaltyPerMin ?? j['PenaltyPerMin'] ?? 0);
 
-      // UI tweaks based on state
-      const title = el('#pageTitle');
-      const subtitle = el('#pageSubtitle');
-      const banner = el('#finalBanner');
+      // Title / banner
+      const title = $('#pageTitle');
+      const subtitle = $('#pageSubtitle');
+      const banner = $('#finalBanner');
 
       if (state === 'RUNNING') {
         title.textContent = "Terry's Treasure Leaderboard";
         subtitle.textContent = "Live standings";
         banner.style.display = 'none';
-      } else if (state === 'PUBLISHED') {
+        refreshMs = 10000;
+      } else if (state === 'PAUSED') {
+        title.textContent = "Terry's Treasure Leaderboard";
+        subtitle.textContent = "Paused";
+        banner.style.display = 'none';
+        refreshMs = 20000;
+      } else if (state === 'ENDED' || state === 'PUBLISHED') {
         title.textContent = "🏆 Final Treasure Results";
         subtitle.textContent = "Adventure complete — final standings";
         banner.style.display = 'block';
-        // Stop auto-refresh timer countdown
-        if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+        refreshMs = 60000;
       } else {
         title.textContent = "Terry's Treasure Leaderboard";
         subtitle.textContent = "Waiting to start";
         banner.style.display = 'none';
+        refreshMs = 20000;
       }
 
-      if (!timerInterval) {
-        timerInterval = setInterval(setTimerUI, 1000);
-      }
+      if (!timerInterval) timerInterval = setInterval(setTimerUI, 1000);
       setTimerUI();
     }
 
+    function pickNumber(...vals){
+      for (const v of vals){
+        const n = Number(v);
+        if (Number.isFinite(n)) return n;
+      }
+      return 0;
+    }
+
     function renderLeaderboard(rows){
-      const box = el('#leaderboard');
-      if (!rows || rows.length === 0) {
+      const box = $('#leaderboard');
+      if (!Array.isArray(rows) || rows.length === 0) {
         box.innerHTML = `<div style="text-align:center; padding:18px; color:#8b4513;">No crews yet.</div>`;
         return;
       }
 
-      // rows come pre-sorted (we sort again just in case)
-      rows.sort((a,b)=> (b.score - a.score) || String(a.teamName||'').localeCompare(String(b.teamName||'')));
+      // Map rows into a consistent shape
+      const mapped = rows.map((t) => {
+        const teamName  = t.teamName || t.name || t.team || t.teamCode || 'Crew';
+        // Prefer adjusted score if supplied; otherwise compute base - penalty
+        const penalty   = pickNumber(t.penaltyApplied, t.penalty, t.latePenalty, t.penaltyDeduction);
+        const adjusted  = Number.isFinite(Number(t.adjustedScore)) ? Number(t.adjustedScore)
+                          : Number.isFinite(Number(t.score))       ? Number(t.score)
+                          : pickNumber(t.totalScore, t.originalScore, t.baseScore) - penalty;
+        const baseScore = Number.isFinite(Number(t.totalScore)) ? Number(t.totalScore)
+                          : Number.isFinite(Number(t.originalScore)) ? Number(t.originalScore)
+                          : adjusted + penalty;
 
+        const returnedAt = t.returnedAt || t.ReturnedAt || t['ReturnedAt (ISO)'] || '';
+        const lateMins = pickNumber(t.lateMins, t.LateMins);
+        return { teamName, adjusted, penalty, baseScore, returnedAt, lateMins };
+      });
+
+      // Sort: adjusted desc, then team name
+      mapped.sort((a,b)=> (b.adjusted - a.adjusted) || a.teamName.localeCompare(b.teamName));
+
+      // Ties: give equal rank numbers if scores equal
       let html = '';
-      rows.forEach((t, idx) => {
-        const rank = idx + 1;
+      let lastScore = null, lastRank = 0;
+      mapped.forEach((t, i) => {
+        const sameAsPrev = lastScore !== null && t.adjusted === lastScore;
+        const rank = sameAsPrev ? lastRank : i + 1;
+        lastScore = t.adjusted; lastRank = rank;
+
         const rankClass = rank===1 ? 'first' : '';
-        const name = t.teamName || t.teamCode || `Crew ${rank}`;
-        const score = Number(t.score || 0);
-        const penalty = Number(t.penaltyApplied || 0);
+        const entryClass = t.penalty>0 ? 'team-entry penalized' : 'team-entry';
         const returned = !!t.returnedAt;
-        const late = !t.returnedAt && state !== 'DRAFT' && endsAt && (Date.now() > new Date(endsAt).getTime());
-        const entryClass = penalty>0 ? 'team-entry penalized' : 'team-entry';
+        const isLateNow = !returned && endsAt && (Date.now() > new Date(endsAt).getTime()) && state === 'RUNNING';
         const statusBadge = returned
           ? `<span class="team-status-badge status-returned">Returned</span>`
-          : (late ? `<span class="team-status-badge status-late">Late</span>` : '');
+          : (isLateNow ? `<span class="team-status-badge status-late">Late</span>` : '');
 
-        const scoreBlock = penalty>0
+        const scoreBlock = t.penalty>0
           ? `<div class="total-score penalized">
-               <div class="original-score">${score + penalty}</div>
-               <div class="penalty-deduction">-${penalty}</div>
-               ${score}
-               </div>`
-          : `<div class="total-score">${score}</div>`;
+               <div class="original-score">${t.baseScore}</div>
+               <div class="penalty-deduction">-${t.penalty}</div>
+               ${t.adjusted}
+             </div>`
+          : `<div class="total-score">${t.adjusted}</div>`;
 
         html += `
           <div class="${entryClass}">
             <div class="rank ${rankClass}">${rank}</div>
             <div class="team-info">
-              <div class="team-name">${name} ${statusBadge}</div>
+              <div class="team-name">${t.teamName} ${statusBadge}</div>
             </div>
             ${scoreBlock}
           </div>
@@ -233,42 +287,52 @@
     }
 
     async function fetchLeaderboard(){
-      const url = EVENT_ID ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
-                           : '/.netlify/functions/get_leaderboard';
+      const base = '/.netlify/functions/get_leaderboard';
+      const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
       const r = await fetch(url);
-      const j = await r.json();
+      const j = await r.json().catch(()=> ({}));
       if (!r.ok || j.success === false) throw new Error(j.message || 'Leaderboard error');
-      renderLeaderboard(j.rows || []);
-      el('#lastUpdated').textContent = (j.lastUpdated || new Date().toISOString()).slice(11,19);
+      const rows = j.rows || j.data || [];
+      renderLeaderboard(rows);
+      const lu = j.lastUpdated || new Date().toISOString();
+      $('#lastUpdated').textContent = lu.slice(11,19);
     }
 
     async function refreshAll(){
-      try {
-        await fetchEventState();
-        await fetchLeaderboard();
-      } catch (e) {
+      await fetchEventState();
+      await fetchLeaderboard();
+    }
+
+    function startAutoRefresh(){
+      if (refreshInterval) clearInterval(refreshInterval);
+      refreshInterval = setInterval(async () => {
+        try{
+          await refreshAll();
+          // Stop when final/published (keeps page stable for display screens)
+          if (state === 'ENDED' || state === 'PUBLISHED') {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+            $('#statusBar').innerHTML = `🏁 Final results published | Last updated: <span id="lastUpdated">${prettyClock(new Date())}</span>`;
+          }
+        } catch(e){
+          console.error(e);
+        }
+      }, refreshMs);
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try{
+        await refreshAll();
+        startAutoRefresh();
+      }catch(e){
         console.error(e);
-        const box = el('#leaderboard');
-        box.innerHTML = `
+        $('#leaderboard').innerHTML = `
           <div class="error-container" style="background:#ffe6e6;border:2px solid #ff6b6b;border-radius:10px;padding:15px;margin:10px 0;color:#d63031;text-align:center;">
             ❌ ${e.message || 'Error loading data'}
-            <button class="retry-btn" onclick="refreshAll()" style="background:#ff8c00;color:#fff;border:none;padding:8px 16px;border-radius:16px;cursor:pointer;font-weight:700;margin-left:10px;">Retry</button>
+            <button class="retry-btn" onclick="location.reload()" style="background:#ff8c00;color:#fff;border:none;padding:8px 16px;border-radius:16px;cursor:pointer;font-weight:700;margin-left:10px;">Retry</button>
           </div>
         `;
       }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      refreshAll();
-      // Auto-refresh more frequently while RUNNING, stop when PUBLISHED
-      refreshInterval = setInterval(async () => {
-        await refreshAll();
-        if (state === 'PUBLISHED' && refreshInterval) {
-          clearInterval(refreshInterval);
-          refreshInterval = null;
-          el('#statusBar').innerHTML = `🏁 Final results published | Last updated: <span id="lastUpdated">${new Date().toTimeString().split(' ')[0]}</span>`;
-        }
-      }, 20000);
     });
 
     window.addEventListener('beforeunload', () => {
