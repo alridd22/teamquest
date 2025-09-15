@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Terry's Treasure • Gallery</title>
+  <style>
+    :root{--ink:#3b2d16;--panel:#f7efe7;--card:#fffdf8;--accent:#d2691e}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-rounded,"Segoe UI",system-ui,-apple-system,sans-serif;background:linear-gradient(135deg,#cd7e3f,#e79754);color:var(--ink)}
+    .wrap{max-width:1100px;margin:24px auto;padding:0 16px}
+    .panel{background:var(--panel);border-radius:20px;box-shadow:0 6px 18px rgba(0,0,0,.12);padding:18px}
+    h1{margin:0 0 6px}
+    .sub{color:#6a553e;margin-bottom:12px}
+    .tabs{display:flex;gap:10px;margin:8px 0 14px}
+    .tab{padding:10px 14px;border-radius:999px;border:1px solid #e2d5c6;background:#fffdf8;cursor:pointer;font-weight:800}
+    .tab.active{background:#ffe7c2;border-color:#e9bf8a}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .card{background:var(--card);border:1px solid #ecdac7;border-radius:16px;padding:12px;box-shadow:0 3px 10px rgba(0,0,0,.08)}
+    .card img{width:100%;height:180px;object-fit:cover;border-radius:12px;margin-bottom:8px}
+    .card h3{margin:6px 0 8px}
+    .lock{background:#fff7e6;border:2px dashed #d69b45;border-radius:16px;padding:18px;text-align:center;font-weight:800;color:#6a553e}
+    .status{margin-top:12px;text-align:center;color:#6a553e}
+    @media (max-width: 900px){.grid{grid-template-columns:1fr 1fr}}
+    @media (max-width: 600px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel">
+      <h1>🏅 Gallery</h1>
+      <div class="sub">Limericks and Acts of Kindness from the adventure</div>
+
+      <div id="lock" class="lock" style="display:none">🔒 The gallery will unlock when results are published. Check back soon!</div>
+
+      <div id="content" style="display:none">
+        <div class="tabs">
+          <button class="tab active" data-view="both">All</button>
+          <button class="tab" data-view="limerick">Limericks</button>
+          <button class="tab" data-view="kindness">Kindness</button>
+        </div>
+
+        <div id="grid" class="grid"></div>
+        <div class="status" id="status">Loaded</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+
+    const $ = s => document.querySelector(s);
+    let data = {limerick:[], kindness:[], published:false};
+
+    function cardHtml(e){
+      const img = e.imageUrl ? `<img src="${e.imageUrl}" alt="evidence">` : '';
+      const text = e.text ? `<p>${e.text.replace(/\n/g,'<br>')}</p>` : '';
+      return `
+        <div class="card">
+          ${img}
+          <h3>${e.teamName}</h3>
+          <small style="opacity:.7;text-transform:capitalize">${e.activity}</small>
+          ${text}
+        </div>
+      `;
+    }
+
+    function render(view='both'){
+      const items = [
+        ...(view==='kindness' ? [] : data.limerick),
+        ...(view==='limerick' ? [] : data.kindness),
+      ];
+      $('#grid').innerHTML = items.length ? items.map(cardHtml).join('') :
+        `<div class="lock">No submissions yet.</div>`;
+      $('#status').textContent = `Showing ${items.length} item(s)`;
+    }
+
+    function setTabs(){
+      document.querySelectorAll('.tab').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+          btn.classList.add('active');
+          render(btn.dataset.view);
+        });
+      });
+    }
+
+    async function load(){
+      const base = '/.netlify/functions/get_gallery';
+      const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
+      const r = await fetch(url);
+      const j = await r.json();
+      if (!r.ok || j.success === false) throw new Error(j.message || 'Failed to load gallery');
+
+      if (!j.published){
+        $('#lock').style.display = 'block';
+        $('#content').style.display = 'none';
+        return;
+      }
+
+      data = {
+        limerick: Array.isArray(j.limerick) ? j.limerick : [],
+        kindness: Array.isArray(j.kindness) ? j.kindness : [],
+        published: true,
+      };
+
+      $('#lock').style.display = 'none';
+      $('#content').style.display = 'block';
+      setTabs();
+      render('both');
+    }
+
+    load().catch(err=>{
+      $('#lock').style.display = 'block';
+      $('#lock').textContent = '⚠️ ' + (err.message || 'Unable to load gallery');
+    });
+  </script>
+</body>
+</html>
