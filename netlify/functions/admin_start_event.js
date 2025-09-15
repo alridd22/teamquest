@@ -1,86 +1,79 @@
 // /netlify/functions/admin_start_event.js
 const { google } = require('googleapis');
 
-// ---------- CORS ----------
+// ---------------- CORS ----------------
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
+const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
+const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
 
-// ---------- Env / Auth helpers ----------
+// ---------------- Env / Auth ----------------
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || process.env.SPREADSHEET_ID || '';
+
 function parseServiceAccount() {
-  const b64 = process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 || '';
-  if (!b64) throw new Error('Missing GOOGLE_SERVICE_ACCOUNT_JSON_B64');
-  try { return JSON.parse(Buffer.from(b64, 'base64').toString('utf8')); }
-  catch { return JSON.parse(b64); }
-}
-const SPREADSHEET_ID =
-  process.env.GOOGLE_SHEET_ID || process.env.SPREADSHEET_ID || '';
+  // Accept multiple names; allow base64 or raw JSON
+  const raw =
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
+    process.env.GCP_SERVICE_ACCOUNT ||
+    process.env.FIREBASE_SERVICE_ACCOUNT ||
+    '';
+  if (!raw) throw new Error('Missing service account JSON (checked GOOGLE_SERVICE_ACCOUNT_JSON_B64 / GOOGLE_SERVICE_ACCOUNT_JSON / GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT)');
 
-function adminTokenFromRequest(event) {
+  const text = raw.trim().startsWith('{')
+    ? raw
+    : Buffer.from(raw, 'base64').toString('utf8');
+
+  return JSON.parse(text);
+}
+
+function tokenFromReq(event){
   const q = event.queryStringParameters || {};
   const h = event.headers || {};
-  const auth = h.authorization || h.Authorization;
-  if (auth && auth.startsWith('Bearer ')) return auth.slice(7).trim();
+  const a = h.authorization || h.Authorization;
+  if (a && a.startsWith('Bearer ')) return a.slice(7).trim();
   if (q.key) return q.key.trim();
   return null;
 }
 
-// ACCEPT: ADMIN_API_KEYS, ADMIN_TOKEN, TQ_ADMIN_SECRET, TQ_ADMIN_SECRETS
-function allowedAdminKeys() {
-  const vars = [
+// Accept: ADMIN_API_KEYS, ADMIN_TOKEN, TQ_ADMIN_SECRET, TQ_ADMIN_SECRETS
+function allowedAdminKeys(){
+  const list = [
     process.env.ADMIN_API_KEYS,
     process.env.ADMIN_TOKEN,
     process.env.TQ_ADMIN_SECRET,
     process.env.TQ_ADMIN_SECRETS,
-  ];
-  const list = vars
-    .filter(Boolean)
-    .flatMap(v => String(v).split(','))
-    .map(s => s.trim())
-    .filter(Boolean);
-  // de-dupe
+  ]
+  .filter(Boolean)
+  .flatMap(v => String(v).split(','))
+  .map(s => s.trim())
+  .filter(Boolean);
   return Array.from(new Set(list));
 }
-function isAllowedAdmin(token) {
+function isAllowed(token){
   const list = allowedAdminKeys();
-  if (list.length === 0) return false; // hardened default
-  return !!token && list.includes(token);
+  return list.length > 0 && !!token && list.includes(token);
 }
 
-function ok(body)  { return { statusCode: 200, headers: CORS, body: JSON.stringify(body) }; }
-function bad(code, msg){ return { statusCode: code, headers: CORS, body: JSON.stringify({ success:false, message: msg }) }; }
-
-// ---------- Sheets helpers ----------
-async function sheetsClient() {
+// ---------------- Sheets helpers ----------------
+async function sheetsClient(){
   if (!SPREADSHEET_ID) throw new Error('Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
   const sa = parseServiceAccount();
   const jwt = new google.auth.JWT(sa.client_email, undefined, sa.private_key, [
     'https://www.googleapis.com/auth/spreadsheets',
   ]);
   await jwt.authorize();
-  return google.sheets({ version: 'v4', auth: jwt });
+  return google.sheets({ version:'v4', auth: jwt });
 }
-
 function colLetter(n){ let s=''; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26);} return s; }
 
-async function readSheetHeaders(sheets, sheetName) {
-  const r = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: `${sheetName}!1:1`,
-  });
-  const headers = r.data.values?.[0] || [];
-  return { headers, pos: Object.fromEntries(headers.map((h,i)=>[h,i])) };
-}
-
-async function findEventRow(sheets, sheetName, eventId) {
-  const r = await sheets.spreadsheets.values.get({
-    spreadsheetId: SPREADSHEET_ID,
-    range: sheetName,
-  });
+async function findEventRow(sheets, sheetName, eventId){
+  const r = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range: sheetName });
   const rows = r.data.values || [];
-  if (rows.length < 2) return { rowIndex:null, rowObj:null, headers: rows[0]||[] };
+  if (rows.length < 2) return { rowIndex:null, rowObj:null, headers: rows[0] || [] };
 
   const headers = rows[0];
   const pos = Object.fromEntries(headers.map((h,i)=>[h,i]));
@@ -98,36 +91,34 @@ async function findEventRow(sheets, sheetName, eventId) {
   return { rowIndex:null, rowObj:null, headers };
 }
 
-async function updateRowPatch(sheets, sheetName, rowIndex, headers, patch) {
+async function updateRowPatch(sheets, sheetName, rowIndex, headers, patch){
   const lastCol = colLetter(headers.length || 10);
   const cur = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
     range: `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`,
   });
-  const rowVals = cur.data.values?.[0] || new Array(headers.length).fill('');
+  const row = cur.data.values?.[0] || new Array(headers.length).fill('');
   const pos = Object.fromEntries(headers.map((h,i)=>[h,i]));
-  for (const [k,v] of Object.entries(patch)) {
-    if (pos[k] != null) rowVals[pos[k]] = v;
-  }
+  for (const [k,v] of Object.entries(patch)) if (pos[k] != null) row[pos[k]] = v;
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
     range: `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`,
     valueInputOption: 'RAW',
-    requestBody: { values: [rowVals] },
+    requestBody: { values: [row] },
   });
 }
 
-// ---------- Handler ----------
+// ---------------- Handler ----------------
 exports.handler = async (event) => {
   try {
-    if (event.httpMethod === 'OPTIONS') {
-      return { statusCode: 204, headers: CORS, body: '' };
-    }
+    if (event.httpMethod === 'OPTIONS') return { statusCode:204, headers: CORS, body:'' };
     if (event.httpMethod !== 'POST') return bad(405, 'Use POST');
 
-    const token = adminTokenFromRequest(event);
-    if (!isAllowedAdmin(token)) return bad(401, 'Unauthorized');
+    // Admin auth
+    const token = tokenFromReq(event);
+    if (!isAllowed(token)) return bad(401, 'Unauthorized');
 
+    // Body
     let body;
     try { body = JSON.parse(event.body || '{}'); }
     catch { return bad(400, 'Invalid JSON body'); }
@@ -135,14 +126,13 @@ exports.handler = async (event) => {
     const eventId = (body.eventId || body.id || '').toString().trim();
     if (!eventId) return bad(400, 'Missing eventId');
 
-    // Normalize action (accept stop=end)
+    // Action (accept stop=end)
     const actionIn = (body.action || 'start').toString().trim().toLowerCase();
     const action = (actionIn === 'stop') ? 'end' : actionIn;
 
+    // Sheets
     const sheets = await sheetsClient();
     const sheetName = 'events';
-
-    // Find row
     const { rowIndex, rowObj, headers } = await findEventRow(sheets, sheetName, eventId);
     if (!rowIndex || !rowObj) return bad(404, `Event not found: ${eventId}`);
 
@@ -162,7 +152,6 @@ exports.handler = async (event) => {
       });
       return { success:true, eventId, state:'RUNNING', startedAt: startedAtIso, endsAt: endsAtIso, durationSec };
     };
-
     const setPaused = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'PAUSED',
@@ -170,7 +159,6 @@ exports.handler = async (event) => {
       });
       return { success:true, eventId, state:'PAUSED' };
     };
-
     const setEnded = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'ENDED',
@@ -178,7 +166,6 @@ exports.handler = async (event) => {
       });
       return { success:true, eventId, state:'ENDED' };
     };
-
     const setReset = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'NOT_STARTED',
