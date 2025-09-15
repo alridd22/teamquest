@@ -1,3 +1,4 @@
+// /netlify/functions/admin_start_event.js
 const { google } = require('googleapis');
 
 const CORS = {
@@ -16,7 +17,6 @@ function parseServiceAccount() {
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
     process.env.GCP_SERVICE_ACCOUNT ||
     process.env.FIREBASE_SERVICE_ACCOUNT || '';
-
   if (rawJson) {
     const text = rawJson.trim().startsWith('{') ? rawJson : Buffer.from(rawJson, 'base64').toString('utf8');
     return JSON.parse(text);
@@ -30,11 +30,10 @@ function parseServiceAccount() {
       ? Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, 'base64').toString('utf8')
       : (process.env.GOOGLE_PRIVATE_KEY || '');
   if (key) key = key.replace(/\\n/g, '\n');
-
   if (!email || !key) {
     throw new Error('Missing service account creds (JSON or EMAIL + PRIVATE_KEY(_B64)).');
   }
-  return { type: 'service_account', client_email: email, private_key: key, token_uri: 'https://oauth2.googleapis.com/token' };
+  return { type:'service_account', client_email: email, private_key: key, token_uri: 'https://oauth2.googleapis.com/token' };
 }
 
 function tokenFromReq(event){
@@ -127,14 +126,13 @@ exports.handler = async (event) => {
     const nowIso = now.toISOString();
     const durationSec = Number(rowObj.DurationSec || rowObj['DurationSec'] || 0);
 
-    // ---- start (supports resume) ----
     const setRunning = async () => {
       const remainingSec = Number(body.remainingSec);
       const isResume = (String(rowObj.State || rowObj['State']).toUpperCase() === 'PAUSED')
                         && Number.isFinite(remainingSec) && remainingSec > 0;
 
       const startedAtIso = isResume
-        ? (rowObj['StartedAt (ISO)'] || nowIso)  // preserve original start
+        ? (rowObj['StartedAt (ISO)'] || nowIso)
         : nowIso;
 
       const endsAtIso = isResume
@@ -149,14 +147,9 @@ exports.handler = async (event) => {
       });
 
       return {
-        success: true,
-        eventId,
-        state: 'RUNNING',
-        startedAt: startedAtIso,
-        endsAt: endsAtIso,
-        durationSec,
-        resumed: isResume,
-        remainingSec: isResume ? remainingSec : undefined,
+        success: true, eventId, state: 'RUNNING',
+        startedAt: startedAtIso, endsAt: endsAtIso, durationSec,
+        resumed: isResume, remainingSec: isResume ? remainingSec : undefined,
       };
     };
 
@@ -186,12 +179,22 @@ exports.handler = async (event) => {
       return { success:true, eventId, state:'NOT_STARTED' };
     };
 
+    const setPublished = async () => {
+      await updateRowPatch(sheets, sheetName, rowIndex, headers, {
+        'State': 'PUBLISHED',
+        'PublishedAt (ISO)': nowIso,
+        'UpdatedAt (ISO)': nowIso,
+      });
+      return { success:true, eventId, state:'PUBLISHED', publishedAt: nowIso };
+    };
+
     let result;
     switch (action) {
-      case 'start': result = await setRunning(); break;
-      case 'pause': result = await setPaused();  break;
-      case 'end':   result = await setEnded();   break;
-      case 'reset': result = await setReset();   break;
+      case 'start':    result = await setRunning();   break;
+      case 'pause':    result = await setPaused();    break;
+      case 'end':      result = await setEnded();     break;
+      case 'reset':    result = await setReset();     break;
+      case 'publish':  result = await setPublished(); break;
       default: return bad(400, `Unknown action: ${actionIn}`);
     }
 
