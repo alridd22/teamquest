@@ -33,6 +33,7 @@
     }
     .timer-display.penalty{background:linear-gradient(145deg,#dc143c,#b22222);animation:penalty-pulse 1s ease-in-out infinite;border-color:#8b0000}
     .timer-display.paused{background:linear-gradient(145deg,#b9b9b9,#9e9e9e);border-color:#6b6b6b}
+    .timer-display.final{background:linear-gradient(145deg,#3bb273,#2f9a60);border-color:#267c4e}
     @keyframes penalty-pulse{0%,100%{box-shadow:0 5px 15px rgba(220,20,60,.4);transform:scale(1)}50%{box-shadow:0 8px 25px rgba(220,20,60,.7);transform:scale(1.02)}}
     .penalty-warning{
       background:linear-gradient(145deg,#ffb6c1,#ffa0b4);border:3px solid #dc143c;color:#8b0000;padding:12px 18px;border-radius:20px;
@@ -129,28 +130,39 @@
       const card = $('#timerDisplay');
       const icon = $('#timerIcon');
 
-      card.classList.remove('penalty','paused');
+      card.classList.remove('penalty','paused','final');
+
+      // ✅ NEW: Final states show "Finished" regardless of EndsAt
+      if (state === 'ENDED' || state === 'PUBLISHED') {
+        tEl.textContent = 'Finished';
+        icon.textContent = '🏁';
+        card.classList.add('final');
+        $('#penaltyWarning').classList.remove('show');
+        return;
+      }
+
+      if (state === 'PAUSED') {
+        tEl.textContent = 'Paused';
+        icon.textContent = '⏸';
+        card.classList.add('paused');
+        $('#penaltyWarning').classList.remove('show');
+        return;
+      }
 
       if (!endsAt) {
-        tEl.textContent = state === 'PAUSED' ? 'Paused' : 'Waiting to start';
-        icon.textContent = state === 'PAUSED' ? '⏸' : '⏰';
+        tEl.textContent = 'Waiting to start';
+        icon.textContent = '⏰';
         return;
       }
 
       const now = Date.now();
       const diff = new Date(endsAt).getTime() - now;
 
-      if (state === 'PAUSED') {
-        tEl.textContent = 'Paused';
-        icon.textContent = '⏸';
-        return;
-      }
-
       if (diff >= 0) {
         tEl.textContent = `Time remaining: ${fmtTime(diff)}`;
         icon.textContent = '⏰';
       } else {
-        // Overtime
+        // Overtime during RUNNING
         tEl.textContent = `Overtime: ${fmtTime(diff)}`;
         icon.textContent = '⏱';
         if (penaltyPerMin > 0 && state === 'RUNNING') {
@@ -166,7 +178,8 @@
       const v = String(s||'').trim().toUpperCase();
       if (['RUNNING','STARTED','ACTIVE'].includes(v)) return 'RUNNING';
       if (['PAUSED','PAUSE'].includes(v)) return 'PAUSED';
-      if (['ENDED','END','STOPPED','STOP','COMPLETE','COMPLETED','FINISHED','PUBLISHED'].includes(v)) return v==='PUBLISHED'?'PUBLISHED':'ENDED';
+      if (['PUBLISHED'].includes(v)) return 'PUBLISHED';
+      if (['ENDED','END','STOPPED','STOP','COMPLETE','COMPLETED','FINISHED'].includes(v)) return 'ENDED';
       if (['NOT_STARTED','NOTSTARTED','READY','PENDING','DRAFT',''].includes(v)) return 'NOT_STARTED';
       return 'NOT_STARTED';
     }
@@ -231,7 +244,6 @@
       // Map rows into a consistent shape
       const mapped = rows.map((t) => {
         const teamName  = t.teamName || t.name || t.team || t.teamCode || 'Crew';
-        // Prefer adjusted score if supplied; otherwise compute base - penalty
         const penalty   = pickNumber(t.penaltyApplied, t.penalty, t.latePenalty, t.penaltyDeduction);
         const adjusted  = Number.isFinite(Number(t.adjustedScore)) ? Number(t.adjustedScore)
                           : Number.isFinite(Number(t.score))       ? Number(t.score)
@@ -248,7 +260,7 @@
       // Sort: adjusted desc, then team name
       mapped.sort((a,b)=> (b.adjusted - a.adjusted) || a.teamName.localeCompare(b.teamName));
 
-      // Ties: give equal rank numbers if scores equal
+      // Ties: equal rank numbers if scores equal
       let html = '';
       let lastScore = null, lastRank = 0;
       mapped.forEach((t, i) => {
@@ -308,7 +320,7 @@
       refreshInterval = setInterval(async () => {
         try{
           await refreshAll();
-          // Stop when final/published (keeps page stable for display screens)
+          // Stop when final/published (keeps page stable for displays)
           if (state === 'ENDED' || state === 'PUBLISHED') {
             clearInterval(refreshInterval);
             refreshInterval = null;
