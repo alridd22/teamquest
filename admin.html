@@ -93,7 +93,7 @@
           <div class="stat"><div style="font-size:13px; opacity:.8">Returned</div><h3 id="statReturned">0</h3></div>
         </div>
 
-        <div class="help">Tip: The page auto-syncs with the Sheet every 3s. “Reset” sets the event back to “Not started” (if the backend supports it).</div>
+        <div class="help">Tip: The page auto-syncs with the Sheet every 3s. “Reset” sets the event back to “Not started”.</div>
       </section>
 
       <!-- RIGHT: Crew Management -->
@@ -115,9 +115,9 @@
 
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
-      start: '/.netlify/functions/admin_start_event',   // start/pause/end/stop/reset
+      start: '/.netlify/functions/admin_start_event',   // start/pause/end/stop/reset (+ resume)
       teams: '/.netlify/functions/admin_list_teams',
-      markReturn: '/.netlify/functions/admin_mark_return', // POST {eventId, teamCode, returnedAt, undo?}
+      markReturn: '/.netlify/functions/admin_mark_return',
     };
 
     const el = {
@@ -173,7 +173,11 @@
         s==='running' ? 'Running' :
         s==='paused'  ? 'Paused'  :
         s==='ended'   ? 'Ended'   : 'Not Started';
-      el.btnStart.disabled = (s==='running' || s==='paused' || s==='ended');
+
+      // Allow "Resume" when paused
+      el.btnStart.disabled = (s==='running' || s==='ended');
+      el.btnStart.textContent = (s==='paused') ? '▶ Resume' : '🍭 Launch';
+
       el.btnPause.disabled = !(s==='running');
       el.btnEnd.disabled   = (s==='ended' || s==='notstarted');
     }
@@ -234,15 +238,15 @@
       tick();
     }
 
-    // Admin action helper that tries synonyms (stop/end)
-    async function postActionSmart(action){
+    // Action helper (accepts extra payload like remainingSec)
+    async function postActionSmart(action, extra = {}){
       const tryActions = (action === 'end') ? ['stop','end'] :
                          (action === 'reset') ? ['reset'] :
                          [action];
 
       let lastErr = null;
       for (const a of tryActions){
-        const body = { eventId: EVENT_ID, action: a };
+        const body = { eventId: EVENT_ID, action: a, ...extra };
         try{
           const res = await fetch(endpoints.start, { method:'POST', headers: headers(), body: JSON.stringify(body) });
           const data = await res.json().catch(()=>({success:false, message:'Bad JSON'}));
@@ -253,8 +257,8 @@
       return {ok:false, error:lastErr || 'Unknown error'};
     }
 
-    async function doAction(action){
-      // Optimistic UI for pause/end/reset
+    async function doAction(action, extra = {}){
+      // Optimistic UI for smoother feel
       if (action === 'pause'){
         const ms = (current.endsAt ? new Date(current.endsAt).getTime() - Date.now() : current.remainingMs) || 0;
         current.remainingMs = Math.max(0, ms);
@@ -271,8 +275,23 @@
         current.remainingMs = dur * 1000; current.state = 'notstarted';
         setStatusPill('notstarted'); tick();
       }
+      if (action === 'start'){
+        const now = Date.now();
+        if (typeof extra.remainingSec === 'number' && extra.remainingSec > 0) {
+          // Resume optimistically
+          current.state = 'running';
+          current.endsAt = new Date(now + extra.remainingSec * 1000).toISOString();
+          setStatusPill('running'); tick();
+        } else {
+          // Fresh start (optimistic)
+          const dur = current.durationSec ?? initialDurationSec ?? 0;
+          current.state = 'running';
+          current.endsAt = new Date(now + dur * 1000).toISOString();
+          setStatusPill('running'); tick();
+        }
+      }
 
-      const r = await postActionSmart(action);
+      const r = await postActionSmart(action, extra);
       if (!r.ok){
         alert(`Failed to ${action}. ${r.error || ''}`.trim());
       }
@@ -341,11 +360,19 @@
     }
 
     // ---------- Wire UI ----------
-    el.btnStart.addEventListener('click', () => doAction('start'));
+    el.btnStart.addEventListener('click', async () => {
+      const s = normState(current.state);
+      if (s === 'paused') {
+        const remainingSec = Math.max(0, Math.ceil((current.remainingMs || 0) / 1000));
+        await doAction('start', { remainingSec }); // resume
+      } else {
+        await doAction('start'); // fresh start
+      }
+    });
     el.btnPause.addEventListener('click', () => doAction('pause'));
     el.btnEnd.addEventListener('click',   () => doAction('end'));
     el.btnReset.addEventListener('click', async () => {
-      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times (if your backend supports reset), and re-enable Launch.');
+      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times in the Sheet, and re-enable Launch.');
       if (!ok) return;
       await doAction('reset');
     });
