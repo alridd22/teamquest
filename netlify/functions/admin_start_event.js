@@ -1,7 +1,5 @@
-// /netlify/functions/admin_start_event.js
 const { google } = require('googleapis');
 
-// -------------- CORS --------------
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -10,60 +8,33 @@ const CORS = {
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
 const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
 
-// -------------- ENV / AUTH --------------
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || process.env.SPREADSHEET_ID || '';
 
-/**
- * Build service account creds from any of:
- * - GOOGLE_SERVICE_ACCOUNT_JSON_B64 (base64 of full JSON)
- * - GOOGLE_SERVICE_ACCOUNT_JSON (raw JSON)
- * - GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT (raw or b64 JSON)
- * - GOOGLE_SERVICE_ACCOUNT_EMAIL + (GOOGLE_PRIVATE_KEY_B64 || GOOGLE_PRIVATE_KEY)
- */
 function parseServiceAccount() {
-  // Path A: full JSON (raw or base64) under common names
-  const rawJsonCandidate =
+  const rawJson =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
     process.env.GCP_SERVICE_ACCOUNT ||
-    process.env.FIREBASE_SERVICE_ACCOUNT ||
-    '';
+    process.env.FIREBASE_SERVICE_ACCOUNT || '';
 
-  if (rawJsonCandidate) {
-    const text = rawJsonCandidate.trim().startsWith('{')
-      ? rawJsonCandidate
-      : Buffer.from(rawJsonCandidate, 'base64').toString('utf8');
+  if (rawJson) {
+    const text = rawJson.trim().startsWith('{') ? rawJson : Buffer.from(rawJson, 'base64').toString('utf8');
     return JSON.parse(text);
   }
-
-  // Path B: split email + key
   const email =
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
     process.env.GOOGLE_CLIENT_EMAIL ||
-    process.env.GCP_CLIENT_EMAIL ||
-    '';
-
-  // Prefer b64 key, fall back to raw; also unescape \n if needed
-  let pk =
+    process.env.GCP_CLIENT_EMAIL || '';
+  let key =
     process.env.GOOGLE_PRIVATE_KEY_B64
       ? Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, 'base64').toString('utf8')
       : (process.env.GOOGLE_PRIVATE_KEY || '');
+  if (key) key = key.replace(/\\n/g, '\n');
 
-  if (pk) pk = pk.replace(/\\n/g, '\n'); // handle escaped newlines from env UI
-
-  if (!email || !pk) {
-    throw new Error(
-      'Missing service account JSON (checked GOOGLE_SERVICE_ACCOUNT_JSON_B64 / GOOGLE_SERVICE_ACCOUNT_JSON / ' +
-      'GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT) OR missing pair GOOGLE_SERVICE_ACCOUNT_EMAIL + (GOOGLE_PRIVATE_KEY_B64|GOOGLE_PRIVATE_KEY)'
-    );
+  if (!email || !key) {
+    throw new Error('Missing service account creds (JSON or EMAIL + PRIVATE_KEY(_B64)).');
   }
-
-  return {
-    type: 'service_account',
-    client_email: email,
-    private_key: pk,
-    token_uri: 'https://oauth2.googleapis.com/token',
-  };
+  return { type: 'service_account', client_email: email, private_key: key, token_uri: 'https://oauth2.googleapis.com/token' };
 }
 
 function tokenFromReq(event){
@@ -74,33 +45,21 @@ function tokenFromReq(event){
   if (q.key) return q.key.trim();
   return null;
 }
-
-// Accept: ADMIN_API_KEYS, ADMIN_TOKEN, TQ_ADMIN_SECRET, TQ_ADMIN_SECRETS
 function allowedAdminKeys(){
   const list = [
     process.env.ADMIN_API_KEYS,
     process.env.ADMIN_TOKEN,
     process.env.TQ_ADMIN_SECRET,
     process.env.TQ_ADMIN_SECRETS,
-  ]
-  .filter(Boolean)
-  .flatMap(v => String(v).split(','))
-  .map(s => s.trim())
-  .filter(Boolean);
+  ].filter(Boolean).flatMap(v => String(v).split(',')).map(s=>s.trim()).filter(Boolean);
   return Array.from(new Set(list));
 }
-function isAllowed(token){
-  const list = allowedAdminKeys();
-  return list.length > 0 && !!token && list.includes(token);
-}
+function isAllowed(token){ const list = allowedAdminKeys(); return list.length>0 && !!token && list.includes(token); }
 
-// -------------- SHEETS HELPERS --------------
 async function sheetsClient(){
   if (!SPREADSHEET_ID) throw new Error('Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
   const sa = parseServiceAccount();
-  const jwt = new google.auth.JWT(sa.client_email, undefined, sa.private_key, [
-    'https://www.googleapis.com/auth/spreadsheets',
-  ]);
+  const jwt = new google.auth.JWT(sa.client_email, undefined, sa.private_key, ['https://www.googleapis.com/auth/spreadsheets']);
   await jwt.authorize();
   return google.sheets({ version:'v4', auth: jwt });
 }
@@ -144,29 +103,21 @@ async function updateRowPatch(sheets, sheetName, rowIndex, headers, patch){
   });
 }
 
-// -------------- HANDLER --------------
 exports.handler = async (event) => {
   try {
     if (event.httpMethod === 'OPTIONS') return { statusCode:204, headers: CORS, body:'' };
     if (event.httpMethod !== 'POST') return bad(405, 'Use POST');
 
-    // Admin auth
     const token = tokenFromReq(event);
     if (!isAllowed(token)) return bad(401, 'Unauthorized');
 
-    // Body
-    let body;
-    try { body = JSON.parse(event.body || '{}'); }
-    catch { return bad(400, 'Invalid JSON body'); }
-
+    let body; try { body = JSON.parse(event.body || '{}'); } catch { return bad(400, 'Invalid JSON body'); }
     const eventId = (body.eventId || body.id || '').toString().trim();
     if (!eventId) return bad(400, 'Missing eventId');
 
-    // Action (accept stop=end)
     const actionIn = (body.action || 'start').toString().trim().toLowerCase();
     const action = (actionIn === 'stop') ? 'end' : actionIn;
 
-    // Sheets
     const sheets = await sheetsClient();
     const sheetName = 'events';
     const { rowIndex, rowObj, headers } = await findEventRow(sheets, sheetName, eventId);
@@ -176,18 +127,39 @@ exports.handler = async (event) => {
     const nowIso = now.toISOString();
     const durationSec = Number(rowObj.DurationSec || rowObj['DurationSec'] || 0);
 
-    // Mutators
+    // ---- start (supports resume) ----
     const setRunning = async () => {
-      const startedAtIso = nowIso;
-      const endsAtIso = new Date(now.getTime() + durationSec * 1000).toISOString();
+      const remainingSec = Number(body.remainingSec);
+      const isResume = (String(rowObj.State || rowObj['State']).toUpperCase() === 'PAUSED')
+                        && Number.isFinite(remainingSec) && remainingSec > 0;
+
+      const startedAtIso = isResume
+        ? (rowObj['StartedAt (ISO)'] || nowIso)  // preserve original start
+        : nowIso;
+
+      const endsAtIso = isResume
+        ? new Date(now.getTime() + remainingSec * 1000).toISOString()
+        : new Date(now.getTime() + durationSec * 1000).toISOString();
+
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'RUNNING',
         'StartedAt (ISO)': startedAtIso,
         'EndsAt (ISO)': endsAtIso,
         'UpdatedAt (ISO)': nowIso,
       });
-      return { success:true, eventId, state:'RUNNING', startedAt: startedAtIso, endsAt: endsAtIso, durationSec };
+
+      return {
+        success: true,
+        eventId,
+        state: 'RUNNING',
+        startedAt: startedAtIso,
+        endsAt: endsAtIso,
+        durationSec,
+        resumed: isResume,
+        remainingSec: isResume ? remainingSec : undefined,
+      };
     };
+
     const setPaused = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'PAUSED',
@@ -195,6 +167,7 @@ exports.handler = async (event) => {
       });
       return { success:true, eventId, state:'PAUSED' };
     };
+
     const setEnded = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'ENDED',
@@ -202,6 +175,7 @@ exports.handler = async (event) => {
       });
       return { success:true, eventId, state:'ENDED' };
     };
+
     const setReset = async () => {
       await updateRowPatch(sheets, sheetName, rowIndex, headers, {
         'State': 'NOT_STARTED',
@@ -212,7 +186,6 @@ exports.handler = async (event) => {
       return { success:true, eventId, state:'NOT_STARTED' };
     };
 
-    // Execute
     let result;
     switch (action) {
       case 'start': result = await setRunning(); break;
