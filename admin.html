@@ -40,12 +40,15 @@
     .pill.running{background:#e6fbf1; color:#106a3e; border:1px solid #b8efcf}
     .pill.paused{background:#fff6e9; color:#7a5a13; border:1px solid #f1d093}
     .pill.ended{background:#fdeeee; color:#8b1f1f; border:1px solid #f3b3b3}
+    .pill.published{background:#e7f9ef; color:#0f6e44; border:1px solid #b7ebcf}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+    .grid1{display:grid; grid-template-columns:1fr; gap:12px; margin-top:12px}
     button{appearance:none; border:0; border-radius:12px; padding:12px 14px; font-weight:900; font-size:15px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
     .btn{background:#eaf8ff; color:#0a4c68; border:1px solid #bfe8ff; display:flex; align-items:center; justify-content:center; gap:8px}
     .btn.pause{background:#fff6e9; border-color:#f3d49c; color:#6b4b0a}
     .btn.end{background:#ffe9e9; border-color:#f5b1b1; color:#7d2323}
     .btn.reset{background:#f7efe7; border-color:#dfd1c2; color:#4e3b25}
+    .btn.publish{background:#e6fff2; border:1px solid #bfeeda; color:#0d6a40}
     .btn.secondary{background:#fffdf8; border:1px solid #e5d5c4; color:#3b2d16}
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .stats{display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:18px}
@@ -87,13 +90,20 @@
           <button id="btnReset" class="btn reset">🔁 Reset</button>
         </div>
 
+        <div class="grid1">
+          <button id="btnPublish" class="btn publish">📢 Publish Results</button>
+        </div>
+
         <div class="stats">
           <div class="stat"><div style="font-size:13px; opacity:.8">Total Crews</div><h3 id="statTotal">—</h3></div>
           <div class="stat"><div style="font-size:13px; opacity:.8">Active</div><h3 id="statActive">—</h3></div>
           <div class="stat"><div style="font-size:13px; opacity:.8">Returned</div><h3 id="statReturned">0</h3></div>
         </div>
 
-        <div class="help">Tip: The page auto-syncs with the Sheet every 3s. “Reset” sets the event back to “Not started”.</div>
+        <div class="help">
+          Tip: The page auto-syncs every 3s. “Reset” sets the event back to “Not started”.
+          “Publish Results” flips the event to <b>PUBLISHED</b> — the public leaderboard shows final results and the Gallery unlocks.
+        </div>
       </section>
 
       <!-- RIGHT: Crew Management -->
@@ -105,7 +115,6 @@
   </div>
 
   <script>
-    // ---------- Config ----------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
     if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
@@ -115,7 +124,7 @@
 
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
-      start: '/.netlify/functions/admin_start_event',   // start/pause/end/stop/reset (+ resume)
+      start: '/.netlify/functions/admin_start_event',
       teams: '/.netlify/functions/admin_list_teams',
       markReturn: '/.netlify/functions/admin_mark_return',
     };
@@ -127,6 +136,7 @@
       btnPause: document.getElementById('btnPause'),
       btnEnd: document.getElementById('btnEnd'),
       btnReset: document.getElementById('btnReset'),
+      btnPublish: document.getElementById('btnPublish'),
       teams: document.getElementById('teams'),
       statTotal: document.getElementById('statTotal'),
       statActive: document.getElementById('statActive'),
@@ -141,6 +151,7 @@
 
     const normState = (s='') => {
       const v = (s || '').toString().trim().toLowerCase();
+      if (['published'].includes(v)) return 'published';
       if (['running','started','start','active'].includes(v)) return 'running';
       if (['paused','pause'].includes(v)) return 'paused';
       if (['ended','end','stopped','stop','complete','completed','finished'].includes(v)) return 'ended';
@@ -157,7 +168,6 @@
       return `${hh} : ${mm} : ${ss}`;
     };
 
-    // ---------- Event snapshot ----------
     let current = {
       state: 'unknown',
       startedAt: null, endsAt: null,
@@ -168,21 +178,24 @@
 
     function setStatusPill(state){
       const s = normState(state);
-      el.statusPill.className = 'pill ' + (s==='running'?'running':s==='paused'?'paused':s==='ended'?'ended':'');
+      el.statusPill.className = 'pill ' + (
+        s==='running' ? 'running' : s==='paused' ? 'paused' : s==='ended' ? 'ended' : s==='published' ? 'published' : ''
+      );
       el.statusPill.textContent =
-        s==='running' ? 'Running' :
-        s==='paused'  ? 'Paused'  :
-        s==='ended'   ? 'Ended'   : 'Not Started';
+        s==='running'   ? 'Running'   :
+        s==='paused'    ? 'Paused'    :
+        s==='ended'     ? 'Ended'     :
+        s==='published' ? 'Published' : 'Not Started';
 
-      // Allow "Resume" when paused
-      el.btnStart.disabled = (s==='running' || s==='ended');
+      el.btnStart.disabled   = (s==='running' || s==='ended' || s==='published');
       el.btnStart.textContent = (s==='paused') ? '▶ Resume' : '🍭 Launch';
-
-      el.btnPause.disabled = !(s==='running');
-      el.btnEnd.disabled   = (s==='ended' || s==='notstarted');
+      el.btnPause.disabled   = !(s==='running');
+      el.btnEnd.disabled     = (s==='ended' || s==='notstarted' || s==='published');
+      el.btnReset.disabled   = (s==='running');
+      el.btnPublish.disabled = !(s==='ended'); // only after End
+      el.btnPublish.textContent = (s==='published') ? '✅ Published' : '📢 Publish Results';
     }
 
-    // Animation loop
     let rafId = null;
     function tick(){
       cancelAnimationFrame(rafId);
@@ -195,7 +208,7 @@
         current.remainingMs = displayMs;
       } else if (s === 'paused'){
         displayMs = Math.max(0, current.remainingMs || 0);
-      } else if (s === 'ended'){
+      } else if (s === 'ended' || s==='published'){
         displayMs = 0;
       } else {
         const dur = current.durationSec ?? initialDurationSec;
@@ -205,7 +218,6 @@
       rafId = requestAnimationFrame(tick);
     }
 
-    // ---------- API ----------
     async function fetchState({force=false}={}){
       const callAt = Date.now();
       const res = await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
@@ -213,7 +225,7 @@
       if (!force && callAt < current.lastUpdateAt) return;
 
       const nextState = normState(
-        data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : 'notstarted')
+        data.state || (data.running ? 'running' : data.paused ? 'paused' : data.ended ? 'ended' : data.published ? 'published' : 'notstarted')
       );
 
       if (initialDurationSec == null && typeof data.durationSec === 'number') initialDurationSec = data.durationSec;
@@ -238,10 +250,10 @@
       tick();
     }
 
-    // Action helper (accepts extra payload like remainingSec)
     async function postActionSmart(action, extra = {}){
       const tryActions = (action === 'end') ? ['stop','end'] :
                          (action === 'reset') ? ['reset'] :
+                         (action === 'publish') ? ['publish'] :
                          [action];
 
       let lastErr = null;
@@ -257,8 +269,7 @@
       return {ok:false, error:lastErr || 'Unknown error'};
     }
 
-    async function doAction(action, extra = {}){
-      // Optimistic UI for smoother feel
+    async function doAction(action, extra = {}) {
       if (action === 'pause'){
         const ms = (current.endsAt ? new Date(current.endsAt).getTime() - Date.now() : current.remainingMs) || 0;
         current.remainingMs = Math.max(0, ms);
@@ -278,17 +289,18 @@
       if (action === 'start'){
         const now = Date.now();
         if (typeof extra.remainingSec === 'number' && extra.remainingSec > 0) {
-          // Resume optimistically
           current.state = 'running';
           current.endsAt = new Date(now + extra.remainingSec * 1000).toISOString();
-          setStatusPill('running'); tick();
         } else {
-          // Fresh start (optimistic)
           const dur = current.durationSec ?? initialDurationSec ?? 0;
           current.state = 'running';
           current.endsAt = new Date(now + dur * 1000).toISOString();
-          setStatusPill('running'); tick();
         }
+        setStatusPill('running'); tick();
+      }
+      if (action === 'publish'){
+        current.state = 'published';
+        setStatusPill('published'); tick();
       }
 
       const r = await postActionSmart(action, extra);
@@ -331,7 +343,6 @@
           </div>`;
       }).join('');
 
-      // Wire return buttons
       el.teams.querySelectorAll('button[data-action]').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
           const teamCode = btn.getAttribute('data-team');
@@ -348,10 +359,10 @@
             });
             const data = await res.json().catch(()=>({success:false}));
             if (!data.success) {
-              alert(data.message || 'Failed to mark/undo return. Do you have the admin_mark_return function deployed?');
+              alert(data.message || 'Failed to mark/undo return.');
               return;
             }
-            await loadTeams();  // refresh list/stats
+            await loadTeams();
           }catch(e){
             alert('admin_mark_return not available (or network error).');
           }
@@ -359,32 +370,33 @@
       });
     }
 
-    // ---------- Wire UI ----------
+    // Wire UI
     el.btnStart.addEventListener('click', async () => {
       const s = normState(current.state);
       if (s === 'paused') {
         const remainingSec = Math.max(0, Math.ceil((current.remainingMs || 0) / 1000));
-        await doAction('start', { remainingSec }); // resume
+        await doAction('start', { remainingSec });
       } else {
-        await doAction('start'); // fresh start
+        await doAction('start');
       }
     });
     el.btnPause.addEventListener('click', () => doAction('pause'));
     el.btnEnd.addEventListener('click',   () => doAction('end'));
     el.btnReset.addEventListener('click', async () => {
-      const ok = confirm('Are you sure you want to reset the timer?\n\nThis will set the event to “Not started”, clear start/end times in the Sheet, and re-enable Launch.');
+      const ok = confirm('Are you sure you want to reset the timer?\n\nThis sets the event to “Not started” and clears start/end times.');
       if (!ok) return;
       await doAction('reset');
     });
+    el.btnPublish.addEventListener('click', async () => {
+      const ok = confirm('Publish results now?\n\nThis will:\n• Show FINAL results on the public leaderboard\n• Unlock the Gallery (Limericks + Kindness)\nThis action is safe (you can still edit scores later).');
+      if (!ok) return;
+      await doAction('publish');
+    });
 
-    // ---------- Boot ----------
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
-      setInterval(async ()=>{
-        await fetchState();
-        await loadTeams();
-      }, 3000);
+      setInterval(async ()=>{ await fetchState(); await loadTeams(); }, 3000);
     })();
   </script>
 </body>
