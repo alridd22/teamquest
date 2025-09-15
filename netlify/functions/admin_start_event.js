@@ -1,7 +1,7 @@
 // /netlify/functions/admin_start_event.js
 const { google } = require('googleapis');
 
-// ---------------- CORS ----------------
+// -------------- CORS --------------
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -10,24 +10,60 @@ const CORS = {
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
 const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
 
-// ---------------- Env / Auth ----------------
+// -------------- ENV / AUTH --------------
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || process.env.SPREADSHEET_ID || '';
 
+/**
+ * Build service account creds from any of:
+ * - GOOGLE_SERVICE_ACCOUNT_JSON_B64 (base64 of full JSON)
+ * - GOOGLE_SERVICE_ACCOUNT_JSON (raw JSON)
+ * - GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT (raw or b64 JSON)
+ * - GOOGLE_SERVICE_ACCOUNT_EMAIL + (GOOGLE_PRIVATE_KEY_B64 || GOOGLE_PRIVATE_KEY)
+ */
 function parseServiceAccount() {
-  // Accept multiple names; allow base64 or raw JSON
-  const raw =
+  // Path A: full JSON (raw or base64) under common names
+  const rawJsonCandidate =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
     process.env.GCP_SERVICE_ACCOUNT ||
     process.env.FIREBASE_SERVICE_ACCOUNT ||
     '';
-  if (!raw) throw new Error('Missing service account JSON (checked GOOGLE_SERVICE_ACCOUNT_JSON_B64 / GOOGLE_SERVICE_ACCOUNT_JSON / GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT)');
 
-  const text = raw.trim().startsWith('{')
-    ? raw
-    : Buffer.from(raw, 'base64').toString('utf8');
+  if (rawJsonCandidate) {
+    const text = rawJsonCandidate.trim().startsWith('{')
+      ? rawJsonCandidate
+      : Buffer.from(rawJsonCandidate, 'base64').toString('utf8');
+    return JSON.parse(text);
+  }
 
-  return JSON.parse(text);
+  // Path B: split email + key
+  const email =
+    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+    process.env.GOOGLE_CLIENT_EMAIL ||
+    process.env.GCP_CLIENT_EMAIL ||
+    '';
+
+  // Prefer b64 key, fall back to raw; also unescape \n if needed
+  let pk =
+    process.env.GOOGLE_PRIVATE_KEY_B64
+      ? Buffer.from(process.env.GOOGLE_PRIVATE_KEY_B64, 'base64').toString('utf8')
+      : (process.env.GOOGLE_PRIVATE_KEY || '');
+
+  if (pk) pk = pk.replace(/\\n/g, '\n'); // handle escaped newlines from env UI
+
+  if (!email || !pk) {
+    throw new Error(
+      'Missing service account JSON (checked GOOGLE_SERVICE_ACCOUNT_JSON_B64 / GOOGLE_SERVICE_ACCOUNT_JSON / ' +
+      'GCP_SERVICE_ACCOUNT / FIREBASE_SERVICE_ACCOUNT) OR missing pair GOOGLE_SERVICE_ACCOUNT_EMAIL + (GOOGLE_PRIVATE_KEY_B64|GOOGLE_PRIVATE_KEY)'
+    );
+  }
+
+  return {
+    type: 'service_account',
+    client_email: email,
+    private_key: pk,
+    token_uri: 'https://oauth2.googleapis.com/token',
+  };
 }
 
 function tokenFromReq(event){
@@ -58,7 +94,7 @@ function isAllowed(token){
   return list.length > 0 && !!token && list.includes(token);
 }
 
-// ---------------- Sheets helpers ----------------
+// -------------- SHEETS HELPERS --------------
 async function sheetsClient(){
   if (!SPREADSHEET_ID) throw new Error('Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
   const sa = parseServiceAccount();
@@ -108,7 +144,7 @@ async function updateRowPatch(sheets, sheetName, rowIndex, headers, patch){
   });
 }
 
-// ---------------- Handler ----------------
+// -------------- HANDLER --------------
 exports.handler = async (event) => {
   try {
     if (event.httpMethod === 'OPTIONS') return { statusCode:204, headers: CORS, body:'' };
