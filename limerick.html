@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TeamQuest – Terry’s Verse Vault</title>
   <style>
-    /* ====== NAV (matches treasure-hunt vibe) ====== */
-    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;height:80px}
-    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
-    .nav-logo{display:flex;align-items:center;text-decoration:none;transition:.3s}
+    /* NAV */
+    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;height:80px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 20px}
+    .nav-logo{display:flex;align-items:center}
     .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5))}
-    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
+    .nav-menu{display:flex;gap:30px;list-style:none;margin:0;padding:0}
     .nav-item{position:relative}
-    .nav-link{color:#F5DEB3;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:8px;transition:.3s;background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap;text-shadow:1px 1px 2px rgba(0,0,0,.7)}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
-    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321,#8B4513);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.2s;box-shadow:0 8px 20px rgba(0,0,0,.3)}
+    .nav-link{display:block;color:#F5DEB3;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:8px;background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);text-shadow:1px 1px 2px rgba(0,0,0,.7)}
+    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px)}
+    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321,#8B4513);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.2s}
     .nav-item:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
-    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 18px;font-weight:600;border-bottom:1px solid rgba(218,165,32,.2);background:rgba(101,67,33,.2);margin:2px;border-radius:6px}
-    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;transform:translateX(5px)}
-    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
+    .dropdown-link{display:block;padding:12px 18px;color:#F5DEB3;text-decoration:none}
+    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff}
+    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem}
     @media (max-width:768px){
       .treasure-nav{height:120px}
       .nav-container{justify-content:center;position:relative}
       .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
-      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513,#654321);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .25s ease;overflow-y:auto}
+      .nav-toggle{display:block;position:absolute;right:20px;top:50%;transform:translateY(-50%)}
+      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513,#654321);flex-direction:column;align-items:center;gap:18px;padding-top:24px;transition:left .25s ease}
       .nav-menu.active{left:0}
-      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none;width:280px}
+      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none}
     }
 
-    /* ====== PAGE ====== */
+    /* PAGE */
     *{box-sizing:border-box}
     body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;padding-top:100px!important}
     @media (max-width:768px){body{padding-top:140px!important}}
-    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:24px;max-width:720px;width:100%;padding:28px 24px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:24px;max-width:720px;width:100%;padding:26px 22px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
     .container::before{content:'';display:block;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700);border-radius:6px;margin:-10px -6px 20px}
-    h1{color:#8B4513;text-align:center;margin:6px 0 4px;font-size:2.2rem}
+    h1{color:#8B4513;text-align:center;margin:0 0 6px;font-size:2.2rem}
     .subtitle{text-align:center;color:#A0522D;margin-bottom:16px}
 
     .banner{background:#fff8e6;border:2px dashed #DAA520;border-radius:14px;padding:10px 14px;margin:10px 0;color:#7a4a0b;font-weight:600}
+    .section{background:#fff8e6;border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:16px;margin:14px 0}
     .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:800;border:2px solid #DAA520;margin:14px 0}
 
-    .section{background:#fff8e6;border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:16px;margin:14px 0}
     .form-group{margin-bottom:18px}
     label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700}
-    input[type="text"],select,textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
+    select,input[type="text"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
     textarea{min-height:160px;resize:vertical;font-family:Georgia,serif;line-height:1.5}
     .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:6px}
 
@@ -63,9 +63,7 @@
   <!-- NAV -->
   <nav class="treasure-nav">
     <div class="nav-container">
-      <a class="nav-logo" href="https://theteamquest.netlify.app/">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest logo"/>
-      </a>
+      <a class="nav-logo" href="https://theteamquest.netlify.app/"><img src="/Team Quest Logo-01.png" alt="TeamQuest Logo"/></a>
       <ul class="nav-menu" id="nav-menu">
         <li class="nav-item">
           <a href="#" class="nav-link">🎯 Activities ▼</a>
@@ -85,15 +83,16 @@
 
   <div class="container">
     <div class="banner" id="eventBanner" aria-live="polite">Checking event status…</div>
+
     <!-- LOGIN -->
-    <section id="loginSection" class="section">
-      <h1>📝 Terry’s Verse Vault</h1>
+    <section id="loginSection" class="section" aria-labelledby="loginTitle">
+      <h1 id="loginTitle">📝 Terry’s Verse Vault</h1>
       <p class="subtitle">Write a limerick. Make us smile. Earn doubloons.</p>
 
       <div class="form-group">
         <label for="teamSelect">Choose your crew</label>
-        <select id="teamSelect">
-          <option value="">Loading crews…</option>
+        <select id="teamSelect" disabled>
+          <option>Loading crews…</option>
         </select>
       </div>
 
@@ -102,7 +101,7 @@
         <input id="teamPin" type="text" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234" aria-describedby="pinHelp"/>
       </div>
 
-      <button id="signInBtn" class="submit-btn">🔓 Sign in</button>
+      <button id="signInBtn" class="submit-btn" disabled>🔓 Sign in</button>
       <div id="loginMessage" class="message" role="status" aria-live="polite"></div>
     </section>
 
@@ -140,18 +139,18 @@
   </div>
 
   <script>
-    /* ====== helper: query + auth ====== */
+    /* ------- Query + Auth helpers ------- */
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID  = qs.get('event') || qs.get('eventId') || '';
-    const TEAM_CODE = localStorage.getItem('teamCode') || '';
-    const TEAM_TOKEN= localStorage.getItem('teamToken') || '';
+    const EVENT_ID   = qs.get('event') || qs.get('eventId') || '';
+    const TEAM_TOKEN = localStorage.getItem('teamToken') || '';
+    const TEAM_CODE  = localStorage.getItem('teamCode') || '';
 
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
         headers:{
           'Content-Type':'application/json',
-          ...(TEAM_TOKEN ? { Authorization: `Bearer ${TEAM_TOKEN}` } : {})
+          ...(TEAM_TOKEN ? { 'Authorization': `Bearer ${TEAM_TOKEN}` } : {})
         },
         body: JSON.stringify(payload)
       });
@@ -164,99 +163,93 @@
       return data || {};
     }
 
-    /* ====== state ====== */
-    let crews = [];
-    let currentTeam = TEAM_CODE ? { teamCode: TEAM_CODE, teamName: localStorage.getItem('teamName') || '' } : null;
-
-    /* ====== ui helpers ====== */
-    function $(id){ return document.getElementById(id); }
-    function show(el){ el.style.display='block'; }
-    function hide(el){ el.style.display='none'; }
+    /* ------- DOM helpers ------- */
+    const $ = id => document.getElementById(id);
+    const show = el => el.style.display='block';
+    const hide = el => el.style.display='none';
     function msg(id, text, type='success'){
-      const box = $(id);
-      box.textContent = text;
-      box.className = `message ${type==='error'?'error-message':'success-message'}`;
-      show(box);
+      const el = $(id);
+      el.textContent = text;
+      el.className = `message ${type==='error'?'error-message':'success-message'}`;
+      show(el);
     }
-    function setBanner(text){ $('eventBanner').textContent = text; }
+    function setBanner(t){ $('eventBanner').textContent = t; }
 
-    /* ====== load crews + state ====== */
-    async function loadCrews(){
-      try{
-        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        if(Array.isArray(data.teams)){ crews = data.teams; }
-      }catch(e){ /* fallback */ }
-      if(!crews.length){
-        crews = [
-          { teamCode:'TEAM-A', teamName:'The Adventurers' },
-          { teamCode:'TEAM-B', teamName:'Map Masters' },
-          { teamCode:'TEAM-C', teamName:'The Clue Hunters' }
-        ];
-      }
-      const sel = $('teamSelect');
-      sel.innerHTML = '<option value="">Choose your crew…</option>';
-      crews.sort((a,b)=>a.teamName.localeCompare(b.teamName))
-           .forEach(t=>{
-             const o = document.createElement('option');
-             o.value = t.teamCode; o.textContent = t.teamName;
-             sel.appendChild(o);
-           });
-      if(currentTeam){
-        sel.value = currentTeam.teamCode;
-        afterSignIn(currentTeam);
-      }
-    }
-
+    /* ------- Event state ------- */
     async function loadEventState(){
+      if(!EVENT_ID){ setBanner('No event selected. Add ?event=YOUR_EVENT_ID to the URL.'); return; }
       try{
-        if(!EVENT_ID){ setBanner('No event selected. Add ?event=YOUR_EVENT_ID to the URL.'); return; }
         const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        if(state==='RUNNING'){ setBanner('Event running — submit your limerick when ready.'); }
-        else if(state==='PAUSED'){ setBanner('Event paused — please wait.'); disableForm(true); }
-        else if(state==='ENDED'){ setBanner('Event ended — submissions closed.'); disableForm(true); }
-        else if(state==='PUBLISHED'){ setBanner('Results published — view the leaderboard & gallery!'); disableForm(true); }
-        else { setBanner('Event not started yet.'); disableForm(true); }
+        if(state==='RUNNING')      setBanner('Event running — submit your limerick when ready.');
+        else if(state==='PAUSED')  { setBanner('Event paused — please wait.'); disableForm(true); }
+        else if(state==='ENDED')   { setBanner('Event ended — submissions closed.'); disableForm(true); }
+        else if(state==='PUBLISHED'){ setBanner('Results published — see the leaderboard & gallery.'); disableForm(true); }
+        else                        { setBanner('Event not started yet.'); disableForm(true); }
       }catch{ setBanner('Event status unavailable — you can still try to submit.'); }
     }
-
     function disableForm(off){
       $('submitBtn').disabled = off;
       $('limerickText').disabled = off;
       $('limerickTopic').disabled = off;
     }
 
-    /* ====== sign in ====== */
+    /* ------- Load crews (NO random fallbacks) ------- */
+    let crews = [];
+    async function loadCrews(){
+      try{
+        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        if(Array.isArray(data.teams) && data.teams.length){
+          crews = data.teams;
+          const sel = $('teamSelect');
+          sel.innerHTML = '<option value="">Choose your crew…</option>';
+          crews.sort((a,b)=>a.teamName.localeCompare(b.teamName))
+               .forEach(t=>{
+                 const o = document.createElement('option');
+                 o.value = t.teamCode; o.textContent = t.teamName;
+                 sel.appendChild(o);
+               });
+          sel.disabled = false;
+          $('signInBtn').disabled = false;
+          // Preselect previously used teamCode (no auto-login; still requires PIN)
+          if(TEAM_CODE){ sel.value = TEAM_CODE; }
+        }else{
+          throw new Error('No teams found for this event.');
+        }
+      }catch(err){
+        $('teamSelect').innerHTML = '<option>Couldn’t load crews</option>';
+        msg('loginMessage','Couldn’t load crews. Refresh this page or return to the team start page.','error');
+      }
+    }
+
+    /* ------- Sign in with team + PIN (same flow as Kindness) ------- */
     $('signInBtn').addEventListener('click', async ()=>{
-      const code = $('teamSelect').value;
-      const pin  = $('teamPin').value.trim();
-      if(!code) return msg('loginMessage','Choose your crew first.','error');
+      const teamCode = $('teamSelect').value;
+      const pin = $('teamPin').value.trim();
+      if(!teamCode) return msg('loginMessage','Choose your crew first.','error');
       if(!/^\d{4}$/.test(pin)) return msg('loginMessage','Enter your 4-digit PIN.','error');
 
       try{
         const res = await fetch('/.netlify/functions/verify_team_pin_function',{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ teamCode: code, pin, eventId: EVENT_ID })
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ teamCode, pin, eventId: EVENT_ID })
         });
         const data = await res.json();
         if(!res.ok || !data?.success || data.valid===false) throw new Error(data.message||'Invalid PIN');
-        const team = crews.find(t=>t.teamCode===code) || { teamCode: code, teamName: data.teamName||'Crew' };
-        if(data.token){ localStorage.setItem('teamToken', data.token); }
+
+        const team = crews.find(t=>t.teamCode===teamCode) || { teamCode, teamName: data.teamName||teamCode };
+        if(data.token) localStorage.setItem('teamToken', data.token);
         localStorage.setItem('teamCode', team.teamCode);
         localStorage.setItem('teamName', team.teamName);
-        currentTeam = team;
-        afterSignIn(team);
+
+        $('teamInfo').textContent = `Crew: ${team.teamName}`;
+        hide($('loginSection')); show($('challengeSection'));
       }catch(err){
-        msg('loginMessage', err.message || 'Sign-in failed', 'error');
+        msg('loginMessage', err.message || 'Sign-in failed. Try again.','error');
       }
     });
 
-    function afterSignIn(team){
-      $('teamInfo').textContent = `Crew: ${team.teamName || team.teamCode}`;
-      hide($('loginSection'));
-      show($('challengeSection'));
-    }
-
-    /* ====== submit limerick ====== */
+    /* ------- Limerick form ------- */
     $('limerickText').addEventListener('input', e=>{
       const left = 500 - e.target.value.length;
       $('charCount').textContent = left;
@@ -265,46 +258,42 @@
 
     $('limerickForm').addEventListener('submit', async (e)=>{
       e.preventDefault();
+      const text = $('limerickText').value.trim();
       const topic = $('limerickTopic').value.trim();
-      const text  = $('limerickText').value.trim();
-
+      const teamCode = localStorage.getItem('teamCode') || '';
       if(!text) return msg('challengeMessage','Type your limerick first.','error');
       const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
       if(lines.length < 5) return msg('challengeMessage','Please write 5 lines (AABBA).','error');
 
-      $('submitBtn').disabled = true; show($('loading')); hide($('challengeMessage'));
-
+      $('submitBtn').disabled = true; $('loading').style.display='block'; hide($('challengeMessage'));
       try{
-        await callFn('submit_limerick_function', {
+        await callFn('submit_limerick_function',{
           eventId: EVENT_ID,
-          teamCode: (currentTeam && currentTeam.teamCode) || localStorage.getItem('teamCode') || '',
+          teamCode,
           topic,
-          text,             // alias
           limerickText: text
         });
-
         msg('challengeMessage',"🎉 Submitted! Check back in a few minutes for a score — Terry’s AI is weighing your verse.",'success');
-        $('limerickForm').style.opacity = .6;
-        disableForm(true);
+        $('limerickForm').style.opacity = .6; disableForm(true);
       }catch(err){
         msg('challengeMessage', err.message || 'Couldn’t submit. Please try again.','error');
         $('submitBtn').disabled = false;
       }finally{
-        hide($('loading'));
+        $('loading').style.display='none';
       }
     });
 
-    /* ====== nav mobile ====== */
+    /* ------- Nav + boot ------- */
     document.addEventListener('DOMContentLoaded', ()=>{
       const navToggle = document.getElementById('nav-toggle');
       const navMenu = document.getElementById('nav-menu');
-      navToggle?.addEventListener('click', ()=> {
+      navToggle?.addEventListener('click', ()=>{
         navMenu.classList.toggle('active');
         navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
       });
 
-      loadCrews();
       loadEventState();
+      loadCrews();
     });
   </script>
 </body>
