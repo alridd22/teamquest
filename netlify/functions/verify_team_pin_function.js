@@ -1,84 +1,88 @@
-// verify_team_pin_function.js — CommonJS, uses shared utils
+// /.netlify/functions/verify_team_pin_function.js
+const { google } = require('googleapis');
 
-const jwt = require("jsonwebtoken");
-const {
-  ok, error, isPreflight,
-  getDoc, JWT_SECRET, CURRENT_EVENT,
-} = require("./_utils.js");
+// ---- CORS helpers ----
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
+const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success: false, message: m }) });
 
-const nowIso = () => new Date().toISOString();
+// ---- ENV: spreadsheet + service account ----
+const SPREADSHEET_ID =
+  process.env.GOOGLE_SHEET_ID ||
+  process.env.SPREADSHEET_ID ||
+  process.env.SHEET_ID ||
+  '';
 
-module.exports.handler = async (event) => {
+function parseServiceAccount() {
+  let raw =
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
+    process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
+    process.env.GCP_SERVICE_ACCOUNT ||
+    process.env.FIREBASE_SERVICE_ACCOUNT ||
+    '';
+  if (!raw) return null;
+  if (!raw.trim().startsWith('{')) raw = Buffer.from(raw, 'base64').toString('utf8');
+  return JSON.parse(raw);
+}
+
+async function getSheets() {
+  const svc = parseServiceAccount();
+  if (!svc) throw new Error('Missing Google service account JSON (set GOOGLE_SERVICE_ACCOUNT_JSON or *_B64)');
+  const auth = new google.auth.JWT(
+    svc.client_email,
+    null,
+    svc.private_key,
+    ['https://www.googleapis.com/auth/spreadsheets.readonly']
+  );
+  await auth.authorize();
+  return google.sheets({ version: 'v4', auth });
+}
+
+// ---- Handler ----
+exports.handler = async (event) => {
+  if (event.httpMethod === 'OPTIONS') return ok({ success: true });
+  if (event.httpMethod !== 'POST') return bad(405, 'Use POST');
+
+  // Parse body safely
+  let body = {};
+  try { body = JSON.parse(event.body || '{}'); }
+  catch { return bad(400, 'Invalid JSON'); }
+
+  const { eventId, teamCode, pin } = body || {};
+  if (!eventId || !teamCode || !pin) return bad(400, 'eventId, teamCode, pin are required');
+  if (!SPREADSHEET_ID) return bad(500, 'Missing GOOGLE_SHEET_ID / SPREADSHEET_ID env');
+
   try {
-    // CORS preflight
-    if (isPreflight(event)) return ok({});
+    const sheets = await getSheets();
+    // Read the Teams tab (headers in row 1). Adjust tab name if yours differs.
+    const range = 'teams!A:Z';
+    const resp = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
+    const rows = resp.data.values || [];
+    if (!rows.length) return bad(500, 'No data in teams sheet');
 
-    if (event.httpMethod !== "POST") return error(405, "POST only");
+    const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+    const idxCode = headers.indexOf('teamcode') >= 0 ? headers.indexOf('teamcode') : headers.indexOf('code');
+    const idxName = headers.indexOf('teamname') >= 0 ? headers.indexOf('teamname') : headers.indexOf('name');
+    const idxPin  = headers.indexOf('pin') >= 0 ? headers.indexOf('pin') : headers.indexOf('secret');
 
-    // Parse body
-    let body = {};
-    try { body = JSON.parse(event.body || "{}"); } catch { return error(400, "Invalid JSON"); }
-    const teamCode = (body.teamCode || "").trim();
-    const pin      = (body.pin || "").trim();
-    if (!teamCode || !pin) return error(400, "teamCode and pin required");
+    if (idxCode < 0 || idxPin < 0) return bad(500, 'Teams sheet must include columns: teamCode, pin');
 
-    // Sheets doc (robust creds via _utils)
-    const doc = await getDoc?.();
-    if (!doc) return error(500, "Spreadsheet client not available");
+    const row = rows.slice(1).find(r => (r[idxCode] || '').trim() === teamCode);
+    if (!row) return ok({ success: true, valid: false });
 
-    // Find or create "teams" sheet
-    let teams = doc.sheetsByTitle ? doc.sheetsByTitle["teams"] : null;
-    if (!teams) {
-      teams = await doc.addSheet({
-        title: "teams",
-        headerValues: ["Team Code","Team Name","PIN","State","Device","LastSeen","Event Id"],
-      });
-    } else {
-      await teams.loadHeaderRow();
-      if (!teams.headerValues || teams.headerValues.length === 0) {
-        await teams.setHeaderRow(["Team Code","Team Name","PIN","State","Device","LastSeen","Event Id"]);
-        await teams.loadHeaderRow();
-      }
-    }
+    const valid = String(row[idxPin] || '').trim() === String(pin).trim();
+    if (!valid) return ok({ success: true, valid: false });
 
-    // Locate team (case-insensitive), scoped to CURRENT_EVENT
-    const rows = await teams.getRows();
-    const ev = String(CURRENT_EVENT || "").trim(); // allow "default"
-    const row = rows.find((r) => {
-      const code = String(r.get("Team Code") || "").trim();
-      const eventId = String(r.get("Event Id") || "").trim();
-      const codeMatch = code.toUpperCase() === teamCode.toUpperCase();
-      const eventMatch = eventId === ev || (!eventId && ev === "default");
-      return codeMatch && eventMatch;
-    });
-    if (!row) return error(400, "Unknown team for this event");
+    const teamName = idxName >= 0 ? String(row[idxName] || '').trim() : '';
 
-    // Verify PIN
-    const storedPin = String(row.get("PIN") || "").trim();
-    if (storedPin !== pin) return error(401, "Invalid PIN");
-
-    // Update state/last-seen/event
-    if (!row.get("State")) row.set("State", "READY");
-    row.set("LastSeen", nowIso());
-    row.set("Event Id", ev || row.get("Event Id") || "");
-    await row.save();
-
-    // Sign token (8h)
-    const token = jwt.sign(
-      { teamCode: row.get("Team Code"), event: ev },
-      JWT_SECRET,
-      { expiresIn: "8h" }
-    );
-
-    return ok({
-      success: true,
-      token,
-      teamCode: row.get("Team Code"),
-      state: row.get("State") || "READY",
-      event: ev,
-    });
-  } catch (e) {
-    console.error("verify_team_pin_function error:", e);
-    return error(500, e.message || "Auth error");
+    // If you issue JWTs elsewhere, you can also include { token: jwt }
+    return ok({ success: true, valid: true, teamName });
+  } catch (err) {
+    console.error('verify_team_pin_function error:', err);
+    return bad(500, err.message || 'Server error');
   }
 };
