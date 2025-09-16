@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TeamQuest – Terry’s Verse Vault</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TeamQuest — Terry’s Verse Vault</title>
   <style>
-    /* NAV */
-    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;height:80px}
-    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;height:100%;padding:0 20px}
-    .nav-logo{display:flex;align-items:center}
+    /* ===== NAV ===== */
+    .treasure-nav{position:fixed;inset:0 0 auto 0;height:80px;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000}
+    .nav-container{max-width:1200px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
     .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5))}
-    .nav-menu{display:flex;gap:30px;list-style:none;margin:0;padding:0}
+    .nav-menu{display:flex;gap:28px;list-style:none;margin:0;padding:0}
     .nav-item{position:relative}
-    .nav-link{display:block;color:#F5DEB3;text-decoration:none;font-weight:700;padding:12px 18px;border-radius:8px;background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);text-shadow:1px 1px 2px rgba(0,0,0,.7)}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px)}
-    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321,#8B4513);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.2s}
+    .nav-link{display:block;color:#F5DEB3;text-decoration:none;font-weight:800;padding:10px 16px;border-radius:10px;background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);text-shadow:1px 1px 2px rgba(0,0,0,.7)}
+    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-1px)}
+    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321,#8B4513);border:2px solid #DAA520;border-radius:10px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:.2s}
     .nav-item:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
-    .dropdown-link{display:block;padding:12px 18px;color:#F5DEB3;text-decoration:none}
+    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 16px}
     .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff}
-    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem}
+
+    .nav-toggle{display:none;background:none;border:none;font-size:1.8rem;color:#DAA520}
     @media (max-width:768px){
       .treasure-nav{height:120px}
       .nav-container{justify-content:center;position:relative}
@@ -29,31 +29,34 @@
       .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none}
     }
 
-    /* PAGE */
+    /* ===== PAGE ===== */
     *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;padding-top:100px!important}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Noto Sans",sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;padding-top:100px!important}
     @media (max-width:768px){body{padding-top:140px!important}}
-    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:24px;max-width:720px;width:100%;padding:26px 22px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
-    .container::before{content:'';display:block;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700);border-radius:6px;margin:-10px -6px 20px}
-    h1{color:#8B4513;text-align:center;margin:0 0 6px;font-size:2.2rem}
-    .subtitle{text-align:center;color:#A0522D;margin-bottom:16px}
 
-    .banner{background:#fff8e6;border:2px dashed #DAA520;border-radius:14px;padding:10px 14px;margin:10px 0;color:#7a4a0b;font-weight:600}
+    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:22px;max-width:720px;width:100%;padding:24px 20px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
+    .container::before{content:"";display:block;height:8px;border-radius:6px;margin:-10px -6px 18px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+
+    h1{margin:0 0 6px;text-align:center;color:#8B4513;font-size:2.2rem}
+    .subtitle{text-align:center;color:#A0522D;margin-bottom:14px}
+    .banner{background:#fff8e6;border:2px dashed #DAA520;border-radius:12px;padding:10px 14px;margin-bottom:12px;color:#6e440b;font-weight:700}
+
     .section{background:#fff8e6;border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:16px;margin:14px 0}
-    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:800;border:2px solid #DAA520;margin:14px 0}
+    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;border:2px solid #DAA520;border-radius:12px;padding:12px;text-align:center;font-weight:900;margin:12px 0}
 
-    .form-group{margin-bottom:18px}
-    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700}
+    .form-group{margin-bottom:16px}
+    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:800}
     select,input[type="text"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
-    textarea{min-height:160px;resize:vertical;font-family:Georgia,serif;line-height:1.5}
-    .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:6px}
+    textarea{min-height:160px;resize:vertical;font-family:Georgia,serif;line-height:1.6}
+    .char-count{text-align:right;font-size:.9rem;color:#8B4513;margin-top:6px}
 
     .submit-btn{width:100%;background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:16px;border-radius:14px;font-weight:900;font-size:1.05rem;display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid #8B4513;cursor:pointer}
     .submit-btn[disabled]{opacity:.6;cursor:not-allowed}
-    .message{display:none;margin:16px 0;padding:14px;border-radius:12px;border:3px solid;font-weight:600;text-align:center}
+
+    .message{display:none;margin:14px 0;padding:14px;border-radius:12px;border:3px solid;font-weight:700;text-align:center}
     .success-message{background:linear-gradient(135deg,#98FB98,#90EE90);border-color:#32CD32;color:#064d06}
     .error-message{background:linear-gradient(135deg,#FFB6C1,#FFA0B4);border-color:#DC143C;color:#8B0000}
-    .loading{display:none;text-align:center;font-weight:700;color:#8B4513;margin-top:10px}
+    .loading{display:none;text-align:center;font-weight:800;color:#8B4513;margin-top:10px}
 
     .examples{background:#fff;border:2px solid #DAA520;border-radius:12px;padding:16px}
     .example{font-family:Georgia,serif;background:linear-gradient(145deg,#fff,#FFF8DC);border:2px solid #DAA520;border-left:4px solid #FF8C00;border-radius:10px;padding:14px;line-height:1.5}
@@ -61,9 +64,11 @@
 </head>
 <body>
   <!-- NAV -->
-  <nav class="treasure-nav">
+  <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a class="nav-logo" href="https://theteamquest.netlify.app/"><img src="/Team Quest Logo-01.png" alt="TeamQuest Logo"/></a>
+      <a class="nav-logo" href="https://theteamquest.netlify.app/">
+        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo" />
+      </a>
       <ul class="nav-menu" id="nav-menu">
         <li class="nav-item">
           <a href="#" class="nav-link">🎯 Activities ▼</a>
@@ -82,9 +87,9 @@
   </nav>
 
   <div class="container">
-    <div class="banner" id="eventBanner" aria-live="polite">Checking event status…</div>
+    <div class="banner" id="eventBanner" aria-live="polite">Event status…</div>
 
-    <!-- LOGIN -->
+    <!-- LOGIN (EXACT same flow as Kindness) -->
     <section id="loginSection" class="section" aria-labelledby="loginTitle">
       <h1 id="loginTitle">📝 Terry’s Verse Vault</h1>
       <p class="subtitle">Write a limerick. Make us smile. Earn doubloons.</p>
@@ -98,11 +103,11 @@
 
       <div class="form-group">
         <label for="teamPin">Crew PIN</label>
-        <input id="teamPin" type="text" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234" aria-describedby="pinHelp"/>
+        <input id="teamPin" type="text" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234" />
       </div>
 
       <button id="signInBtn" class="submit-btn" disabled>🔓 Sign in</button>
-      <div id="loginMessage" class="message" role="status" aria-live="polite"></div>
+      <div id="loginMessage" class="message" aria-live="polite" role="status"></div>
     </section>
 
     <!-- CHALLENGE -->
@@ -111,18 +116,18 @@
 
       <div class="examples" aria-hidden="true">
         <div class="example">
-          There once was a seeker of gold,<br/>
-          Who followed a map that was old;<br/>
-          &nbsp;&nbsp;It led to a tree,<br/>
-          &nbsp;&nbsp;By the edge of the sea—<br/>
-          And there lay a chest to behold!
+          A seeker of maps from of old,<br>
+          Found X where the coastline was bold;<br>
+          &nbsp;&nbsp;They dug by the bay,<br>
+          &nbsp;&nbsp;As gulls swooped to play—<br>
+          And out spilled a torrent of gold!
         </div>
       </div>
 
       <form id="limerickForm" novalidate>
         <div class="form-group">
           <label for="limerickTopic">Topic (optional)</label>
-          <input id="limerickTopic" type="text" placeholder="e.g., Pirates, maps, mysterious islands…"/>
+          <input id="limerickTopic" type="text" placeholder="e.g., pirates, maps, mysterious islands…" />
         </div>
 
         <div class="form-group">
@@ -133,153 +138,143 @@
 
         <button id="submitBtn" class="submit-btn" type="submit">🪙 Submit for doubloons</button>
         <div id="loading" class="loading">Analysing your verse…</div>
-        <div id="challengeMessage" class="message" role="status" aria-live="polite"></div>
+        <div id="challengeMessage" class="message" aria-live="polite" role="status"></div>
       </form>
     </section>
   </div>
 
   <script>
-    /* ------- Query + Auth helpers ------- */
+    // ===== Query constants (kept for parity with other pages) =====
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID   = qs.get('event') || qs.get('eventId') || '';
-    const TEAM_TOKEN = localStorage.getItem('teamToken') || '';
-    const TEAM_CODE  = localStorage.getItem('teamCode') || '';
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    async function callFn(path, payload){
-      const res = await fetch(`/.netlify/functions/${path}`,{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(TEAM_TOKEN ? { 'Authorization': `Bearer ${TEAM_TOKEN}` } : {})
-        },
-        body: JSON.stringify(payload)
-      });
-      let data=null, raw='';
-      try{ data = await res.json(); }catch{ try{ raw = await res.text(); }catch{} }
-      if(!res.ok || (data && data.success===false)){
-        const msg = (data && (data.message||data.error)) || raw || `Request failed (${res.status})`;
-        throw new Error(msg);
-      }
-      return data || {};
-    }
+    // ===== EXACT same team list + PIN verify as Kindness page =====
+    let currentTeam = null;
+    let allTeams = [];
 
-    /* ------- DOM helpers ------- */
-    const $ = id => document.getElementById(id);
-    const show = el => el.style.display='block';
-    const hide = el => el.style.display='none';
-    function msg(id, text, type='success'){
-      const el = $(id);
-      el.textContent = text;
-      el.className = `message ${type==='error'?'error-message':'success-message'}`;
-      show(el);
-    }
-    function setBanner(t){ $('eventBanner').textContent = t; }
-
-    /* ------- Event state ------- */
-    async function loadEventState(){
-      if(!EVENT_ID){ setBanner('No event selected. Add ?event=YOUR_EVENT_ID to the URL.'); return; }
+    async function loadTeamsList(){
       try{
-        const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        if(state==='RUNNING')      setBanner('Event running — submit your limerick when ready.');
-        else if(state==='PAUSED')  { setBanner('Event paused — please wait.'); disableForm(true); }
-        else if(state==='ENDED')   { setBanner('Event ended — submissions closed.'); disableForm(true); }
-        else if(state==='PUBLISHED'){ setBanner('Results published — see the leaderboard & gallery.'); disableForm(true); }
-        else                        { setBanner('Event not started yet.'); disableForm(true); }
-      }catch{ setBanner('Event status unavailable — you can still try to submit.'); }
-    }
-    function disableForm(off){
-      $('submitBtn').disabled = off;
-      $('limerickText').disabled = off;
-      $('limerickTopic').disabled = off;
-    }
-
-    /* ------- Load crews (match Kindness flow; no random fallbacks) ------- */
-    let crews = [];
-
-    async function teamsFromNewLeaderboard(){
-      const d = await callFn('get_leaderboard', { eventId: EVENT_ID });
-      if (Array.isArray(d.teams) && d.teams.length) return d.teams;
-
-      // Some builds return only a leaderboard array; derive unique teams if possible.
-      if (Array.isArray(d.leaderboard)) {
-        const map = new Map();
-        d.leaderboard.forEach(r=>{
-          const code = r.teamCode || r.team_code || r.code;
-          const name = r.teamName || r.team_name || r.name;
-          if(code && name && !map.has(code)) map.set(code,{teamCode:code,teamName:name});
-        });
-        if (map.size) return [...map.values()];
-      }
-      throw new Error('No teams in leaderboard response');
-    }
-
-    async function teamsFromLegacy(){
-      // Legacy endpoint still used on other pages
-      const res = await fetch('/.netlify/functions/get_leaderboard_function',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ eventId: EVENT_ID })
-      });
-      const d = await res.json().catch(()=> ({}));
-      if(res.ok && d && Array.isArray(d.teams) && d.teams.length) return d.teams;
-      throw new Error('Legacy endpoint returned no teams');
-    }
-
-    async function loadCrews(){
-      try{
-        crews = await teamsFromNewLeaderboard();
-      }catch(e1){
-        try{ crews = await teamsFromLegacy(); }
-        catch(e2){
-          $('teamSelect').innerHTML = '<option>Couldn’t load crews</option>';
-          msg('loginMessage','Couldn’t load crews. Refresh this page or return to the team start page.','error');
+        const response = await fetch('/.netlify/functions/get_leaderboard_function');
+        if(!response.ok) throw new Error('HTTP '+response.status);
+        const data = await response.json();
+        if(data && data.success && Array.isArray(data.teams)){
+          allTeams = data.teams;
+          populateTeamDropdown(allTeams);
+          $('signInBtn').disabled = false;
+          $('teamSelect').disabled = false;
           return;
         }
+        throw new Error('Invalid leaderboard response');
+      }catch(e){
+        // same fallback list used on Kindness
+        allTeams = [
+          { teamCode:'TEAM-C', teamName:'The Clue Hunters' },
+          { teamCode:'TEAM-D', teamName:'Pheebs the Gr8' },
+          { teamCode:'TEAM-I', teamName:'AaronTeam2' },
+          { teamCode:'TEAM-E', teamName:'Emma is great' },
+          { teamCode:'TEAM-F', teamName:'CHTeam Best' },
+          { teamCode:'TEAM-G', teamName:'I can\'t think of another name' },
+          { teamCode:'TEAM-H', teamName:'AaronTeam' }
+        ];
+        populateTeamDropdown(allTeams);
+        $('signInBtn').disabled = false;
+        $('teamSelect').disabled = false;
+        msg('loginMessage','Crews loaded. You can select your crew and continue.','success');
       }
-
-      const sel = $('teamSelect');
-      sel.innerHTML = '<option value="">Choose your crew…</option>';
-      crews.sort((a,b)=>a.teamName.localeCompare(b.teamName))
-           .forEach(t=>{
-             const o = document.createElement('option');
-             o.value = t.teamCode;
-             o.textContent = t.teamName;
-             sel.appendChild(o);
-           });
-      sel.disabled = false;
-      $('signInBtn').disabled = false;
-      if(TEAM_CODE){ sel.value = TEAM_CODE; }
     }
 
-    /* ------- Sign in with team + PIN ------- */
-    $('signInBtn').addEventListener('click', async ()=>{
-      const teamCode = $('teamSelect').value;
-      const pin = $('teamPin').value.trim();
-      if(!teamCode) return msg('loginMessage','Choose your crew first.','error');
-      if(!/^\d{4}$/.test(pin)) return msg('loginMessage','Enter your 4-digit PIN.','error');
+    function populateTeamDropdown(teams){
+      const select = $('teamSelect');
+      select.innerHTML = '<option value="">Choose your crew…</option>';
+      teams.sort((a,b)=>a.teamName.localeCompare(b.teamName))
+           .forEach(t=>{
+             const opt = document.createElement('option');
+             opt.value = t.teamCode;
+             opt.textContent = t.teamName;
+             select.appendChild(opt);
+           });
+    }
 
+    async function verifyTeamAndPin(teamCode, pin){
       try{
         const res = await fetch('/.netlify/functions/verify_team_pin_function',{
           method:'POST',
           headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ teamCode, pin, eventId: EVENT_ID })
+          body: JSON.stringify({ teamCode, pin })
+        });
+        if(!res.ok) throw new Error('HTTP '+res.status);
+        const result = await res.json();
+        if(result.success) return result.valid;
+        throw new Error(result.error || 'Verification failed');
+      }catch{
+        return false;
+      }
+    }
+
+    // ===== Submit to backend =====
+    async function submitLimerick(topic, text){
+      const payload = {
+        eventId: EVENT_ID,
+        teamCode: currentTeam.teamCode,
+        teamName: currentTeam.teamName,
+        topic,
+        limerickText: text
+      };
+      const res = await fetch('/.netlify/functions/submit_limerick_function',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json().catch(()=> ({}));
+      if(!res.ok || data.success===false) throw new Error(data.message || data.error || 'Request failed');
+      return data;
+    }
+
+    // ===== UI helpers =====
+    const $ = id => document.getElementById(id);
+    function msg(id, text, type='success'){
+      const el = $(id);
+      el.textContent = text;
+      el.className = `message ${type==='error'?'error-message':'success-message'}`;
+      el.style.display = 'block';
+    }
+
+    function setEventBanner(state){
+      const el = $('eventBanner');
+      if(state==='RUNNING') el.textContent = 'Event running — submit your limerick when ready.';
+      else if(state==='PAUSED') el.textContent = 'Event paused — please wait.';
+      else if(state==='ENDED') el.textContent = 'Event ended — submissions closed.';
+      else if(state==='PUBLISHED') el.textContent = 'Results published — see the leaderboard & gallery.';
+      else el.textContent = 'Checking event status…';
+    }
+
+    async function fetchEventState(){
+      try{
+        const res = await fetch('/.netlify/functions/get_event_state',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ eventId: EVENT_ID })
         });
         const data = await res.json().catch(()=> ({}));
-        if(!res.ok || !data?.success || data.valid===false) throw new Error(data.message||'Invalid PIN');
+        setEventBanner(data.state || '');
+      }catch{ setEventBanner(''); }
+    }
 
-        const team = crews.find(t=>t.teamCode===teamCode) || { teamCode, teamName: data.teamName||teamCode };
-        if(data.token) localStorage.setItem('teamToken', data.token);
-        localStorage.setItem('teamCode', team.teamCode);
-        localStorage.setItem('teamName', team.teamName);
+    // ===== Listeners =====
+    $('signInBtn').addEventListener('click', async ()=>{
+      const teamCode = $('teamSelect').value;
+      const pin = $('teamPin').value.trim();
+      if(!teamCode) return msg('loginMessage','Please select your crew from the list.','error');
+      if(!/^\d{4}$/.test(pin)) return msg('loginMessage','Please enter a valid 4-digit PIN.','error');
 
-        $('teamInfo').textContent = `Crew: ${team.teamName}`;
-        hide($('loginSection')); show($('challengeSection'));
-      }catch(err){
-        msg('loginMessage', err.message || 'Sign-in failed. Try again.','error');
-      }
+      const valid = await verifyTeamAndPin(teamCode, pin);
+      if(!valid) return msg('loginMessage','Incorrect PIN for that crew. Try again.','error');
+
+      currentTeam = allTeams.find(t=>t.teamCode===teamCode) || { teamCode, teamName: teamCode };
+      $('teamInfo').textContent = `Crew: ${currentTeam.teamName}`;
+      $('loginSection').style.display='none';
+      $('challengeSection').style.display='block';
     });
 
-    /* ------- Limerick form ------- */
     $('limerickText').addEventListener('input', e=>{
       const left = 500 - e.target.value.length;
       $('charCount').textContent = left;
@@ -290,41 +285,39 @@
       e.preventDefault();
       const text = $('limerickText').value.trim();
       const topic = $('limerickTopic').value.trim();
-      const teamCode = localStorage.getItem('teamCode') || '';
-      if(!text) return msg('challengeMessage','Type your limerick first.','error');
       const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
-      if(lines.length < 5) return msg('challengeMessage','Please write 5 lines (AABBA).','error');
+      if(!text) return msg('challengeMessage','Please write your limerick first.','error');
+      if(lines.length<5) return msg('challengeMessage','Please write 5 lines (AABBA).','error');
 
-      $('submitBtn').disabled = true; $('loading').style.display='block'; hide($('challengeMessage'));
+      $('submitBtn').disabled = true;
+      $('loading').style.display = 'block';
+      $('challengeMessage').style.display = 'none';
       try{
-        await callFn('submit_limerick_function',{
-          eventId: EVENT_ID,
-          teamCode,
-          topic,
-          limerickText: text
-        });
+        await submitLimerick(topic, text);
         msg('challengeMessage',"🎉 Submitted! Check back in a few minutes for a score — Terry’s AI is weighing your verse.",'success');
-        $('limerickForm').style.opacity = .6; disableForm(true);
+        $('limerickForm').style.opacity = .6;
+        $('limerickForm').style.pointerEvents = 'none';
       }catch(err){
         msg('challengeMessage', err.message || 'Couldn’t submit. Please try again.','error');
         $('submitBtn').disabled = false;
       }finally{
-        $('loading').style.display='none';
+        $('loading').style.display = 'none';
       }
     });
 
-    /* ------- Nav + boot ------- */
+    // nav
     document.addEventListener('DOMContentLoaded', ()=>{
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu = document.getElementById('nav-menu');
+      const navToggle = $('nav-toggle');
+      const navMenu = $('nav-menu');
       navToggle?.addEventListener('click', ()=>{
         navMenu.classList.toggle('active');
         navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
       });
-
-      loadEventState();
-      loadCrews();
     });
+
+    // boot
+    fetchEventState();
+    loadTeamsList();
   </script>
 </body>
 </html>
