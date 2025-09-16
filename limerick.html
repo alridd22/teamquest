@@ -1,73 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TeamQuest — Terry’s Verse Vault</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TeamQuest – Terry’s Verse Vault</title>
   <style>
-    /* ===== NAV ===== */
-    .treasure-nav{position:fixed;inset:0 0 auto 0;height:80px;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000}
-    .nav-container{max-width:1200px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 20px}
-    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5))}
-    .nav-menu{display:flex;gap:28px;list-style:none;margin:0;padding:0}
+    /* ————— NAV ————— */
+    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:80px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
+    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
+    .nav-logo:hover{transform:scale(1.05)}
+    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
+    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
+    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
     .nav-item{position:relative}
-    .nav-link{display:block;color:#F5DEB3;text-decoration:none;font-weight:800;padding:10px 16px;border-radius:10px;background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);text-shadow:1px 1px 2px rgba(0,0,0,.7)}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-1px)}
-    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321,#8B4513);border:2px solid #DAA520;border-radius:10px;min-width:200px;opacity:0;visibility:hidden;transform:translateY(-8px);transition:.2s}
+    .nav-link{color:#F5DEB3;text-decoration:none;font-size:1rem;font-weight:bold;padding:12px 18px;border-radius:8px;transition:.3s;display:block;text-shadow:1px 1px 2px rgba(0,0,0,.7);background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap}
+    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
+    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321 0%,#8B4513 100%);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s;box-shadow:0 8px 20px rgba(0,0,0,.3)}
     .nav-item:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
-    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 16px}
-    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff}
-    .nav-toggle{display:none;background:none;border:none;font-size:1.8rem;color:#DAA520}
-
+    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 18px;font-size:.95rem;border-bottom:1px solid rgba(218,165,32,.2);transition:.3s;background:rgba(101,67,33,.2);margin:2px;border-radius:6px;font-weight:600}
+    .dropdown-link:last-child{border-bottom:none}
+    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;padding-left:25px;transform:translateX(5px);box-shadow:0 2px 8px rgba(255,140,0,.3)}
+    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
     @media (max-width:768px){
       .treasure-nav{height:120px}
       .nav-container{justify-content:center;position:relative}
       .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-      .nav-toggle{display:block;position:absolute;right:20px;top:50%;transform:translateY(-50%)}
-      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513,#654321);flex-direction:column;align-items:center;gap:18px;padding-top:24px;transition:left .25s ease}
+      .nav-logo img{height:85px!important}
+      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
+      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513 0%,#654321 100%);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .3s;overflow-y:auto}
       .nav-menu.active{left:0}
-      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none}
+      .nav-link{font-size:1.1rem;padding:15px 25px;width:280px;text-align:center;background:linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6));border:2px solid #DAA520;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.3)}
+      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none;background:rgba(101,67,33,.9);border:2px solid #DAA520;border-radius:12px;margin-top:10px;width:280px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
     }
 
-    /* ===== PAGE ===== */
-    *{box-sizing:border-box}
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Noto Sans",sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px;padding-top:100px!important}
+    /* ————— PAGE ————— */
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;padding-top:100px!important;position:relative}
     @media (max-width:768px){body{padding-top:140px!important}}
+    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border-radius:25px;padding:34px;box-shadow:0 20px 40px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.3);max-width:720px;width:100%;position:relative;overflow:hidden;border:3px solid #8B4513}
+    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    .logo{text-align:center;margin-bottom:10px}
+    h1{color:#8B4513;text-align:center;margin-bottom:6px;font-size:2.1em;font-weight:800}
+    .subtitle{text-align:center;color:#A0522D;margin-bottom:16px;font-size:1.05em;font-weight:600}
+    .status-banner{display:none;margin:12px 0 18px;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:10px;padding:12px 14px;color:#654321;font-weight:600}
+    .status-banner.paused{border-left-color:#DAA520}
+    .status-banner.ended{border-left-color:#8B0000}
+    .status-banner.published{border-left-color:#32CD32}
 
-    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:22px;max-width:720px;width:100%;padding:24px 20px;box-shadow:0 20px 40px rgba(0,0,0,.2)}
-    .container::before{content:"";display:block;height:8px;border-radius:6px;margin:-10px -6px 18px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
-
-    h1{margin:0 0 6px;text-align:center;color:#8B4513;font-size:2.2rem}
-    .subtitle{text-align:center;color:#A0522D;margin-bottom:14px}
-    .banner{background:#fff8e6;border:2px dashed #DAA520;border-radius:12px;padding:10px 14px;margin-bottom:12px;color:#6e440b;font-weight:700}
-
-    .section{background:#fff8e6;border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:16px;margin:14px 0}
-    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;border:2px solid #DAA520;border-radius:12px;padding:12px;text-align:center;font-weight:900;margin:12px 0}
+    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:14px;text-align:center;font-size:1.05em;font-weight:700;margin-bottom:12px;box-shadow:0 5px 15px rgba(139,69,19,.3);border:2px solid #DAA520}
+    .auth-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px dashed #DAA520;border-radius:14px;padding:16px;margin:10px 0}
+    .auth-grid{display:grid;grid-template-columns:1fr 160px;gap:10px}
+    @media (max-width:560px){.auth-grid{grid-template-columns:1fr}}
+    .small-btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
+    .small-btn:hover{background:#A0522D}
+    .message{padding:16px;border-radius:14px;margin:16px 0;text-align:center;display:none;border:3px solid;font-weight:700}
+    .success-message{background:linear-gradient(135deg,#90EE90 0%,#98FB98 100%);border-color:#32CD32;color:#064b06}
+    .error-message{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
 
     .form-group{margin-bottom:16px}
-    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:800}
-    select,input[type="text"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
-    textarea{min-height:160px;resize:vertical;font-family:Georgia,serif;line-height:1.6}
-    .char-count{text-align:right;font-size:.9rem;color:#8B4513;margin-top:6px}
+    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700;font-size:1.02em}
+    select,input[type="text"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%)}
+    select:focus,input[type="text"]:focus,textarea:focus{outline:none;border-color:#FF8C00;background:#fff;box-shadow:0 0 0 3px rgba(255,140,0,.2)}
+    textarea{min-height:160px;resize:vertical;line-height:1.55;font-family:'Georgia','Times New Roman',serif}
+    .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:5px;font-weight:600}
 
-    .submit-btn{width:100%;background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:16px;border-radius:14px;font-weight:900;font-size:1.05rem;display:flex;align-items:center;justify-content:center;gap:10px;border:2px solid #8B4513;cursor:pointer}
-    .submit-btn[disabled]{opacity:.6;cursor:not-allowed}
-
-    .message{display:none;margin:14px 0;padding:14px;border-radius:12px;border:3px solid;font-weight:700;text-align:center}
-    .success-message{background:linear-gradient(135deg,#98FB98,#90EE90);border-color:#32CD32;color:#064d06}
-    .error-message{background:linear-gradient(135deg,#FFB6C1,#FFA0B4);border-color:#DC143C;color:#8B0000}
-    .loading{display:none;text-align:center;font-weight:800;color:#8B4513;margin-top:10px}
-
-    .examples{background:#fff;border:2px solid #DAA520;border-radius:12px;padding:16px}
-    .example{font-family:Georgia,serif;background:linear-gradient(145deg,#fff,#FFF8DC);border:2px solid #DAA520;border-left:4px solid #FF8C00;border-radius:10px;padding:14px;line-height:1.5}
+    .submit-btn{width:100%;background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:16px;border-radius:14px;font-size:1.1em;font-weight:900;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px;border:3px solid #8B4513}
+    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 12px 25px rgba(255,140,0,.3);background:linear-gradient(135deg,#FFB347,#F0C814)}
+    .submit-btn:disabled{opacity:.6;cursor:not-allowed}
+    .loading{display:none;text-align:center;margin-top:12px;color:#8B4513;font-weight:800}
   </style>
 </head>
 <body>
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a class="nav-logo" href="https://theteamquest.netlify.app/">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo" />
+      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
       </a>
       <ul class="nav-menu" id="nav-menu">
         <li class="nav-item">
@@ -82,237 +91,295 @@
         <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_leaderboard">🏆 The Leaderboard</a></li>
         <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_gallery">📸 The Gallery</a></li>
       </ul>
-      <button class="nav-toggle" id="nav-toggle">☰</button>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
   </nav>
 
   <div class="container">
-    <div class="banner" id="eventBanner" aria-live="polite">Event status…</div>
-
-    <!-- LOGIN -->
-    <section id="loginSection" class="section" aria-labelledby="loginTitle">
-      <h1 id="loginTitle">📝 Terry’s Verse Vault</h1>
+    <div class="logo">
+      <h1>Terry’s Verse Vault</h1>
       <p class="subtitle">Write a limerick. Make us smile. Earn doubloons.</p>
+    </div>
+
+    <div id="stateBanner" class="status-banner" role="status" aria-live="polite"></div>
+
+    <div class="team-info" id="teamInfo">Crew: unknown</div>
+
+    <!-- Sign-in -->
+    <div class="auth-card" id="signinCard" aria-live="polite">
+      <div class="auth-grid">
+        <div>
+          <label for="teamSelect">Choose your crew</label>
+          <select id="teamSelect">
+            <option value="">Loading teams…</option>
+          </select>
+        </div>
+        <div>
+          <label for="teamPin">Crew PIN</label>
+          <input id="teamPin" type="text" inputmode="numeric" maxlength="4" placeholder="1234"/>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <button class="small-btn" id="signinBtn">🔓 Sign in</button>
+      </div>
+      <div class="message" id="signinMsg"></div>
+    </div>
+
+    <!-- Limerick form -->
+    <form id="limerickForm" style="display:none">
+      <div class="form-group">
+        <label for="limerickTopic">Topic (optional)</label>
+        <input id="limerickTopic" type="text" placeholder="e.g., Pirates, a map mishap, sea shanties…"/>
+      </div>
 
       <div class="form-group">
-        <label for="teamSelect">Choose your crew</label>
-        <select id="teamSelect" disabled>
-          <option>Loading crews…</option>
-        </select>
+        <label for="limerickText">Your limerick</label>
+        <textarea id="limerickText" maxlength="500" placeholder="Write 5 lines (AABBA). Keep it playful and clean."></textarea>
+        <div class="char-count"><span id="charCount">500</span> characters remaining</div>
       </div>
 
-      <div class="form-group">
-        <label for="teamPin">Crew PIN</label>
-        <input id="teamPin" type="text" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234" />
-      </div>
-
-      <button id="signInBtn" class="submit-btn" disabled>🔓 Sign in</button>
-      <div id="loginMessage" class="message" aria-live="polite" role="status"></div>
-    </section>
-
-    <!-- CHALLENGE -->
-    <section id="challengeSection" class="section" style="display:none">
-      <div class="team-info" id="teamInfo">Crew: …</div>
-
-      <div class="examples" aria-hidden="true">
-        <div class="example">
-          A seeker of maps from of old,<br>
-          Found X where the coastline was bold;<br>
-          &nbsp;&nbsp;They dug by the bay,<br>
-          &nbsp;&nbsp;As gulls swooped to play—<br>
-          And out spilled a torrent of gold!
-        </div>
-      </div>
-
-      <form id="limerickForm" novalidate>
-        <div class="form-group">
-          <label for="limerickTopic">Topic (optional)</label>
-          <input id="limerickTopic" type="text" placeholder="e.g., pirates, maps, mysterious islands…" />
-        </div>
-
-        <div class="form-group">
-          <label for="limerickText">Your limerick (5 lines)</label>
-          <textarea id="limerickText" maxlength="500" placeholder="Type your limerick here…" required></textarea>
-          <div class="char-count"><span id="charCount">500</span> characters left</div>
-        </div>
-
-        <button id="submitBtn" class="submit-btn" type="submit">🪙 Submit for doubloons</button>
-        <div id="loading" class="loading">Analysing your verse…</div>
-        <div id="challengeMessage" class="message" aria-live="polite" role="status"></div>
-      </form>
-    </section>
+      <button type="submit" class="submit-btn" id="submitBtn">🪙 Submit to the Vault</button>
+      <div class="loading" id="loading">✨ Terry is logging your poem… check back in a few minutes for a score.</div>
+      <div class="message" id="feedback"></div>
+    </form>
   </div>
 
   <script>
-    // ===== Shared constants =====
-    const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+    /* ===== URL / STORAGE ===== */
+    const qs        = new URLSearchParams(location.search);
+    const EVENT_ID  = qs.get('event') || qs.get('eventId') || '';
 
-    // ===== State =====
-    let currentTeam = null;
-    let allTeams = [];
+    const token    = () => localStorage.getItem('teamToken') || '';
+    const teamCode = () => localStorage.getItem('teamCode') || '';
+    const teamName = () => localStorage.getItem('teamName') || '';
 
-    // ===== Helpers =====
-    const $ = id => document.getElementById(id);
-    function msg(id, text, type='success'){
-      const el = $(id);
-      el.textContent = text;
-      el.className = `message ${type==='error' ? 'error-message' : 'success-message'}`;
-      el.style.display = 'block';
-    }
-
-    // ===== Event state banner =====
-    function setEventBanner(state){
-      const el = $('eventBanner');
-      if(state==='RUNNING') el.textContent = 'Event running — submit your limerick when ready.';
-      else if(state==='PAUSED') el.textContent = 'Event paused — please wait.';
-      else if(state==='ENDED') el.textContent = 'Event ended — submissions closed.';
-      else if(state==='PUBLISHED') el.textContent = 'Results published — see the leaderboard & gallery.';
-      else el.textContent = 'Checking event status…';
-    }
-    async function fetchEventState(){
-      try{
-        const res = await fetch('/.netlify/functions/get_event_state',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ eventId: EVENT_ID })
-        });
-        const data = await res.json().catch(()=> ({}));
-        setEventBanner(data.state || '');
-      }catch{ setEventBanner(''); }
-    }
-
-    // ===== Load crews (SAME method as Kindness: no legacy endpoint, no fallback) =====
-    async function loadTeamsList(){
-      try{
-        const res = await fetch('/.netlify/functions/get_leaderboard',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ eventId: EVENT_ID || '' })
-        });
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        const data = await res.json();
-        allTeams = Array.isArray(data?.teams) ? data.teams : [];
-        if(!allTeams.length) throw new Error('No teams found');
-        populateTeamDropdown(allTeams);
-        $('teamSelect').disabled = false;
-        $('signInBtn').disabled = false;
-      }catch(err){
-        console.error('loadTeamsList:', err);
-        $('teamSelect').innerHTML = '<option>Couldn’t load crews</option>';
-        $('teamSelect').disabled = true;
-        $('signInBtn').disabled = true;
-        msg('loginMessage','Couldn’t load crews. Refresh this page or return to the team start page.','error');
-      }
-    }
-    function populateTeamDropdown(teams){
-      const sel = $('teamSelect');
-      sel.innerHTML = '<option value="">Choose your crew…</option>';
-      teams
-        .slice()
-        .sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''))
-        .forEach(t=>{
-          const o=document.createElement('option');
-          o.value=t.teamCode;
-          o.textContent=t.teamName || t.teamCode;
-          sel.appendChild(o);
-        });
-    }
-
-    // ===== Verify PIN (same endpoint as Kindness) =====
-    async function verifyTeamAndPin(teamCode, pin){
-      try{
-        const res = await fetch('/.netlify/functions/verify_team_pin_function',{
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ teamCode, pin })
-        });
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        const result = await res.json();
-        return !!result?.valid && result?.success!==false;
-      }catch(err){
-        console.error('verifyTeamAndPin:', err);
-        return false;
-      }
-    }
-
-    // ===== Submission =====
-    async function submitLimerick(topic, text){
-      const payload = {
-        eventId: EVENT_ID,
-        teamCode: currentTeam.teamCode,
-        teamName: currentTeam.teamName,
-        topic,
-        limerickText: text
-      };
-      const res = await fetch('/.netlify/functions/submit_limerick_function',{
+    /* ===== FETCH HELPER (same as Kindness) ===== */
+    async function callFn(path, payload){
+      const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+        headers:{
+          'Content-Type':'application/json',
+          ...(token() ? {'Authorization': `Bearer ${token()}`} : {})
+        },
+        body: JSON.stringify(payload || {})
       });
-      const data = await res.json().catch(()=> ({}));
-      if(!res.ok || data.success===false) throw new Error(data.message || data.error || 'Request failed');
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || data.success === false){
+        throw new Error(data.message || `Request failed (${res.status})`);
+      }
       return data;
     }
 
-    // ===== UI wiring =====
-    $('nav-toggle')?.addEventListener('click', ()=>{
-      const menu = $('nav-menu');
-      menu.classList.toggle('active');
-      $('nav-toggle').textContent = menu.classList.contains('active') ? '✕' : '☰';
+    /* ===== EL REFS ===== */
+    const navToggle   = document.getElementById('nav-toggle');
+    const navMenu     = document.getElementById('nav-menu');
+
+    const stateBanner = document.getElementById('stateBanner');
+    const teamInfo    = document.getElementById('teamInfo');
+    const teamSelect  = document.getElementById('teamSelect');
+    const teamPin     = document.getElementById('teamPin');
+    const signinBtn   = document.getElementById('signinBtn');
+    const signinMsg   = document.getElementById('signinMsg');
+
+    const form        = document.getElementById('limerickForm');
+    const topicEl     = document.getElementById('limerickTopic');
+    const textEl      = document.getElementById('limerickText');
+    const countEl     = document.getElementById('charCount');
+    const submitBtn   = document.getElementById('submitBtn');
+    const loadingEl   = document.getElementById('loading');
+    const feedbackEl  = document.getElementById('feedback');
+
+    /* ===== NAV ===== */
+    navToggle?.addEventListener('click', ()=>{
+      navMenu.classList.toggle('active');
+      navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
     });
-
-    $('limerickText').addEventListener('input', e=>{
-      const left = 500 - e.target.value.length;
-      $('charCount').textContent = left;
-      $('charCount').style.color = left<50 ? '#b00020' : '#8B4513';
-    });
-
-    $('signInBtn').addEventListener('click', async ()=>{
-      const teamCode = $('teamSelect').value;
-      const pin = $('teamPin').value.trim();
-      if(!teamCode) return msg('loginMessage','Please select your crew from the list.','error');
-      if(!/^\d{4}$/.test(pin)) return msg('loginMessage','Please enter a valid 4-digit PIN.','error');
-
-      const ok = await verifyTeamAndPin(teamCode, pin);
-      if(!ok) return msg('loginMessage','Incorrect PIN for that crew. Try again.','error');
-
-      currentTeam = allTeams.find(t=>t.teamCode===teamCode) || { teamCode, teamName: teamCode };
-      $('teamInfo').textContent = `Crew: ${currentTeam.teamName}`;
-      $('loginSection').style.display='none';
-      $('challengeSection').style.display='block';
-    });
-
-    $('limerickForm').addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const text = $('limerickText').value.trim();
-      const topic = $('limerickTopic').value.trim();
-      const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
-
-      if(!text) return msg('challengeMessage','Please write your limerick first.','error');
-      if(lines.length<5) return msg('challengeMessage','Please write 5 lines (AABBA).','error');
-
-      $('submitBtn').disabled = true;
-      $('loading').style.display = 'block';
-      $('challengeMessage').style.display = 'none';
-
-      try{
-        await submitLimerick(topic, text);
-        msg('challengeMessage',"🎉 Submitted! Check back in a few minutes for a score — Terry’s AI is weighing your verse.",'success');
-        $('limerickForm').style.opacity = .6;
-        $('limerickForm').style.pointerEvents = 'none';
-      }catch(err){
-        console.error('submit error', err);
-        msg('challengeMessage', err.message || 'Couldn’t submit. Please try again.','error');
-        $('submitBtn').disabled = false;
-      }finally{
-        $('loading').style.display = 'none';
+    document.addEventListener('click', (e)=>{
+      const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
+      if(!inside && navMenu.classList.contains('active')){
+        navMenu.classList.remove('active'); navToggle.textContent='☰';
       }
     });
 
-    // ===== Boot =====
-    fetchEventState();
-    loadTeamsList();
+    /* ===== UI HELPERS ===== */
+    const setSigninMsg = (msg,type='error')=>{
+      signinMsg.textContent = msg;
+      signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`;
+      signinMsg.style.display = 'block';
+    };
+    const clearSigninMsg = ()=>{ signinMsg.textContent=''; signinMsg.style.display='none'; };
+
+    const setFeedback = (msg,type)=>{
+      feedbackEl.innerHTML = msg;
+      feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`;
+      feedbackEl.style.display = 'block';
+    };
+    const clearFeedback = ()=>{ feedbackEl.textContent=''; feedbackEl.style.display='none'; };
+
+    function updateCrewLabel(){
+      teamInfo.textContent = teamName() ? `Crew: ${teamName()}` :
+                             (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown');
+    }
+
+    /* ===== EVENT STATE (same pattern) ===== */
+    async function refreshEventState(){
+      if(!EVENT_ID){
+        stateBanner.textContent = 'Missing eventId in the URL (?event=...).';
+        stateBanner.className = 'status-banner ended';
+        stateBanner.style.display='block';
+        form.style.display='none';
+        return 'UNKNOWN';
+      }
+      try{
+        const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
+        let text='', cls='status-banner';
+        let lock=false;
+        if(state==='NOT_STARTED'){ text='Event not started yet.'; cls+=' paused'; lock=true; }
+        if(state==='PAUSED'){ text='Event paused — submissions closed for now.'; cls+=' paused'; lock=true; }
+        if(state==='RUNNING'){ text='Event running — submit your limerick when ready.'; lock=false; }
+        if(state==='ENDED'){ text='Event ended — submissions are closed.'; cls+=' ended'; lock=true; }
+        if(state==='PUBLISHED'){ text='Results published! Check the Gallery.'; cls+=' published'; lock=true; }
+        stateBanner.textContent = text; stateBanner.className = cls; stateBanner.style.display = text ? 'block':'none';
+        submitBtn.disabled = lock;
+        return state;
+      }catch{
+        stateBanner.textContent = 'Could not verify event state.'; stateBanner.className='status-banner'; stateBanner.style.display='block';
+        return 'UNKNOWN';
+      }
+    }
+
+    /* ===== TEAMS (same method as Kindness; NO static fallback) ===== */
+    function extractTeams(data){
+      if(Array.isArray(data?.teams)) return data.teams;
+      if(Array.isArray(data?.leaderboard)){
+        return data.leaderboard.map(r=>({
+          teamCode: r.teamCode || r.code || r.teamId || '',
+          teamName: r.teamName || r.name || ''
+        })).filter(t=>t.teamName);
+      }
+      if(Array.isArray(data?.rows)){
+        return data.rows.map(r=>({
+          teamCode: r.teamCode || r.code || '',
+          teamName: r.teamName || r.name || ''
+        })).filter(t=>t.teamName);
+      }
+      return [];
+    }
+
+    async function loadTeams(){
+      try{
+        let data  = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        let teams = extractTeams(data);
+
+        if(!teams.length){
+          // GET fallback only (to match Kindness’ robustness)
+          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+          if(res.ok){
+            data  = await res.json().catch(()=>({}));
+            teams = extractTeams(data);
+          }
+        }
+        if(!teams.length) throw new Error('No teams returned');
+
+        teams.sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||''));
+        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` +
+          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        clearSigninMsg();
+      }catch(err){
+        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
+        setSigninMsg('Couldn’t load crews. Refresh this page or return to the team start page.', 'error');
+      }
+    }
+
+    /* ===== SIGN-IN (identical flow) ===== */
+    async function signIn(){
+      clearSigninMsg(); clearFeedback();
+      const code = teamSelect.value;
+      const pin  = (teamPin.value || '').trim();
+      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
+      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
+
+      try{
+        const res = await callFn('verify_team_pin_function',{ eventId: EVENT_ID, teamCode: code, pin });
+        if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
+        if(res.token) localStorage.setItem('teamToken', res.token);
+        localStorage.setItem('teamCode', code);
+        localStorage.setItem('teamName', res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
+        updateCrewLabel();
+        setSigninMsg('Signed in. You can submit now!', 'success');
+        form.style.display='block';
+      }catch(err){
+        if(String(err.message).includes('404')){
+          setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
+        }else{
+          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
+        }
+      }
+    }
+
+    /* ===== CHARACTER COUNT ===== */
+    function updateCount(){
+      const remaining = 500 - (textEl.value?.length || 0);
+      countEl.textContent = remaining;
+      countEl.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
+    }
+    textEl.addEventListener('input', updateCount);
+
+    /* ===== SUBMIT ===== */
+    async function submitLimerick(e){
+      e.preventDefault();
+      clearFeedback();
+
+      if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
+      if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
+
+      // Minimum basic validation
+      const text = (textEl.value || '').trim();
+      if(text.length < 50){ setFeedback('Please write a longer limerick (at least 50 characters).','error'); return; }
+      const lines = text.split('\n').filter(l=>l.trim().length>0);
+      if(lines.length < 3){ setFeedback('Write your limerick across multiple lines (AABBA).','error'); return; }
+
+      submitBtn.disabled = true;
+      loadingEl.style.display = 'block';
+
+      try{
+        await callFn('submit_limerick_function',{
+          eventId: EVENT_ID,
+          teamCode: teamCode(),
+          token: token(),
+          topic: (topicEl.value || '').trim(),
+          limerickText: text
+        });
+
+        setFeedback('🎉 Submitted! Your verse is in Terry’s vault. Check the leaderboard/gallery in a few minutes for your score.', 'success');
+        form.querySelectorAll('input, textarea, button').forEach(el=>el.disabled=true);
+        form.style.opacity='0.6';
+      }catch(err){
+        setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'}`, 'error');
+      }finally{
+        submitBtn.disabled = false;
+        loadingEl.style.display = 'none';
+      }
+    }
+
+    /* ===== WIRE UP & INIT ===== */
+    signinBtn.addEventListener('click', signIn);
+    form.addEventListener('submit', submitLimerick);
+
+    (async function init(){
+      // close mobile menu when following a link
+      document.querySelectorAll('.nav-link,.dropdown-link').forEach(a=>{
+        a.addEventListener('click',()=>{ navMenu.classList.remove('active'); navToggle.textContent='☰'; });
+      });
+
+      updateCrewLabel();
+      const state = await refreshEventState();
+      await loadTeams();
+
+      // If already signed in on this device and event is running, show form
+      if(teamCode() && state==='RUNNING'){ form.style.display='block'; }
+      updateCount();
+    })();
   </script>
 </body>
 </html>
