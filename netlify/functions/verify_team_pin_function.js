@@ -1,7 +1,7 @@
 // /.netlify/functions/verify_team_pin_function.js
 const { google } = require('googleapis');
 
-// ---- CORS helpers ----
+// ---------- CORS ----------
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -10,77 +10,125 @@ const CORS = {
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
 const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success: false, message: m }) });
 
-// ---- ENV: spreadsheet + service account ----
+// ---------- ENV: spreadsheet id (use your standard keys) ----------
 const SPREADSHEET_ID =
   process.env.GOOGLE_SHEET_ID ||
   process.env.SPREADSHEET_ID ||
   process.env.SHEET_ID ||
   '';
 
-function parseServiceAccount() {
+// ---------- Service Account parsing (supports JSON or split email/key) ----------
+function buildServiceAccount() {
+  // 1) Full JSON, possibly base64
   let raw =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
     process.env.GCP_SERVICE_ACCOUNT ||
     process.env.FIREBASE_SERVICE_ACCOUNT ||
     '';
-  if (!raw) return null;
-  if (!raw.trim().startsWith('{')) raw = Buffer.from(raw, 'base64').toString('utf8');
-  return JSON.parse(raw);
+  if (raw) {
+    const text = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
+    try { return JSON.parse(text); } catch (e) { /* fall through to split */ }
+  }
+
+  // 2) Split env (email + private key)
+  const email =
+    process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
+    process.env.GCP_SA_EMAIL ||
+    process.env.GCLOUD_CLIENT_EMAIL ||
+    process.env.SERVICE_ACCOUNT_EMAIL ||
+    '';
+
+  let private_key =
+    process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
+    process.env.GCP_SA_KEY ||
+    process.env.GCLOUD_PRIVATE_KEY ||
+    process.env.SERVICE_ACCOUNT_PRIVATE_KEY ||
+    '';
+
+  if (email && private_key) {
+    // Netlify often stores \n as literal two chars; fix them
+    private_key = private_key.replace(/\\n/g, '\n');
+    return { client_email: email, private_key };
+  }
+
+  return null;
 }
 
-async function getSheets() {
-  const svc = parseServiceAccount();
-  if (!svc) throw new Error('Missing Google service account JSON (set GOOGLE_SERVICE_ACCOUNT_JSON or *_B64)');
+async function getSheetsClient() {
+  const sa = buildServiceAccount();
+  if (!sa) throw new Error('Missing Google service account (set GOOGLE_SERVICE_ACCOUNT_JSON[_B64] or EMAIL/PRIVATE_KEY)');
   const auth = new google.auth.JWT(
-    svc.client_email,
+    sa.client_email,
     null,
-    svc.private_key,
+    sa.private_key,
     ['https://www.googleapis.com/auth/spreadsheets.readonly']
   );
   await auth.authorize();
   return google.sheets({ version: 'v4', auth });
 }
 
-// ---- Handler ----
+// ---------- Helper to read the Teams sheet robustly ----------
+async function readTeams() {
+  const sheets = await getSheetsClient();
+
+  // Try common tab names
+  const ranges = ['teams!A:Z', 'Teams!A:Z', 'TEAMS!A:Z'];
+  let rows = [];
+  let lastErr;
+  for (const range of ranges) {
+    try {
+      const resp = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
+      rows = resp.data.values || [];
+      if (rows.length) break;
+    } catch (e) { lastErr = e; }
+  }
+  if (!rows.length) {
+    if (!SPREADSHEET_ID) throw new Error('Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
+    if (lastErr) throw lastErr;
+    throw new Error('No rows found in teams sheet');
+  }
+
+  const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
+  const getIdx = (...names) => names.map(n => headers.indexOf(n)).find(i => i >= 0);
+  const idxCode = getIdx('teamcode', 'code', 'team_code', 'id');
+  const idxName = getIdx('teamname', 'name', 'team_name');
+  const idxPin  = getIdx('pin', 'secret', 'passcode');
+
+  if (idxCode == null || idxCode < 0 || idxPin == null || idxPin < 0) {
+    throw new Error('Teams sheet must include columns for teamCode and pin');
+  }
+
+  const teams = rows.slice(1).map(r => ({
+    teamCode: (r[idxCode] || '').toString().trim(),
+    teamName: idxName >= 0 ? (r[idxName] || '').toString().trim() : '',
+    pin:      (r[idxPin]  || '').toString().trim(),
+  })).filter(t => t.teamCode);
+
+  return teams;
+}
+
+// ---------- Handler ----------
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return ok({ success: true });
   if (event.httpMethod !== 'POST') return bad(405, 'Use POST');
 
-  // Parse body safely
   let body = {};
-  try { body = JSON.parse(event.body || '{}'); }
-  catch { return bad(400, 'Invalid JSON'); }
+  try { body = JSON.parse(event.body || '{}'); } catch { return bad(400, 'Invalid JSON'); }
 
   const { eventId, teamCode, pin } = body || {};
   if (!eventId || !teamCode || !pin) return bad(400, 'eventId, teamCode, pin are required');
-  if (!SPREADSHEET_ID) return bad(500, 'Missing GOOGLE_SHEET_ID / SPREADSHEET_ID env');
 
   try {
-    const sheets = await getSheets();
-    // Read the Teams tab (headers in row 1). Adjust tab name if yours differs.
-    const range = 'teams!A:Z';
-    const resp = await sheets.spreadsheets.values.get({ spreadsheetId: SPREADSHEET_ID, range });
-    const rows = resp.data.values || [];
-    if (!rows.length) return bad(500, 'No data in teams sheet');
+    const teams = await readTeams();
+    const t = teams.find(x => x.teamCode === teamCode);
+    if (!t) return ok({ success: true, valid: false });
 
-    const headers = rows[0].map(h => String(h || '').trim().toLowerCase());
-    const idxCode = headers.indexOf('teamcode') >= 0 ? headers.indexOf('teamcode') : headers.indexOf('code');
-    const idxName = headers.indexOf('teamname') >= 0 ? headers.indexOf('teamname') : headers.indexOf('name');
-    const idxPin  = headers.indexOf('pin') >= 0 ? headers.indexOf('pin') : headers.indexOf('secret');
-
-    if (idxCode < 0 || idxPin < 0) return bad(500, 'Teams sheet must include columns: teamCode, pin');
-
-    const row = rows.slice(1).find(r => (r[idxCode] || '').trim() === teamCode);
-    if (!row) return ok({ success: true, valid: false });
-
-    const valid = String(row[idxPin] || '').trim() === String(pin).trim();
+    const valid = String(t.pin) === String(pin).trim();
     if (!valid) return ok({ success: true, valid: false });
 
-    const teamName = idxName >= 0 ? String(row[idxName] || '').trim() : '';
-
-    // If you issue JWTs elsewhere, you can also include { token: jwt }
-    return ok({ success: true, valid: true, teamName });
+    // If you issue JWTs elsewhere, you can attach it here: { token }
+    return ok({ success: true, valid: true, teamName: t.teamName });
   } catch (err) {
     console.error('verify_team_pin_function error:', err);
     return bad(500, err.message || 'Server error');
