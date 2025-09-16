@@ -3,397 +3,328 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Terry's Treasure Quest - Live Leaderboard</title>
+  <title>TeamQuest – Leaderboard</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:linear-gradient(135deg,#d4691a,#f4a261);
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
-    }
-    .treasure-container{
-      background:linear-gradient(145deg,#f5e6d3,#e8d5b8);border-radius:25px;border:5px solid #8b4513;
-      box-shadow:0 15px 35px rgba(0,0,0,.3);padding:30px;max-width:900px;width:100%;position:relative;overflow:hidden
-    }
-    .treasure-container::before{
-      content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;
-      background:radial-gradient(circle,rgba(255,215,0,.1) 0%,transparent 70%);
-      animation:shimmer 3s ease-in-out infinite
-    }
-    @keyframes shimmer{0%,100%{transform:rotate(0)}50%{transform:rotate(180deg)}}
-    .header{text-align:center;margin-bottom:20px;position:relative;z-index:1}
-    .trophy{font-size:48px;margin-bottom:10px;animation:bounce 2s infinite}
-    @keyframes bounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}
-    .title{font-size:2.2em;color:#8b4513;margin-bottom:6px;text-shadow:2px 2px 4px rgba(0,0,0,.3);font-weight:bold}
-    .subtitle{font-size:1.05em;color:#a0522d;margin-bottom:12px}
-
-    .timer-display{
-      background:linear-gradient(145deg,#ff8c00,#ffa500);color:#fff;padding:10px 20px;border-radius:25px;
-      font-size:1.1em;font-weight:bold;text-align:center;margin:10px auto 0;max-width:360px;
-      box-shadow:0 5px 15px rgba(0,0,0,.2);border:3px solid #8b4513;transition:all .3s ease
-    }
-    .timer-display.penalty{background:linear-gradient(145deg,#dc143c,#b22222);animation:penalty-pulse 1s ease-in-out infinite;border-color:#8b0000}
-    .timer-display.paused{background:linear-gradient(145deg,#b9b9b9,#9e9e9e);border-color:#6b6b6b}
-    .timer-display.final{background:linear-gradient(145deg,#3bb273,#2f9a60);border-color:#267c4e}
-    .timer-display.awaiting{background:linear-gradient(145deg,#ffc107,#f2b602);border-color:#c58d02}
-
-    @keyframes penalty-pulse{
-      0%,100%{box-shadow:0 5px 15px rgba(220,20,60,.4);transform:scale(1)}
-      50%{box-shadow:0 8px 25px rgba(220,20,60,.7);transform:scale(1.02)}
-    }
-
-    .notice{
-      background:#ffe168;color:#5b3d00;border:2px solid #d9aa00;padding:12px 16px;border-radius:14px;
-      font-weight:800;text-align:center;margin:16px 0 0;display:none
-    }
-    .notice.final{background:#ffe37a}
-    .notice.await{background:#ffe37a}
-
-    .leaderboard-container{
-      background:#fff;border-radius:15px;padding:16px;margin:16px 0 10px;border:2px solid #d2691e;position:relative;z-index:1
-    }
-    .team-entry{
-      display:flex;align-items:center;padding:16px;margin:10px 0;background:linear-gradient(145deg,#fff8dc,#f5f5dc);
-      border-radius:16px;border:2px solid #daa520;box-shadow:0 4px 12px rgba(0,0,0,.08);transition:transform .3s, box-shadow .3s;position:relative
-    }
-    .team-entry:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
-    .team-entry.penalized{background:linear-gradient(145deg,#ffeaea,#ffe0e0);border:2px solid #ff6b6b;border-left:6px solid #dc143c}
-    .rank{font-size:1.8em;font-weight:900;color:#8b4513;margin-right:16px;min-width:45px;text-align:center}
-    .rank.first{color:#ffd700;text-shadow:2px 2px 4px rgba(0,0,0,.4);font-size:2.1em}
-    .team-info{flex:1;margin-right:10px}
-    .team-name{font-size:1.35em;font-weight:900;color:#8b4513;margin-bottom:6px;display:flex;gap:10px;align-items:center;line-height:1.3}
-    .team-status-badge{padding:4px 10px;border-radius:18px;font-size:.7em;font-weight:700;letter-spacing:.4px;color:#fff}
-    .status-returned{background:#27ae60}.status-late{background:#e74c3c}
-    .total-score{font-size:1.4em;font-weight:800;color:#8b4513;background:linear-gradient(145deg,#ffd700,#ffed4e);
-      padding:10px 16px;border-radius:18px;border:3px solid #b8860b;box-shadow:0 4px 12px rgba(0,0,0,.15);min-width:110px;text-align:center}
-    .total-score.penalized{background:linear-gradient(145deg,#ffb3ba,#ff9999);border-color:#dc143c;color:#8b0000}
-    .original-score{font-size:.65em;color:#999;text-decoration:line-through;margin-bottom:2px;opacity:.8}
-    .penalty-deduction{font-size:.65em;color:#dc143c;font-weight:800;margin-bottom:2px}
-    .status-bar{text-align:center;margin-top:10px;padding:10px;background:rgba(255,255,255,.85);border-radius:15px;font-size:.9em;color:#8b4513;font-weight:700}
-
+    /* ————— NAV ————— */
+    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:80px}
+    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
+    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
+    .nav-logo:hover{transform:scale(1.05)}
+    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
+    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
+    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
+    .nav-item{position:relative}
+    .nav-link{color:#F5DEB3;text-decoration:none;font-size:1rem;font-weight:bold;padding:12px 18px;border-radius:8px;transition:.3s;display:block;text-shadow:1px 1px 2px rgba(0,0,0,.7);background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap}
+    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
+    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
     @media (max-width:768px){
-      .treasure-container{padding:18px;margin:8px}.title{font-size:1.9em}.team-entry{flex-direction:column;align-items:stretch;gap:8px}
-      .rank{min-width:auto;align-self:flex-start;margin-bottom:4px}.team-name{font-size:1.2em}.total-score{align-self:center}
+      .treasure-nav{height:120px}
+      .nav-container{justify-content:center;position:relative}
+      .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
+      .nav-logo img{height:85px!important}
+      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
+      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513 0%,#654321 100%);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .3s;overflow-y:auto}
+      .nav-menu.active{left:0}
+      .nav-link{font-size:1.1rem;padding:15px 25px;width:280px;text-align:center;background:linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6));border:2px solid #DAA520;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.3)}
+    }
+
+    /* ————— PAGE ————— */
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;padding:20px;padding-top:100px}
+    .container{max-width:1100px;margin:0 auto;background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:24px;box-shadow:0 20px 40px rgba(0,0,0,.2);padding:22px;position:relative}
+    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
+    h1{margin:6px 0 4px;color:#8B4513;font-weight:800;text-align:center}
+    .subtitle{text-align:center;color:#A0522D;margin-bottom:10px;font-weight:600}
+
+    .status{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;margin:8px 0 16px}
+    .pill{padding:8px 12px;border-radius:999px;border:2px solid #DAA520;background:#FFF8DC;color:#654321;font-weight:700}
+    .pill.warn{border-color:#FF8C00}
+    .pill.ok{border-color:#32CD32}
+    .pill.err{border-color:#8B0000}
+
+    .countdown{font-size:1.1rem;font-weight:800;color:#8B4513;text-align:center;margin:2px 0 10px}
+    .hint{font-size:.95rem;color:#654321;text-align:center;margin-bottom:8px}
+
+    .hidden-banner{background:linear-gradient(135deg,#FFE4B5,#F0C27B);border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:12px;margin:10px 0;color:#654321;font-weight:700;text-align:center;display:none}
+
+    .board-outer{background:#fff9ee;border:2px solid #DAA520;border-radius:16px;overflow:auto;/* horizontal scroll on small screens */}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}
+    thead th{position:sticky;top:0;background:linear-gradient(135deg,#FFDE9E,#FFD27A);border-bottom:2px solid #DAA520;color:#8B4513;font-weight:800;text-align:left;padding:10px 12px}
+    tbody td{padding:10px 12px;border-bottom:1px dashed rgba(139,69,19,.25);vertical-align:middle}
+    .col-rank{width:70px;text-align:center;font-weight:800}
+    .col-team{min-width:220px;font-weight:700;color:#4a341b}
+    .col-total,.col-score{width:110px;text-align:right;font-weight:900}
+    .muted{color:#8B4513;opacity:.6}
+    .hidden-scores td.col-rank,.hidden-scores td.col-total,.hidden-scores td.col-score{color:transparent;text-shadow:0 0 10px rgba(139,69,19,.25)}
+    .penalty{color:#8B0000;font-weight:900}
+    .bonus{color:#2f5a14;font-weight:900}
+
+    .footer-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#654321}
+    .mini{font-size:.9rem}
+    .btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
+    .btn:hover{background:#A0522D}
+    .msg{margin-top:10px;padding:12px;border-radius:12px;border:2px solid;display:none;text-align:center;font-weight:700}
+    .msg.error{background:#ffd8dd;border-color:#b30024;color:#6b0015}
+    .msg.info{background:#e6ffe6;border-color:#32CD32;color:#064b06}
+
+    .spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(0,0,0,.15);border-top-color:#8B4513;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    @media (max-width:560px){
+      .col-rank{width:56px}
+      .col-total,.col-score{width:90px}
     }
   </style>
 </head>
 <body>
-  <div class="treasure-container" id="treasureContainer">
-    <div class="header">
-      <div class="trophy">🏆</div>
-      <h1 class="title" id="pageTitle">Terry's Treasure Leaderboard</h1>
-      <p class="subtitle" id="pageSubtitle">Live standings</p>
+  <!-- NAV -->
+  <nav class="treasure-nav">
+    <div class="nav-container">
+      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
+      </a>
+      <ul class="nav-menu" id="nav-menu">
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/clue_hunt_challenge">💎 The Treasure Hunt</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/scavenger_hunt">🔍 The Scavenger Hunt</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/quiz_challenge">⏰ The Timed Quiz</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/kindness_challenge_page">❤️ Kindness</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/limerick_challenge_page">📝 Limerick</a></li>
+        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_gallery">📸 Gallery</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </nav>
 
-      <div class="timer-display" id="timerDisplay">
-        <span id="timerIcon">⏰</span> <span id="timer">Loading…</span>
-      </div>
+  <div class="container">
+    <h1>TeamQuest Leaderboard</h1>
+    <p class="subtitle">Live standings with activity breakdown</p>
 
-      <div class="notice final" id="finalBanner">🏁 Adventure complete — final results</div>
-      <div class="notice await" id="awaitBanner">⏳ Adventure complete — awaiting publication</div>
-      <div class="notice await" id="notStartedBanner">🔒 Leaderboard will appear when results are published</div>
+    <div class="status" aria-live="polite">
+      <div class="pill" id="statePill">Checking event… <span class="spinner" aria-hidden="true"></span></div>
+      <div class="pill" id="phasePill" style="display:none"></div>
     </div>
 
-    <div class="leaderboard-container">
-      <div id="leaderboard">
-        <div style="text-align:center; padding:18px; color:#8b4513;">Loading leaderboard…</div>
-      </div>
+    <div class="countdown" id="countdown" aria-live="polite"></div>
+    <div class="hint" id="hint"></div>
+    <div id="hiddenBanner" class="hidden-banner">⏳ Scores are hidden for the final 15 minutes. Keep pushing!</div>
+
+    <div class="board-outer" id="boardOuter" aria-live="polite" aria-busy="true" style="display:none;">
+      <table id="boardTable" aria-describedby="countdown">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
     </div>
 
-    <div class="status-bar" id="statusBar">
-      <span class="auto-refresh-icon">🔄</span>
-      Auto-refreshing… Last updated: <span id="lastUpdated">—</span>
+    <div class="msg error" id="errorBox"></div>
+    <div class="footer-bar">
+      <div class="mini" id="updatedAt">Last updated —</div>
+      <button class="btn" id="refreshBtn">🔄 Refresh</button>
     </div>
   </div>
 
   <script>
-    // Accept ?event=... or ?eventId=...
+    /* ===== URL / TOKEN ===== */
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+    const EVENT_ID   = qs.get('event') || qs.get('eventId') || '';
+    const TEAM_TOKEN = localStorage.getItem('teamToken') || '';
 
-    let refreshInterval = null;
-    let refreshMs = 20000;
-    let timerInterval = null;
-    let endsAt = null;
-    let penaltyPerMin = 0;
-    let state = 'NOT_STARTED'; // NOT_STARTED | RUNNING | PAUSED | ENDED | PUBLISHED
+    /* ===== Fetch helper ===== */
+    async function callFn(path, payload){
+      const res = await fetch(`/.netlify/functions/${path}`,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          ...(TEAM_TOKEN ? {'Authorization':`Bearer ${TEAM_TOKEN}`} : {})
+        },
+        body: JSON.stringify(payload || {})
+      });
+      const data = await res.json().catch(()=>({}));
+      if(!res.ok || data.success === false) throw new Error(data.message || `Request failed (${res.status})`);
+      return data;
+    }
 
-    const $ = (sel) => document.querySelector(sel);
+    /* ===== Elements ===== */
+    const navToggle   = document.getElementById('nav-toggle');
+    const navMenu     = document.getElementById('nav-menu');
+    const statePill   = document.getElementById('statePill');
+    const phasePill   = document.getElementById('phasePill');
+    const countdownEl = document.getElementById('countdown');
+    const hintEl      = document.getElementById('hint');
+    const hiddenBanner= document.getElementById('hiddenBanner');
+    const boardOuter  = document.getElementById('boardOuter');
+    const theadEl     = document.getElementById('thead');
+    const tbodyEl     = document.getElementById('tbody');
+    const errorBox    = document.getElementById('errorBox');
+    const updatedAt   = document.getElementById('updatedAt');
+    const refreshBtn  = document.getElementById('refreshBtn');
 
+    navToggle?.addEventListener('click', ()=>{
+      navMenu.classList.toggle('active');
+      navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+    });
+
+    /* ===== Timing / state ===== */
+    const FIFTEEN_MIN_MS = 15 * 60 * 1000;
+    let countdownTimer = null;
+    let endsAtMs = null;
+    let serverNowMs = null;
+    let clientAtFetchMs = null;
+    let lastState = 'UNKNOWN';
+    let hideScores = false; // computed each tick
+
+    function nowMs(){
+      if(serverNowMs && clientAtFetchMs){
+        const drift = Date.now() - clientAtFetchMs;
+        return serverNowMs + drift;
+      }
+      return Date.now();
+    }
     function fmtTime(ms){
-      const sign = ms < 0 ? '+' : '';
-      const t = Math.abs(ms);
-      const h = Math.floor(t/3_600_000);
-      const m = Math.floor((t%3_600_000)/60_000);
-      const s = Math.floor((t%60_000)/1000);
-      return `${sign}${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+      const t = Math.max(0, ms);
+      const s = Math.floor(t/1000)%60;
+      const m = Math.floor(t/60000)%60;
+      const h = Math.floor(t/3600000);
+      const pad = n => String(n).padStart(2,'0');
+      return h>0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
     }
-    function prettyClock(d=new Date()){
-      return d.toTimeString().split(' ')[0];
+    function tryParseTs(obj){
+      const fields = ['endsAt','endAt','endTime','end','end_ts','endTimestamp','endISO'];
+      for(const k of fields){
+        if(!obj || !obj[k]) continue;
+        const v = obj[k];
+        if(typeof v === 'number') return v;
+        const ms = Date.parse(v);
+        if(!isNaN(ms)) return ms;
+      }
+      return null;
     }
-    function show(el, yes){ el.style.display = yes ? 'block' : 'none'; }
 
-    function setTimerUI(){
-      const tEl = $('#timer');
-      const card = $('#timerDisplay');
-      const icon = $('#timerIcon');
+    function setStatePill(text, cls=''){ statePill.textContent=text; statePill.className=`pill ${cls}`; }
+    function setPhasePill(text, cls=''){ phasePill.textContent=text; phasePill.className=`pill ${cls}`; phasePill.style.display = text ? 'inline-block':'none'; }
+    function setError(msg){ errorBox.textContent=msg; errorBox.className='msg error'; errorBox.style.display='block'; }
+    function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
 
-      card.classList.remove('penalty','paused','final','awaiting');
+    function updateCountdown(){
+      if(!endsAtMs){ countdownEl.textContent=''; hiddenBanner.style.display='none'; return; }
+      const left = endsAtMs - nowMs();
 
-      // Gate scoreboard visibility below — we only render rows for PUBLISHED.
-      if (state === 'PUBLISHED') {
-        tEl.textContent = 'Finished';
-        icon.textContent = '🏁';
-        card.classList.add('final');
-        $('#finalBanner').style.display = 'block';
-        $('#awaitBanner').style.display = 'none';
-        $('#notStartedBanner').style.display = 'none';
-        return;
-      }
+      // Hide scores in last 15 minutes while RUNNING
+      hideScores = lastState === 'RUNNING' && left > 0 && left <= FIFTEEN_MIN_MS;
 
-      if (state === 'ENDED') {
-        tEl.textContent = 'Awaiting publication';
-        icon.textContent = '⏳';
-        card.classList.add('awaiting');
-        $('#finalBanner').style.display = 'none';
-        $('#awaitBanner').style.display = 'block';
-        $('#notStartedBanner').style.display = 'none';
-        return;
-      }
-
-      if (state === 'PAUSED') {
-        tEl.textContent = 'Paused';
-        icon.textContent = '⏸';
-        card.classList.add('paused');
-        $('#finalBanner').style.display = 'none';
-        $('#awaitBanner').style.display = 'none';
-        $('#notStartedBanner').style.display = 'none';
-        return;
-      }
-
-      if (state === 'NOT_STARTED') {
-        tEl.textContent = 'Waiting to start';
-        icon.textContent = '⏰';
-        $('#finalBanner').style.display = 'none';
-        $('#awaitBanner').style.display = 'none';
-        $('#notStartedBanner').style.display = 'block';
-        return;
-      }
-
-      // RUNNING
-      if (!endsAt) {
-        tEl.textContent = 'Live';
-        icon.textContent = '⏰';
-        return;
-      }
-      const diff = new Date(endsAt).getTime() - Date.now();
-      if (diff >= 0) {
-        tEl.textContent = `Time remaining: ${fmtTime(diff)}`;
-        icon.textContent = '⏰';
-        $('#penaltyWarning')?.classList?.remove('show');
+      if(left <= 0){
+        countdownEl.textContent = '⏱️ Time’s up.';
       } else {
-        tEl.textContent = `Overtime: ${fmtTime(diff)}`;
-        icon.textContent = '⏱';
-        if (penaltyPerMin > 0) {
-          card.classList.add('penalty');
-        } else {
-          card.classList.remove('penalty');
+        countdownEl.textContent = `⏱️ Time left: ${fmtTime(left)}`;
+      }
+      hiddenBanner.style.display = hideScores ? 'block' : 'none';
+
+      // When ENDED (and not yet PUBLISHED), keep scores hidden and hint
+      if(lastState === 'ENDED'){
+        hideScores = true;
+      }
+
+      // Update phase pill / hint
+      if(lastState === 'RUNNING'){
+        if(hideScores){
+          setPhasePill('Final 15 — scores hidden', 'warn');
+          hintEl.textContent = 'Keep going! Scores reappear when time runs out and results are published.';
+        }else{
+          setPhasePill('Live scores visible', 'ok');
+          hintEl.textContent = 'Live updates while the event is running.';
         }
+      } else if(lastState === 'ENDED'){
+        setPhasePill('Event finished', 'warn');
+        hintEl.textContent = 'Waiting for results to be published…';
+      } else if(lastState === 'PUBLISHED'){
+        setPhasePill('Final results', 'ok');
+        hintEl.textContent = 'Official final standings.';
+      } else if(lastState === 'PAUSED'){
+        setPhasePill('Paused', 'warn');
+        hintEl.textContent = 'Scores may lag while the event is paused.';
+      } else if(lastState === 'NOT_STARTED'){
+        setPhasePill('Not started', 'warn');
+        hintEl.textContent = 'Scores will appear once the event begins.';
       }
 
-      $('#finalBanner').style.display = 'none';
-      $('#awaitBanner').style.display = 'none';
-      $('#notStartedBanner').style.display = 'none';
+      // Apply CSS class for hiding numbers
+      tbodyEl.parentElement.classList.toggle('hidden-scores', hideScores && lastState !== 'PUBLISHED');
     }
 
-    function normalizeState(s=''){
-      const v = String(s||'').trim().toUpperCase();
-      if (['RUNNING','STARTED','ACTIVE'].includes(v)) return 'RUNNING';
-      if (['PAUSED','PAUSE'].includes(v)) return 'PAUSED';
-      if (['PUBLISHED'].includes(v)) return 'PUBLISHED';
-      if (['ENDED','END','STOPPED','STOP','COMPLETE','COMPLETED','FINISHED'].includes(v)) return 'ENDED';
-      if (['NOT_STARTED','NOTSTARTED','READY','PENDING','DRAFT',''].includes(v)) return 'NOT_STARTED';
-      return 'NOT_STARTED';
+    /* ===== Leaderboard extraction with breakdown ===== */
+    const SYN = {
+      clues:      ['clues','clue','cluehunt','clueHunt','treasureHunt','clue_score','clueScore'],
+      quiz:       ['quiz','quizScore','trivia','timedQuiz','quiz_points','quizPoints'],
+      scavenger:  ['scavenger','scavengerHunt','scav','scavengerScore','scav_points','scavPoints'],
+      kindness:   ['kindness','kindnessScore','heart','heartTreasure','kindness_points'],
+      limerick:   ['limerick','limerickScore','poem','verse','limerick_points'],
+      bonus:      ['bonus','bonuses','bonusPoints','bonus_points'],
+      penalties:  ['penalties','penalty','deductions','penaltyPoints','penalty_points','penaltyScore']
+    };
+
+    function lowerKeyMap(obj){
+      const map = {};
+      for(const k in obj){ map[k.toLowerCase()] = obj[k]; }
+      return map;
     }
-
-    async function fetchEventState(){
-      const url = EVENT_ID ? `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`
-                           : '/.netlify/functions/get_event_state';
-      const r = await fetch(url);
-      const j = await r.json();
-      if (!r.ok || j.success === false) throw new Error(j.message || 'Event state error');
-
-      state = normalizeState(j.state || j.State);
-      endsAt = j.endsAt || j['EndsAt (ISO)'] || null;
-      penaltyPerMin = Number(j.penaltyPerMin ?? j['PenaltyPerMin'] ?? 0);
-
-      // Title / banner + refresh cadence
-      const title = $('#pageTitle');
-      const subtitle = $('#pageSubtitle');
-
-      if (state === 'RUNNING') {
-        title.textContent = "Terry's Treasure Leaderboard";
-        subtitle.textContent = "Live standings";
-        refreshMs = 10000;
-      } else if (state === 'PAUSED') {
-        title.textContent = "Terry's Treasure Leaderboard";
-        subtitle.textContent = "Paused";
-        refreshMs = 20000;
-      } else if (state === 'ENDED') {
-        title.textContent = "Final Treasure Results";
-        subtitle.textContent = "Awaiting publication";
-        refreshMs = 10000; // keep polling for publish
-      } else if (state === 'PUBLISHED') {
-        title.textContent = "🏆 Final Treasure Results";
-        subtitle.textContent = "Adventure complete — final standings";
-        refreshMs = 60000;
-      } else {
-        title.textContent = "Terry's Treasure Leaderboard";
-        subtitle.textContent = "Waiting to start";
-        refreshMs = 20000;
-      }
-
-      if (!timerInterval) timerInterval = setInterval(setTimerUI, 1000);
-      setTimerUI();
-    }
-
-    function pickNumber(...vals){
-      for (const v of vals){
+    function getValBySyn(obj, synArr){
+      const m = lowerKeyMap(obj || {});
+      for(const s of synArr){
+        const v = m[s.toLowerCase()];
         const n = Number(v);
-        if (Number.isFinite(n)) return n;
+        if(Number.isFinite(n)) return n;
       }
       return 0;
     }
 
-    function renderLeaderboard(rows){
-      const box = $('#leaderboard');
+    function extractRows(data){
+      const list = Array.isArray(data?.leaderboard) ? data.leaderboard
+                 : Array.isArray(data?.teams) ? data.teams
+                 : [];
+      return list.map(r=>{
+        const total = Number(r.finalScore ?? r.total ?? r.score ?? r.points ?? 0) || 0;
+        return {
+          teamName: r.teamName || r.name || '',
+          teamCode: r.teamCode || r.code || '',
+          total,
+          raw: r
+        };
+      });
+    }
 
-      // Gate: render rows ONLY when published
-      if (state !== 'PUBLISHED') {
-        box.innerHTML = `
-          <div style="text-align:center; padding:18px; color:#8b4513;">
-            ${state === 'ENDED'
-              ? 'Final results will appear here once they are published.'
-              : 'Leaderboard will appear after results are published.'}
-          </div>`;
+    function detectColumns(rows){
+      // Decide which breakdown columns to show by presence across any row
+      const defs = [
+        {id:'clues',     label:'Clues',      syn:SYN.clues,      cls:'col-score'},
+        {id:'quiz',      label:'Quiz',       syn:SYN.quiz,       cls:'col-score'},
+        {id:'scavenger', label:'Scavenger',  syn:SYN.scavenger,  cls:'col-score'},
+        {id:'kindness',  label:'Kindness',   syn:SYN.kindness,   cls:'col-score'},
+        {id:'limerick',  label:'Limerick',   syn:SYN.limerick,   cls:'col-score'},
+        {id:'bonus',     label:'Bonus',      syn:SYN.bonus,      cls:'col-score bonus'},
+        {id:'penalties', label:'Penalties',  syn:SYN.penalties,  cls:'col-score penalty'}
+      ];
+      return defs.filter(d => rows.some(r => getValBySyn(r.raw, d.syn) !== 0));
+    }
+
+    function buildHeader(cols){
+      const ths = [
+        `<th class="col-rank">Rank</th>`,
+        `<th class="col-team">Team</th>`,
+        `<th class="col-total">Total</th>`,
+        ...cols.map(c=>`<th class="${c.cls}">${c.label}</th>`)
+      ].join('');
+      theadEl.innerHTML = `<tr>${ths}</tr>`;
+    }
+
+    function renderBody(rows, cols, hide){
+      tbodyEl.innerHTML = '';
+      if(!rows.length){
+        tbodyEl.innerHTML = `<tr><td class="col-rank">—</td><td class="col-team muted">No teams yet</td><td class="col-total">—</td>${cols.map(()=>'<td class="col-score">—</td>').join('')}</tr>`;
         return;
       }
 
-      if (!Array.isArray(rows) || rows.length === 0) {
-        box.innerHTML = `<div style="text-align:center; padding:18px; color:#8b4513;">No crews yet.</div>`;
-        return;
-      }
-
-      // Map rows into a consistent shape
-      const mapped = rows.map((t) => {
-        const teamName  = t.teamName || t.name || t.team || t.teamCode || 'Crew';
-        const penalty   = pickNumber(t.penaltyApplied, t.penalty, t.latePenalty, t.penaltyDeduction);
-        const adjusted  = Number.isFinite(Number(t.adjustedScore)) ? Number(t.adjustedScore)
-                          : Number.isFinite(Number(t.score))       ? Number(t.score)
-                          : pickNumber(t.totalScore, t.originalScore, t.baseScore) - penalty;
-        const baseScore = Number.isFinite(Number(t.totalScore)) ? Number(t.totalScore)
-                          : Number.isFinite(Number(t.originalScore)) ? Number(t.originalScore)
-                          : adjusted + penalty;
-
-        const returnedAt = t.returnedAt || t.ReturnedAt || t['ReturnedAt (ISO)'] || '';
-        const lateMins = pickNumber(t.lateMins, t.LateMins);
-        return { teamName, adjusted, penalty, baseScore, returnedAt, lateMins };
-      });
-
-      // Sort: adjusted desc, then team name
-      mapped.sort((a,b)=> (b.adjusted - a.adjusted) || a.teamName.localeCompare(b.teamName));
-
-      // Ties: equal rank numbers if scores equal
-      let html = '';
-      let lastScore = null, lastRank = 0;
-      mapped.forEach((t, i) => {
-        const sameAsPrev = lastScore !== null && t.adjusted === lastScore;
-        const rank = sameAsPrev ? lastRank : i + 1;
-        lastScore = t.adjusted; lastRank = rank;
-
-        const rankClass = rank===1 ? 'first' : '';
-        const entryClass = t.penalty>0 ? 'team-entry penalized' : 'team-entry';
-        const returned = !!t.returnedAt;
-        const statusBadge = returned
-          ? `<span class="team-status-badge status-returned">Returned</span>`
-          : '';
-
-        const scoreBlock = t.penalty>0
-          ? `<div class="total-score penalized">
-               <div class="original-score">${t.baseScore}</div>
-               <div class="penalty-deduction">-${t.penalty}</div>
-               ${t.adjusted}
-             </div>`
-          : `<div class="total-score">${t.adjusted}</div>`;
-
-        html += `
-          <div class="${entryClass}">
-            <div class="rank ${rankClass}">${rank}</div>
-            <div class="team-info">
-              <div class="team-name">${t.teamName} ${statusBadge}</div>
-            </div>
-            ${scoreBlock}
-          </div>
-        `;
-      });
-
-      box.innerHTML = html;
-    }
-
-    async function fetchLeaderboard(){
-      // Only request data when published (reduces flicker & load)
-      if (state !== 'PUBLISHED') { renderLeaderboard([]); return; }
-      const base = '/.netlify/functions/get_leaderboard';
-      const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
-      const r = await fetch(url);
-      const j = await r.json().catch(()=> ({}));
-      if (!r.ok || j.success === false) throw new Error(j.message || 'Leaderboard error');
-      const rows = j.rows || j.data || [];
-      renderLeaderboard(rows);
-      const lu = j.lastUpdated || new Date().toISOString();
-      $('#lastUpdated').textContent = lu.slice(11,19);
-    }
-
-    async function refreshAll(){
-      await fetchEventState();
-      await fetchLeaderboard();
-    }
-
-    function startAutoRefresh(){
-      if (refreshInterval) clearInterval(refreshInterval);
-      refreshInterval = setInterval(async () => {
-        try{
-          await refreshAll();
-          // When published, slow down and then stop refreshing (stable final screen)
-          if (state === 'PUBLISHED') {
-            clearInterval(refreshInterval);
-            refreshInterval = null;
-            $('#statusBar').innerHTML = `🏁 Final results published | Last updated: <span id="lastUpdated">${prettyClock(new Date())}</span>`;
-          }
-        } catch(e){
-          console.error(e);
-        }
-      }, refreshMs);
-    }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      try{
-        await refreshAll();
-        startAutoRefresh();
-      }catch(e){
-        console.error(e);
-        $('#leaderboard').innerHTML = `
-          <div class="error-container" style="background:#ffe6e6;border:2px solid #ff6b6b;border-radius:10px;padding:15px;margin:10px 0;color:#d63031;text-align:center;">
-            ❌ ${e.message || 'Error loading data'}
-            <button class="retry-btn" onclick="location.reload()" style="background:#ff8c00;color:#fff;border:none;padding:8px 16px;border-radius:16px;cursor:pointer;font-weight:700;margin-left:10px;">Retry</button>
-          </div>
-        `;
-      }
-    });
-
-    window.addEventListener('beforeunload', () => {
-      if (refreshInterval) clearInterval(refreshInterval);
-      if (timerInterval) clearInterval(timerInterval);
-    });
-  </script>
-</body>
-</html>
+      let list = [...rows];
+      if(hide){
+        // Alphabetical during hidden period to avoid leaking rank
+        list.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
+      } else {
+        list.sort((a,b)=> (b.total - a.total
