@@ -1,6 +1,17 @@
 // /.netlify/functions/submit_kindness_function.js
-// Accepts Kindness submissions with optional JWT. Falls back to teamCode-only.
-// Writes to "submissions" (or "Submissions") with a tidy row.
+// Kindness submission (Zapier-compatible row shape)
+//
+// Writes rows that match your historic columns so Zapier keeps working:
+//
+// A Timestamp     | B Team Code | C Activity | D Nonce
+// E Payload (JSON)| F AI Status | G AI Attempts | H AI Score
+// I Final Score   | J Idempotency | K Event Id
+//
+// Auth: accepts Bearer team JWT if present; otherwise allows teamCode-only
+// by confirming the team exists in the Teams tab.
+//
+// Env: reuses your _utils.js if present (same auth/env as the hardened funcs).
+// Spreadsheet id is taken from GOOGLE_SHEET_ID (or the usual fallbacks).
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -10,7 +21,6 @@ const CORS = {
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
 const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
 
-// Try to reuse your hardened utils (env, auth, sheets)
 let U = null;
 try { U = require('./_utils'); } catch {}
 
@@ -25,7 +35,7 @@ function getSpreadsheetId() {
 }
 
 async function getSheets() {
-  // Prefer utils wiring if present
+  // Prefer your shared utils wiring
   if (U) {
     if (typeof U.getSheetsClient === 'function') return await U.getSheetsClient();
     if (typeof U.getSheets === 'function') {
@@ -38,9 +48,9 @@ async function getSheets() {
       return U.google.sheets({ version:'v4', auth: U.auth });
     }
   }
-  // Fallback: direct googleapis (supports JSON or split email/key)
-  const { google } = require('googleapis');
 
+  // Fallback: direct googleapis with flexible env
+  const { google } = require('googleapis');
   let raw =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
@@ -80,17 +90,15 @@ async function getSheets() {
 async function getTeamFromAuth(event) {
   const hdr = event.headers || {};
   const authz = hdr.authorization || hdr.Authorization || '';
-  if (!authz.startsWith('Bearer ')) return null;
+  if (!authz?.startsWith?.('Bearer ')) return null;
   const token = authz.slice(7).trim();
 
-  // Prefer your utils’ verifier if available
   if (U) {
     try {
       if (typeof U.verifyTeamToken === 'function') return await U.verifyTeamToken(token);
-      if (typeof U.verifyJwt === 'function') return await U.verifyJwt(token);
+      if (typeof U.verifyJwt === 'function')       return await U.verifyJwt(token);
     } catch { /* ignore */ }
   }
-  // Fallback: jsonwebtoken with any of these secrets
   try {
     const jwt = require('jsonwebtoken');
     const secret = process.env.TQ_TEAM_JWT_SECRET || process.env.JWT_SECRET || process.env.SECRET;
@@ -106,7 +114,6 @@ const findIdx = (hdrs, names) => {
   return -1;
 };
 
-// Load teams and confirm a code exists
 async function teamExists(sheets, spreadsheetId, code) {
   const ranges = ['teams!A:Z','Teams!A:Z','TEAMS!A:Z'];
   for (const range of ranges) {
@@ -119,13 +126,13 @@ async function teamExists(sheets, spreadsheetId, code) {
       if (idxCode < 0) continue;
       const found = rows.slice(1).some(r => (r[idxCode] || '').toString().trim() === code);
       if (found) return true;
-    } catch { /* try next */ }
+    } catch {}
   }
   return false;
 }
 
-// Read all existing submissions to prevent duplicates (best-effort)
-async function hasExistingSubmission(sheets, spreadsheetId, eventId, teamCode) {
+// Look for an existing row by Idempotency or by (eventId + teamCode + activity)
+async function alreadySubmitted(sheets, spreadsheetId, activity, teamCode, eventId, idemKey) {
   const ranges = ['submissions!A:Z','Submissions!A:Z'];
   for (const range of ranges) {
     try {
@@ -133,23 +140,25 @@ async function hasExistingSubmission(sheets, spreadsheetId, eventId, teamCode) {
       const rows = resp.data.values || [];
       if (!rows.length) continue;
       const headers = rows[0];
-      const idxEvent = findIdx(headers, ['eventid','event','event_id']);
+      const idxIdem  = findIdx(headers, ['idempotency','idem','idempotencykey']);
+      const idxAct   = findIdx(headers, ['activity','type']);
       const idxTeam  = findIdx(headers, ['teamcode','team','team_code','code','crew','crewcode']);
-      const idxType  = findIdx(headers, ['type','activity']);
-      const body = rows.slice(1);
-      return body.some(r =>
-        (idxEvent < 0 || (r[idxEvent] || '').toString().trim() === eventId) &&
-        (idxTeam  < 0 || (r[idxTeam]  || '').toString().trim() === teamCode) &&
-        (idxType  < 0 || norm(r[idxType] || '') === 'kindness')
-      );
-    } catch { /* try next */ }
+      const idxEvent = findIdx(headers, ['eventid','event','event_id']);
+
+      for (const r of rows.slice(1)) {
+        const idemOk = idxIdem >= 0 && (r[idxIdem] || '').toString().trim() === idemKey;
+        const tripOk = (idxAct<0 || norm(r[idxAct]||'')===norm(activity))
+                    && (idxTeam<0 || (r[idxTeam]||'').toString().trim()===teamCode)
+                    && (idxEvent<0 || (r[idxEvent]||'').toString().trim()===eventId);
+        if (idemOk || tripOk) return true;
+      }
+    } catch {}
   }
   return false;
 }
 
-// Append submission (first tab that works)
-async function appendSubmission(sheets, spreadsheetId, row) {
-  const targets = ['submissions!A:Z','Submissions!A:Z','Kindness!A:Z','KINDNESS!A:Z'];
+async function appendRowZapierShape(sheets, spreadsheetId, row) {
+  const targets = ['submissions!A:K','Submissions!A:K'];
   for (const range of targets) {
     try {
       await sheets.spreadsheets.values.append({
@@ -160,14 +169,20 @@ async function appendSubmission(sheets, spreadsheetId, row) {
         requestBody: { values: [row] },
       });
       return true;
-    } catch { /* try next */ }
+    } catch {}
   }
-  throw new Error('Could not append to any submissions sheet (tried: submissions, Submissions, Kindness)');
+  throw new Error('Could not append to submissions/Submissions A:K');
 }
+
+const ts = () => new Date().toISOString().slice(0,19).replace('T',' ');
+const makeNonce = () => `kindness-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`;
+const makeIdem  = (eventId, teamCode) => `kindness|${eventId}|${teamCode}`;
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return ok({ success:true });
   if (event.httpMethod !== 'POST')   return bad(405,'Use POST');
+
+  console.info('Kindness submission started');
 
   let body = {};
   try { body = JSON.parse(event.body || '{}'); } catch { return bad(400,'Invalid JSON'); }
@@ -175,17 +190,16 @@ exports.handler = async (event) => {
   const eventId = (body.eventId || body.event || '').toString().trim();
   let teamCode  = (body.teamCode || body.team || '').toString().trim();
 
-  // Pull from JWT if present (preferred)
+  // Prefer team from JWT if present
   const claims = await getTeamFromAuth(event);
   if (claims?.teamCode) teamCode = claims.teamCode;
 
-  // Map/normalize payload fields
+  // Payload fields (flexible aliases)
   const description = (body.description || body.text || body.story || body.storyText || body.desc || '').toString().trim();
   const location    = (body.location || body.place || body.where || '').toString().trim();
   const photoUrl    = (body.photoUrl || body.imageUrl || body.imgUrl || body.url || body.photo || '').toString().trim();
-  const teamName    = (body.teamName || '').toString().trim();
 
-  if (!eventId) return bad(400,'Missing eventId');
+  if (!eventId)  return bad(400,'Missing eventId');
   if (!teamCode) return bad(400,'Missing teamCode (sign in first)');
   if (!description || description.length < 5) return bad(400,'Please include a short description');
   if (!photoUrl) return bad(400,'Please include a photoUrl (Uploadcare URL)');
@@ -194,7 +208,7 @@ exports.handler = async (event) => {
   if (!spreadsheetId) return bad(500,'Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
 
   try {
-    // optional: block if event is not running (uses utils if available)
+    // optional: respect event state if your utils expose it
     if (U && typeof U.getEventState === 'function') {
       const state = await U.getEventState(eventId).catch(()=>null);
       if (state && state !== 'RUNNING') {
@@ -204,35 +218,43 @@ exports.handler = async (event) => {
 
     const sheets = await getSheets();
 
-    // If no JWT, at least confirm the team code exists
+    // If no JWT, at least validate the team exists
     if (!claims?.teamCode) {
       const exists = await teamExists(sheets, spreadsheetId, teamCode);
       if (!exists) return bad(401,'Unknown teamCode');
     }
 
-    // Enforce one kindness submission per team/event (best-effort)
-    const already = await hasExistingSubmission(sheets, spreadsheetId, eventId, teamCode);
-    if (already) return bad(400,'You already submitted a kindness for this event');
+    const activity = 'kindness';
+    const nonce = makeNonce();
+    const idempotencyKey = makeIdem(eventId, teamCode);
 
-    // Compose a tidy row
-    const timestamp = new Date().toISOString();
+    // De-dupe: one kindness per team/event
+    if (await alreadySubmitted(sheets, spreadsheetId, activity, teamCode, eventId, idempotencyKey)) {
+      return ok({ success:true, message:'Already submitted' });
+    }
+
+    // Zapier-friendly payload as a single JSON string
+    const payload = JSON.stringify({ description, photoUrl, location });
+
+    // Row shape that matches your historical columns
     const row = [
-      timestamp,          // 1. timestamp
-      eventId,            // 2. eventId
-      'kindness',         // 3. type/activity
-      teamCode,           // 4. teamCode
-      teamName,           // 5. teamName (may be empty)
-      description,        // 6. description / story
-      photoUrl,           // 7. photoUrl
-      location,           // 8. location (optional)
+      ts(),            // A Timestamp (yyyy-mm-dd HH:MM:SS)
+      teamCode,        // B Team Code
+      activity,        // C Activity
+      nonce,           // D Nonce (unique per submission)
+      payload,         // E Payload (JSON)
+      'QUEUED',        // F AI Status (initial state)
+      0,               // G AI Attempts
+      '',              // H AI Score
+      '',              // I Final Score
+      idempotencyKey,  // J Idempotency
+      eventId          // K Event Id
     ];
 
-    await appendSubmission(sheets, spreadsheetId, row);
-
+    await appendRowZapierShape(sheets, spreadsheetId, row);
     return ok({ success:true, message:'Submitted' });
   } catch (err) {
     console.error('Kindness submission error:', err);
     return bad(400, err.message || 'Submission failed');
   }
 };
-
