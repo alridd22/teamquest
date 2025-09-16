@@ -59,7 +59,14 @@
     .status-banner.ended{border-left-color:#8B0000}
     .status-banner.published{border-left-color:#32CD32}
 
-    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:14px;text-align:center;font-size:1.05em;font-weight:700;margin-bottom:16px;box-shadow:0 5px 15px rgba(139,69,19,.3);border:2px solid #DAA520}
+    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:14px;text-align:center;font-size:1.05em;font-weight:700;margin-bottom:12px;box-shadow:0 5px 15px rgba(139,69,19,.3);border:2px solid #DAA520}
+    .auth-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px dashed #DAA520;border-radius:14px;padding:16px;margin:10px 0}
+    .auth-grid{display:grid;grid-template-columns:1fr 160px;gap:10px}
+    @media (max-width:560px){.auth-grid{grid-template-columns:1fr}}
+    .auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .small-btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
+    .small-btn:hover{background:#A0522D}
+
     .terry-greeting{display:flex;gap:16px;margin:12px 0;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-radius:16px;padding:18px;border:3px solid #DAA520;box-shadow:0 5px 15px rgba(139,69,19,.2)}
     .terry-character img{width:100px;height:100px;border-radius:12px;border:4px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.3);object-fit:cover;background:linear-gradient(135deg,#8B4513,#A0522D);display:block}
     .terry-note{background:linear-gradient(135deg,#FFB6C1 0%,#FFC0CB 100%);color:#8B4513;padding:16px;border-radius:12px;border:3px solid #DAA520;font-weight:600;line-height:1.5;box-shadow:0 5px 15px rgba(255,182,193,.3)}
@@ -72,8 +79,9 @@
 
     .form-group{margin-bottom:16px}
     label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700;font-size:1.02em}
-    input[type="text"], textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;transition:.2s;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%);font-family:inherit}
-    input[type="text"]:focus, textarea:focus{outline:none;border-color:#FF8C00;background:#fff;box-shadow:0 0 0 3px rgba(255,140,0,.2);transform:translateY(-1px)}
+    select,input[type="text"],input[type="number"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;transition:.2s;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%);font-family:inherit}
+    select:focus,input[type="text"]:focus,input[type="number"]:focus,textarea:focus{outline:none;border-color:#FF8C00;background:#fff;box-shadow:0 0 0 3px rgba(255,140,0,.2);transform:translateY(-1px)}
+    .pin{font-weight:800;letter-spacing:2px;text-align:center}
     textarea{min-height:120px;resize:vertical;line-height:1.5}
     .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:5px;font-weight:600}
 
@@ -95,31 +103,6 @@
     .success-message{background:linear-gradient(135deg,#90EE90 0%,#98FB98 100%);border-color:#32CD32;color:#064b06}
     .error-message{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
     .loading{display:none;text-align:center;margin-top:12px;color:#8B4513;font-weight:800;font-size:1.02em}
-
-    .auth-block{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px dashed #DAA520;border-radius:12px;padding:16px;text-align:center;color:#654321;font-weight:700}
-    .auth-actions{margin-top:8px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-    .small-btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
-    .small-btn:hover{background:#A0522D}
-
-    @media (max-width:600px){
-      .container{padding:26px 18px}
-      h1{font-size:1.8em}
-      .terry-greeting{flex-direction:column;align-items:center;text-align:center}
-    }
-
-    /* ——— Modal (kept, shorter) ——— */
-    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;justify-content:center;align-items:center;z-index:2000;padding:20px}
-    .modal-overlay.active{display:flex}
-    .modal-content{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border-radius:20px;padding:28px;max-width:720px;width:100%;max-height:90vh;overflow-y:auto;border:4px solid #8B4513;box-shadow:0 20px 40px rgba(0,0,0,.3);position:relative}
-    .modal-content::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#FFB6C1,#DAA520,#FFD700);border-radius:20px 20px 0 0}
-    .close-btn{position:absolute;top:12px;right:16px;background:none;border:none;font-size:22px;color:#8B4513;cursor:pointer;padding:5px;border-radius:50%;transition:.2s}
-    .close-btn:hover{background:rgba(255,140,0,.2);transform:scale(1.06)}
-    .modal-title{color:#8B4513;font-size:1.6em;font-weight:800;margin-bottom:6px;text-align:center}
-    .modal-subtitle{color:#A0522D;text-align:center;margin-bottom:14px;font-weight:700}
-    .scoring-grid{display:grid;gap:12px}
-    .scoring-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px solid #DAA520;border-radius:12px;padding:14px}
-    .scoring-card h4{margin:0 0 6px;color:#8B4513}
-    .scoring-card p{margin:0;color:#654321}
   </style>
 </head>
 <body>
@@ -146,20 +129,6 @@
     </div>
   </nav>
 
-  <!-- Scoring Modal -->
-  <div class="modal-overlay" id="scoringModal" aria-modal="true" role="dialog" aria-labelledby="scoringTitle">
-    <div class="modal-content">
-      <button class="close-btn" id="closeModalBtn" aria-label="Close">✕</button>
-      <div class="modal-title" id="scoringTitle">💖 Heart Treasure Scoring</div>
-      <div class="modal-subtitle">Creativity • Effort • Impact (max 60 doubloons)</div>
-      <div class="scoring-grid">
-        <div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div>
-        <div class="scoring-card"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div>
-        <div class="scoring-card"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big treasure.</p></div>
-      </div>
-    </div>
-  </div>
-
   <div class="container" id="app">
     <div class="logo">
       <div class="heart-icon">💖</div>
@@ -169,16 +138,30 @@
 
     <div id="stateBanner" class="status-banner" role="status" aria-live="polite"></div>
 
-    <div class="team-info" id="teamInfo">Crew: loading…</div>
+    <div class="team-info" id="teamInfo">Crew: unknown</div>
 
-    <div id="authGate" class="auth-block" style="display:none;">
-      You’re not signed in for this event.
-      <div class="auth-actions">
-        <a class="small-btn" href="/">⬅️ Team start page</a>
-        <button class="small-btn" id="retryAuth">🔄 Retry</button>
+    <!-- Sign-in block (team dropdown + PIN) -->
+    <div class="auth-card" id="signinCard" aria-live="polite">
+      <div class="auth-grid">
+        <div>
+          <label for="teamSelect">Choose your crew</label>
+          <select id="teamSelect" aria-label="Team list">
+            <option value="">Loading teams…</option>
+          </select>
+        </div>
+        <div>
+          <label for="teamPin">Crew PIN</label>
+          <input id="teamPin" class="pin" type="number" inputmode="numeric" min="0000" max="9999" placeholder="1234" />
+        </div>
       </div>
+      <div class="auth-actions">
+        <button class="small-btn" id="signinBtn">🔓 Unlock Kindness</button>
+        <button class="small-btn" id="clearBtn" title="Forget local team info">🗑️ Clear local data</button>
+      </div>
+      <div class="message" id="signinMsg"></div>
     </div>
 
+    <!-- Terry intro -->
     <div class="terry-greeting">
       <div class="terry-character">
         <img src="/terry-thinking.png" alt="Terry, your Quest guide">
@@ -199,7 +182,8 @@
       </ul>
     </div>
 
-    <form id="kindnessForm" aria-describedby="formHelp">
+    <!-- Submission form -->
+    <form id="kindnessForm" aria-describedby="formHelp" style="display:none;">
       <div class="form-group">
         <label for="photoUpload">📸 Photo of your kind act</label>
         <div class="file-upload">
@@ -236,20 +220,21 @@
   </div>
 
   <script>
-    // ——— Query + Local Storage ———
+    // ——— URL + Storage ———
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID   = qs.get('event') || qs.get('eventId') || '';
-    const TEAM_CODE  = localStorage.getItem('teamCode')  || '';
-    const TEAM_NAME  = localStorage.getItem('teamName')  || '';
-    const TEAM_TOKEN = localStorage.getItem('teamToken') || '';
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    // ——— Fetch helper with JWT ———
+    function token(){ return localStorage.getItem('teamToken') || ''; }
+    function teamCode(){ return localStorage.getItem('teamCode') || ''; }
+    function teamName(){ return localStorage.getItem('teamName') || ''; }
+
+    // ——— Fetch helper (reads token on each call) ———
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
         headers:{
           'Content-Type':'application/json',
-          ...(TEAM_TOKEN ? {'Authorization':`Bearer ${TEAM_TOKEN}`} : {})
+          ...(token() ? {'Authorization':`Bearer ${token()}`} : {})
         },
         body: JSON.stringify(payload)
       });
@@ -258,7 +243,7 @@
       return data;
     }
 
-    // ——— UI helpers ———
+    // ——— Elements ———
     const navToggle = document.getElementById('nav-toggle');
     const navMenu = document.getElementById('nav-menu');
     if(navToggle && navMenu){
@@ -273,56 +258,38 @@
     }
 
     const stateBanner = document.getElementById('stateBanner');
-    const teamInfo    = document.getElementById('teamInfo');
-    const authGate    = document.getElementById('authGate');
-    const retryAuth   = document.getElementById('retryAuth');
-    const form        = document.getElementById('kindnessForm');
-    const submitBtn   = document.getElementById('submitBtn');
-    const loadingEl   = document.getElementById('loading');
-    const feedbackEl  = document.getElementById('feedback');
-    const descEl      = document.getElementById('kindnessDescription');
-    const countEl     = document.getElementById('charCount');
-    const locEl       = document.getElementById('location');
-    const fileInput   = document.getElementById('photoUpload');
-    const filePreview = document.getElementById('filePreview');
-    const previewImage= document.getElementById('previewImage');
-    const fileInfo    = document.getElementById('fileInfo');
+    const teamInfo = document.getElementById('teamInfo');
+    const signinCard = document.getElementById('signinCard');
+    const signinBtn = document.getElementById('signinBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const signinMsg = document.getElementById('signinMsg');
+    const teamSelect = document.getElementById('teamSelect');
+    const teamPin = document.getElementById('teamPin');
 
-    function setFeedback(msg,type){
-      feedbackEl.innerHTML = msg;
-      feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`;
-      feedbackEl.style.display='block';
-    }
-    function clearFeedback(){
-      feedbackEl.textContent='';
-      feedbackEl.style.display='none';
-    }
-    function setSubmitting(on){
-      submitBtn.disabled = on;
-      loadingEl.style.display = on ? 'block':'none';
-      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Heart Treasure</span>`;
-    }
-    function disableForm(disabled, reason=''){
-      [...form.elements].forEach(el=>el.disabled = disabled);
-      if(disabled && reason){ setFeedback(reason,'error'); }
-    }
+    const form = document.getElementById('kindnessForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingEl = document.getElementById('loading');
+    const feedbackEl = document.getElementById('feedback');
+    const descEl = document.getElementById('kindnessDescription');
+    const countEl = document.getElementById('charCount');
+    const locEl = document.getElementById('location');
+    const fileInput = document.getElementById('photoUpload');
+    const filePreview = document.getElementById('filePreview');
+    const previewImage = document.getElementById('previewImage');
+    const fileInfo = document.getElementById('fileInfo');
+
+    // ——— Small UI helpers ———
+    function setFeedback(msg,type){ feedbackEl.innerHTML = msg; feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`; feedbackEl.style.display='block'; }
+    function clearFeedback(){ feedbackEl.textContent=''; feedbackEl.style.display='none'; }
+    function setSigninMsg(msg,type='error'){ signinMsg.textContent = msg; signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; }
+    function clearSigninMsg(){ signinMsg.textContent=''; signinMsg.style.display='none'; }
+    function setSubmitting(on){ submitBtn.disabled = on; loadingEl.style.display = on ? 'block':'none'; submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Heart Treasure</span>`; }
+    function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
 
     // ——— Draft persistence ———
-    const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${TEAM_CODE}`;
-    function saveDraft(){
-      const d = { description: descEl.value || '', location: locEl.value || '' };
-      localStorage.setItem(draftKey(), JSON.stringify(d));
-    }
-    function loadDraft(){
-      try{
-        const raw = localStorage.getItem(draftKey());
-        if(!raw) return;
-        const d = JSON.parse(raw);
-        if(d.description) descEl.value = d.description;
-        if(d.location) locEl.value = d.location;
-        updateCharCount();
-      }catch{}
-    }
+    const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
+    function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
+    function loadDraft(){ try{ const raw = localStorage.getItem(draftKey()); if(raw){ const d=JSON.parse(raw); if(d.description) descEl.value=d.description; if(d.location) locEl.value=d.location; updateCharCount(); } }catch{} }
     function clearDraft(){ localStorage.removeItem(draftKey()); }
 
     // ——— Event state ———
@@ -331,64 +298,78 @@
         stateBanner.textContent = 'Missing eventId in the URL (?event=...).';
         stateBanner.className = 'status-banner ended';
         stateBanner.style.display='block';
-        disableForm(true,'Open this page from your Team link so we know your event.');
+        disableForm(true);
         return 'UNKNOWN';
       }
       try{
         const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        let text = '';
-        let cls = 'status-banner';
-        let lock = false;
-        if(state === 'NOT_STARTED'){ text='Event not started yet. You’ll be able to submit when it begins.'; cls+=' paused'; lock=true; }
+        let text = '', cls = 'status-banner', lock = false;
+        if(state === 'NOT_STARTED'){ text='Event not started yet.'; cls+=' paused'; lock=true; }
         if(state === 'PAUSED'){ text='Event paused — submissions temporarily closed.'; cls+=' paused'; lock=true; }
         if(state === 'RUNNING'){ text='Event running — submit your kindness when ready.'; cls='status-banner'; lock=false; }
         if(state === 'ENDED'){ text='Event ended — submissions are closed.'; cls+=' ended'; lock=true; }
-        if(state === 'PUBLISHED'){ text='Results published! Check the Gallery to see entries.'; cls+=' published'; lock=true; }
-        stateBanner.textContent = text;
-        stateBanner.className = cls;
-        stateBanner.style.display = text ? 'block':'none';
+        if(state === 'PUBLISHED'){ text='Results published! Check the Gallery.'; cls+=' published'; lock=true; }
+        stateBanner.textContent = text; stateBanner.className = cls; stateBanner.style.display = text ? 'block':'none';
         disableForm(lock);
         return state;
       }catch{
-        stateBanner.textContent = 'Could not verify event state. You may still try to submit.';
-        stateBanner.className = 'status-banner';
-        stateBanner.style.display='block';
-        return 'UNKNOWN';
+        stateBanner.textContent = 'Could not verify event state.'; stateBanner.className='status-banner'; stateBanner.style.display='block'; return 'UNKNOWN';
       }
     }
 
-    // ——— Auth gate ———
-    function checkAuth(){
-      teamInfo.textContent = TEAM_NAME ? `Crew: ${TEAM_NAME}` : (TEAM_CODE ? `Crew code: ${TEAM_CODE}` : 'Crew: unknown');
-      const authed = Boolean(TEAM_TOKEN && EVENT_ID && TEAM_CODE);
-      authGate.style.display = authed ? 'none' : 'block';
-      form.style.display = authed ? 'block' : 'none';
-      return authed;
+    // ——— Auth (dropdown + PIN) ———
+    function updateCrewLabel(){ teamInfo.textContent = teamName() ? `Crew: ${teamName()}` : (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown'); }
+
+    async function loadTeams(){
+      try{
+        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        const teams = Array.isArray(data.teams) ? data.teams : [];
+        teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
+        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+      }catch(e){
+        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
+        setSigninMsg('Couldn’t load team list. Try again or refresh.', 'error');
+      }
     }
 
-    if(retryAuth){ retryAuth.addEventListener('click', ()=> { location.reload(); }); }
+    async function signIn(){
+      clearSigninMsg(); clearFeedback();
+      const code = teamSelect.value;
+      const pin = (teamPin.value || '').trim();
+      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
+      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
 
-    // ——— Scoring Modal ———
-    const scoringRulesBtn = document.getElementById('scoringRulesBtn');
-    const scoringModal = document.getElementById('scoringModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    if(scoringRulesBtn){ scoringRulesBtn.addEventListener('click', ()=> scoringModal.classList.add('active')); }
-    if(closeModalBtn){ closeModalBtn.addEventListener('click', ()=> scoringModal.classList.remove('active')); }
-    if(scoringModal){ scoringModal.addEventListener('click', (e)=>{ if(e.target===scoringModal) scoringModal.classList.remove('active'); }); }
+      try{
+        const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
+        // expected: { success:true, valid:true, token?:string, teamName?:string }
+        if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
+        if(res.token) localStorage.setItem('teamToken', res.token);
+        localStorage.setItem('teamCode', code);
+        if(res.teamName){
+          localStorage.setItem('teamName', res.teamName);
+        } else {
+          const opt = teamSelect.options[teamSelect.selectedIndex]; localStorage.setItem('teamName', opt ? opt.textContent : '');
+        }
+        updateCrewLabel();
+        setSigninMsg('Signed in. You can submit now!', 'success');
+        form.style.display = 'block';
+      }catch(err){
+        if(String(err.message).includes('404')){
+          setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
+        }else{
+          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
+        }
+      }
+    }
 
     // ——— Character counter ———
-    function updateCharCount(){
-      const remaining = 500 - (descEl.value?.length || 0);
-      countEl.textContent = remaining;
-      countEl.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
-    }
-    descEl.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
-    locEl.addEventListener('input', saveDraft);
+    function updateCharCount(){ const remaining = 500 - (descEl.value?.length || 0); countEl.textContent = remaining; countEl.style.color = remaining < 50 ? '#DC143C' : '#8B4513'; }
+    descEl?.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
+    locEl?.addEventListener('input', saveDraft);
 
     // ——— File preview ———
-    fileInput.addEventListener('change', (e)=>{
-      clearFeedback();
-      const file = e.target.files[0];
+    fileInput?.addEventListener('change', (e)=>{
+      clearFeedback(); const file = e.target.files[0];
       if(!file){ filePreview.style.display='none'; return; }
       if(file.size > 5*1024*1024){ setFeedback('Image must be under 5MB.','error'); fileInput.value=''; filePreview.style.display='none'; return;}
       if(!file.type.startsWith('image/')){ setFeedback('Please upload an image file.','error'); fileInput.value=''; filePreview.style.display='none'; return;}
@@ -398,7 +379,7 @@
       fileInfo.innerHTML = `<strong>File:</strong> ${file.name}<br><strong>Size:</strong> ${(file.size/1024/1024).toFixed(2)} MB<br><strong>Type:</strong> ${file.type}`;
     });
 
-    // ——— Uploadcare (simple direct) ———
+    // ——— Uploadcare ———
     async function uploadToUploadcare(file){
       const uploadcarePublicKey = 'e060d7b73e9b8e15de28';
       const fd = new FormData();
@@ -415,75 +396,85 @@
     async function doSubmit(){
       clearFeedback();
 
-      if(!TEAM_TOKEN || !TEAM_CODE || !EVENT_ID){
-        setFeedback('Missing team or event info. Reload from your Team link.','error');
-        return;
-      }
+      if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
+      if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
 
-      // re-check event is RUNNING
       try{
         const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        if(state !== 'RUNNING'){
-          setFeedback(`Submissions are closed (state: ${state}).`,'error');
-          return;
-        }
-      }catch{
-        // allow attempt if state unknown
-      }
+        if(state !== 'RUNNING'){ setFeedback(`Submissions are closed (state: ${state}).`,'error'); return; }
+      }catch{ /* allow attempt if unknown */ }
 
       const photoFile = fileInput.files[0];
-      const description = descEl.value.trim();
-      const locationVal = locEl.value.trim();
-
+      const description = (descEl.value||'').trim();
+      const locationVal = (locEl.value||'').trim();
       if(!photoFile){ setFeedback('Please upload a photo of your kindness.','error'); return; }
       if(description.length < 20){ setFeedback('Tell us a little more (min 20 characters).','error'); return; }
 
       setSubmitting(true);
-
       try{
         const photoUrl = await uploadToUploadcare(photoFile);
-
-        const payload = {
+        await callFn('submit_kindness_function', {
           eventId: EVENT_ID,
-          teamCode: TEAM_CODE,
-          token: TEAM_TOKEN,
+          teamCode: teamCode(),
+          token: token(),          // passed if available
           description,
           location: locationVal,
           photoUrl
-        };
-
-        await callFn('submit_kindness_function', payload);
-
-        // Success — celebrate, lock form, clear draft
+        });
         setFeedback('🎉 Submitted! Your kindness is in Terry’s vault. Check the leaderboard/gallery soon.', 'success');
         clearDraft();
         [...form.elements].forEach(el=>el.disabled = true);
         form.style.opacity = '0.6';
-
       }catch(err){
         setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`, 'error');
-        const btn = document.getElementById('retryBtn');
-        if(btn) btn.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
+        const btn = document.getElementById('retryBtn'); if(btn) btn.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
       }finally{
         setSubmitting(false);
       }
     }
 
-    document.getElementById('kindnessForm').addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
+    // ——— Modal ———
+    const scoringRulesBtn = document.getElementById('scoringRulesBtn');
+    scoringRulesBtn?.addEventListener('click', ()=>{
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay active';
+      modal.innerHTML = `<div class="modal-content">
+        <button class="close-btn" aria-label="Close">✕</button>
+        <div class="modal-title">💖 Heart Treasure Scoring</div>
+        <div class="modal-subtitle">Creativity • Effort • Impact (max 60 doubloons)</div>
+        <div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div>
+        <div class="scoring-card" style="margin-top:10px"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div>
+        <div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big treasure.</p></div>
+      </div>`;
+      document.body.appendChild(modal);
+      modal.addEventListener('click', (e)=>{ if(e.target===modal || e.target.classList.contains('close-btn')) modal.remove(); });
+    });
+
+    // ——— Wire up ———
+    document.getElementById('kindnessForm')?.addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
+    signinBtn?.addEventListener('click', signIn);
+    clearBtn?.addEventListener('click', ()=>{
+      localStorage.removeItem('teamToken');
+      localStorage.removeItem('teamCode');
+      localStorage.removeItem('teamName');
+      updateCrewLabel();
+      form.style.display='none';
+      setSigninMsg('Local team info cleared.', 'success');
+    });
 
     // ——— Init ———
     (async function init(){
-      // Nav close on link click (mobile)
+      // Close mobile menu when clicking links
       const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-      navLinks.forEach(link => link.addEventListener('click', ()=> {
-        navMenu.classList.remove('active'); navToggle.textContent='☰';
-      }));
+      navLinks.forEach(link => link.addEventListener('click', ()=> { navMenu.classList.remove('active'); navToggle.textContent='☰'; }));
 
+      updateCrewLabel();
       updateCharCount();
-      loadDraft();
-      const authed = checkAuth();
       await refreshEventState();
-      if(!authed) return;
+      await loadTeams();
+
+      if(teamCode()){ form.style.display='block'; } // already signed in on this device
+      loadDraft();
     })();
   </script>
 </body>
