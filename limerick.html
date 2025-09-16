@@ -193,35 +193,65 @@
       $('limerickTopic').disabled = off;
     }
 
-    /* ------- Load crews (NO random fallbacks) ------- */
+    /* ------- Load crews (match Kindness flow; no random fallbacks) ------- */
     let crews = [];
-    async function loadCrews(){
-      try{
-        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        if(Array.isArray(data.teams) && data.teams.length){
-          crews = data.teams;
-          const sel = $('teamSelect');
-          sel.innerHTML = '<option value="">Choose your crew…</option>';
-          crews.sort((a,b)=>a.teamName.localeCompare(b.teamName))
-               .forEach(t=>{
-                 const o = document.createElement('option');
-                 o.value = t.teamCode; o.textContent = t.teamName;
-                 sel.appendChild(o);
-               });
-          sel.disabled = false;
-          $('signInBtn').disabled = false;
-          // Preselect previously used teamCode (no auto-login; still requires PIN)
-          if(TEAM_CODE){ sel.value = TEAM_CODE; }
-        }else{
-          throw new Error('No teams found for this event.');
-        }
-      }catch(err){
-        $('teamSelect').innerHTML = '<option>Couldn’t load crews</option>';
-        msg('loginMessage','Couldn’t load crews. Refresh this page or return to the team start page.','error');
+
+    async function teamsFromNewLeaderboard(){
+      const d = await callFn('get_leaderboard', { eventId: EVENT_ID });
+      if (Array.isArray(d.teams) && d.teams.length) return d.teams;
+
+      // Some builds return only a leaderboard array; derive unique teams if possible.
+      if (Array.isArray(d.leaderboard)) {
+        const map = new Map();
+        d.leaderboard.forEach(r=>{
+          const code = r.teamCode || r.team_code || r.code;
+          const name = r.teamName || r.team_name || r.name;
+          if(code && name && !map.has(code)) map.set(code,{teamCode:code,teamName:name});
+        });
+        if (map.size) return [...map.values()];
       }
+      throw new Error('No teams in leaderboard response');
     }
 
-    /* ------- Sign in with team + PIN (same flow as Kindness) ------- */
+    async function teamsFromLegacy(){
+      // Legacy endpoint still used on other pages
+      const res = await fetch('/.netlify/functions/get_leaderboard_function',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ eventId: EVENT_ID })
+      });
+      const d = await res.json().catch(()=> ({}));
+      if(res.ok && d && Array.isArray(d.teams) && d.teams.length) return d.teams;
+      throw new Error('Legacy endpoint returned no teams');
+    }
+
+    async function loadCrews(){
+      try{
+        crews = await teamsFromNewLeaderboard();
+      }catch(e1){
+        try{ crews = await teamsFromLegacy(); }
+        catch(e2){
+          $('teamSelect').innerHTML = '<option>Couldn’t load crews</option>';
+          msg('loginMessage','Couldn’t load crews. Refresh this page or return to the team start page.','error');
+          return;
+        }
+      }
+
+      const sel = $('teamSelect');
+      sel.innerHTML = '<option value="">Choose your crew…</option>';
+      crews.sort((a,b)=>a.teamName.localeCompare(b.teamName))
+           .forEach(t=>{
+             const o = document.createElement('option');
+             o.value = t.teamCode;
+             o.textContent = t.teamName;
+             sel.appendChild(o);
+           });
+      sel.disabled = false;
+      $('signInBtn').disabled = false;
+      if(TEAM_CODE){ sel.value = TEAM_CODE; }
+    }
+
+    /* ------- Sign in with team + PIN ------- */
     $('signInBtn').addEventListener('click', async ()=>{
       const teamCode = $('teamSelect').value;
       const pin = $('teamPin').value.trim();
@@ -234,7 +264,7 @@
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ teamCode, pin, eventId: EVENT_ID })
         });
-        const data = await res.json();
+        const data = await res.json().catch(()=> ({}));
         if(!res.ok || !data?.success || data.valid===false) throw new Error(data.message||'Invalid PIN');
 
         const team = crews.find(t=>t.teamCode===teamCode) || { teamCode, teamName: data.teamName||teamCode };
