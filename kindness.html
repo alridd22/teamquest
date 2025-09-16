@@ -155,8 +155,7 @@
         </div>
       </div>
       <div class="auth-actions">
-        <button class="small-btn" id="signinBtn">🔓 Unlock Kindness</button>
-        <button class="small-btn" id="clearBtn" title="Forget local team info">🗑️ Clear local data</button>
+        <button class="small-btn" id="signinBtn">🔓 Sign in</button>
       </div>
       <div class="message" id="signinMsg"></div>
     </div>
@@ -220,15 +219,16 @@
   </div>
 
   <script>
-    // ——— URL + Storage ———
+    // ——— URL ———
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    function token(){ return localStorage.getItem('teamToken') || ''; }
-    function teamCode(){ return localStorage.getItem('teamCode') || ''; }
-    function teamName(){ return localStorage.getItem('teamName') || ''; }
+    // ——— Local getters (used after sign-in) ———
+    const token    = () => localStorage.getItem('teamToken') || '';
+    const teamCode = () => localStorage.getItem('teamCode') || '';
+    const teamName = () => localStorage.getItem('teamName') || '';
 
-    // ——— Fetch helper (reads token on each call) ———
+    // ——— Fetch helper ———
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
@@ -245,7 +245,7 @@
 
     // ——— Elements ———
     const navToggle = document.getElementById('nav-toggle');
-    const navMenu = document.getElementById('nav-menu');
+    const navMenu   = document.getElementById('nav-menu');
     if(navToggle && navMenu){
       navToggle.addEventListener('click', ()=> {
         navMenu.classList.toggle('active');
@@ -258,33 +258,38 @@
     }
 
     const stateBanner = document.getElementById('stateBanner');
-    const teamInfo = document.getElementById('teamInfo');
-    const signinCard = document.getElementById('signinCard');
-    const signinBtn = document.getElementById('signinBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const signinMsg = document.getElementById('signinMsg');
-    const teamSelect = document.getElementById('teamSelect');
-    const teamPin = document.getElementById('teamPin');
+    const teamInfo    = document.getElementById('teamInfo');
+    const signinCard  = document.getElementById('signinCard');
+    const signinBtn   = document.getElementById('signinBtn');
+    const signinMsg   = document.getElementById('signinMsg');
+    const teamSelect  = document.getElementById('teamSelect');
+    const teamPin     = document.getElementById('teamPin');
 
-    const form = document.getElementById('kindnessForm');
-    const submitBtn = document.getElementById('submitBtn');
-    const loadingEl = document.getElementById('loading');
-    const feedbackEl = document.getElementById('feedback');
-    const descEl = document.getElementById('kindnessDescription');
-    const countEl = document.getElementById('charCount');
-    const locEl = document.getElementById('location');
-    const fileInput = document.getElementById('photoUpload');
+    const form        = document.getElementById('kindnessForm');
+    const submitBtn   = document.getElementById('submitBtn');
+    const loadingEl   = document.getElementById('loading');
+    const feedbackEl  = document.getElementById('feedback');
+    const descEl      = document.getElementById('kindnessDescription');
+    const countEl     = document.getElementById('charCount');
+    const locEl       = document.getElementById('location');
+    const fileInput   = document.getElementById('photoUpload');
     const filePreview = document.getElementById('filePreview');
-    const previewImage = document.getElementById('previewImage');
-    const fileInfo = document.getElementById('fileInfo');
+    const previewImage= document.getElementById('previewImage');
+    const fileInfo    = document.getElementById('fileInfo');
 
-    // ——— Small UI helpers ———
-    function setFeedback(msg,type){ feedbackEl.innerHTML = msg; feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`; feedbackEl.style.display='block'; }
-    function clearFeedback(){ feedbackEl.textContent=''; feedbackEl.style.display='none'; }
-    function setSigninMsg(msg,type='error'){ signinMsg.textContent = msg; signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; }
-    function clearSigninMsg(){ signinMsg.textContent=''; signinMsg.style.display='none'; }
-    function setSubmitting(on){ submitBtn.disabled = on; loadingEl.style.display = on ? 'block':'none'; submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Heart Treasure</span>`; }
+    // ——— UI helpers ———
+    const setFeedback = (msg,type) => { feedbackEl.innerHTML = msg; feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`; feedbackEl.style.display='block'; };
+    const clearFeedback = () => { feedbackEl.textContent=''; feedbackEl.style.display='none'; };
+    const setSigninMsg = (msg,type='error') => { signinMsg.textContent = msg; signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; };
+    const clearSigninMsg = () => { signinMsg.textContent=''; signinMsg.style.display='none'; };
+
+    function setSubmitting(on){
+      submitBtn.disabled = on;
+      loadingEl.style.display = on ? 'block':'none';
+      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Heart Treasure</span>`;
+    }
     function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
+    function updateCrewLabel(){ teamInfo.textContent = teamName() ? `Crew: ${teamName()}` : (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown'); }
 
     // ——— Draft persistence ———
     const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
@@ -317,25 +322,49 @@
       }
     }
 
-    // ——— Auth (dropdown + PIN) ———
-    function updateCrewLabel(){ teamInfo.textContent = teamName() ? `Crew: ${teamName()}` : (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown'); }
+    // ——— Load teams (robust) ———
+    function extractTeams(data){
+      if(Array.isArray(data?.teams)) return data.teams;
+      if(Array.isArray(data?.leaderboard)) {
+        return data.leaderboard.map(r=>({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      }
+      if(Array.isArray(data?.rows)) {
+        return data.rows.map(r=>({ teamCode: r.teamCode || r.code || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      }
+      return [];
+    }
 
     async function loadTeams(){
       try{
-        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        const teams = Array.isArray(data.teams) ? data.teams : [];
+        // Try POST first (preferred)
+        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        let teams = extractTeams(data);
+
+        // If nothing came back, try GET fallback (in case backend expects GET)
+        if(!teams.length){
+          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+          if(res.ok){
+            data = await res.json().catch(()=>({}));
+            teams = extractTeams(data);
+          }
+        }
+
+        if(!teams.length) throw new Error('No teams returned');
+
         teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
         teamSelect.innerHTML = `<option value="">Choose your crew…</option>` + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        clearSigninMsg();
       }catch(e){
         teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
-        setSigninMsg('Couldn’t load team list. Try again or refresh.', 'error');
+        setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
       }
     }
 
+    // ——— Sign in (dropdown + PIN) ———
     async function signIn(){
       clearSigninMsg(); clearFeedback();
       const code = teamSelect.value;
-      const pin = (teamPin.value || '').trim();
+      const pin  = (teamPin.value || '').trim();
       if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
       if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
 
@@ -345,11 +374,7 @@
         if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
         if(res.token) localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
-        if(res.teamName){
-          localStorage.setItem('teamName', res.teamName);
-        } else {
-          const opt = teamSelect.options[teamSelect.selectedIndex]; localStorage.setItem('teamName', opt ? opt.textContent : '');
-        }
+        localStorage.setItem('teamName', res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
         updateCrewLabel();
         setSigninMsg('Signed in. You can submit now!', 'success');
         form.style.display = 'block';
@@ -404,7 +429,7 @@
         if(state !== 'RUNNING'){ setFeedback(`Submissions are closed (state: ${state}).`,'error'); return; }
       }catch{ /* allow attempt if unknown */ }
 
-      const photoFile = fileInput.files[0];
+      const photoFile   = fileInput.files[0];
       const description = (descEl.value||'').trim();
       const locationVal = (locEl.value||'').trim();
       if(!photoFile){ setFeedback('Please upload a photo of your kindness.','error'); return; }
@@ -427,15 +452,14 @@
         form.style.opacity = '0.6';
       }catch(err){
         setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`, 'error');
-        const btn = document.getElementById('retryBtn'); if(btn) btn.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
+        document.getElementById('retryBtn')?.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
       }finally{
         setSubmitting(false);
       }
     }
 
     // ——— Modal ———
-    const scoringRulesBtn = document.getElementById('scoringRulesBtn');
-    scoringRulesBtn?.addEventListener('click', ()=>{
+    document.getElementById('scoringRulesBtn')?.addEventListener('click', ()=>{
       const modal = document.createElement('div');
       modal.className = 'modal-overlay active';
       modal.innerHTML = `<div class="modal-content">
@@ -453,14 +477,6 @@
     // ——— Wire up ———
     document.getElementById('kindnessForm')?.addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
     signinBtn?.addEventListener('click', signIn);
-    clearBtn?.addEventListener('click', ()=>{
-      localStorage.removeItem('teamToken');
-      localStorage.removeItem('teamCode');
-      localStorage.removeItem('teamName');
-      updateCrewLabel();
-      form.style.display='none';
-      setSigninMsg('Local team info cleared.', 'success');
-    });
 
     // ——— Init ———
     (async function init(){
@@ -469,13 +485,16 @@
       navLinks.forEach(link => link.addEventListener('click', ()=> { navMenu.classList.remove('active'); navToggle.textContent='☰'; }));
 
       updateCrewLabel();
-      updateCharCount();
-      await refreshEventState();
+      const state = await refreshEventState();
       await loadTeams();
-
-      if(teamCode()){ form.style.display='block'; } // already signed in on this device
+      // If already signed in on this device, allow form
+      if(teamCode() && state === 'RUNNING'){ document.getElementById('kindnessForm').style.display='block'; }
+      updateCharCount();
       loadDraft();
     })();
+
+    // ——— Character counter helper ———
+    function updateCharCount(){ const remaining = 500 - (document.getElementById('kindnessDescription').value?.length || 0); document.getElementById('charCount').textContent = remaining; document.getElementById('charCount').style.color = remaining < 50 ? '#DC143C' : '#8B4513'; }
   </script>
 </body>
 </html>
