@@ -147,7 +147,6 @@
     async function getEventState(){
       try{
         const data = await postJSON("/.netlify/functions/get_event_state", { eventId: EVENT_ID });
-        // Expecting: {state:"RUNNING"|"NOT_STARTED"|"PAUSED"|"ENDED"|"PUBLISHED", endsAt?:ms|iso, remainingMs?:number}
         let remainingMs = Number.isFinite(data.remainingMs) ? data.remainingMs : undefined;
         if (remainingMs === undefined && data.endsAt){
           const endTs = typeof data.endsAt === "number" ? data.endsAt : Date.parse(data.endsAt);
@@ -155,13 +154,12 @@
         }
         return { state: data.state || "RUNNING", remainingMs };
       }catch(e){
-        // Fail-soft: assume running but unknown clock
         console.warn("get_event_state failed:", e);
         return { state:"RUNNING", remainingMs: undefined };
       }
     }
 
-    // ------- Leaderboard fetch + normalisation -------
+    // ------- Normalisation -------
     function pickScore(src, keys, fallback = 0){
       for (const k of keys){
         if (src && src[k] != null && !isNaN(+src[k])) return Number(src[k]);
@@ -169,44 +167,66 @@
       return fallback;
     }
 
-    function normaliseLeaderboard(raw){
-      // Accept shapes: {leaderboard:[...]}, {teams:[...]}, {rows:[...]}
-      const arr = Array.isArray(raw?.leaderboard) ? raw.leaderboard
-               : Array.isArray(raw?.teams)       ? raw.teams
-               : Array.isArray(raw?.rows)        ? raw.rows
-               : [];
+    function unwrap(obj){
+      // many functions wrap their payload under "data" or "result"
+      return obj?.data ?? obj?.result ?? obj;
+    }
+
+    function extractArray(obj){
+      // accept many top-level keys
+      return (
+        (Array.isArray(obj?.leaderboard) && obj.leaderboard) ||
+        (Array.isArray(obj?.teams)       && obj.teams)       ||
+        (Array.isArray(obj?.rows)        && obj.rows)        ||
+        (Array.isArray(obj?.standings)   && obj.standings)   ||
+        (Array.isArray(obj?.scoreboard)  && obj.scoreboard)  ||
+        (Array.isArray(obj?.items)       && obj.items)       ||
+        (Array.isArray(obj)              && obj)             ||
+        []
+      );
+    }
+
+    function normaliseLeaderboard(rawIn){
+      const raw = unwrap(rawIn);
+      const arr = extractArray(raw);
 
       const out = arr.map(t =>{
-        const name = t.teamName || t.name || t.team || t.Team || "";
-        const br   = t.breakdown || t.scores || t.activities || {};
+        const name = t.teamName || t.name || t.team || t.Team || t.team_display || "";
+        const br   = t.breakdown || t.scores || t.activities || t.parts || {};
 
         const kindness  = pickScore(t, ["kindness","kindnessScore","Kindness","score_kindness"], pickScore(br, ["kindness"], 0));
         const limerick  = pickScore(t, ["limerick","limerickScore","Limerick","score_limerick"], pickScore(br, ["limerick"], 0));
-        const scavenger = pickScore(t, ["scavenger","scavengerScore","Scavenger","score_scavenger","hunt","scav"], pickScore(br, ["scavenger"], 0));
+        const scavenger = pickScore(t, ["scavenger","scavengerScore","Scavenger","score_scavenger","hunt","scav"], pickScore(br, ["scavenger","hunt","scav"], 0));
         const quiz      = pickScore(t, ["quiz","quizScore","Quiz","score_quiz"], pickScore(br, ["quiz"], 0));
         const total     = Number.isFinite(+t.total) ? +t.total : kindness + limerick + scavenger + quiz;
 
         return { teamName: name, kindness, limerick, scavenger, quiz, total };
       });
 
-      // Filter empty names (if any) and sort
+      // If we still got nothing, but a "teams" list exists as strings, render that as zero scores
+      if (!out.length && Array.isArray(raw?.teams) && raw.teams.every(x => typeof x === "string")){
+        return raw.teams.map((name) => ({ teamName:name, kindness:0, limerick:0, scavenger:0, quiz:0, total:0 }));
+      }
+
       return out.filter(t => t.teamName).sort((a,b)=> b.total - a.total);
     }
 
     async function getLeaderboard(){
-      // POST first
       try{
         const data = await postJSON("/.netlify/functions/get_leaderboard", { eventId: EVENT_ID });
-        return normaliseLeaderboard(data);
+        const norm = normaliseLeaderboard(data);
+        if (!norm.length) console.debug("POST /get_leaderboard returned no rows. Raw:", data);
+        return norm;
       }catch(e){
         console.warn("POST get_leaderboard failed, trying GET:", e?.message || e);
       }
-      // GET fallback
       try{
         const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
-        return normaliseLeaderboard(data);
+        const norm = normaliseLeaderboard(data);
+        if (!norm.length) console.debug("GET /get_leaderboard returned no rows. Raw:", data);
+        return norm;
       }catch(e2){
         console.error("GET get_leaderboard failed:", e2);
         return [];
@@ -257,11 +277,9 @@
     let tickTimer = null;
 
     async function refresh(){
-      // 1) Event state & clock
       const { state, remainingMs } = await getEventState();
       setStateChip(state);
 
-      // Clock
       let msLeft = Number.isFinite(remainingMs) ? remainingMs : undefined;
       const updateClock = () => {
         if (!Number.isFinite(msLeft)) {
@@ -276,18 +294,13 @@
       if (tickTimer) clearInterval(tickTimer);
       tickTimer = setInterval(updateClock, 1000);
 
-      // 2) Leaderboard
       const teams = await getLeaderboard();
 
-      // 3) Visibility rules
       const fifteenMin = 15 * 60 * 1000;
       const hideScores = (state === "RUNNING") && Number.isFinite(msLeft) && (msLeft <= fifteenMin);
       hideBanner.style.display = hideScores ? "block" : "none";
+      endBanner.style.display  = (state === "ENDED") ? "block" : "none";
 
-      const showEndedMsg = (state === "ENDED");     // waiting for publish
-      endBanner.style.display = showEndedMsg ? "block" : "none";
-
-      // If PUBLISHED, always show scores; if NOT_STARTED/PAUSED, show zero rows message
       const actuallyHide = (state === "RUNNING") ? hideScores : false;
 
       drawRows(teams, actuallyHide);
@@ -296,7 +309,6 @@
 
     refreshBtn.addEventListener("click", refresh);
 
-    // Initial kick-off
     (async () => {
       if (!EVENT_ID){
         stateChip.textContent = "Missing event id (?event=...)";
