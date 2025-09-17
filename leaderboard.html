@@ -2,329 +2,322 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TeamQuest – Leaderboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>TeamQuest — Leaderboard</title>
   <style>
-    /* ————— NAV ————— */
-    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:80px}
-    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
-    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
-    .nav-logo:hover{transform:scale(1.05)}
-    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
-    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
-    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
-    .nav-item{position:relative}
-    .nav-link{color:#F5DEB3;text-decoration:none;font-size:1rem;font-weight:bold;padding:12px 18px;border-radius:8px;transition:.3s;display:block;text-shadow:1px 1px 2px rgba(0,0,0,.7);background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
-    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
-    @media (max-width:768px){
-      .treasure-nav{height:120px}
-      .nav-container{justify-content:center;position:relative}
-      .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-      .nav-logo img{height:85px!important}
-      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
-      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513 0%,#654321 100%);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .3s;overflow-y:auto}
-      .nav-menu.active{left:0}
-      .nav-link{font-size:1.1rem;padding:15px 25px;width:280px;text-align:center;background:linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6));border:2px solid #DAA520;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.3)}
-    }
+    /* ——— NAV ——— */
+    .nav{position:fixed;inset:auto 0 0 0;top:0;height:72px;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:10}
+    .nav .wrap{max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:18px;height:100%;padding:0 16px}
+    .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+    .brand img{height:48px;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5))}
+    .links{display:flex;gap:10px;margin-left:auto}
+    .links a{color:#F5DEB3;text-decoration:none;font-weight:700;padding:10px 14px;border-radius:10px;background:rgba(101,67,33,.35);border:2px solid rgba(218,165,32,.4)}
+    .links a:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;border-color:#DAA520}
 
-    /* ————— PAGE ————— */
+    /* ——— PAGE ——— */
+    :root{--card:#f6eee0;--ink:#432;--gold:#DAA520;--soft:#ffe9c7}
     *{box-sizing:border-box}
-    body{margin:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;padding:20px;padding-top:100px}
-    .container{max-width:1100px;margin:0 auto;background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border:3px solid #8B4513;border-radius:24px;box-shadow:0 20px 40px rgba(0,0,0,.2);padding:22px;position:relative}
-    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
-    h1{margin:6px 0 4px;color:#8B4513;font-weight:800;text-align:center}
-    .subtitle{text-align:center;color:#A0522D;margin-bottom:10px;font-weight:600}
+    body{margin:0;font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;padding:100px 16px 24px;color:var(--ink)}
+    .shell{max-width:1200px;margin:0 auto}
+    .card{background:var(--card);border:3px solid #8B4513;border-radius:22px;padding:18px 18px 8px;box-shadow:0 16px 32px rgba(0,0,0,.18)}
+    .card h1{margin:6px 0 6px;text-align:center;font-size:32px}
+    .sub{margin:0 0 12px;text-align:center;color:#7a5737}
+    .toolbar{display:flex;align-items:center;gap:12px;justify-content:center;flex-wrap:wrap;margin:6px 0 16px}
+    .chip{display:inline-flex;align-items:center;gap:8px;font-weight:800;border:2px dashed var(--gold);background:#fff3d9;border-radius:999px;padding:8px 14px}
+    .ghost{opacity:.6}
+    .btn{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:2px solid #8B4513;border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .right{margin-left:auto}
+    .muted{color:#7a5737;font-weight:600}
+    .note{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:2px solid var(--gold);border-left:6px solid #FF8C00;border-radius:12px;padding:14px;margin:10px 0;font-weight:700;text-align:center}
+    .hidden{display:none !important}
 
-    .status{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;margin:8px 0 16px}
-    .pill{padding:8px 12px;border-radius:999px;border:2px solid #DAA520;background:#FFF8DC;color:#654321;font-weight:700}
-    .pill.warn{border-color:#FF8C00}
-    .pill.ok{border-color:#32CD32}
-    .pill.err{border-color:#8B0000}
-
-    .countdown{font-size:1.1rem;font-weight:800;color:#8B4513;text-align:center;margin:2px 0 10px}
-    .hint{font-size:.95rem;color:#654321;text-align:center;margin-bottom:8px}
-
-    .hidden-banner{background:linear-gradient(135deg,#FFE4B5,#F0C27B);border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:12px;padding:12px;margin:10px 0;color:#654321;font-weight:700;text-align:center;display:none}
-
-    .board-outer{background:#fff9ee;border:2px solid #DAA520;border-radius:16px;overflow:auto;/* horizontal scroll on small screens */}
-    table{width:100%;border-collapse:separate;border-spacing:0;min-width:720px}
-    thead th{position:sticky;top:0;background:linear-gradient(135deg,#FFDE9E,#FFD27A);border-bottom:2px solid #DAA520;color:#8B4513;font-weight:800;text-align:left;padding:10px 12px}
-    tbody td{padding:10px 12px;border-bottom:1px dashed rgba(139,69,19,.25);vertical-align:middle}
-    .col-rank{width:70px;text-align:center;font-weight:800}
-    .col-team{min-width:220px;font-weight:700;color:#4a341b}
-    .col-total,.col-score{width:110px;text-align:right;font-weight:900}
-    .muted{color:#8B4513;opacity:.6}
-    .hidden-scores td.col-rank,.hidden-scores td.col-total,.hidden-scores td.col-score{color:transparent;text-shadow:0 0 10px rgba(139,69,19,.25)}
-    .penalty{color:#8B0000;font-weight:900}
-    .bonus{color:#2f5a14;font-weight:900}
-
-    .footer-bar{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:#654321}
-    .mini{font-size:.9rem}
-    .btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
-    .btn:hover{background:#A0522D}
-    .msg{margin-top:10px;padding:12px;border-radius:12px;border:2px solid;display:none;text-align:center;font-weight:700}
-    .msg.error{background:#ffd8dd;border-color:#b30024;color:#6b0015}
-    .msg.info{background:#e6ffe6;border-color:#32CD32;color:#064b06}
-
-    .spinner{display:inline-block;width:16px;height:16px;border:3px solid rgba(0,0,0,.15);border-top-color:#8B4513;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-
-    @media (max-width:560px){
-      .col-rank{width:56px}
-      .col-total,.col-score{width:90px}
+    table{width:100%;border-collapse:separate;border-spacing:0;margin-top:6px}
+    thead th{position:sticky;top:0;background:var(--soft);border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);padding:10px 8px;font-size:14px}
+    tbody td{padding:10px 8px;border-bottom:1px solid #e8d7c3}
+    tbody tr:nth-child(odd){background:#fffdf8}
+    .rank{font-weight:900;text-align:center;width:70px}
+    .team{font-weight:800}
+    .num{text-align:right;font-variant-numeric:tabular-nums}
+    .total{background:linear-gradient(180deg,#fff,#ffefd8)}
+    .last-upd{margin:12px 2px 18px}
+    .countdown{font-weight:900;color:#8B4513}
+    @media (max-width:760px){
+      .links{display:none}
+      thead th:nth-child(3),tbody td:nth-child(3){display:none} /* hide one minor column on small screens */
     }
   </style>
 </head>
 <body>
-  <!-- NAV -->
-  <nav class="treasure-nav">
-    <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
+  <nav class="nav">
+    <div class="wrap">
+      <a class="brand" href="https://theteamquest.netlify.app/">
+        <img src="/Team Quest Logo-01.png" alt="TeamQuest">
       </a>
-      <ul class="nav-menu" id="nav-menu">
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/clue_hunt_challenge">💎 The Treasure Hunt</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/scavenger_hunt">🔍 The Scavenger Hunt</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/quiz_challenge">⏰ The Timed Quiz</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/kindness_challenge_page">❤️ Kindness</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/limerick_challenge_page">📝 Limerick</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_gallery">📸 Gallery</a></li>
-      </ul>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+      <div class="links">
+        <a href="https://theteamquest.netlify.app/clue_hunt_challenge">💎 Treasure Hunt</a>
+        <a href="https://theteamquest.netlify.app/scavenger_hunt">🔍 Scavenger</a>
+        <a href="https://theteamquest.netlify.app/quiz_challenge">⏰ Timed Quiz</a>
+        <a href="https://theteamquest.netlify.app/kindness_challenge_page">❤️ Kindness</a>
+        <a href="https://theteamquest.netlify.app/limerick_challenge_page">📝 Limerick</a>
+        <a href="https://theteamquest.netlify.app/teamquest_gallery">📸 Gallery</a>
+      </div>
     </div>
   </nav>
 
-  <div class="container">
-    <h1>TeamQuest Leaderboard</h1>
-    <p class="subtitle">Live standings with activity breakdown</p>
+  <main class="shell">
+    <section class="card">
+      <h1>TeamQuest Leaderboard</h1>
+      <p class="sub">Live standings with activity breakdown</p>
 
-    <div class="status" aria-live="polite">
-      <div class="pill" id="statePill">Checking event… <span class="spinner" aria-hidden="true"></span></div>
-      <div class="pill" id="phasePill" style="display:none"></div>
-    </div>
+      <div class="toolbar">
+        <div id="statusChip" class="chip">Checking event…</div>
+        <div id="countChip" class="chip ghost hidden">⏳ <span id="countLabel">Time remaining</span>: <span id="countdown">—:—</span></div>
+        <button class="btn" id="refreshBtn">🔄 Refresh</button>
+      </div>
 
-    <div class="countdown" id="countdown" aria-live="polite"></div>
-    <div class="hint" id="hint"></div>
-    <div id="hiddenBanner" class="hidden-banner">⏳ Scores are hidden for the final 15 minutes. Keep pushing!</div>
+      <div id="hideNotice" class="note hidden">⏳ Final 15 minutes — live scores are hidden. Keep playing! The countdown above shows time left.</div>
+      <div id="postEventNotice" class="note hidden">🕰 Event complete — final results will appear once the host publishes them.</div>
 
-    <div class="board-outer" id="boardOuter" aria-live="polite" aria-busy="true" style="display:none;">
-      <table id="boardTable" aria-describedby="countdown">
-        <thead id="thead"></thead>
-        <tbody id="tbody"></tbody>
-      </table>
-    </div>
+      <div id="tableWrap" class="table">
+        <table id="board" aria-live="polite"></table>
+      </div>
 
-    <div class="msg error" id="errorBox"></div>
-    <div class="footer-bar">
-      <div class="mini" id="updatedAt">Last updated —</div>
-      <button class="btn" id="refreshBtn">🔄 Refresh</button>
-    </div>
-  </div>
+      <div class="last-upd muted" id="lastUpd">Last updated —</div>
+    </section>
+  </main>
 
   <script>
-    /* ===== URL / TOKEN ===== */
+    /* =============== Inputs & helpers =============== */
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID   = qs.get('event') || qs.get('eventId') || '';
-    const TEAM_TOKEN = localStorage.getItem('teamToken') || '';
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    /* ===== Fetch helper ===== */
+    function fmtTime(ts){
+      const d = new Date(ts);
+      return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    }
+    function nowTs(){ return Date.now(); }
+    function toInt(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+    function pick(obj, keys){
+      for(const k of keys){
+        if (obj && Object.prototype.hasOwnProperty.call(obj, k)) return obj[k];
+        // also allow case-insensitive
+        const found = Object.keys(obj||{}).find(x=>x.toLowerCase()===String(k).toLowerCase());
+        if(found) return obj[found];
+      }
+      return undefined;
+    }
+
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(TEAM_TOKEN ? {'Authorization':`Bearer ${TEAM_TOKEN}`} : {})
-        },
+        headers:{'Content-Type':'application/json'},
         body: JSON.stringify(payload || {})
       });
-      const data = await res.json().catch(()=>({}));
+      const data = await res.json().catch(()=> ({}));
       if(!res.ok || data.success === false) throw new Error(data.message || `Request failed (${res.status})`);
       return data;
     }
 
-    /* ===== Elements ===== */
-    const navToggle   = document.getElementById('nav-toggle');
-    const navMenu     = document.getElementById('nav-menu');
-    const statePill   = document.getElementById('statePill');
-    const phasePill   = document.getElementById('phasePill');
-    const countdownEl = document.getElementById('countdown');
-    const hintEl      = document.getElementById('hint');
-    const hiddenBanner= document.getElementById('hiddenBanner');
-    const boardOuter  = document.getElementById('boardOuter');
-    const theadEl     = document.getElementById('thead');
-    const tbodyEl     = document.getElementById('tbody');
-    const errorBox    = document.getElementById('errorBox');
-    const updatedAt   = document.getElementById('updatedAt');
-    const refreshBtn  = document.getElementById('refreshBtn');
+    /* =============== Event state (safe POST) =============== */
+    const statusChip = document.getElementById('statusChip');
+    const countChip  = document.getElementById('countChip');
+    const countdownEl= document.getElementById('countdown');
+    const countLabel = document.getElementById('countLabel');
+    const hideNotice = document.getElementById('hideNotice');
+    const postEvent  = document.getElementById('postEventNotice');
 
-    navToggle?.addEventListener('click', ()=>{
-      navMenu.classList.toggle('active');
-      navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-    });
-
-    /* ===== Timing / state ===== */
-    const FIFTEEN_MIN_MS = 15 * 60 * 1000;
     let countdownTimer = null;
-    let endsAtMs = null;
-    let serverNowMs = null;
-    let clientAtFetchMs = null;
-    let lastState = 'UNKNOWN';
-    let hideScores = false; // computed each tick
+    let eventMeta = {state:'UNKNOWN', endMs:null, remaining: null};
 
-    function nowMs(){
-      if(serverNowMs && clientAtFetchMs){
-        const drift = Date.now() - clientAtFetchMs;
-        return serverNowMs + drift;
-      }
-      return Date.now();
-    }
-    function fmtTime(ms){
-      const t = Math.max(0, ms);
-      const s = Math.floor(t/1000)%60;
-      const m = Math.floor(t/60000)%60;
-      const h = Math.floor(t/3600000);
-      const pad = n => String(n).padStart(2,'0');
-      return h>0 ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`;
-    }
-    function tryParseTs(obj){
-      const fields = ['endsAt','endAt','endTime','end','end_ts','endTimestamp','endISO'];
-      for(const k of fields){
-        if(!obj || !obj[k]) continue;
-        const v = obj[k];
-        if(typeof v === 'number') return v;
-        const ms = Date.parse(v);
-        if(!isNaN(ms)) return ms;
-      }
-      return null;
+    function parseEventMeta(data){
+      const state = String(pick(data,['state','status'])||'UNKNOWN');
+      const nowMs = Date.parse(pick(data,['now','serverTime','serverNow'])||new Date());
+      const endStr = pick(data,['endAt','endTime','endsAt']);
+      const startStr = pick(data,['startAt','startTime','startsAt']);
+      const endMs = endStr ? Date.parse(endStr) : null;
+      const startMs = startStr ? Date.parse(startStr) : null;
+      let remaining = pick(data,['remainingSeconds','secondsRemaining','remaining']);
+      if(remaining == null && endMs) remaining = Math.max(0, Math.round((endMs - nowMs)/1000));
+      return {state, nowMs, endMs, startMs, remaining};
     }
 
-    function setStatePill(text, cls=''){ statePill.textContent=text; statePill.className=`pill ${cls}`; }
-    function setPhasePill(text, cls=''){ phasePill.textContent=text; phasePill.className=`pill ${cls}`; phasePill.style.display = text ? 'inline-block':'none'; }
-    function setError(msg){ errorBox.textContent=msg; errorBox.className='msg error'; errorBox.style.display='block'; }
-    function clearError(){ errorBox.style.display='none'; errorBox.textContent=''; }
+    function updateStatusUI(){
+      const s = eventMeta.state;
+      const rem = eventMeta.remaining;
 
-    function updateCountdown(){
-      if(!endsAtMs){ countdownEl.textContent=''; hiddenBanner.style.display='none'; return; }
-      const left = endsAtMs - nowMs();
+      // status label
+      let label = '';
+      if(s==='NOT_STARTED') label = 'Event not started';
+      else if(s==='RUNNING') label = 'Event running';
+      else if(s==='PAUSED') label = 'Event paused';
+      else if(s==='ENDED') label = 'Event ended';
+      else if(s==='PUBLISHED') label = 'Results published';
+      else label = 'Event status unknown';
+      statusChip.textContent = label;
 
-      // Hide scores in last 15 minutes while RUNNING
-      hideScores = lastState === 'RUNNING' && left > 0 && left <= FIFTEEN_MIN_MS;
-
-      if(left <= 0){
-        countdownEl.textContent = '⏱️ Time’s up.';
-      } else {
-        countdownEl.textContent = `⏱️ Time left: ${fmtTime(left)}`;
-      }
-      hiddenBanner.style.display = hideScores ? 'block' : 'none';
-
-      // When ENDED (and not yet PUBLISHED), keep scores hidden and hint
-      if(lastState === 'ENDED'){
-        hideScores = true;
-      }
-
-      // Update phase pill / hint
-      if(lastState === 'RUNNING'){
-        if(hideScores){
-          setPhasePill('Final 15 — scores hidden', 'warn');
-          hintEl.textContent = 'Keep going! Scores reappear when time runs out and results are published.';
-        }else{
-          setPhasePill('Live scores visible', 'ok');
-          hintEl.textContent = 'Live updates while the event is running.';
-        }
-      } else if(lastState === 'ENDED'){
-        setPhasePill('Event finished', 'warn');
-        hintEl.textContent = 'Waiting for results to be published…';
-      } else if(lastState === 'PUBLISHED'){
-        setPhasePill('Final results', 'ok');
-        hintEl.textContent = 'Official final standings.';
-      } else if(lastState === 'PAUSED'){
-        setPhasePill('Paused', 'warn');
-        hintEl.textContent = 'Scores may lag while the event is paused.';
-      } else if(lastState === 'NOT_STARTED'){
-        setPhasePill('Not started', 'warn');
-        hintEl.textContent = 'Scores will appear once the event begins.';
+      // countdown
+      if(typeof rem === 'number'){
+        countChip.classList.remove('hidden');
+        tickCountdown(); // draw immediately
+        if(countdownTimer) clearInterval(countdownTimer);
+        countdownTimer = setInterval(tickCountdown, 1000);
+      }else{
+        countChip.classList.add('hidden');
+        if(countdownTimer) clearInterval(countdownTimer);
       }
 
-      // Apply CSS class for hiding numbers
-      tbodyEl.parentElement.classList.toggle('hidden-scores', hideScores && lastState !== 'PUBLISHED');
+      // hide/show notices
+      const hideNow = (s==='RUNNING' && typeof rem === 'number' && rem <= 15*60 && rem > 0);
+      hideNotice.classList.toggle('hidden', !hideNow);
+      postEvent.classList.toggle('hidden', !(s==='ENDED' || (s!=='PUBLISHED' && rem===0)));
+
+      // count label text
+      countLabel.textContent = s==='RUNNING' ? 'Time remaining' :
+                               s==='NOT_STARTED' ? 'Starts in' : 'Time';
     }
 
-    /* ===== Leaderboard extraction with breakdown ===== */
-    const SYN = {
-      clues:      ['clues','clue','cluehunt','clueHunt','treasureHunt','clue_score','clueScore'],
-      quiz:       ['quiz','quizScore','trivia','timedQuiz','quiz_points','quizPoints'],
-      scavenger:  ['scavenger','scavengerHunt','scav','scavengerScore','scav_points','scavPoints'],
-      kindness:   ['kindness','kindnessScore','heart','heartTreasure','kindness_points'],
-      limerick:   ['limerick','limerickScore','poem','verse','limerick_points'],
-      bonus:      ['bonus','bonuses','bonusPoints','bonus_points'],
-      penalties:  ['penalties','penalty','deductions','penaltyPoints','penalty_points','penaltyScore']
-    };
-
-    function lowerKeyMap(obj){
-      const map = {};
-      for(const k in obj){ map[k.toLowerCase()] = obj[k]; }
-      return map;
+    function tickCountdown(){
+      if(typeof eventMeta.remaining !== 'number') return;
+      const rem = Math.max(0, eventMeta.remaining - Math.round((nowTs() - eventMeta.nowMs)/1000));
+      const m = Math.floor(rem/60).toString().padStart(2,'0');
+      const s = Math.floor(rem%60).toString().padStart(2,'0');
+      countdownEl.textContent = `${m}:${s}`;
     }
-    function getValBySyn(obj, synArr){
-      const m = lowerKeyMap(obj || {});
-      for(const s of synArr){
-        const v = m[s.toLowerCase()];
-        const n = Number(v);
-        if(Number.isFinite(n)) return n;
+
+    async function getEventStateSafe(){
+      if(!EVENT_ID) return {state:'UNKNOWN'};
+      try{
+        const data = await callFn('get_event_state',{eventId:EVENT_ID});
+        eventMeta = parseEventMeta(data);
+        updateStatusUI();
+        return eventMeta;
+      }catch(e){
+        console.warn('Event-state check failed:', e.message);
+        statusChip.textContent = 'Showing latest scores (event unknown)';
+        countChip.classList.add('hidden');
+        return {state:'UNKNOWN'};
       }
-      return 0;
     }
 
-    function extractRows(data){
-      const list = Array.isArray(data?.leaderboard) ? data.leaderboard
-                 : Array.isArray(data?.teams) ? data.teams
-                 : [];
-      return list.map(r=>{
-        const total = Number(r.finalScore ?? r.total ?? r.score ?? r.points ?? 0) || 0;
-        return {
-          teamName: r.teamName || r.name || '',
-          teamCode: r.teamCode || r.code || '',
-          total,
-          raw: r
-        };
+    /* =============== Leaderboard =============== */
+    const board = document.getElementById('board');
+    const lastUpd = document.getElementById('lastUpd');
+
+    function normaliseTeams(raw){
+      const rows = raw?.teams || raw?.leaderboard || raw?.rows || [];
+      return rows.map(t=>{
+        const name = pick(t,['teamName','name']) || '';
+        const code = pick(t,['teamCode','code','teamId']) || '';
+        // scores
+        const kindness = toInt(pick(t,['kindness','kind','kind_act','kindActs','kindnessScore']));
+        const limerick = toInt(pick(t,['limerick','verse','poem','limerickScore']));
+        const scav     = toInt(pick(t,['scavenger','scav','scavenger_hunt','scavengerScore']));
+        const clues    = toInt(pick(t,['cluehunt','clue_hunt','clues','hunt','clueScore']));
+        const quiz     = toInt(pick(t,['quiz','quizScore']));
+        let total      = toInt(pick(t,['total','score','points']));
+        if(!total) total = kindness + limerick + scav + clues + quiz;
+        return {name, code, kindness, limerick, scav, clues, quiz, total};
       });
     }
 
-    function detectColumns(rows){
-      // Decide which breakdown columns to show by presence across any row
-      const defs = [
-        {id:'clues',     label:'Clues',      syn:SYN.clues,      cls:'col-score'},
-        {id:'quiz',      label:'Quiz',       syn:SYN.quiz,       cls:'col-score'},
-        {id:'scavenger', label:'Scavenger',  syn:SYN.scavenger,  cls:'col-score'},
-        {id:'kindness',  label:'Kindness',   syn:SYN.kindness,   cls:'col-score'},
-        {id:'limerick',  label:'Limerick',   syn:SYN.limerick,   cls:'col-score'},
-        {id:'bonus',     label:'Bonus',      syn:SYN.bonus,      cls:'col-score bonus'},
-        {id:'penalties', label:'Penalties',  syn:SYN.penalties,  cls:'col-score penalty'}
+    function detectColumns(teams){
+      // Only show columns that have any value > 0 (but always show Total)
+      const cols = [
+        {key:'kindness', label:'❤️ Kindness'},
+        {key:'limerick', label:'📝 Limerick'},
+        {key:'scav',     label:'🔍 Scavenger'},
+        {key:'clues',    label:'💎 Clue Hunt'},
+        {key:'quiz',     label:'⏰ Quiz'},
       ];
-      return defs.filter(d => rows.some(r => getValBySyn(r.raw, d.syn) !== 0));
+      return cols.filter(c => teams.some(t => t[c.key] !== 0));
     }
 
-    function buildHeader(cols){
-      const ths = [
-        `<th class="col-rank">Rank</th>`,
-        `<th class="col-team">Team</th>`,
-        `<th class="col-total">Total</th>`,
-        ...cols.map(c=>`<th class="${c.cls}">${c.label}</th>`)
-      ].join('');
-      theadEl.innerHTML = `<tr>${ths}</tr>`;
-    }
-
-    function renderBody(rows, cols, hide){
-      tbodyEl.innerHTML = '';
-      if(!rows.length){
-        tbodyEl.innerHTML = `<tr><td class="col-rank">—</td><td class="col-team muted">No teams yet</td><td class="col-total">—</td>${cols.map(()=>'<td class="col-score">—</td>').join('')}</tr>`;
+    function renderTable(teams){
+      if(!Array.isArray(teams) || !teams.length){
+        board.innerHTML = '<tbody><tr><td class="muted">No teams yet.</td></tr></tbody>';
         return;
       }
+      teams.sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
+      const cols = detectColumns(teams);
 
-      let list = [...rows];
-      if(hide){
-        // Alphabetical during hidden period to avoid leaking rank
-        list.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
-      } else {
-        list.sort((a,b)=> (b.total - a.total
+      let thead = `<thead><tr>
+        <th class="rank">#</th>
+        <th>Team</th>
+        ${cols.map(c=>`<th class="num">${c.label}</th>`).join('')}
+        <th class="num total">🏆 Total</th>
+      </tr></thead>`;
+
+      let rows = teams.map((t,i)=>`
+        <tr>
+          <td class="rank">${i+1}</td>
+          <td class="team">${t.name || t.code}</td>
+          ${cols.map(c=>`<td class="num">${t[c.key]}</td>`).join('')}
+          <td class="num total"><strong>${t.total}</strong></td>
+        </tr>`).join('');
+
+      board.innerHTML = thead + `<tbody>${rows}</tbody>`;
+    }
+
+    async function loadLeaderboard(){
+      try{
+        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        const teams = normaliseTeams(data);
+        renderTable(teams);
+        lastUpd.textContent = `Last updated — ${fmtTime(Date.now())}`;
+      }catch(e){
+        console.error('Leaderboard load failed', e);
+        board.innerHTML = `<tbody><tr><td class="muted">Couldn’t load leaderboard.</td></tr></tbody>`;
+      }
+    }
+
+    /* =============== Visibility rules (15-minute hide) =============== */
+    function applyVisibility(){
+      const s = eventMeta.state;
+      const rem = eventMeta.remaining;
+      const hide = (s==='RUNNING' && typeof rem === 'number' && rem <= 15*60 && rem > 0);
+
+      document.getElementById('tableWrap').classList.toggle('hidden', hide);
+      hideNotice.classList.toggle('hidden', !hide);
+
+      // After time runs out, keep table hidden and show “awaiting publication”
+      const finished = (typeof rem === 'number' && rem === 0) || s==='ENDED';
+      postEvent.classList.toggle('hidden', !(finished && s!=='PUBLISHED'));
+
+      // If results published, show table (assumes backend returns finals/locked totals)
+      if(s==='PUBLISHED'){
+        hideNotice.classList.add('hidden');
+        document.getElementById('tableWrap').classList.remove('hidden');
+        postEvent.classList.add('hidden');
+      }
+    }
+
+    /* =============== Init / refresh =============== */
+    const refreshBtn = document.getElementById('refreshBtn');
+    refreshBtn.addEventListener('click', async ()=>{
+      refreshBtn.disabled = true;
+      try{
+        await getEventStateSafe();
+        await loadLeaderboard();
+        applyVisibility();
+      }finally{
+        refreshBtn.disabled = false;
+      }
+    });
+
+    // auto-refresh every 60s (gentle)
+    setInterval(async ()=>{
+      await getEventStateSafe();
+      await loadLeaderboard();
+      applyVisibility();
+    }, 60000);
+
+    (async function init(){
+      statusChip.textContent = 'Checking event…';
+      await getEventStateSafe();
+      await loadLeaderboard();
+      applyVisibility();
+    })();
+  </script>
+</body>
+</html>
