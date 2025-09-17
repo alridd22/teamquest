@@ -2,321 +2,293 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TeamQuest Leaderboard</title>
   <style>
+    /* ---------- Base ---------- */
     :root{
-      --bg:#d9731e; --panel:#efe5d7; --ink:#653c17;
-      --gold:#d6a21c; --gold-2:#ffd36b; --accent:#ffb24b;
-      --row:#f9f2e9; --row-alt:#f3ebdf;
+      --bg: #F3EADB;
+      --card: #F7F0E5;
+      --brown: #8B4513;
+      --gold: #DAA520;
+      --gold2:#FFB347;
     }
     *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background: radial-gradient(1200px 600px at 50% -80px, #f6b16a 0, #e58838 40%, #c86b1a 75%, #a85615 100%), var(--bg);
-      color:var(--ink);
+      margin:0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
+      color:#3a2a17;
     }
-    .wrap{max-width:1100px;margin:48px auto;padding:0 16px}
-    .card{
-      background:var(--panel); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);
-      padding:28px;
+
+    /* ---------- Card ---------- */
+    .leaderboard-card{
+      max-width: 1050px;
+      margin: 42px auto;
+      background: var(--card);
+      border: 3px solid var(--brown);
+      border-radius: 18px;
+      box-shadow: 0 14px 28px rgba(0,0,0,.18);
+      padding: 26px 24px 22px;
     }
-    h1{margin:0 0 6px;font-size:32px;letter-spacing:.3px}
-    .sub{margin:0 0 18px;color:#7a5128}
-    .chips{display:flex;gap:12px;align-items:center;margin:8px 0 18px}
-    .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 14px; border-radius:12px; font-weight:700;
-      background:linear-gradient(180deg,#fff7e3,#ffe9b9);
+    .leaderboard-title{
+      color: var(--brown);
+      font-weight: 800;
+      font-size: 2.1rem;
+      margin: 0 0 6px;
+      text-align:left;
+    }
+    .leaderboard-sub{
+      color:#7b522a;
+      font-weight: 600;
+      margin: 0 0 18px;
+    }
+
+    /* ---------- Badges / Buttons ---------- */
+    .cluster{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+
+    .badge{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 16px;
       border:2px dashed var(--gold);
-      color:#52300f;
+      border-radius:14px;
+      background: #fff7e3;
+      font-weight:800;
+      color:#6a3f16;
+      user-select:none;
     }
-    .btn{
-      display:inline-flex; align-items:center; gap:8px; cursor:pointer;
-      padding:10px 14px; border-radius:12px; border:2px solid var(--gold);
-      background:linear-gradient(180deg,#ffe09f,#ffc66a);
-      font-weight:800; color:#4b2a0d;
+    .badge .dot{
+      width:10px;height:10px;border-radius:999px;background:#2ecc71;
+      box-shadow:0 0 0 3px rgba(46,204,113,.25);
+      display:inline-block;
     }
+    .badge.time .dot{
+      background:#ffd166;
+      box-shadow:0 0 0 3px rgba(255,209,102,.25);
+    }
+
+    .btn-refresh{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 16px; border-radius:12px; border:2px solid var(--brown);
+      background: linear-gradient(135deg, var(--gold2), var(--gold));
+      color:#fff; font-weight:800; cursor:pointer;
+      transition: transform .08s ease, filter .08s ease;
+      user-select:none;
+    }
+    .btn-refresh:hover{ filter:brightness(1.03); transform:translateY(-1px); }
+
+    /* ---------- Banners ---------- */
     .banner{
-      margin:8px 0 16px; padding:10px 14px; border-radius:10px;
-      border:2px solid var(--gold);
-      background:linear-gradient(180deg,#fff7e3,#ffefc6);
-      display:none; font-weight:700;
+      margin:14px 0 10px; padding:12px 14px;
+      background: #fff7e3; border:2px solid var(--gold); border-radius:10px;
+      color:#6a3f16; font-weight:700;
+      display:none;
     }
-    .banner.info{background:linear-gradient(180deg,#f3f1ff,#e7e3ff)}
-    .table{
-      width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
-      border-radius:12px; border:1px solid #e6d7be; background:#fff;
+    .banner.show{display:block}
+
+    /* ---------- Table ---------- */
+    table.leaderboard{
+      width:100%; border-collapse:separate; border-spacing:0;
+      background:#fff; border:2px solid #e7d8c4; border-radius:12px; overflow:hidden;
     }
-    thead th{
-      position:sticky; top:0; z-index:2;
-      background:linear-gradient(180deg,#fff7e3,#ffefc6);
-      font-weight:800; text-align:left; padding:12px 10px; border-bottom:1px solid #eadcc4;
+    .leaderboard thead th{
+      background: linear-gradient(180deg,#fff8ea, #fdeac7);
+      color:#6a3f16; font-weight:800; padding:14px 12px; text-align:left;
+      border-bottom:2px solid #eddcc4; white-space:nowrap;
     }
-    tbody td{padding:12px 10px; border-bottom:1px solid #f1e8db}
-    tbody tr:nth-child(odd){background:var(--row)}
-    tbody tr:nth-child(even){background:var(--row-alt)}
-    .col-r{text-align:right}
-    .muted{color:#7a5128}
-    .rank{width:48px;text-align:right;font-variant-numeric:tabular-nums}
-    .team{min-width:240px;font-weight:700}
-    .center{display:flex;justify-content:center;padding:28px 6px}
-    .foot{margin-top:12px;color:#876039}
-    @media (max-width:740px){
-      .team{min-width:unset}
-      thead th:nth-child(3), tbody td:nth-child(3),
-      thead th:nth-child(4), tbody td:nth-child(4){display:none}
+    .leaderboard tbody td{ padding:14px 12px; color:#4a3a26; }
+    .leaderboard tbody tr:nth-child(even){ background:#fffaf2; }
+    .leaderboard tbody tr:hover{ background:#fff4df; }
+    .leaderboard td.rank{ width:52px; color:#7a5a34; font-weight:800; }
+    .leaderboard tbody td:nth-child(n+3){ text-align:right; font-variant-numeric: tabular-nums; }
+
+    .empty{
+      padding:18px 12px; color:#7b522a; font-weight:600;
     }
+
+    /* ---------- Footer line ---------- */
+    .updated{ margin-top:12px; color:#7b522a; font-weight:600; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>TeamQuest Leaderboard</h1>
-      <p class="sub">Live standings with activity breakdown</p>
+  <main class="leaderboard-card" aria-live="polite">
+    <h1 class="leaderboard-title">TeamQuest Leaderboard</h1>
+    <p class="leaderboard-sub">Live standings with activity breakdown</p>
 
-      <div class="chips">
-        <div id="stateChip" class="chip">Checking event…</div>
-        <div id="clockChip" class="chip">Time remaining: 00:00</div>
-        <button id="refreshBtn" class="btn" type="button">🔄 Refresh</button>
-      </div>
-
-      <div id="hideBanner" class="banner">🔒 Scores hidden for the final push. Keep going!</div>
-      <div id="endBanner" class="banner info">⚠️ Event complete — final results will appear once the host publishes them.</div>
-
-      <table class="table" aria-live="polite">
-        <thead>
-          <tr>
-            <th class="rank">#</th>
-            <th class="team">Team</th>
-            <th class="col-r">Kindness</th>
-            <th class="col-r">Limerick</th>
-            <th class="col-r">Scavenger</th>
-            <th class="col-r">Quiz</th>
-            <th class="col-r">Total</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td class="center" colspan="7">Loading…</td></tr>
-        </tbody>
-      </table>
-
-      <div class="foot">
-        Last updated — <span id="updated">—:—:—</span>
-      </div>
+    <div class="cluster">
+      <span class="badge" id="statusBadge"><span class="dot" aria-hidden="true"></span><span id="statusText">Running</span></span>
+      <span class="badge time"><span class="dot" aria-hidden="true"></span>Time remaining: <span id="timeLeft">00:00</span></span>
+      <button class="btn-refresh" id="refreshBtn">🔄 Refresh</button>
     </div>
-  </div>
 
-  <!-- ===== Robust leaderboard script ===== -->
+    <!-- messages -->
+    <div class="banner" id="hideBanner">🔒 Scores hidden for the final push. Keep going!</div>
+    <div class="banner" id="endedBanner">⚠️ Event complete — final results will appear once the host publishes them.</div>
+
+    <!-- table -->
+    <table class="leaderboard" id="board" role="table" aria-describedby="statusText">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Team</th>
+          <th>Kindness</th>
+          <th>Limerick</th>
+          <th>Scavenger</th>
+          <th>Quiz</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr><td class="empty" colspan="7">Loading…</td></tr>
+      </tbody>
+    </table>
+
+    <div class="updated" id="lastUpdated">Last updated — --:--:--</div>
+  </main>
+
   <script>
-    // ------- Query & els -------
+    // ------- helpers -------
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get("event") || qs.get("eventId") || "";
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    const stateChip = document.getElementById("stateChip");
-    const clockChip = document.getElementById("clockChip");
-    const hideBanner = document.getElementById("hideBanner");
-    const endBanner  = document.getElementById("endBanner");
-    const rowsEl     = document.getElementById("rows");
-    const updatedEl  = document.getElementById("updated");
-    const refreshBtn = document.getElementById("refreshBtn");
+    const rowsEl = document.getElementById('rows');
+    const timeEl = document.getElementById('timeLeft');
+    const statusText = document.getElementById('statusText');
+    const statusBadge = document.getElementById('statusBadge');
+    const hideBanner = document.getElementById('hideBanner');
+    const endedBanner = document.getElementById('endedBanner');
+    const lastUpdated = document.getElementById('lastUpdated');
+    const refreshBtn = document.getElementById('refreshBtn');
 
-    // ------- Helpers -------
-    const nowIsoClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    const pad = n => String(n).padStart(2, "0");
-    function fmtMs(ms){
-      if (!Number.isFinite(ms) || ms < 0) return "00:00";
-      const sec = Math.floor(ms / 1000);
-      const h = Math.floor(sec / 3600);
-      const m = Math.floor((sec % 3600) / 60);
-      const s = sec % 60;
-      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    let countdownTimer = null;
+
+    function fmtTime(ms){
+      if(ms == null) return '00:00';
+      ms = Math.max(0, ms);
+      const s = Math.floor(ms/1000);
+      const h = Math.floor(s/3600);
+      const m = Math.floor((s%3600)/60);
+      const sec = s%60;
+      return (h>0? String(h).padStart(2,'0')+':':'') +
+             String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
     }
-    async function postJSON(path, body){
-      const res = await fetch(path, {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(body || {})
-      });
-      const data = await res.json().catch(()=> ({}));
-      if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
-      return data;
+    function nowLocalTime(){
+      const d = new Date();
+      return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+    function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
+
+    // tries multiple shapes for meta coming from different backends
+    function extractMeta(data){
+      const meta = data?.event || data || {};
+      const state = (data?.state || meta.state || 'RUNNING').toUpperCase();
+      const endsAtIso = meta.endsAt || meta.endAt || meta.ends || null;
+      const serverNowIso = meta.now || data?.now || null;
+      let remainingMs = null;
+
+      if(data?.timeRemainingMs != null) remainingMs = num(data.timeRemainingMs);
+      else if(data?.timeRemainingSec != null) remainingMs = num(data.timeRemainingSec)*1000;
+      else if(meta.timeRemainingSec != null) remainingMs = num(meta.timeRemainingSec)*1000;
+      else if(endsAtIso){
+        const now = serverNowIso ? new Date(serverNowIso) : new Date();
+        remainingMs = new Date(endsAtIso) - now;
+      }
+      return { state, remainingMs };
     }
 
-    // ------- Event state -------
-    async function getEventState(){
+    function setStatus(state){
+      const pretty = (state==='RUNNING'?'Running': state==='PAUSED'?'Paused'
+                      : state==='PUBLISHED'?'Published' : 'Ended');
+      statusText.textContent = pretty;
+      // green dot only for running
+      statusBadge.querySelector('.dot').style.background =
+        (state==='RUNNING') ? '#2ecc71' : (state==='PAUSED' ? '#ffd166' : '#ff6b6b');
+    }
+
+    function setCountdown(ms){
+      if(countdownTimer) clearInterval(countdownTimer);
+      if(ms == null){ timeEl.textContent = '00:00'; return; }
+      let remaining = ms;
+      timeEl.textContent = fmtTime(remaining);
+      countdownTimer = setInterval(()=>{
+        remaining -= 1000;
+        if(remaining <= 0){ timeEl.textContent = '00:00'; clearInterval(countdownTimer); }
+        else timeEl.textContent = fmtTime(remaining);
+      },1000);
+    }
+
+    function renderRows(list){
+      if(!Array.isArray(list) || list.length===0){
+        rowsEl.innerHTML = `<tr><td class="empty" colspan="7">No teams yet.</td></tr>`;
+        return;
+      }
+      rowsEl.innerHTML = list.map((t,i)=>{
+        // flexible property names for different function outputs
+        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
+        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
+        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
+        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
+        const total = num(t.total ?? (k+l+s+q));
+        const name = t.teamName || t.name || t.team || t.teamCode || '—';
+        return `
+          <tr>
+            <td class="rank">${i+1}</td>
+            <td>${name}</td>
+            <td>${k}</td>
+            <td>${l}</td>
+            <td>${s}</td>
+            <td>${q}</td>
+            <td>${total}</td>
+          </tr>`;
+      }).join('');
+    }
+
+    async function loadBoard(){
+      // fetch leaderboard (GET)
+      const url = EVENT_ID
+        ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
+        : '/.netlify/functions/get_leaderboard';
+
       try{
-        const data = await postJSON("/.netlify/functions/get_event_state", { eventId: EVENT_ID });
-        let remainingMs = Number.isFinite(data.remainingMs) ? data.remainingMs : undefined;
-        if (remainingMs === undefined && data.endsAt){
-          const endTs = typeof data.endsAt === "number" ? data.endsAt : Date.parse(data.endsAt);
-          if (Number.isFinite(endTs)) remainingMs = Math.max(0, endTs - Date.now());
-        }
-        return { state: data.state || "RUNNING", remainingMs };
-      }catch(e){
-        console.warn("get_event_state failed:", e);
-        return { state:"RUNNING", remainingMs: undefined };
-      }
-    }
-
-    // ------- Normalisation -------
-    function pickScore(src, keys, fallback = 0){
-      for (const k of keys){
-        if (src && src[k] != null && !isNaN(+src[k])) return Number(src[k]);
-      }
-      return fallback;
-    }
-
-    function unwrap(obj){
-      // many functions wrap their payload under "data" or "result"
-      return obj?.data ?? obj?.result ?? obj;
-    }
-
-    function extractArray(obj){
-      // accept many top-level keys
-      return (
-        (Array.isArray(obj?.leaderboard) && obj.leaderboard) ||
-        (Array.isArray(obj?.teams)       && obj.teams)       ||
-        (Array.isArray(obj?.rows)        && obj.rows)        ||
-        (Array.isArray(obj?.standings)   && obj.standings)   ||
-        (Array.isArray(obj?.scoreboard)  && obj.scoreboard)  ||
-        (Array.isArray(obj?.items)       && obj.items)       ||
-        (Array.isArray(obj)              && obj)             ||
-        []
-      );
-    }
-
-    function normaliseLeaderboard(rawIn){
-      const raw = unwrap(rawIn);
-      const arr = extractArray(raw);
-
-      const out = arr.map(t =>{
-        const name = t.teamName || t.name || t.team || t.Team || t.team_display || "";
-        const br   = t.breakdown || t.scores || t.activities || t.parts || {};
-
-        const kindness  = pickScore(t, ["kindness","kindnessScore","Kindness","score_kindness"], pickScore(br, ["kindness"], 0));
-        const limerick  = pickScore(t, ["limerick","limerickScore","Limerick","score_limerick"], pickScore(br, ["limerick"], 0));
-        const scavenger = pickScore(t, ["scavenger","scavengerScore","Scavenger","score_scavenger","hunt","scav"], pickScore(br, ["scavenger","hunt","scav"], 0));
-        const quiz      = pickScore(t, ["quiz","quizScore","Quiz","score_quiz"], pickScore(br, ["quiz"], 0));
-        const total     = Number.isFinite(+t.total) ? +t.total : kindness + limerick + scavenger + quiz;
-
-        return { teamName: name, kindness, limerick, scavenger, quiz, total };
-      });
-
-      // If we still got nothing, but a "teams" list exists as strings, render that as zero scores
-      if (!out.length && Array.isArray(raw?.teams) && raw.teams.every(x => typeof x === "string")){
-        return raw.teams.map((name) => ({ teamName:name, kindness:0, limerick:0, scavenger:0, quiz:0, total:0 }));
-      }
-
-      return out.filter(t => t.teamName).sort((a,b)=> b.total - a.total);
-    }
-
-    async function getLeaderboard(){
-      try{
-        const data = await postJSON("/.netlify/functions/get_leaderboard", { eventId: EVENT_ID });
-        const norm = normaliseLeaderboard(data);
-        if (!norm.length) console.debug("POST /get_leaderboard returned no rows. Raw:", data);
-        return norm;
-      }catch(e){
-        console.warn("POST get_leaderboard failed, trying GET:", e?.message || e);
-      }
-      try{
-        const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+        const res = await fetch(url, { cache: 'no-store' });
+        if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
-        const norm = normaliseLeaderboard(data);
-        if (!norm.length) console.debug("GET /get_leaderboard returned no rows. Raw:", data);
-        return norm;
-      }catch(e2){
-        console.error("GET get_leaderboard failed:", e2);
-        return [];
-      }
-    }
 
-    // ------- Render -------
-    function setStateChip(state){
-      const label = (
-        state === "RUNNING"     ? "Running" :
-        state === "NOT_STARTED" ? "Not started" :
-        state === "PAUSED"      ? "Paused" :
-        state === "ENDED"       ? "Completed" :
-        state === "PUBLISHED"   ? "Results published" :
-        state || "Unknown"
-      );
-      stateChip.textContent = label;
-    }
+        // event meta
+        const { state, remainingMs } = extractMeta(data);
+        setStatus(state);
+        setCountdown(remainingMs);
 
-    function drawRows(teams, hideScores){
-      rowsEl.innerHTML = "";
-      if (!teams.length){
-        rowsEl.innerHTML = `<tr><td class="center" colspan="7">No teams yet.</td></tr>`;
-        return;
-      }
-      teams.forEach((t, i) => {
-        const k = hideScores ? "—" : t.kindness;
-        const l = hideScores ? "—" : t.limerick;
-        const s = hideScores ? "—" : t.scavenger;
-        const q = hideScores ? "—" : t.quiz;
-        const tot = hideScores ? "—" : t.total;
+        // visibility logic
+        const hideForFinalPush = state === 'RUNNING' && remainingMs != null && remainingMs > 0 && remainingMs <= 15*60*1000;
+        hideBanner.classList.toggle('show', hideForFinalPush);
+        endedBanner.classList.toggle('show', (state !== 'RUNNING' && state !== 'PUBLISHED') || (remainingMs != null && remainingMs <=0));
 
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="rank">${i+1}</td>
-          <td class="team">${t.teamName}</td>
-          <td class="col-r">${k}</td>
-          <td class="col-r">${l}</td>
-          <td class="col-r">${s}</td>
-          <td class="col-r">${q}</td>
-          <td class="col-r"><strong>${tot}</strong></td>
-        `;
-        rowsEl.appendChild(tr);
-      });
-    }
-
-    // ------- Orchestration -------
-    let tickTimer = null;
-
-    async function refresh(){
-      const { state, remainingMs } = await getEventState();
-      setStateChip(state);
-
-      let msLeft = Number.isFinite(remainingMs) ? remainingMs : undefined;
-      const updateClock = () => {
-        if (!Number.isFinite(msLeft)) {
-          clockChip.textContent = "Time remaining: 00:00";
-          return;
+        // rows
+        if(hideForFinalPush || (state !== 'RUNNING' && state !== 'PUBLISHED')){
+          rowsEl.innerHTML = `<tr><td class="empty" colspan="7">${hideForFinalPush ? 'Scores are hidden until the finish.' : 'Scores will appear once results are published.'}</td></tr>`;
+        }else{
+          const list = data.leaderboard || data.rows || data.teams || [];
+          renderRows(list);
         }
-        clockChip.textContent = `Time remaining: ${fmtMs(msLeft)}`;
-        msLeft -= 1000;
-        if (msLeft < 0) msLeft = 0;
-      };
-      updateClock();
-      if (tickTimer) clearInterval(tickTimer);
-      tickTimer = setInterval(updateClock, 1000);
 
-      const teams = await getLeaderboard();
-
-      const fifteenMin = 15 * 60 * 1000;
-      const hideScores = (state === "RUNNING") && Number.isFinite(msLeft) && (msLeft <= fifteenMin);
-      hideBanner.style.display = hideScores ? "block" : "none";
-      endBanner.style.display  = (state === "ENDED") ? "block" : "none";
-
-      const actuallyHide = (state === "RUNNING") ? hideScores : false;
-
-      drawRows(teams, actuallyHide);
-      updatedEl.textContent = nowIsoClock();
+        lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
+      }catch(err){
+        console.error('Leaderboard load failed:', err);
+        rowsEl.innerHTML = `<tr><td class="empty" colspan="7">Couldn’t load leaderboard. Please try again.</td></tr>`;
+        lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
+      }
     }
 
-    refreshBtn.addEventListener("click", refresh);
+    // wire up
+    refreshBtn.addEventListener('click', loadBoard);
+    document.addEventListener('visibilitychange', () => { if(!document.hidden) loadBoard(); });
 
-    (async () => {
-      if (!EVENT_ID){
-        stateChip.textContent = "Missing event id (?event=...)";
-        rowsEl.innerHTML = `<tr><td class="center" colspan="7">Add <strong>?event=YOUR_EVENT_ID</strong> to the URL.</td></tr>`;
-        return;
-      }
-      await refresh();
-    })();
+    // initial
+    loadBoard();
+    // gentle auto-refresh while running
+    setInterval(loadBoard, 60_000);
   </script>
 </body>
 </html>
