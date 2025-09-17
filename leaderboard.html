@@ -2,399 +2,309 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TeamQuest Leaderboard</title>
   <style>
-    :root {
-      --bg: #e07a32;
-      --panel: #f3e8d9;
-      --panel-2: #fbf3e7;
-      --brown: #8b4513;
-      --gold: #daa520;
-      --ink: #3a2a18;
-      --muted: #7a5b3b;
-      --chip: #fff4d7;
+    :root{
+      --bg:#d9731e; --panel:#efe5d7; --ink:#653c17;
+      --gold:#d6a21c; --gold-2:#ffd36b; --accent:#ffb24b;
+      --row:#f9f2e9; --row-alt:#f3ebdf;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-      color: var(--ink);
-      background: radial-gradient(1200px 500px at 50% -200px, #f6ad72 0%, transparent 60%) var(--bg);
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background: radial-gradient(1200px 600px at 50% -80px, #f6b16a 0, #e58838 40%, #c86b1a 75%, #a85615 100%), var(--bg);
+      color:var(--ink);
     }
-
-    /* top bar */
-    .nav {
-      background: linear-gradient(180deg, #5a2f12, #6a3a17);
-      border-bottom: 3px solid var(--gold);
-      padding: 10px 16px;
-      color: #f3d9a5;
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .wrap{max-width:1100px;margin:48px auto;padding:0 16px}
+    .card{
+      background:var(--panel); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.18);
+      padding:28px;
     }
-    .brand {
-      display: inline-flex; align-items: center; gap: 8px; font-weight: 800;
+    h1{margin:0 0 6px;font-size:32px;letter-spacing:.3px}
+    .sub{margin:0 0 18px;color:#7a5128}
+    .chips{display:flex;gap:12px;align-items:center;margin:8px 0 18px}
+    .chip{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px; border-radius:12px; font-weight:700;
+      background:linear-gradient(180deg,#fff7e3,#ffe9b9);
+      border:2px dashed var(--gold);
+      color:#52300f;
     }
-    .brand img { height: 32px; }
-
-    /* card */
-    .card {
-      max-width: 1100px; margin: 28px auto; background: var(--panel);
-      border-radius: 16px; border: 3px solid var(--brown);
-      box-shadow: 0 10px 30px rgba(0,0,0,.18);
-      overflow: hidden;
+    .btn{
+      display:inline-flex; align-items:center; gap:8px; cursor:pointer;
+      padding:10px 14px; border-radius:12px; border:2px solid var(--gold);
+      background:linear-gradient(180deg,#ffe09f,#ffc66a);
+      font-weight:800; color:#4b2a0d;
     }
-    .card-header {
-      padding: 22px 22px 8px 22px; text-align: center;
+    .banner{
+      margin:8px 0 16px; padding:10px 14px; border-radius:10px;
+      border:2px solid var(--gold);
+      background:linear-gradient(180deg,#fff7e3,#ffefc6);
+      display:none; font-weight:700;
     }
-    h1 { margin: 0 0 6px; font-size: 28px; color: var(--brown); }
-    .subtitle { margin: 0; color: var(--muted); }
-
-    .toolbar {
-      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 12px 18px;
+    .banner.info{background:linear-gradient(180deg,#f3f1ff,#e7e3ff)}
+    .table{
+      width:100%; border-collapse:separate; border-spacing:0; overflow:hidden;
+      border-radius:12px; border:1px solid #e6d7be; background:#fff;
     }
-    .chip {
-      background: var(--chip); border: 2px dashed var(--gold);
-      color: var(--brown); padding: 10px 14px; border-radius: 12px; font-weight: 800;
+    thead th{
+      position:sticky; top:0; z-index:2;
+      background:linear-gradient(180deg,#fff7e3,#ffefc6);
+      font-weight:800; text-align:left; padding:12px 10px; border-bottom:1px solid #eadcc4;
     }
-    .btn {
-      display: inline-flex; align-items: center; gap: 8px; border: 0;
-      background: linear-gradient(180deg, #ffbd45, #f09e18);
-      color: #fff; font-weight: 800; padding: 10px 14px; border-radius: 10px;
-      cursor: pointer; border: 2px solid #8b551f;
-    }
-    .btn:active { transform: translateY(1px); }
-
-    .banner {
-      margin: 0 18px 12px; padding: 12px 14px; border-radius: 12px;
-      border: 2px solid var(--gold); background: #fff8e8; color: var(--ink);
-      font-weight: 700; display: none;
-    }
-    .banner.show { display: block; }
-    .banner.alert { background: #fff1f1; border-color: #e07474; }
-
-    /* table */
-    .table-wrap { padding: 0 18px 18px; }
-    table {
-      width: 100%; border-collapse: collapse; overflow: hidden;
-      border-radius: 12px; background: var(--panel-2);
-      border: 1px solid #e5d4b8;
-    }
-    thead th {
-      text-align: left; font-size: 14px; color: #6b4f2f; letter-spacing: .02em;
-      background: #fff3df; border-bottom: 2px solid #e8d2aa;
-      padding: 12px 10px; position: sticky; top: 0; z-index: 1;
-    }
-    tbody td {
-      padding: 12px 10px; border-bottom: 1px solid #eddcc3;
-    }
-    tbody tr:nth-child(odd) { background: #fffaf3; }
-    .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .rank { width: 42px; text-align: center; color: #7a5b3b; font-weight: 700; }
-    .team { min-width: 180px; font-weight: 700; }
-    .muted { color: #a08660; }
-
-    .footer {
-      padding: 12px 18px 18px; color: #7a5b3b;
-    }
-
-    @media (max-width: 880px) {
-      thead th:nth-child(3), tbody td:nth-child(3), /* Kindness */
-      thead th:nth-child(4), tbody td:nth-child(4), /* Limerick */
-      thead th:nth-child(5), tbody td:nth-child(5), /* Scavenger */
-      thead th:nth-child(6), tbody td:nth-child(6)  /* Quiz */
-      { display: none; }
-      .team { min-width: unset; }
+    tbody td{padding:12px 10px; border-bottom:1px solid #f1e8db}
+    tbody tr:nth-child(odd){background:var(--row)}
+    tbody tr:nth-child(even){background:var(--row-alt)}
+    .col-r{text-align:right}
+    .muted{color:#7a5128}
+    .rank{width:48px;text-align:right;font-variant-numeric:tabular-nums}
+    .team{min-width:240px;font-weight:700}
+    .center{display:flex;justify-content:center;padding:28px 6px}
+    .foot{margin-top:12px;color:#876039}
+    @media (max-width:740px){
+      .team{min-width:unset}
+      thead th:nth-child(3), tbody td:nth-child(3),
+      thead th:nth-child(4), tbody td:nth-child(4){display:none}
     }
   </style>
 </head>
 <body>
-  <div class="nav">
-    <span class="brand">
-      <img src="/Team Quest Logo-01.png" alt="" />
-      TeamQuest
-    </span>
-  </div>
-
-  <div class="card" id="app">
-    <div class="card-header">
+  <div class="wrap">
+    <div class="card">
       <h1>TeamQuest Leaderboard</h1>
-      <p class="subtitle">Live standings with activity breakdown</p>
-    </div>
+      <p class="sub">Live standings with activity breakdown</p>
 
-    <div class="toolbar">
-      <span id="stateChip" class="chip">Checking event…</span>
-      <span id="clockChip" class="chip">Time remaining: 00:00</span>
-      <button id="refreshBtn" class="btn">🔄 Refresh</button>
-    </div>
+      <div class="chips">
+        <div id="stateChip" class="chip">Checking event…</div>
+        <div id="clockChip" class="chip">Time remaining: 00:00</div>
+        <button id="refreshBtn" class="btn" type="button">🔄 Refresh</button>
+      </div>
 
-    <div id="hideBanner" class="banner">🔒 Scores hidden for the final push. Keep going!</div>
-    <div id="endBanner" class="banner">⚠️ Event complete — final results will appear once the host publishes them.</div>
+      <div id="hideBanner" class="banner">🔒 Scores hidden for the final push. Keep going!</div>
+      <div id="endBanner" class="banner info">⚠️ Event complete — final results will appear once the host publishes them.</div>
 
-    <div class="table-wrap">
-      <table id="board">
+      <table class="table" aria-live="polite">
         <thead>
           <tr>
             <th class="rank">#</th>
             <th class="team">Team</th>
-            <th class="num">Kindness</th>
-            <th class="num">Limerick</th>
-            <th class="num">Scavenger</th>
-            <th class="num">Quiz</th>
-            <th class="num">Total</th>
+            <th class="col-r">Kindness</th>
+            <th class="col-r">Limerick</th>
+            <th class="col-r">Scavenger</th>
+            <th class="col-r">Quiz</th>
+            <th class="col-r">Total</th>
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="7" class="muted" style="text-align:center;padding:16px;">No teams yet.</td></tr>
+          <tr><td class="center" colspan="7">Loading…</td></tr>
         </tbody>
       </table>
-    </div>
 
-    <div class="footer">
-      <span id="updated" class="muted">Last updated — …</span>
+      <div class="foot">
+        Last updated — <span id="updated">—:—:—</span>
+      </div>
     </div>
   </div>
 
+  <!-- ===== Robust leaderboard script ===== -->
   <script>
-    // ------- CONFIG -------
+    // ------- Query & els -------
     const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-    const FORCE_SHOW = qs.get('show') === '1'; // ?show=1 to bypass hide window (for testing)
-    const HIDE_WINDOW_MIN = 15;                // Hide scores in last N minutes of RUNNING
-    const AUTO_REFRESH_MS = 30_000;
+    const EVENT_ID = qs.get("event") || qs.get("eventId") || "";
 
-    // ------- ELEMENTS -------
-    const stateChip = document.getElementById('stateChip');
-    const clockChip = document.getElementById('clockChip');
-    const refreshBtn = document.getElementById('refreshBtn');
-    const hideBanner = document.getElementById('hideBanner');
-    const endBanner = document.getElementById('endBanner');
-    const tbody = document.getElementById('rows');
-    const updatedEl = document.getElementById('updated');
+    const stateChip = document.getElementById("stateChip");
+    const clockChip = document.getElementById("clockChip");
+    const hideBanner = document.getElementById("hideBanner");
+    const endBanner  = document.getElementById("endBanner");
+    const rowsEl     = document.getElementById("rows");
+    const updatedEl  = document.getElementById("updated");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-    let countdownTimer = null;
-    let lastEventMeta = { state: 'UNKNOWN', endsAt: 0, now: Date.now() };
-
-    // ------- EVENT STATE -------
-    async function fetchEventState() {
-      // Call your existing get_event_state function; accept GET/POST variations
-      const endpoint = '/.netlify/functions/get_event_state';
-      const tryPost = () => fetch(endpoint, {
-        method: 'POST', headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ eventId: EVENT_ID })
+    // ------- Helpers -------
+    const nowIsoClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const pad = n => String(n).padStart(2, "0");
+    function fmtMs(ms){
+      if (!Number.isFinite(ms) || ms < 0) return "00:00";
+      const sec = Math.floor(ms / 1000);
+      const h = Math.floor(sec / 3600);
+      const m = Math.floor((sec % 3600) / 60);
+      const s = sec % 60;
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    }
+    async function postJSON(path, body){
+      const res = await fetch(path, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(body || {})
       });
-      const tryGet = () => fetch(`${endpoint}?eventId=${encodeURIComponent(EVENT_ID)}`);
-
-      let data;
-      try {
-        let r = await tryPost();
-        if (!r.ok) r = await tryGet();
-        data = await r.json().catch(()=>({}));
-      } catch {
-        data = {};
-      }
-
-      // Robust parsing of possible shapes
-      const state = (data.state || data?.event?.state || 'UNKNOWN').toUpperCase();
-      const nowMs =
-        data.now ? +new Date(data.now) :
-        data.serverNow ? +new Date(data.serverNow) : Date.now();
-
-      const endRaw = data.endsAt || data.endAt || data.endTime || data.eventEnd || data?.event?.endsAt;
-      const endsAtMs = endRaw ? +new Date(endRaw) : (nowMs + 0); // fallback => no countdown
-
-      lastEventMeta = { state, endsAt: endsAtMs, now: nowMs };
-      return lastEventMeta;
+      const data = await res.json().catch(()=> ({}));
+      if (!res.ok) throw new Error(data.message || data.error || `HTTP ${res.status}`);
+      return data;
     }
 
-    function startCountdown(meta) {
-      clearInterval(countdownTimer);
-      const tick = () => {
-        const now = Date.now();
-        const remain = Math.max(0, (meta.endsAt || now) - now);
-        const mm = String(Math.floor(remain / 60000)).padStart(2, '0');
-        const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, '0');
-        clockChip.textContent = `Time remaining: ${mm}:${ss}`;
-      };
-      tick();
-      countdownTimer = setInterval(tick, 1000);
+    // ------- Event state -------
+    async function getEventState(){
+      try{
+        const data = await postJSON("/.netlify/functions/get_event_state", { eventId: EVENT_ID });
+        // Expecting: {state:"RUNNING"|"NOT_STARTED"|"PAUSED"|"ENDED"|"PUBLISHED", endsAt?:ms|iso, remainingMs?:number}
+        let remainingMs = Number.isFinite(data.remainingMs) ? data.remainingMs : undefined;
+        if (remainingMs === undefined && data.endsAt){
+          const endTs = typeof data.endsAt === "number" ? data.endsAt : Date.parse(data.endsAt);
+          if (Number.isFinite(endTs)) remainingMs = Math.max(0, endTs - Date.now());
+        }
+        return { state: data.state || "RUNNING", remainingMs };
+      }catch(e){
+        // Fail-soft: assume running but unknown clock
+        console.warn("get_event_state failed:", e);
+        return { state:"RUNNING", remainingMs: undefined };
+      }
     }
 
-    // ------- LEADERBOARD FETCH -------
-    async function fetchLeaderboard() {
-      const FN = '/.netlify/functions/get_leaderboard';
-      let d = null;
-
-      // 1) GET with eventId in query
-      try {
-        const r = await fetch(`${FN}?eventId=${encodeURIComponent(EVENT_ID)}`);
-        if (r.ok) d = await r.json();
-      } catch {}
-
-      // 2) POST fallback (same endpoint)
-      if (!d) {
-        try {
-          const r = await fetch(FN, {
-            method: 'POST',
-            headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({ eventId: EVENT_ID })
-          });
-          if (r.ok) d = await r.json();
-        } catch {}
+    // ------- Leaderboard fetch + normalisation -------
+    function pickScore(src, keys, fallback = 0){
+      for (const k of keys){
+        if (src && src[k] != null && !isNaN(+src[k])) return Number(src[k]);
       }
-
-      const root = d?.data || d || {};
-      if (Array.isArray(root.teams) && root.teams.length) {
-        return normalizeTeams(root.teams);
-      }
-      if (Array.isArray(root.leaderboard) && root.leaderboard.length) {
-        return normalizeTeams(root.leaderboard);
-      }
-
-      // Fallback: aggregate from raw rows like [{teamCode, activity, score}, ...]
-      let rows = root.rows || root.scores || root.submissions || [];
-      if (!Array.isArray(rows) || !rows.length) {
-        const alt = root.sheet || root.payload || {};
-        rows = alt.rows || alt.scores || [];
-      }
-      if (Array.isArray(rows) && rows.length) {
-        return aggregateFromRows(rows);
-      }
-
-      return { teams: [], activities: ['kindness','limerick','scavenger','quiz'] };
+      return fallback;
     }
 
-    // Convert structured teams into normalized shape
-    function normalizeTeams(list) {
-      const norm = [];
-      const acts = new Set(['kindness','limerick','scavenger','quiz']);
-      for (const t of list) {
-        const name = t.teamName || t.name || t.title || t.teamCode || 'Unknown';
-        const code = t.teamCode || t.code || name;
-        const b = t.breakdown || t.scores || t.activity || {};
-        const row = {
-          code, name,
-          kindness: numberish(t.kindness ?? b.kindness ?? b.K ?? 0),
-          limerick: numberish(t.limerick ?? b.limerick ?? b.L ?? 0),
-          scavenger: numberish(t.scavenger ?? b.scavenger ?? b.S ?? 0),
-          quiz: numberish(t.quiz ?? t.timedQuiz ?? b.quiz ?? b.timedQuiz ?? b.Q ?? 0),
-        };
-        row.total = row.kindness + row.limerick + row.scavenger + row.quiz;
-        norm.push(row);
+    function normaliseLeaderboard(raw){
+      // Accept shapes: {leaderboard:[...]}, {teams:[...]}, {rows:[...]}
+      const arr = Array.isArray(raw?.leaderboard) ? raw.leaderboard
+               : Array.isArray(raw?.teams)       ? raw.teams
+               : Array.isArray(raw?.rows)        ? raw.rows
+               : [];
 
-        // collect any extra activities present
-        Object.keys(b).forEach(k => acts.add(k.toLowerCase()));
+      const out = arr.map(t =>{
+        const name = t.teamName || t.name || t.team || t.Team || "";
+        const br   = t.breakdown || t.scores || t.activities || {};
+
+        const kindness  = pickScore(t, ["kindness","kindnessScore","Kindness","score_kindness"], pickScore(br, ["kindness"], 0));
+        const limerick  = pickScore(t, ["limerick","limerickScore","Limerick","score_limerick"], pickScore(br, ["limerick"], 0));
+        const scavenger = pickScore(t, ["scavenger","scavengerScore","Scavenger","score_scavenger","hunt","scav"], pickScore(br, ["scavenger"], 0));
+        const quiz      = pickScore(t, ["quiz","quizScore","Quiz","score_quiz"], pickScore(br, ["quiz"], 0));
+        const total     = Number.isFinite(+t.total) ? +t.total : kindness + limerick + scavenger + quiz;
+
+        return { teamName: name, kindness, limerick, scavenger, quiz, total };
+      });
+
+      // Filter empty names (if any) and sort
+      return out.filter(t => t.teamName).sort((a,b)=> b.total - a.total);
+    }
+
+    async function getLeaderboard(){
+      // POST first
+      try{
+        const data = await postJSON("/.netlify/functions/get_leaderboard", { eventId: EVENT_ID });
+        return normaliseLeaderboard(data);
+      }catch(e){
+        console.warn("POST get_leaderboard failed, trying GET:", e?.message || e);
       }
-      norm.sort((a,b)=> b.total - a.total);
-      return { teams: norm, activities: Array.from(acts) };
-    }
-
-    // Aggregate from a flat “scores” sheet
-    function aggregateFromRows(rows) {
-      const by = new Map();
-      for (const r of rows) {
-        const code = r.teamCode || r.team || r.code || '';
-        const name = r.teamName || r.name || code;
-        const activity = (r.activity || r.Activity || '').toString().trim().toLowerCase();
-        const score = numberish(r.score ?? r.Score ?? r.points ?? r.Points ?? 0);
-        if (!code) continue;
-
-        const ref = by.get(code) || { code, name, kindness:0, limerick:0, scavenger:0, quiz:0 };
-        if (activity.includes('kind')) ref.kindness += score;
-        else if (activity.includes('limerick')) ref.limerick += score;
-        else if (activity.includes('scav')) ref.scavenger += score;
-        else if (activity.includes('quiz')) ref.quiz += score;
-
-        by.set(code, ref);
+      // GET fallback
+      try{
+        const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.message || `HTTP ${res.status}`);
+        return normaliseLeaderboard(data);
+      }catch(e2){
+        console.error("GET get_leaderboard failed:", e2);
+        return [];
       }
-      const teams = Array.from(by.values()).map(t => ({ ...t, total: t.kindness + t.limerick + t.scavenger + t.quiz }));
-      teams.sort((a,b)=> b.total - a.total);
-      return { teams, activities: ['kindness','limerick','scavenger','quiz'] };
     }
 
-    function numberish(v) {
-      const n = typeof v === 'string' ? parseFloat(v) : +v;
-      return isFinite(n) ? n : 0;
+    // ------- Render -------
+    function setStateChip(state){
+      const label = (
+        state === "RUNNING"     ? "Running" :
+        state === "NOT_STARTED" ? "Not started" :
+        state === "PAUSED"      ? "Paused" :
+        state === "ENDED"       ? "Completed" :
+        state === "PUBLISHED"   ? "Results published" :
+        state || "Unknown"
+      );
+      stateChip.textContent = label;
     }
 
-    // ------- RENDER -------
-    function renderState(meta) {
-      const s = meta.state;
-      if (s === 'RUNNING') stateChip.textContent = 'Running';
-      else if (s === 'PAUSED') stateChip.textContent = 'Paused';
-      else if (s === 'PUBLISHED') stateChip.textContent = 'Results published';
-      else if (s === 'ENDED') stateChip.textContent = 'Completed';
-      else stateChip.textContent = s || 'Unknown';
-    }
-
-    function shouldHideScores(meta) {
-      if (FORCE_SHOW) return false;
-      const now = Date.now();
-      const remainingMs = Math.max(0, (meta.endsAt || now) - now);
-      const inHideWindow = remainingMs <= HIDE_WINDOW_MIN * 60_000;
-      if (meta.state === 'RUNNING') return inHideWindow;
-      if (meta.state === 'PUBLISHED') return false;
-      // ENDED/PAUSED/UNKNOWN => hide
-      return true;
-    }
-
-    function renderBoard(model, hide) {
-      const list = model.teams || [];
-      if (!list.length) {
-        tbody.innerHTML = `<tr><td class="muted" style="text-align:center;padding:16px;" colspan="7">No teams yet.</td></tr>`;
+    function drawRows(teams, hideScores){
+      rowsEl.innerHTML = "";
+      if (!teams.length){
+        rowsEl.innerHTML = `<tr><td class="center" colspan="7">No teams yet.</td></tr>`;
         return;
       }
-      let idx = 1;
-      tbody.innerHTML = list.map(t => {
-        const k = hide ? '—' : t.kindness;
-        const l = hide ? '—' : t.limerick;
-        const s = hide ? '—' : t.scavenger;
-        const q = hide ? '—' : t.quiz;
-        const total = hide ? '—' : t.total;
-        return `<tr>
-          <td class="rank">${idx++}</td>
-          <td class="team">${escapeHtml(t.name || t.code)}</td>
-          <td class="num">${k}</td>
-          <td class="num">${l}</td>
-          <td class="num">${s}</td>
-          <td class="num">${q}</td>
-          <td class="num"><strong>${total}</strong></td>
-        </tr>`;
-      }).join('');
+      teams.forEach((t, i) => {
+        const k = hideScores ? "—" : t.kindness;
+        const l = hideScores ? "—" : t.limerick;
+        const s = hideScores ? "—" : t.scavenger;
+        const q = hideScores ? "—" : t.quiz;
+        const tot = hideScores ? "—" : t.total;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="rank">${i+1}</td>
+          <td class="team">${t.teamName}</td>
+          <td class="col-r">${k}</td>
+          <td class="col-r">${l}</td>
+          <td class="col-r">${s}</td>
+          <td class="col-r">${q}</td>
+          <td class="col-r"><strong>${tot}</strong></td>
+        `;
+        rowsEl.appendChild(tr);
+      });
     }
 
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+    // ------- Orchestration -------
+    let tickTimer = null;
 
-    function setUpdatedNow() {
-      const d = new Date();
-      const hh = String(d.getHours()).padStart(2,'0');
-      const mm = String(d.getMinutes()).padStart(2,'0');
-      const ss = String(d.getSeconds()).padStart(2,'0');
-      updatedEl.textContent = `Last updated — ${hh}:${mm}:${ss}`;
+    async function refresh(){
+      // 1) Event state & clock
+      const { state, remainingMs } = await getEventState();
+      setStateChip(state);
+
+      // Clock
+      let msLeft = Number.isFinite(remainingMs) ? remainingMs : undefined;
+      const updateClock = () => {
+        if (!Number.isFinite(msLeft)) {
+          clockChip.textContent = "Time remaining: 00:00";
+          return;
+        }
+        clockChip.textContent = `Time remaining: ${fmtMs(msLeft)}`;
+        msLeft -= 1000;
+        if (msLeft < 0) msLeft = 0;
+      };
+      updateClock();
+      if (tickTimer) clearInterval(tickTimer);
+      tickTimer = setInterval(updateClock, 1000);
+
+      // 2) Leaderboard
+      const teams = await getLeaderboard();
+
+      // 3) Visibility rules
+      const fifteenMin = 15 * 60 * 1000;
+      const hideScores = (state === "RUNNING") && Number.isFinite(msLeft) && (msLeft <= fifteenMin);
+      hideBanner.style.display = hideScores ? "block" : "none";
+
+      const showEndedMsg = (state === "ENDED");     // waiting for publish
+      endBanner.style.display = showEndedMsg ? "block" : "none";
+
+      // If PUBLISHED, always show scores; if NOT_STARTED/PAUSED, show zero rows message
+      const actuallyHide = (state === "RUNNING") ? hideScores : false;
+
+      drawRows(teams, actuallyHide);
+      updatedEl.textContent = nowIsoClock();
     }
 
-    // ------- FLOW -------
-    async function refreshAll() {
-      // 1) Event meta
-      const meta = await fetchEventState().catch(()=>({state:'UNKNOWN', endsAt:0, now:Date.now()}));
-      renderState(meta);
-      startCountdown(meta);
+    refreshBtn.addEventListener("click", refresh);
 
-      // 2) Leaderboard data
-      const model = await fetchLeaderboard().catch(()=>({teams:[], activities:[]}));
-
-      // 3) Hide/Show banners & render
-      const hide = shouldHideScores(meta);
-      hideBanner.classList.toggle('show', hide && meta.state === 'RUNNING');
-      endBanner.classList.toggle('show', hide && meta.state !== 'RUNNING' && meta.state !== 'PUBLISHED');
-      renderBoard(model, hide);
-      setUpdatedNow();
-    }
-
-    refreshBtn.addEventListener('click', refreshAll);
-    refreshAll();
-    setInterval(refreshAll, AUTO_REFRESH_MS);
+    // Initial kick-off
+    (async () => {
+      if (!EVENT_ID){
+        stateChip.textContent = "Missing event id (?event=...)";
+        rowsEl.innerHTML = `<tr><td class="center" colspan="7">Add <strong>?event=YOUR_EVENT_ID</strong> to the URL.</td></tr>`;
+        return;
+      }
+      await refresh();
+    })();
   </script>
 </body>
 </html>
