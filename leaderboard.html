@@ -1,268 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TeamQuest Leaderboard</title>
-<style>
-  :root{
-    --bg:#e07d35;--panel:#f3e9dd;--brown:#8b4513;--gold:#daa520;--text:#3b2a17;
-    --chip:#fff3cd;--chip-br:#e3c76b;--row:#fbf6ef;--row-alt:#f2eadf;
-  }
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#c96624,#e07d35 40%,#eea76c)}
-  .bar{background:#6e3b16;color:#f9e7ca;border-bottom:3px solid var(--gold);box-shadow:0 4px 12px rgba(0,0,0,.25)}
-  .wrap{max-width:1100px;margin:0 auto;padding:18px}
-  .logo{height:42px;vertical-align:middle}
-  .card{background:var(--panel);border-radius:18px;padding:24px;box-shadow:0 14px 28px rgba(0,0,0,.2);border:3px solid var(--brown);margin:28px auto}
-  h1{margin:8px 0 12px;font-weight:800;color:var(--brown);text-align:center}
-  .subtitle{text-align:center;color:#7a4b24;margin-bottom:18px}
-  .chips{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
-  .chip{background:var(--chip);border:2px dashed var(--chip-br);padding:10px 14px;border-radius:14px;font-weight:700;color:#704417}
-  .btn{background:linear-gradient(135deg,#ffc04d,#ff9d23);border:2px solid #8b4513;border-radius:12px;padding:10px 16px;font-weight:800;color:#5a2d01;cursor:pointer}
-  .banner{background:#fff4dc;border:2px solid var(--gold);border-radius:10px;padding:10px 12px;margin:8px auto;color:#6a4b1d}
-  .table{width:100%;border-collapse:collapse;margin-top:10px;border-radius:12px;overflow:hidden}
-  th,td{padding:12px 10px}
-  th{background:#f9edd9;color:#6a4218;border-bottom:2px solid #e2c792;text-align:left}
-  tbody tr:nth-child(odd){background:var(--row)}
-  tbody tr:nth-child(even){background:var(--row-alt)}
-  .num{text-align:right;font-variant-numeric:tabular-nums}
-  .muted{opacity:.65}
-  .footer{margin-top:10px;color:#6a4b1d}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TeamQuest Leaderboard</title>
+  <style>
+    :root {
+      --bg: #e07a32;
+      --panel: #f3e8d9;
+      --panel-2: #fbf3e7;
+      --brown: #8b4513;
+      --gold: #daa520;
+      --ink: #3a2a18;
+      --muted: #7a5b3b;
+      --chip: #fff4d7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      color: var(--ink);
+      background: radial-gradient(1200px 500px at 50% -200px, #f6ad72 0%, transparent 60%) var(--bg);
+    }
+
+    /* top bar */
+    .nav {
+      background: linear-gradient(180deg, #5a2f12, #6a3a17);
+      border-bottom: 3px solid var(--gold);
+      padding: 10px 16px;
+      color: #f3d9a5;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand {
+      display: inline-flex; align-items: center; gap: 8px; font-weight: 800;
+    }
+    .brand img { height: 32px; }
+
+    /* card */
+    .card {
+      max-width: 1100px; margin: 28px auto; background: var(--panel);
+      border-radius: 16px; border: 3px solid var(--brown);
+      box-shadow: 0 10px 30px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+    .card-header {
+      padding: 22px 22px 8px 22px; text-align: center;
+    }
+    h1 { margin: 0 0 6px; font-size: 28px; color: var(--brown); }
+    .subtitle { margin: 0; color: var(--muted); }
+
+    .toolbar {
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; padding: 12px 18px;
+    }
+    .chip {
+      background: var(--chip); border: 2px dashed var(--gold);
+      color: var(--brown); padding: 10px 14px; border-radius: 12px; font-weight: 800;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px; border: 0;
+      background: linear-gradient(180deg, #ffbd45, #f09e18);
+      color: #fff; font-weight: 800; padding: 10px 14px; border-radius: 10px;
+      cursor: pointer; border: 2px solid #8b551f;
+    }
+    .btn:active { transform: translateY(1px); }
+
+    .banner {
+      margin: 0 18px 12px; padding: 12px 14px; border-radius: 12px;
+      border: 2px solid var(--gold); background: #fff8e8; color: var(--ink);
+      font-weight: 700; display: none;
+    }
+    .banner.show { display: block; }
+    .banner.alert { background: #fff1f1; border-color: #e07474; }
+
+    /* table */
+    .table-wrap { padding: 0 18px 18px; }
+    table {
+      width: 100%; border-collapse: collapse; overflow: hidden;
+      border-radius: 12px; background: var(--panel-2);
+      border: 1px solid #e5d4b8;
+    }
+    thead th {
+      text-align: left; font-size: 14px; color: #6b4f2f; letter-spacing: .02em;
+      background: #fff3df; border-bottom: 2px solid #e8d2aa;
+      padding: 12px 10px; position: sticky; top: 0; z-index: 1;
+    }
+    tbody td {
+      padding: 12px 10px; border-bottom: 1px solid #eddcc3;
+    }
+    tbody tr:nth-child(odd) { background: #fffaf3; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .rank { width: 42px; text-align: center; color: #7a5b3b; font-weight: 700; }
+    .team { min-width: 180px; font-weight: 700; }
+    .muted { color: #a08660; }
+
+    .footer {
+      padding: 12px 18px 18px; color: #7a5b3b;
+    }
+
+    @media (max-width: 880px) {
+      thead th:nth-child(3), tbody td:nth-child(3), /* Kindness */
+      thead th:nth-child(4), tbody td:nth-child(4), /* Limerick */
+      thead th:nth-child(5), tbody td:nth-child(5), /* Scavenger */
+      thead th:nth-child(6), tbody td:nth-child(6)  /* Quiz */
+      { display: none; }
+      .team { min-width: unset; }
+    }
+  </style>
 </head>
 <body>
-  <div class="bar">
-    <div class="wrap">
-      <img src="/Team Quest Logo-01.png" class="logo" alt="TeamQuest">
-    </div>
+  <div class="nav">
+    <span class="brand">
+      <img src="/Team Quest Logo-01.png" alt="" />
+      TeamQuest
+    </span>
   </div>
 
-  <div class="wrap">
-    <div class="card">
+  <div class="card" id="app">
+    <div class="card-header">
       <h1>TeamQuest Leaderboard</h1>
-      <div class="subtitle">Live standings with activity breakdown</div>
+      <p class="subtitle">Live standings with activity breakdown</p>
+    </div>
 
-      <div class="chips">
-        <div id="stateChip" class="chip">Checking event…</div>
-        <div id="clockChip" class="chip">Time remaining: —</div>
-        <button id="refreshBtn" class="btn">🔄 Refresh</button>
-      </div>
+    <div class="toolbar">
+      <span id="stateChip" class="chip">Checking event…</span>
+      <span id="clockChip" class="chip">Time remaining: 00:00</span>
+      <button id="refreshBtn" class="btn">🔄 Refresh</button>
+    </div>
 
-      <div id="banner" class="banner" style="display:none"></div>
+    <div id="hideBanner" class="banner">🔒 Scores hidden for the final push. Keep going!</div>
+    <div id="endBanner" class="banner">⚠️ Event complete — final results will appear once the host publishes them.</div>
 
-      <div id="tableArea"></div>
+    <div class="table-wrap">
+      <table id="board">
+        <thead>
+          <tr>
+            <th class="rank">#</th>
+            <th class="team">Team</th>
+            <th class="num">Kindness</th>
+            <th class="num">Limerick</th>
+            <th class="num">Scavenger</th>
+            <th class="num">Quiz</th>
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="7" class="muted" style="text-align:center;padding:16px;">No teams yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-      <div class="footer muted" id="updated"></div>
+    <div class="footer">
+      <span id="updated" class="muted">Last updated — …</span>
     </div>
   </div>
 
-<script>
-/* ---------- query flags ---------- */
-const qs=new URLSearchParams(location.search);
-const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
-const FORCE_SHOW=['1','true','show','yes'].includes((qs.get('show')||'').toLowerCase());
-const INCLUDE_ALL=['1','true','yes'].includes((qs.get('all')||'').toLowerCase()); // ignore event filter (debug)
+  <script>
+    // ------- CONFIG -------
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+    const FORCE_SHOW = qs.get('show') === '1'; // ?show=1 to bypass hide window (for testing)
+    const HIDE_WINDOW_MIN = 15;                // Hide scores in last N minutes of RUNNING
+    const AUTO_REFRESH_MS = 30_000;
 
-/* ---------- tiny helpers ---------- */
-const $=(id)=>document.getElementById(id);
-const pad=(n)=>String(n).padStart(2,'0');
-const fmtTime=(d)=>new Date(d).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    // ------- ELEMENTS -------
+    const stateChip = document.getElementById('stateChip');
+    const clockChip = document.getElementById('clockChip');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const hideBanner = document.getElementById('hideBanner');
+    const endBanner = document.getElementById('endBanner');
+    const tbody = document.getElementById('rows');
+    const updatedEl = document.getElementById('updated');
 
-async function call(path, body){
-  const res=await fetch(`/.netlify/functions/${path}`,{
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body: JSON.stringify(body||{})
-  });
-  const j=await res.json().catch(()=>({}));
-  if(!res.ok){ throw new Error(j.message||`HTTP ${res.status}`); }
-  return j;
-}
+    let countdownTimer = null;
+    let lastEventMeta = { state: 'UNKNOWN', endsAt: 0, now: Date.now() };
 
-/* ---------- event state & countdown (robust) ---------- */
-async function getEventState(){
-  let d={};
-  try{ d=await call('get_event_state',{eventId:EVENT_ID}); }
-  catch{
-    try{ const r=await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`); d=await r.json(); }
-    catch{}
-  }
-  const src = d?.data || d || {};
+    // ------- EVENT STATE -------
+    async function fetchEventState() {
+      // Call your existing get_event_state function; accept GET/POST variations
+      const endpoint = '/.netlify/functions/get_event_state';
+      const tryPost = () => fetch(endpoint, {
+        method: 'POST', headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ eventId: EVENT_ID })
+      });
+      const tryGet = () => fetch(`${endpoint}?eventId=${encodeURIComponent(EVENT_ID)}`);
 
-  const state = src.state || src.status || 'UNKNOWN';
-  const now   = src.now || src.serverNow || src.currentTime || Date.now();
+      let data;
+      try {
+        let r = await tryPost();
+        if (!r.ok) r = await tryGet();
+        data = await r.json().catch(()=>({}));
+      } catch {
+        data = {};
+      }
 
-  // Try several end fields
-  let endsAt = src.endsAt || src.endAt || src.deadline || src.eventEnd || src.endTime || src.eventEndsAt || src.end || null;
-  let endMs  = endsAt ? new Date(endsAt).getTime() : null;
+      // Robust parsing of possible shapes
+      const state = (data.state || data?.event?.state || 'UNKNOWN').toUpperCase();
+      const nowMs =
+        data.now ? +new Date(data.now) :
+        data.serverNow ? +new Date(data.serverNow) : Date.now();
 
-  // Or derive from remaining*
-  if(!endMs){
-    const remMs = (src.remainingMs ?? (src.remainingSeconds!=null ? src.remainingSeconds*1000 : null) ?? (src.remainingMinutes!=null ? src.remainingMinutes*60000 : null));
-    if(remMs!=null) endMs = new Date(now).getTime() + Number(remMs||0);
-  }
+      const endRaw = data.endsAt || data.endAt || data.endTime || data.eventEnd || data?.event?.endsAt;
+      const endsAtMs = endRaw ? +new Date(endRaw) : (nowMs + 0); // fallback => no countdown
 
-  const published = !!(src.published || src.isPublished || src.resultsPublished);
-  return { state, now, endsAt: endMs ? new Date(endMs).toISOString() : null, published };
-}
+      lastEventMeta = { state, endsAt: endsAtMs, now: nowMs };
+      return lastEventMeta;
+    }
 
-function paintState(state){
-  const pretty=(state||'UNKNOWN').replace(/_/g,' ').toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
-  $('stateChip').textContent = pretty;
-}
-function paintCountdown(now, endsAt){
-  if(!endsAt){ $('clockChip').textContent='Time remaining: —'; return; }
-  const ms=Math.max(0, new Date(endsAt)-new Date(now));
-  const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
-  $('clockChip').textContent = `Time remaining: ${pad(m)}:${pad(s)}`;
-}
+    function startCountdown(meta) {
+      clearInterval(countdownTimer);
+      const tick = () => {
+        const now = Date.now();
+        const remain = Math.max(0, (meta.endsAt || now) - now);
+        const mm = String(Math.floor(remain / 60000)).padStart(2, '0');
+        const ss = String(Math.floor((remain % 60000) / 1000)).padStart(2, '0');
+        clockChip.textContent = `Time remaining: ${mm}:${ss}`;
+      };
+      tick();
+      countdownTimer = setInterval(tick, 1000);
+    }
 
-/* ---------- leaderboard ingestion ---------- */
-function titleCase(x){return (x||'').toLowerCase().replace(/\b\w/g,m=>m.toUpperCase());}
+    // ------- LEADERBOARD FETCH -------
+    async function fetchLeaderboard() {
+      const FN = '/.netlify/functions/get_leaderboard';
+      let d = null;
 
-function get(r, ...keys){
-  for(const k of keys){
-    if(r==null) break;
-    if(Object.prototype.hasOwnProperty.call(r,k)) return r[k];
-  }
-  return undefined;
-}
+      // 1) GET with eventId in query
+      try {
+        const r = await fetch(`${FN}?eventId=${encodeURIComponent(EVENT_ID)}`);
+        if (r.ok) d = await r.json();
+      } catch {}
 
-function aggregateFromRows(rows){
-  const map=new Map();
-  const activities=new Set();
+      // 2) POST fallback (same endpoint)
+      if (!d) {
+        try {
+          const r = await fetch(FN, {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({ eventId: EVENT_ID })
+          });
+          if (r.ok) d = await r.json();
+        } catch {}
+      }
 
-  for(const r of rows){
-    const act = (get(r,'Activity','activity','type','kind')||'').toString().toLowerCase();
-    const code= (get(r,'Team Code','teamCode','team_code','code')||'').toString();
-    const name= (get(r,'Team Name','teamName','team_name','name')||'').toString() || code;
+      const root = d?.data || d || {};
+      if (Array.isArray(root.teams) && root.teams.length) {
+        return normalizeTeams(root.teams);
+      }
+      if (Array.isArray(root.leaderboard) && root.leaderboard.length) {
+        return normalizeTeams(root.leaderboard);
+      }
 
-    // event filtering
-    let eventId = get(r,'Event Id','eventId','event_id') || '';
-    const sid   = (get(r,'SubmissionID','submissionId','Submission Id','idempotency','Idempotency','id')||'').toString();
-    if(!eventId && sid.includes('|')){ const p=sid.split('|'); if(p.length>=2) eventId=p[1]; }
-    if(!INCLUDE_ALL && EVENT_ID && eventId && eventId!==EVENT_ID) continue;
+      // Fallback: aggregate from raw rows like [{teamCode, activity, score}, ...]
+      let rows = root.rows || root.scores || root.submissions || [];
+      if (!Array.isArray(rows) || !rows.length) {
+        const alt = root.sheet || root.payload || {};
+        rows = alt.rows || alt.scores || [];
+      }
+      if (Array.isArray(rows) && rows.length) {
+        return aggregateFromRows(rows);
+      }
 
-    if(!code || !act) continue;
+      return { teams: [], activities: ['kindness','limerick','scavenger','quiz'] };
+    }
 
-    const score=Number(get(r,'Score','score')||0)||0;
-    activities.add(act);
+    // Convert structured teams into normalized shape
+    function normalizeTeams(list) {
+      const norm = [];
+      const acts = new Set(['kindness','limerick','scavenger','quiz']);
+      for (const t of list) {
+        const name = t.teamName || t.name || t.title || t.teamCode || 'Unknown';
+        const code = t.teamCode || t.code || name;
+        const b = t.breakdown || t.scores || t.activity || {};
+        const row = {
+          code, name,
+          kindness: numberish(t.kindness ?? b.kindness ?? b.K ?? 0),
+          limerick: numberish(t.limerick ?? b.limerick ?? b.L ?? 0),
+          scavenger: numberish(t.scavenger ?? b.scavenger ?? b.S ?? 0),
+          quiz: numberish(t.quiz ?? t.timedQuiz ?? b.quiz ?? b.timedQuiz ?? b.Q ?? 0),
+        };
+        row.total = row.kindness + row.limerick + row.scavenger + row.quiz;
+        norm.push(row);
 
-    if(!map.has(code)) map.set(code,{code, name, totals:{}, total:0});
-    const t=map.get(code);
-    t.totals[act]=(t.totals[act]||0)+score;
-    t.total+=score;
-  }
+        // collect any extra activities present
+        Object.keys(b).forEach(k => acts.add(k.toLowerCase()));
+      }
+      norm.sort((a,b)=> b.total - a.total);
+      return { teams: norm, activities: Array.from(acts) };
+    }
 
-  return {
-    teams:[...map.values()].sort((a,b)=>b.total-a.total),
-    activities:[...activities].sort()
-  };
-}
+    // Aggregate from a flat “scores” sheet
+    function aggregateFromRows(rows) {
+      const by = new Map();
+      for (const r of rows) {
+        const code = r.teamCode || r.team || r.code || '';
+        const name = r.teamName || r.name || code;
+        const activity = (r.activity || r.Activity || '').toString().trim().toLowerCase();
+        const score = numberish(r.score ?? r.Score ?? r.points ?? r.Points ?? 0);
+        if (!code) continue;
 
-function normalizeTeams(teams){
-  const activities=new Set();
-  const out=(teams||[]).map(t=>{
-    const code=t.teamCode||t.code||'';
-    const name=t.teamName||t.name||code;
-    const breakdown=t.breakdown||t.totals||{};
-    Object.keys(breakdown).forEach(a=>activities.add(a));
-    return {code,name,totals:breakdown,total:Number(t.total||0)||0};
-  }).sort((a,b)=>b.total-a.total);
-  return {teams:out, activities:[...activities].sort()};
-}
+        const ref = by.get(code) || { code, name, kindness:0, limerick:0, scavenger:0, quiz:0 };
+        if (activity.includes('kind')) ref.kindness += score;
+        else if (activity.includes('limerick')) ref.limerick += score;
+        else if (activity.includes('scav')) ref.scavenger += score;
+        else if (activity.includes('quiz')) ref.quiz += score;
 
-async function fetchLeaderboard(){
-  let d=null;
+        by.set(code, ref);
+      }
+      const teams = Array.from(by.values()).map(t => ({ ...t, total: t.kindness + t.limerick + t.scavenger + t.quiz }));
+      teams.sort((a,b)=> b.total - a.total);
+      return { teams, activities: ['kindness','limerick','scavenger','quiz'] };
+    }
 
-  // GET first
-  try{
-    const r=await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-    d=await r.json();
-  }catch{}
+    function numberish(v) {
+      const n = typeof v === 'string' ? parseFloat(v) : +v;
+      return isFinite(n) ? n : 0;
+    }
 
-  // try POST if GET failed
-  if(!d){
-    try{ d=await call('get_leaderboard',{eventId:EVENT_ID}); }catch{}
-  }
+    // ------- RENDER -------
+    function renderState(meta) {
+      const s = meta.state;
+      if (s === 'RUNNING') stateChip.textContent = 'Running';
+      else if (s === 'PAUSED') stateChip.textContent = 'Paused';
+      else if (s === 'PUBLISHED') stateChip.textContent = 'Results published';
+      else if (s === 'ENDED') stateChip.textContent = 'Completed';
+      else stateChip.textContent = s || 'Unknown';
+    }
 
-  const root = d?.data || d || {};
+    function shouldHideScores(meta) {
+      if (FORCE_SHOW) return false;
+      const now = Date.now();
+      const remainingMs = Math.max(0, (meta.endsAt || now) - now);
+      const inHideWindow = remainingMs <= HIDE_WINDOW_MIN * 60_000;
+      if (meta.state === 'RUNNING') return inHideWindow;
+      if (meta.state === 'PUBLISHED') return false;
+      // ENDED/PAUSED/UNKNOWN => hide
+      return true;
+    }
 
-  if(Array.isArray(root.teams) && root.teams.length) return normalizeTeams(root.teams);
-  if(Array.isArray(root.leaderboard) && root.leaderboard.length) return normalizeTeams(root.leaderboard);
+    function renderBoard(model, hide) {
+      const list = model.teams || [];
+      if (!list.length) {
+        tbody.innerHTML = `<tr><td class="muted" style="text-align:center;padding:16px;" colspan="7">No teams yet.</td></tr>`;
+        return;
+      }
+      let idx = 1;
+      tbody.innerHTML = list.map(t => {
+        const k = hide ? '—' : t.kindness;
+        const l = hide ? '—' : t.limerick;
+        const s = hide ? '—' : t.scavenger;
+        const q = hide ? '—' : t.quiz;
+        const total = hide ? '—' : t.total;
+        return `<tr>
+          <td class="rank">${idx++}</td>
+          <td class="team">${escapeHtml(t.name || t.code)}</td>
+          <td class="num">${k}</td>
+          <td class="num">${l}</td>
+          <td class="num">${s}</td>
+          <td class="num">${q}</td>
+          <td class="num"><strong>${total}</strong></td>
+        </tr>`;
+      }).join('');
+    }
 
-  let rows = root.rows || root.scores || root.submissions || root.table || [];
-  if(!Array.isArray(rows) || !rows.length){
-    // sometimes another nesting
-    const alt = root.sheet || root.payload || {};
-    rows = alt.rows || alt.scores || rows;
-  }
-  if(Array.isArray(rows) && rows.length) return aggregateFromRows(rows);
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
-  return {teams:[], activities:[]};
-}
+    function setUpdatedNow() {
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      const ss = String(d.getSeconds()).padStart(2,'0');
+      updatedEl.textContent = `Last updated — ${hh}:${mm}:${ss}`;
+    }
 
-/* ---------- render ---------- */
-function renderTable(model, hide){
-  const host=$('tableArea');
-  if(hide){ host.innerHTML=''; return; }
+    // ------- FLOW -------
+    async function refreshAll() {
+      // 1) Event meta
+      const meta = await fetchEventState().catch(()=>({state:'UNKNOWN', endsAt:0, now:Date.now()}));
+      renderState(meta);
+      startCountdown(meta);
 
-  const acts=model.activities.length ? model.activities : ['kindness','limerick','scavenger','quiz'];
-  const thActs=acts.map(a=>`<th class="num">${titleCase(a)}</th>`).join('');
-  const rows=model.teams.map((t,i)=>{
-    const cols=acts.map(a=>`<td class="num">${t.totals[a]??0}</td>`).join('');
-    return `<tr>
-      <td class="num">${i+1}</td>
-      <td>${t.name||t.code}</td>
-      ${cols}
-      <td class="num"><strong>${t.total}</strong></td>
-    </tr>`;
-  }).join('') || `<tr><td colspan="${acts.length+3}" class="muted">No teams yet.</td></tr>`;
+      // 2) Leaderboard data
+      const model = await fetchLeaderboard().catch(()=>({teams:[], activities:[]}));
 
-  host.innerHTML = `
-    <table class="table">
-      <thead>
-        <tr>
-          <th class="num">#</th>
-          <th>Team</th>
-          ${thActs}
-          <th class="num">Total</th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-}
+      // 3) Hide/Show banners & render
+      const hide = shouldHideScores(meta);
+      hideBanner.classList.toggle('show', hide && meta.state === 'RUNNING');
+      endBanner.classList.toggle('show', hide && meta.state !== 'RUNNING' && meta.state !== 'PUBLISHED');
+      renderBoard(model, hide);
+      setUpdatedNow();
+    }
 
-/* ---------- page ---------- */
-async function load(){
-  $('updated').textContent='';
-  $('banner').style.display='none';
-
-  const stateInfo = await getEventState();
-  const {state, now, endsAt, published}=stateInfo;
-  paintState(state); paintCountdown(now, endsAt);
-
-  const last15 = endsAt ? (new Date(endsAt)-new Date(now) <= 15*60*1000 && new Date(endsAt)>new Date(now)) : false;
-  let hideReason = null;
-  if(state==='ENDED' && !published) hideReason='ENDED';
-  else if(state==='RUNNING' && last15) hideReason='LAST15';
-  if(FORCE_SHOW) hideReason=null;
-
-  const model = await fetchLeaderboard();
-
-  if(hideReason==='LAST15'){
-    $('banner').textContent='Scores hidden for the final push — keep going! Final totals will appear at the end.';
-    $('banner').style.display='block';
-  }else if(hideReason==='ENDED'){
-    $('banner').textContent='Event complete — final results will appear once the host publishes them.';
-    $('banner').style.display='block';
-  }
-
-  renderTable(model, !!hideReason);
-  $('updated').textContent='Last updated — '+fmtTime(Date.now());
-}
-
-$('refreshBtn').addEventListener('click', load);
-load();
-</script>
+    refreshBtn.addEventListener('click', refreshAll);
+    refreshAll();
+    setInterval(refreshAll, AUTO_REFRESH_MS);
+  </script>
 </body>
 </html>
