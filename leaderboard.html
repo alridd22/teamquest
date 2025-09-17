@@ -57,18 +57,20 @@
   </div>
 
 <script>
-/* ---------- helpers ---------- */
+/* ---------- query flags ---------- */
 const qs=new URLSearchParams(location.search);
 const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
 const FORCE_SHOW=['1','true','show','yes'].includes((qs.get('show')||'').toLowerCase());
+const INCLUDE_ALL=['1','true','yes'].includes((qs.get('all')||'').toLowerCase()); // ignore event filter (debug)
+
+/* ---------- tiny helpers ---------- */
 const $=(id)=>document.getElementById(id);
+const pad=(n)=>String(n).padStart(2,'0');
 const fmtTime=(d)=>new Date(d).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-/* small fetch with error surfacing */
 async function call(path, body){
   const res=await fetch(`/.netlify/functions/${path}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
+    method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify(body||{})
   });
   const j=await res.json().catch(()=>({}));
@@ -76,43 +78,73 @@ async function call(path, body){
   return j;
 }
 
-/* ---------- event state & countdown ---------- */
+/* ---------- event state & countdown (robust) ---------- */
 async function getEventState(){
-  try{
-    const d=await call('get_event_state',{eventId:EVENT_ID});
-    // expected: {state, now, startsAt, endsAt, published}
-    return d||{};
-  }catch(e){
-    console.warn('get_event_state failed:',e);
-    return {state:'UNKNOWN', now:Date.now(), published:false};
+  let d={};
+  try{ d=await call('get_event_state',{eventId:EVENT_ID}); }
+  catch{
+    try{ const r=await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`); d=await r.json(); }
+    catch{}
   }
+  const src = d?.data || d || {};
+
+  const state = src.state || src.status || 'UNKNOWN';
+  const now   = src.now || src.serverNow || src.currentTime || Date.now();
+
+  // Try several end fields
+  let endsAt = src.endsAt || src.endAt || src.deadline || src.eventEnd || src.endTime || src.eventEndsAt || src.end || null;
+  let endMs  = endsAt ? new Date(endsAt).getTime() : null;
+
+  // Or derive from remaining*
+  if(!endMs){
+    const remMs = (src.remainingMs ?? (src.remainingSeconds!=null ? src.remainingSeconds*1000 : null) ?? (src.remainingMinutes!=null ? src.remainingMinutes*60000 : null));
+    if(remMs!=null) endMs = new Date(now).getTime() + Number(remMs||0);
+  }
+
+  const published = !!(src.published || src.isPublished || src.resultsPublished);
+  return { state, now, endsAt: endMs ? new Date(endMs).toISOString() : null, published };
 }
-function paintState(state){ $('stateChip').textContent = state ? state.replace('_',' ').toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase()) : 'Unknown'; }
+
+function paintState(state){
+  const pretty=(state||'UNKNOWN').replace(/_/g,' ').toLowerCase().replace(/(^|\s)\S/g,m=>m.toUpperCase());
+  $('stateChip').textContent = pretty;
+}
 function paintCountdown(now, endsAt){
   if(!endsAt){ $('clockChip').textContent='Time remaining: —'; return; }
   const ms=Math.max(0, new Date(endsAt)-new Date(now));
   const m=Math.floor(ms/60000), s=Math.floor((ms%60000)/1000);
-  $('clockChip').textContent = `Time remaining: ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  $('clockChip').textContent = `Time remaining: ${pad(m)}:${pad(s)}`;
 }
 
-/* ---------- leaderboard fetch (with fallback) ---------- */
+/* ---------- leaderboard ingestion ---------- */
 function titleCase(x){return (x||'').toLowerCase().replace(/\b\w/g,m=>m.toUpperCase());}
+
+function get(r, ...keys){
+  for(const k of keys){
+    if(r==null) break;
+    if(Object.prototype.hasOwnProperty.call(r,k)) return r[k];
+  }
+  return undefined;
+}
 
 function aggregateFromRows(rows){
   const map=new Map();
   const activities=new Set();
 
   for(const r of rows){
-    const act=(r.Activity||r.activity||'').toString().toLowerCase();
-    const code=(r['Team Code']||r.teamCode||'').toString();
-    const name=(r['Team Name']||r.teamName||'').toString() || code;
-    let eventId = r['Event Id']||r.eventId||'';
-    const sid=(r.SubmissionID||r.submissionId||'').toString();
+    const act = (get(r,'Activity','activity','type','kind')||'').toString().toLowerCase();
+    const code= (get(r,'Team Code','teamCode','team_code','code')||'').toString();
+    const name= (get(r,'Team Name','teamName','team_name','name')||'').toString() || code;
+
+    // event filtering
+    let eventId = get(r,'Event Id','eventId','event_id') || '';
+    const sid   = (get(r,'SubmissionID','submissionId','Submission Id','idempotency','Idempotency','id')||'').toString();
     if(!eventId && sid.includes('|')){ const p=sid.split('|'); if(p.length>=2) eventId=p[1]; }
-    if(EVENT_ID && eventId && eventId!==EVENT_ID) continue;
+    if(!INCLUDE_ALL && EVENT_ID && eventId && eventId!==EVENT_ID) continue;
+
     if(!code || !act) continue;
 
-    const score=Number(r.Score||r.score||0)||0;
+    const score=Number(get(r,'Score','score')||0)||0;
     activities.add(act);
 
     if(!map.has(code)) map.set(code,{code, name, totals:{}, total:0});
@@ -128,7 +160,6 @@ function aggregateFromRows(rows){
 }
 
 function normalizeTeams(teams){
-  // Expecting {teamCode, teamName, total, breakdown:{kindness:..,limerick:..,...}}
   const activities=new Set();
   const out=(teams||[]).map(t=>{
     const code=t.teamCode||t.code||'';
@@ -141,19 +172,32 @@ function normalizeTeams(teams){
 }
 
 async function fetchLeaderboard(){
-  const res=await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-  const data=await res.json();
-  if(Array.isArray(data.teams) && data.teams.length){
-    return normalizeTeams(data.teams);
+  let d=null;
+
+  // GET first
+  try{
+    const r=await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+    d=await r.json();
+  }catch{}
+
+  // try POST if GET failed
+  if(!d){
+    try{ d=await call('get_leaderboard',{eventId:EVENT_ID}); }catch{}
   }
-  // fallback: try raw rows from "Scores" tab (or similar)
-  if(Array.isArray(data.rows) && data.rows.length){
-    return aggregateFromRows(data.rows);
+
+  const root = d?.data || d || {};
+
+  if(Array.isArray(root.teams) && root.teams.length) return normalizeTeams(root.teams);
+  if(Array.isArray(root.leaderboard) && root.leaderboard.length) return normalizeTeams(root.leaderboard);
+
+  let rows = root.rows || root.scores || root.submissions || root.table || [];
+  if(!Array.isArray(rows) || !rows.length){
+    // sometimes another nesting
+    const alt = root.sheet || root.payload || {};
+    rows = alt.rows || alt.scores || rows;
   }
-  // another fallback shape some versions used
-  if(Array.isArray(data.leaderboard) && data.leaderboard.length){
-    return normalizeTeams(data.leaderboard);
-  }
+  if(Array.isArray(rows) && rows.length) return aggregateFromRows(rows);
+
   return {teams:[], activities:[]};
 }
 
@@ -188,7 +232,7 @@ function renderTable(model, hide){
     </table>`;
 }
 
-/* ---------- page orchestration ---------- */
+/* ---------- page ---------- */
 async function load(){
   $('updated').textContent='';
   $('banner').style.display='none';
@@ -205,7 +249,6 @@ async function load(){
 
   const model = await fetchLeaderboard();
 
-  // banner text
   if(hideReason==='LAST15'){
     $('banner').textContent='Scores hidden for the final push — keep going! Final totals will appear at the end.';
     $('banner').style.display='block';
