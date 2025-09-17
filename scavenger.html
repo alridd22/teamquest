@@ -11,106 +11,71 @@
   }
   *{box-sizing:border-box}
   body{
-    margin:0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #8b5a2b, #a1642f 40%, #f4a460);
-    color:#2a1a10;
+    margin:0; font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background:linear-gradient(135deg,#8b5a2b,#a1642f 40%,#f4a460); color:#2a1a10;
   }
 
   /* Fixed Nav */
-  .nav{
-    position:fixed; inset:0 0 auto 0; height:64px; z-index:50;
-    background: linear-gradient(135deg, #8b4513, #5d361d);
-    border-bottom:3px solid var(--gold);
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 4px 16px rgba(0,0,0,.35);
-  }
+  .nav{position:fixed; inset:0 0 auto 0; height:64px; z-index:50;
+    background:linear-gradient(135deg,#8b4513,#5d361d); border-bottom:3px solid var(--gold);
+    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(0,0,0,.35);}
   .nav-inner{width:100%; max-width:1200px; display:flex; align-items:center; gap:16px; padding:0 16px;}
   .brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
-  .brand img{height:40px; width:auto; display:block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6));}
+  .brand img{height:40px; width:auto; display:block; filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));}
   .links{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
-  .nav a{
-    color:#f5e6d3; text-decoration:none; font-weight:700; font-size:14px;
-    padding:8px 12px; border:2px solid rgba(218,165,32,.5); border-radius:10px;
-    background: rgba(255,255,255,.06);
-  }
-  .nav a:hover{ background:linear-gradient(135deg, var(--gold), #ff8c00); color:#fff; border-color:var(--gold) }
-  .nav .active{ background:linear-gradient(135deg, #d2a146, #b78020); color:#fff; border-color:var(--gold) }
+  .nav a{color:#f5e6d3; text-decoration:none; font-weight:700; font-size:14px;
+    padding:8px 12px; border:2px solid rgba(218,165,32,.5); border-radius:10px; background:rgba(255,255,255,.06);}
+  .nav a:hover{background:linear-gradient(135deg,var(--gold),#ff8c00); color:#fff; border-color:var(--gold)}
+  .nav .active{background:linear-gradient(135deg,#d2a146,#b78020); color:#fff; border-color:var(--gold)}
 
   /* Page shell */
   .page{max-width:980px; margin:96px auto 24px; padding:16px;}
-  .card{
-    background: linear-gradient(145deg, var(--tan), var(--tan-2));
-    border:3px solid var(--brown); border-radius:18px; padding:18px;
-    box-shadow:0 18px 36px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.35);
-    position:relative;
-  }
-  .card:before{
-    content:""; position:absolute; left:12px; right:12px; top:12px; bottom:12px;
-    border:2px solid var(--gold); border-radius:14px; pointer-events:none;
-  }
+  .card{background:linear-gradient(145deg,var(--tan),var(--tan-2)); border:3px solid var(--brown);
+    border-radius:18px; padding:18px; box-shadow:0 18px 36px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.35); position:relative;}
+  .card:before{content:""; position:absolute; left:12px; right:12px; top:12px; bottom:12px;
+    border:2px solid var(--gold); border-radius:14px; pointer-events:none;}
 
   /* Event banner + badges */
-  .banner{
-    display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;
-    background: #fff6dd; border:2px dashed var(--gold); border-radius:12px;
-    padding:10px 12px; margin-bottom:14px;
-  }
+  .banner{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;
+    background:#fff6dd; border:2px dashed var(--gold); border-radius:12px; padding:10px 12px; margin-bottom:14px;}
   .banner .state{font-weight:800; color:#5a3b1f; display:flex; align-items:center; gap:8px}
-  .badge{
-    border:2px dashed var(--gold); border-radius:999px; padding:4px 10px; font-weight:700;
-    background: #fff; color:#5a3b1f;
-  }
-  .btn{
-    appearance:none; border:0; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:800;
-    display:inline-flex; align-items:center; gap:8px; transition:transform .08s ease;
-  }
+  .badge{border:2px dashed var(--gold); border-radius:999px; padding:4px 10px; font-weight:700; background:#fff; color:#5a3b1f;}
+  .btn{appearance:none; border:0; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:800;
+    display:inline-flex; align-items:center; gap:8px; transition:transform .08s ease;}
   .btn:active{transform:translateY(1px)}
-  .btn-gold{
-    background:linear-gradient(135deg, var(--gold-2), var(--gold));
-    color:#301c0e; border:3px solid var(--brown-d);
-  }
-  .btn-ghost{ background:transparent; border:2px solid var(--gold); color:#5a3b1f; }
+  .btn-gold{background:linear-gradient(135deg,var(--gold-2),var(--gold)); color:#301c0e; border:3px solid var(--brown-d);}
+  .btn-ghost{background:transparent; border:2px solid var(--gold); color:#5a3b1f;}
   .btn[disabled]{opacity:.6; cursor:not-allowed}
 
-  /* Auth + form */
+  /* Form bits */
   .row{display:grid; gap:12px}
   .grid-2{grid-template-columns:1fr 1fr}
   @media (max-width:780px){ .grid-2{grid-template-columns:1fr} }
 
   label{font-weight:700; color:#6b3f23; margin-bottom:4px; display:block}
-  input, select, textarea{
-    width:100%; padding:12px 12px; border-radius:12px; border:3px solid var(--gold);
-    background:#fff; font-size:15px; font-family:inherit;
-  }
+  input, select, textarea{width:100%; padding:12px; border-radius:12px; border:3px solid var(--gold);
+    background:#fff; font-size:15px; font-family:inherit;}
   textarea{min-height:96px; resize:vertical}
   .hint{font-size:12px; color:#6b3f23; opacity:.9}
 
-  .crew-strip{
-    background:linear-gradient(135deg, #8b4513, #a0522d); color:#fff; padding:12px 14px;
-    border:2px solid var(--gold); border-radius:12px; font-weight:800; margin-bottom:10px; display:none;
-  }
+  .crew-strip{background:linear-gradient(135deg,#8b4513,#a0522d); color:#fff; padding:12px 14px;
+    border:2px solid var(--gold); border-radius:12px; font-weight:800; margin-bottom:10px; display:none;}
 
   .alert{display:none; padding:12px 14px; border-radius:12px; border:3px solid; font-weight:700; text-align:center}
   .alert-ok{background:#e7f7ea; color:var(--ok); border-color:#2f9a4a}
   .alert-err{background:#ffe4e7; color:var(--error); border-color:#b20a20}
 
-  .quick{
-    background:#fffdf6; border:2px dashed var(--gold); border-radius:12px; padding:10px 12px; margin:8px 0 12px;
-  }
+  .quick{background:#fffdf6; border:2px dashed var(--gold); border-radius:12px; padding:10px 12px; margin:8px 0 12px;}
+
   .checks{display:grid; grid-template-columns:1fr; gap:8px}
-  .checks label{
-    border:2px dashed var(--gold); border-radius:12px; padding:10px; background:#fff;
-    display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;
-  }
+  .checks label{border:2px dashed var(--gold); border-radius:12px; padding:10px; background:#fff;
+    display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;}
   .checks input{width:auto}
 
-  .uploader{
-    border:4px dashed var(--gold); border-radius:16px; padding:16px; text-align:center; background:#fffef7;
-  }
+  .uploader{border:4px dashed var(--gold); border-radius:16px; padding:16px; text-align:center; background:#fffef7;}
   .uploader.has-file{border-style:solid; background:#f2ffef; border-color:#2f9a4a}
 
   .dimmed{opacity:.5; pointer-events:none}
-
   .footer-note{font-size:12px; opacity:.8; text-align:center; margin-top:8px}
 </style>
 </head>
@@ -160,14 +125,8 @@
         </div>
         <div>
           <label for="pin">4-digit PIN</label>
-          <input id="pin"
-                 type="text"
-                 inputmode="numeric"
-                 pattern="[0-9]{4}"
-                 minlength="4"
-                 maxlength="4"
-                 placeholder="1234"
-                 required />
+          <input id="pin" type="text" inputmode="numeric" pattern="[0-9]{4}"
+                 minlength="4" maxlength="4" placeholder="1234" required />
           <div class="hint">Exactly 4 digits</div>
         </div>
       </div>
@@ -200,23 +159,15 @@
         <div class="hint">Required • JPEG/PNG/WebP • Max ~20MB</div>
       </div>
 
-      <div class="row grid-2">
-        <div>
-          <label for="desc">What did you find?</label>
-          <textarea id="desc" maxlength="300" placeholder="Short and clear (20+ chars)" required></textarea>
-          <div class="hint"><span id="charCount">0</span>/300</div>
-        </div>
-        <div>
-          <label for="loc">Location (optional)</label>
-          <input id="loc" placeholder="e.g. Castle gate / What3Words" />
-        </div>
+      <div>
+        <label for="desc">What did you find?</label>
+        <textarea id="desc" maxlength="300" placeholder="Short and clear (20+ chars)" required></textarea>
+        <div class="hint"><span id="charCount">0</span>/300</div>
       </div>
 
       <div>
         <label>Pick what applies</label>
-        <div class="checks" id="checks">
-          <!-- items injected -->
-        </div>
+        <div class="checks" id="checks"></div>
       </div>
 
       <button type="submit" class="btn btn-gold" id="submitBtn">🚀 Submit find</button>
@@ -235,7 +186,7 @@
   const el = id => document.getElementById(id);
 
   // UI els
-  const banner = el('eventBanner'), stateText = el('stateText'), stateEmoji = el('stateEmoji');
+  const stateText = el('stateText'), stateEmoji = el('stateEmoji');
   const runningBadge = el('runningBadge'), timeBadge = el('timeBadge');
   const refreshStateBtn = el('refreshStateBtn');
   const loginForm = el('loginForm'), loginAlert = el('loginAlert'), refreshCrewsBtn = el('refreshCrewsBtn');
@@ -244,30 +195,30 @@
   const quickRules = el('quickRules');
   const scavForm = el('scavForm'), formAlert = el('formAlert'), submitBtn = el('submitBtn'), busyNote = el('busyNote');
   const pickBtn = el('pickBtn'), fileInput = el('file'), uploaderBox = el('uploaderBox'), uploadText = el('uploadText');
-  const desc = el('desc'), loc = el('loc'), charCount = el('charCount'), checks = el('checks');
+  const desc = el('desc'), charCount = el('charCount'), checks = el('checks');
 
-  const STORAGE_TEAM = keyFor('team');       // tq_<eventId>_team (JSON {code,name})
-  const STORAGE_TOKEN = keyFor('token');     // tq_<eventId>_token (if backend returns one)
+  const STORAGE_TEAM = keyFor('team');   // tq_<eventId>_team
+  const STORAGE_TOKEN = keyFor('token'); // tq_<eventId>_token
 
   let EVENT_STATE = 'UNKNOWN';
   let TEAMS = [];
   let signedTeam = null; // {code,name}
 
+  // The six items from your previous HTML (titles)
   const FIND_ITEMS = [
-    "📍 Team selfie at a landmark",
-    "🪙 Hidden coin or token",
-    "🧭 Old map or compass",
-    "🏴‍☠️ Piratey sign or flag",
-    "💬 Stranger saying ‘TeamQuest!’",
-    "🦜 Something themed ‘parrot’"
+    "Ancient British Coin (2023)",
+    "Metal Binding Clip",
+    "Spiral Shell Treasure",
+    "Sky Messenger Plume",
+    "Flexible Circle Treasure",
+    "Sporting Peg Treasure"
   ];
 
   // Guard: require eventId
   if(!eventId){
     setBanner('❗', "No event specified. Add ?event=EVT-… to the URL.", false);
-    disableEverything(true);
     teamSelect.innerHTML = `<option value="">No event</option>`;
-    return;
+    // keep page visible so user sees message
   }
 
   // Init
@@ -306,55 +257,36 @@
 
   // ===== Event state =====
   async function refreshState(){
-    setBanner('🧭', 'Checking event…', false);
-    runningBadge.style.display = 'none';
-    timeBadge.style.display = 'none';
+    setBanner('🧭','Checking event…',false);
+    runningBadge.style.display='none'; timeBadge.style.display='none';
     try{
       const res = await fetch('/.netlify/functions/get_event_state', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ eventId })
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ eventId })
       });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-
-      // Expect: { success, state, timeRemainingSeconds? }
-      EVENT_STATE = (data.state || '').toUpperCase();
-      let text = '';
-      let emoji = '🧭';
+      EVENT_STATE = (data.state||'').toUpperCase();
+      let text='', emoji='🧭';
       switch(EVENT_STATE){
-        case 'RUNNING': text = "Event running — submit your finds 🧭"; emoji='🏃‍♂️'; runningBadge.style.display='inline-block'; break;
-        case 'PAUSED': text = "Event paused — submissions are closed"; emoji='⏸️'; break;
-        case 'ENDED': text = "Event ended — submissions are closed"; emoji='🏁'; break;
-        case 'PUBLISHED': text = "Results published — submissions closed"; emoji='📣'; break;
-        default: text = "Event unavailable — try refresh"; emoji='❓';
+        case 'RUNNING': text="Event running — submit your finds 🧭"; emoji='🏃‍♂️'; runningBadge.style.display='inline-block'; break;
+        case 'PAUSED': text="Event paused — submissions are closed"; emoji='⏸️'; break;
+        case 'ENDED': text="Event ended — submissions are closed"; emoji='🏁'; break;
+        case 'PUBLISHED': text="Results published — submissions closed"; emoji='📣'; break;
+        default: text="Event unavailable — try refresh"; emoji='❓';
       }
-      setBanner(emoji, text, EVENT_STATE==='RUNNING');
-
-      if(typeof data.timeRemainingSeconds === 'number'){
+      setBanner(emoji,text,EVENT_STATE==='RUNNING');
+      if(typeof data.timeRemainingSeconds==='number'){
         timeBadge.style.display='inline-block';
-        timeBadge.textContent = `Time remaining: ${fmtTime(data.timeRemainingSeconds)}`;
+        timeBadge.textContent=`Time remaining: ${fmtTime(data.timeRemainingSeconds)}`;
       }
-
       gateForm();
     }catch(e){
-      setBanner('⚠️', 'Could not check event. Try again.', false);
+      setBanner('⚠️','Could not check event. Try again.',false);
       gateForm();
     }
   }
-
-  function setBanner(emoji, text, running){
-    stateEmoji.textContent = emoji;
-    stateText.textContent = text;
-    runningBadge.style.display = running ? 'inline-block' : 'none';
-  }
-
-  function gateForm(){
-    const notRun = EVENT_STATE!=='RUNNING';
-    const dim = notRun;
-    [scavForm].forEach(s => s.classList.toggle('dimmed', dim));
-    submitBtn.disabled = notRun;
-  }
+  function setBanner(emoji,text,running){ stateEmoji.textContent=emoji; stateText.textContent=text; runningBadge.style.display=running?'inline-block':'none'; }
+  function gateForm(){ const notRun = EVENT_STATE!=='RUNNING'; scavForm.classList.toggle('dimmed',notRun); submitBtn.disabled = notRun; }
 
   // ===== Crews =====
   async function loadCrews(){
@@ -364,74 +296,44 @@
       const res = await fetch(url);
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-
-      const list = Array.isArray(data.teams) ? data.teams
-                  : Array.isArray(data.leaderboard) ? data.leaderboard
-                  : null;
-
+      const list = Array.isArray(data.teams) ? data.teams : Array.isArray(data.leaderboard) ? data.leaderboard : null;
       if(!list) throw new Error('No crews array');
-
-      TEAMS = list
-        .filter(t => t && t.teamCode && t.teamName)
-        .map(t => ({ teamCode:String(t.teamCode), teamName:String(t.teamName) }))
-        .sort((a,b)=> a.teamName.localeCompare(b.teamName));
-
+      TEAMS = list.filter(t=>t && t.teamCode && t.teamName)
+                  .map(t=>({teamCode:String(t.teamCode), teamName:String(t.teamName)}))
+                  .sort((a,b)=>a.teamName.localeCompare(b.teamName));
       teamSelect.innerHTML = `<option value="">Select crew…</option>` + TEAMS.map(t=>(
-        `<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`
-      )).join('');
+        `<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`)).join('');
       showLoginInfo('');
     }catch(e){
-      TEAMS = [];
-      teamSelect.innerHTML = `<option value="">—</option>`;
+      TEAMS = []; teamSelect.innerHTML = `<option value="">—</option>`;
       showLoginError("Couldn't load crews. Refresh and try again.");
     }
   }
 
   // ===== Sign-in =====
   async function onSignIn(ev){
-    ev.preventDefault();
-    clearLoginAlert();
-
+    ev.preventDefault(); clearLoginAlert();
     const teamCode = teamSelect.value.trim();
     const pin = (pinInput.value||'').trim();
-
     if(!teamCode){ return showLoginError('Pick your crew first.'); }
     if(!/^\d{4}$/.test(pin)){ return showLoginError('Enter a 4-digit PIN.'); }
-
     try{
       const res = await fetch('/.netlify/functions/verify_team_pin_function', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ eventId, teamCode, pin })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({ eventId, teamCode, pin })
       });
-
-      if(res.status===404 || res.status>=500){
-        return showLoginError('Sign-in service unavailable. Try again later.');
-      }
-      if(!res.ok){
-        return showLoginError('Sign-in failed. Try again.');
-      }
+      if(res.status===404 || res.status>=500){ return showLoginError('Sign-in service unavailable. Try again later.'); }
+      if(!res.ok){ return showLoginError('Sign-in failed. Try again.'); }
       const json = await res.json();
-      if(json.success && json.valid===false){
-        return showLoginError("PIN doesn’t match this crew.");
-      }
-      if(!json.success){
-        return showLoginError('Sign-in failed. Try again.');
-      }
+      if(json.success && json.valid===false){ return showLoginError("PIN doesn’t match this crew."); }
+      if(!json.success){ return showLoginError('Sign-in failed. Try again.'); }
 
       const teamObj = TEAMS.find(t=>t.teamCode===teamCode);
       signedTeam = { code: teamCode, name: teamObj ? teamObj.teamName : 'Crew' };
-
-      // optional token persistence
       if(json.token){ localStorage.setItem(STORAGE_TOKEN, json.token); }
-
       localStorage.setItem(STORAGE_TEAM, JSON.stringify(signedTeam));
-
-      showCrewStrip();
-      showForm();
-    }catch(e){
-      showLoginError('Sign-in service unavailable. Try again later.');
-    }
+      showCrewStrip(); showForm();
+    }catch(e){ showLoginError('Sign-in service unavailable. Try again later.'); }
   }
 
   function hydrateFromStorage(){
@@ -439,55 +341,28 @@
       const raw = localStorage.getItem(STORAGE_TEAM);
       if(raw){
         const t = JSON.parse(raw);
-        if(t && t.code && t.name){
-          // Ensure still exists in current event crews
-          if(TEAMS.some(x=>x.teamCode===t.code)){
-            signedTeam = { code:t.code, name:t.name };
-            showCrewStrip();
-          }else{
-            localStorage.removeItem(STORAGE_TEAM);
-          }
-        }
+        if(t && t.code && t.name && TEAMS.some(x=>x.teamCode===t.code)){
+          signedTeam = { code:t.code, name:t.name }; showCrewStrip();
+        }else{ localStorage.removeItem(STORAGE_TEAM); }
       }
     }catch{}
   }
-
-  function maybeShowForm(){
-    if(signedTeam && EVENT_STATE==='RUNNING'){
-      showForm();
-    }else{
-      loginForm.style.display='grid';
-    }
-  }
-
-  function showCrewStrip(){
-    crewStrip.style.display='block';
-    crewStrip.textContent = `Crew: ${signedTeam.name}`;
-  }
-
-  function showForm(){
-    loginForm.style.display='none';
-    quickRules.style.display='block';
-    scavForm.style.display='grid';
-    gateForm();
-  }
+  function maybeShowForm(){ if(signedTeam && EVENT_STATE==='RUNNING'){ showForm(); } else { loginForm.style.display='grid'; } }
+  function showCrewStrip(){ crewStrip.style.display='block'; crewStrip.textContent = `Crew: ${signedTeam.name}`; }
+  function showForm(){ loginForm.style.display='none'; quickRules.style.display='block'; scavForm.style.display='grid'; gateForm(); }
 
   // ===== Uploadcare =====
   function onFilePicked(){
     const file = fileInput.files && fileInput.files[0];
     if(!file){ uploaderBox.classList.remove('has-file'); uploadText.textContent='📸 Add your photo'; return; }
-
     const okTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
-    if(!okTypes.includes(file.type)){ return toast(formAlert, 'Use JPEG/PNG/WebP.', false); }
-    if(file.size > 20*1024*1024){ return toast(formAlert, 'Image too large (max ~20MB).', false); }
-
-    uploaderBox.classList.add('has-file');
-    uploadText.textContent = `✅ ${file.name}`;
+    if(!okTypes.includes(file.type)){ return toast(formAlert,'Use JPEG/PNG/WebP.',false); }
+    if(file.size > 20*1024*1024){ return toast(formAlert,'Image too large (max ~20MB).',false); }
+    uploaderBox.classList.add('has-file'); uploadText.textContent = `✅ ${file.name}`;
   }
-
   async function uploadToUploadcare(file){
     const form = new FormData();
-    form.append('UPLOADCARE_PUB_KEY', 'e060d7b73e9b8e15de28');
+    form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28');
     form.append('file', file);
     const res = await fetch('https://upload.uploadcare.com/base/', { method:'POST', body:form });
     if(!res.ok) throw new Error(`Upload failed (${res.status})`);
@@ -498,96 +373,65 @@
 
   // ===== Submit find =====
   async function onSubmitFind(ev){
-    ev.preventDefault();
-    clearFormAlert();
-
-    if(EVENT_STATE!=='RUNNING'){ return toast(formAlert, 'Submissions are closed.', false); }
-    if(!signedTeam){ return toast(formAlert, 'Sign in first.', false); }
+    ev.preventDefault(); clearFormAlert();
+    if(EVENT_STATE!=='RUNNING'){ return toast(formAlert,'Submissions are closed.',false); }
+    if(!signedTeam){ return toast(formAlert,'Sign in first.',false); }
 
     const file = fileInput.files && fileInput.files[0];
-    if(!file){ return toast(formAlert, 'Add a photo.', false); }
+    if(!file){ return toast(formAlert,'Add a photo.',false); }
 
     const txt = (desc.value||'').trim();
-    if(txt.length < 20){ return toast(formAlert, 'Description must be 20+ chars.', false); }
+    if(txt.length < 20){ return toast(formAlert,'Description must be 20+ chars.',false); }
 
     const picked = Array.from(checks.querySelectorAll('input[type="checkbox"]:checked')).map(c=>c.value);
-    if(picked.length < 1){ return toast(formAlert, 'Tick at least one item.', false); }
+    if(picked.length < 1){ return toast(formAlert,'Tick at least one item.',false); }
 
     disableForm(true);
-
     try{
-      // upload
       const photoUrl = await uploadToUploadcare(file);
-
-      // payload (exact spec)
       const payload = {
         eventId,
         teamCode: signedTeam.code,
         teamName: signedTeam.name,
         items: picked,
         description: txt,
-        location: (loc.value||'').trim(),
         photoUrl
       };
-
       const res = await fetch('/.netlify/functions/submit_scavenger_function', {
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
       });
-
-      if(!res.ok){
-        throw new Error(`HTTP ${res.status}`);
-      }
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
       const j = await res.json();
-      if(!j.success){ throw new Error(j.message || 'Submit failed'); }
+      if(!j.success) throw new Error(j.message || 'Submit failed');
 
-      toast(formAlert, "🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.", true);
-      // lock to prevent double-submit
+      toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
       lockAfterSuccess();
     }catch(e){
       console.error(e);
-      toast(formAlert, 'Submission failed. Please try again.', false);
-      disableForm(false); // re-enable so they can retry
+      toast(formAlert,'Submission failed. Please try again.',false);
+      disableForm(false);
     }
   }
 
   function lockAfterSuccess(){
-    // grey + disable inputs
     uploaderBox.classList.add('dimmed');
-    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{
-      if(el.id!=='refreshStateBtn'){ el.disabled = true; }
-    });
+    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{ el.disabled = true; });
   }
-
   function disableForm(v){
     busyNote.style.display = v ? 'block' : 'none';
     submitBtn.disabled = v || EVENT_STATE!=='RUNNING';
-    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{
-      if(el===submitBtn) return;
-      if(el.id==='refreshStateBtn') return;
-      el.disabled = v;
-    });
+    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{ if(el!==submitBtn) el.disabled = v; });
   }
 
   // ===== Helpers =====
   function keyFor(kind){ return `tq_${eventId}_${kind}`; }
-
-  function toast(node, msg, ok){
-    node.className = `alert ${ok?'alert-ok':'alert-err'}`;
-    node.textContent = msg;
-    node.style.display = 'block';
-  }
+  function toast(node,msg,ok){ node.className=`alert ${ok?'alert-ok':'alert-err'}`; node.textContent=msg; node.style.display='block'; }
   function clearLoginAlert(){ loginAlert.style.display='none'; }
   function clearFormAlert(){ formAlert.style.display='none'; }
   function showLoginError(msg){ loginAlert.className='alert alert-err'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
   function showLoginInfo(msg){ if(!msg){ loginAlert.style.display='none'; return;} loginAlert.className='alert alert-ok'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
-  function fmtTime(sec){
-    const s = Math.max(0, Math.floor(sec));
-    const m = Math.floor(s/60), r = s%60;
-    return `${m}:${String(r).padStart(2,'0')}`;
-  }
+  function fmtTime(sec){ const s=Math.max(0,Math.floor(sec)); const m=Math.floor(s/60), r=s%60; return `${m}:${String(r).padStart(2,'0')}`; }
 })();
 </script>
 </body>
