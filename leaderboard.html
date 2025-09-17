@@ -27,10 +27,10 @@
     .ghost{opacity:.6}
     .btn{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:2px solid #8B4513;border-radius:12px;padding:10px 16px;font-weight:800;cursor:pointer}
     .btn:disabled{opacity:.5;cursor:not-allowed}
-    .right{margin-left:auto}
-    .muted{color:#7a5737;font-weight:600}
     .note{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:2px solid var(--gold);border-left:6px solid #FF8C00;border-radius:12px;padding:14px;margin:10px 0;font-weight:700;text-align:center}
     .hidden{display:none !important}
+    .muted{color:#7a5737;font-weight:600}
+    .last-upd{margin:12px 2px 18px}
 
     table{width:100%;border-collapse:separate;border-spacing:0;margin-top:6px}
     thead th{position:sticky;top:0;background:var(--soft);border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);padding:10px 8px;font-size:14px}
@@ -40,12 +40,7 @@
     .team{font-weight:800}
     .num{text-align:right;font-variant-numeric:tabular-nums}
     .total{background:linear-gradient(180deg,#fff,#ffefd8)}
-    .last-upd{margin:12px 2px 18px}
-    .countdown{font-weight:900;color:#8B4513}
-    @media (max-width:760px){
-      .links{display:none}
-      thead th:nth-child(3),tbody td:nth-child(3){display:none} /* hide one minor column on small screens */
-    }
+    @media (max-width:760px){.links{display:none}}
   </style>
 </head>
 <body>
@@ -79,7 +74,7 @@
       <div id="hideNotice" class="note hidden">⏳ Final 15 minutes — live scores are hidden. Keep playing! The countdown above shows time left.</div>
       <div id="postEventNotice" class="note hidden">🕰 Event complete — final results will appear once the host publishes them.</div>
 
-      <div id="tableWrap" class="table">
+      <div id="tableWrap">
         <table id="board" aria-live="polite"></table>
       </div>
 
@@ -92,22 +87,16 @@
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-    function fmtTime(ts){
-      const d = new Date(ts);
-      return d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    }
-    function nowTs(){ return Date.now(); }
+    function fmtTime(ts){ return new Date(ts).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
     function toInt(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
     function pick(obj, keys){
       for(const k of keys){
-        if (obj && Object.prototype.hasOwnProperty.call(obj, k)) return obj[k];
-        // also allow case-insensitive
-        const found = Object.keys(obj||{}).find(x=>x.toLowerCase()===String(k).toLowerCase());
-        if(found) return obj[found];
+        if (obj && Object.prototype.hasOwnProperty.call(obj,k)) return obj[k];
+        const hit = Object.keys(obj||{}).find(x=>x.toLowerCase()===String(k).toLowerCase());
+        if(hit) return obj[hit];
       }
       return undefined;
     }
-
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
@@ -128,63 +117,48 @@
     const postEvent  = document.getElementById('postEventNotice');
 
     let countdownTimer = null;
-    let eventMeta = {state:'UNKNOWN', endMs:null, remaining: null};
+    let eventMeta = {state:'UNKNOWN', nowMs:Date.now(), endMs:null, remaining:null};
 
     function parseEventMeta(data){
-      const state = String(pick(data,['state','status'])||'UNKNOWN');
-      const nowMs = Date.parse(pick(data,['now','serverTime','serverNow'])||new Date());
-      const endStr = pick(data,['endAt','endTime','endsAt']);
-      const startStr = pick(data,['startAt','startTime','startsAt']);
-      const endMs = endStr ? Date.parse(endStr) : null;
-      const startMs = startStr ? Date.parse(startStr) : null;
-      let remaining = pick(data,['remainingSeconds','secondsRemaining','remaining']);
-      if(remaining == null && endMs) remaining = Math.max(0, Math.round((endMs - nowMs)/1000));
-      return {state, nowMs, endMs, startMs, remaining};
+      const state   = String(pick(data,['state','status'])||'UNKNOWN');
+      const nowMs   = Date.parse(pick(data,['now','serverTime','serverNow'])||new Date());
+      const endStr  = pick(data,['endAt','endTime','endsAt']);
+      const startStr= pick(data,['startAt','startTime','startsAt']);
+      const endMs   = endStr ? Date.parse(endStr) : null;
+      const remaining = pick(data,['remainingSeconds','secondsRemaining','remaining']);
+      const rem = (remaining==null && endMs) ? Math.max(0, Math.round((endMs - nowMs)/1000)) : toInt(remaining);
+      return {state, nowMs, endMs, startMs: startStr?Date.parse(startStr):null, remaining: isNaN(rem)?null:rem};
     }
-
     function updateStatusUI(){
-      const s = eventMeta.state;
-      const rem = eventMeta.remaining;
+      const s = eventMeta.state, rem = eventMeta.remaining;
+      statusChip.textContent =
+        s==='NOT_STARTED' ? 'Event not started' :
+        s==='RUNNING'     ? 'Event running' :
+        s==='PAUSED'      ? 'Event paused' :
+        s==='ENDED'       ? 'Event ended' :
+        s==='PUBLISHED'   ? 'Results published' : 'Event status unknown';
 
-      // status label
-      let label = '';
-      if(s==='NOT_STARTED') label = 'Event not started';
-      else if(s==='RUNNING') label = 'Event running';
-      else if(s==='PAUSED') label = 'Event paused';
-      else if(s==='ENDED') label = 'Event ended';
-      else if(s==='PUBLISHED') label = 'Results published';
-      else label = 'Event status unknown';
-      statusChip.textContent = label;
-
-      // countdown
       if(typeof rem === 'number'){
         countChip.classList.remove('hidden');
-        tickCountdown(); // draw immediately
         if(countdownTimer) clearInterval(countdownTimer);
-        countdownTimer = setInterval(tickCountdown, 1000);
+        const anchor = Date.now();
+        countdownTimer = setInterval(()=> {
+          const elapsed = Math.round((Date.now() - anchor)/1000);
+          const left = Math.max(0, rem - elapsed);
+          const m = String(Math.floor(left/60)).padStart(2,'0');
+          const s2= String(left%60).padStart(2,'0');
+          countdownEl.textContent = `${m}:${s2}`;
+        }, 1000);
       }else{
         countChip.classList.add('hidden');
         if(countdownTimer) clearInterval(countdownTimer);
       }
 
-      // hide/show notices
-      const hideNow = (s==='RUNNING' && typeof rem === 'number' && rem <= 15*60 && rem > 0);
-      hideNotice.classList.toggle('hidden', !hideNow);
-      postEvent.classList.toggle('hidden', !(s==='ENDED' || (s!=='PUBLISHED' && rem===0)));
-
-      // count label text
-      countLabel.textContent = s==='RUNNING' ? 'Time remaining' :
-                               s==='NOT_STARTED' ? 'Starts in' : 'Time';
+      const hide = (s==='RUNNING' && typeof rem==='number' && rem<=15*60 && rem>0);
+      hideNotice.classList.toggle('hidden', !hide);
+      postEvent.classList.toggle('hidden', !( (typeof rem==='number' && rem===0) || s==='ENDED' ));
+      countLabel.textContent = s==='RUNNING' ? 'Time remaining' : (s==='NOT_STARTED' ? 'Starts in' : 'Time');
     }
-
-    function tickCountdown(){
-      if(typeof eventMeta.remaining !== 'number') return;
-      const rem = Math.max(0, eventMeta.remaining - Math.round((nowTs() - eventMeta.nowMs)/1000));
-      const m = Math.floor(rem/60).toString().padStart(2,'0');
-      const s = Math.floor(rem%60).toString().padStart(2,'0');
-      countdownEl.textContent = `${m}:${s}`;
-    }
-
     async function getEventStateSafe(){
       if(!EVENT_ID) return {state:'UNKNOWN'};
       try{
@@ -192,45 +166,90 @@
         eventMeta = parseEventMeta(data);
         updateStatusUI();
         return eventMeta;
-      }catch(e){
-        console.warn('Event-state check failed:', e.message);
+      }catch{
         statusChip.textContent = 'Showing latest scores (event unknown)';
         countChip.classList.add('hidden');
         return {state:'UNKNOWN'};
       }
     }
 
-    /* =============== Leaderboard =============== */
+    /* =============== Leaderboard with robust breakdown =============== */
     const board = document.getElementById('board');
     const lastUpd = document.getElementById('lastUpd');
 
+    const ALIAS = {
+      kind:'kindness', kind_act:'kindness', kindness:'kindness',
+      poem:'limerick', verse:'limerick', limerick:'limerick',
+      scav:'scavenger', scavenger:'scavenger', scavenger_hunt:'scavenger',
+      clue:'cluehunt', clues:'cluehunt', cluehunt:'cluehunt', hunt:'cluehunt',
+      quiz:'quiz', quizscore:'quiz'
+    };
+    const LABEL = {
+      kindness:'❤️ Kindness',
+      limerick:'📝 Limerick',
+      scavenger:'🔍 Scavenger',
+      cluehunt:'💎 Clue Hunt',
+      quiz:'⏰ Quiz'
+    };
+    function normaliseKey(k){
+      const key = String(k||'').toLowerCase().replace(/[\s\-]/g,'');
+      return ALIAS[key] || key;
+    }
+    function titleFor(key){
+      if(LABEL[key]) return LABEL[key];
+      // Title Case for unknown keys
+      return key.replace(/[_\-]/g,' ').replace(/\b\w/g,m=>m.toUpperCase());
+    }
+    function extractBreakdown(row){
+      const add = (bag,k,v)=>{ if(k==null) return; const kk = normaliseKey(k); const val = toInt(v); bag[kk] = (bag[kk]||0) + (Number.isFinite(val)?val:0); };
+      const parts = {};
+
+      // 1) nested object under common names
+      const obj = pick(row, ['breakdown','components','byActivity','activityBreakdown','parts','scores']);
+      if(obj && typeof obj==='object' && !Array.isArray(obj)){
+        Object.entries(obj).forEach(([k,v])=> add(parts,k,v));
+      }
+
+      // 2) array shapes like [{activity:'kindness', score:25}, {type:'quiz', points:10}]
+      const arr = pick(row,['activityScores','activities','scoresArray','activity_points']);
+      if(Array.isArray(arr)){
+        arr.forEach(it=> add(parts, (it.activity||it.type||it.name||it.key), (it.score||it.points||it.value)));
+      }
+
+      // 3) tolerant top-level fallbacks
+      Object.keys(row||{}).forEach(k=>{
+        if(['team','teamname','teamcode','name','code','total','score','points'].includes(k.toLowerCase())) return;
+        const kk = normaliseKey(k);
+        if(['kindness','limerick','scavenger','cluehunt','quiz'].includes(kk)){
+          add(parts, kk, row[k]);
+        }
+      });
+
+      return parts;
+    }
+
     function normaliseTeams(raw){
       const rows = raw?.teams || raw?.leaderboard || raw?.rows || [];
-      return rows.map(t=>{
-        const name = pick(t,['teamName','name']) || '';
-        const code = pick(t,['teamCode','code','teamId']) || '';
-        // scores
-        const kindness = toInt(pick(t,['kindness','kind','kind_act','kindActs','kindnessScore']));
-        const limerick = toInt(pick(t,['limerick','verse','poem','limerickScore']));
-        const scav     = toInt(pick(t,['scavenger','scav','scavenger_hunt','scavengerScore']));
-        const clues    = toInt(pick(t,['cluehunt','clue_hunt','clues','hunt','clueScore']));
-        const quiz     = toInt(pick(t,['quiz','quizScore']));
-        let total      = toInt(pick(t,['total','score','points']));
-        if(!total) total = kindness + limerick + scav + clues + quiz;
-        return {name, code, kindness, limerick, scav, clues, quiz, total};
+      return rows.map(item=>{
+        const name = pick(item,['teamName','name']) || '';
+        const code = pick(item,['teamCode','code','teamId']) || '';
+        const parts = extractBreakdown(item);
+        let total = toInt(pick(item,['total','score','points']));
+        if(!total){
+          total = Object.values(parts).reduce((a,b)=>a+toInt(b),0);
+        }
+        return {name, code, parts, total};
       });
     }
 
-    function detectColumns(teams){
-      // Only show columns that have any value > 0 (but always show Total)
-      const cols = [
-        {key:'kindness', label:'❤️ Kindness'},
-        {key:'limerick', label:'📝 Limerick'},
-        {key:'scav',     label:'🔍 Scavenger'},
-        {key:'clues',    label:'💎 Clue Hunt'},
-        {key:'quiz',     label:'⏰ Quiz'},
-      ];
-      return cols.filter(c => teams.some(t => t[c.key] !== 0));
+    function computeColumnKeys(teams){
+      const set = new Set();
+      teams.forEach(t => Object.keys(t.parts).forEach(k => set.add(k)));
+      // stable preferred order, then any extras alphabetically
+      const preferred = ['kindness','limerick','scavenger','cluehunt','quiz'];
+      const extras = [...set].filter(k=>!preferred.includes(k)).sort();
+      const keys = preferred.filter(k=>set.has(k)).concat(extras);
+      return keys;
     }
 
     function renderTable(teams){
@@ -238,21 +257,22 @@
         board.innerHTML = '<tbody><tr><td class="muted">No teams yet.</td></tr></tbody>';
         return;
       }
-      teams.sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
-      const cols = detectColumns(teams);
+      teams.sort((a,b)=> b.total - a.total || (a.name||a.code).localeCompare(b.name||b.code));
+
+      const cols = computeColumnKeys(teams);
 
       let thead = `<thead><tr>
         <th class="rank">#</th>
         <th>Team</th>
-        ${cols.map(c=>`<th class="num">${c.label}</th>`).join('')}
+        ${cols.map(k=>`<th class="num">${titleFor(k)}</th>`).join('')}
         <th class="num total">🏆 Total</th>
       </tr></thead>`;
 
-      let rows = teams.map((t,i)=>`
+      const rows = teams.map((t,i)=>`
         <tr>
           <td class="rank">${i+1}</td>
           <td class="team">${t.name || t.code}</td>
-          ${cols.map(c=>`<td class="num">${t[c.key]}</td>`).join('')}
+          ${cols.map(k=>`<td class="num">${toInt(t.parts[k]||0)}</td>`).join('')}
           <td class="num total"><strong>${t.total}</strong></td>
         </tr>`).join('');
 
@@ -264,7 +284,7 @@
         const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
         const teams = normaliseTeams(data);
         renderTable(teams);
-        lastUpd.textContent = `Last updated — ${fmtTime(Date.now())}`;
+        document.getElementById('lastUpd').textContent = `Last updated — ${fmtTime(Date.now())}`;
       }catch(e){
         console.error('Leaderboard load failed', e);
         board.innerHTML = `<tbody><tr><td class="muted">Couldn’t load leaderboard.</td></tr></tbody>`;
@@ -280,11 +300,9 @@
       document.getElementById('tableWrap').classList.toggle('hidden', hide);
       hideNotice.classList.toggle('hidden', !hide);
 
-      // After time runs out, keep table hidden and show “awaiting publication”
       const finished = (typeof rem === 'number' && rem === 0) || s==='ENDED';
       postEvent.classList.toggle('hidden', !(finished && s!=='PUBLISHED'));
 
-      // If results published, show table (assumes backend returns finals/locked totals)
       if(s==='PUBLISHED'){
         hideNotice.classList.add('hidden');
         document.getElementById('tableWrap').classList.remove('hidden');
@@ -305,7 +323,7 @@
       }
     });
 
-    // auto-refresh every 60s (gentle)
+    // gentle auto-refresh each minute
     setInterval(async ()=>{
       await getEventStateSafe();
       await loadLeaderboard();
