@@ -55,7 +55,6 @@
   label{font-weight:700; color:#6b3f23; margin-bottom:4px; display:block}
   input, select, textarea{width:100%; padding:12px; border-radius:12px; border:3px solid var(--gold);
     background:#fff; font-size:15px; font-family:inherit;}
-  textarea{min-height:96px; resize:vertical}
   .hint{font-size:12px; color:#6b3f23; opacity:.9}
 
   .crew-strip{background:linear-gradient(135deg,#8b4513,#a0522d); color:#fff; padding:12px 14px;
@@ -145,7 +144,6 @@
       <strong>Quick rules</strong>
       <ul style="margin:8px 0 0 16px; padding:0">
         <li>Upload 1 photo per submit.</li>
-        <li>Tell us what you found (20+ chars).</li>
         <li>Tick what it is. Boom. 🏴‍☠️</li>
       </ul>
     </div>
@@ -157,12 +155,6 @@
         <input type="file" id="file" accept="image/*" style="display:none" />
         <button type="button" class="btn btn-gold" id="pickBtn">Upload photo</button>
         <div class="hint">Required • JPEG/PNG/WebP • Max ~20MB</div>
-      </div>
-
-      <div>
-        <label for="desc">What did you find?</label>
-        <textarea id="desc" maxlength="300" placeholder="Short and clear (20+ chars)" required></textarea>
-        <div class="hint"><span id="charCount">0</span>/300</div>
       </div>
 
       <div>
@@ -193,7 +185,7 @@
   const quickRules = el('quickRules');
   const scavForm = el('scavForm'), formAlert = el('formAlert'), submitBtn = el('submitBtn'), busyNote = el('busyNote');
   const pickBtn = el('pickBtn'), fileInput = el('file'), uploaderBox = el('uploaderBox'), uploadText = el('uploadText');
-  const desc = el('desc'), charCount = el('charCount'), checks = el('checks');
+  const checks = el('checks');
 
   const STORAGE_TEAM = keyFor('team');   // tq_<event>_team
   const STORAGE_TOKEN = keyFor('token'); // tq_<event>_token
@@ -229,7 +221,6 @@
     loginForm.addEventListener('submit', onSignIn);
     pickBtn.addEventListener('click', ()=> fileInput.click());
     fileInput.addEventListener('change', onFilePicked);
-    desc.addEventListener('input', ()=> charCount.textContent = (desc.value||'').length);
 
     scavForm.addEventListener('submit', onSubmitFind);
   }
@@ -369,11 +360,10 @@
     const file = fileInput.files && fileInput.files[0];
     if(!file){ return toast(formAlert,'Add a photo.',false); }
 
-    const txt = (desc.value||'').trim();
-    if(txt.length < 20){ return toast(formAlert,'Description must be 20+ chars.',false); }
-
     const picked = Array.from(checks.querySelectorAll('input[type="checkbox"]:checked')).map(c=>c.value);
     if(picked.length < 1){ return toast(formAlert,'Tick at least one item.',false); }
+
+    const description = buildAutoDescription(picked); // generated to satisfy backend
 
     disableForm(true);
 
@@ -385,7 +375,7 @@
         teamCode: signedTeam.code,
         teamName: signedTeam.name,
         items: picked,
-        description: txt,
+        description,              // auto-generated
         photoUrl
       };
 
@@ -400,13 +390,11 @@
       let serverMsg = '';
       try{
         const text = await res.text();
-        // try parse json; else keep raw text
         serverMsg = text;
-        try{ const j = JSON.parse(text); serverMsg = j.message || JSON.stringify(j); if(j.success===false) throw new Error(); if(j.success===true){ serverMsg = ''; } }catch{}
+        try{ const j = JSON.parse(text); serverMsg = j.message || JSON.stringify(j); if(j.success===true){ serverMsg=''; } }catch{}
       }catch{}
 
       if(!res.ok){
-        // show status + any server message
         const pretty = serverMsg ? ` (${serverMsg})` : '';
         throw new Error(`HTTP ${res.status}${pretty}`);
       }
@@ -418,6 +406,12 @@
       toast(formAlert, `Submission failed. ${e.message || 'Please try again.'}`, false);
       disableForm(false);
     }
+  }
+
+  function buildAutoDescription(picked){
+    let base = `Find: ${picked.join(', ')}`;
+    if(base.length < 20) base += ' — TeamQuest scavenger';
+    return base;
   }
 
   function lockAfterSuccess(){
