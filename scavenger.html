@@ -52,6 +52,9 @@
   .checks{display:grid;grid-template-columns:1fr;gap:8px}
   .checks label{border:2px dashed #daa520;border-radius:12px;padding:10px;background:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
   .checks input{width:auto}
+  /* greyed/locked item */
+  .checks label.done{opacity:.55;filter:grayscale(.3);background:#f6f1e5}
+  .checks label.done .tag{margin-left:auto;font-size:12px;border:2px dashed #daa520;border-radius:999px;padding:2px 8px;background:#fff}
   .uploader{border:4px dashed #daa520;border-radius:16px;padding:16px;text-align:center;background:#fffef7}
   .uploader.has-file{border-style:solid;background:#f2ffef;border-color:#2f9a4a}
   .dimmed{opacity:.5;pointer-events:none}
@@ -153,31 +156,34 @@
   const pickBtn = el('pickBtn'), fileInput = el('file'), uploaderBox = el('uploaderBox'), uploadText = el('uploadText');
   const checks = el('checks');
 
-  const STORAGE_TEAM = keyFor('team');   // tq_<event>_team  -> {code,name}
-  const STORAGE_TOKEN = keyFor('token'); // tq_<event>_token
+  const STORAGE_TEAM  = keyFor('team');        // tq_<event>_team  -> {code,name}
+  const STORAGE_TOKEN = keyFor('token');       // tq_<event>_token
+  const DONE_KEY = code => `tq_${eventId}_done_${code}`; // submitted item ids per team
 
   let EVENT_STATE = 'UNKNOWN';
   let TEAMS = [];
   let signedTeam = null;
 
-  // Stable IDs + titles (matches your earlier HTML)
+  // Stable IDs + labels (your latest names)
   const ITEMS = [
-    { id:'british_coin_2023', title:'Ancient British Coin (2023)' },
-    { id:'paperclip',         title:'Metal Binding Clip' },
-    { id:'snail_shell',       title:'Spiral Shell Treasure' },
-    { id:'feather',           title:'Sky Messenger Plume' },
-    { id:'elastic_band',      title:'Flexible Circle Treasure' },
-    { id:'golf_tee',          title:'Sporting Peg Treasure' }
+    { id:'british_coin_2023', title:'Any British coin dated 2023' },
+    { id:'paperclip',         title:'A Paperclip' },
+    { id:'snail_shell',       title:'A Snail Shell' },
+    { id:'feather',           title:'A Feather' },
+    { id:'elastic_band',      title:'An Elastic Band' },
+    { id:'golf_tee',          title:'A Golf Tee' }
   ];
 
   init();
 
   async function init(){
     wireUI();
-    renderItems();
+    renderItems();           // first paint (no team yet → no locks)
     await refreshState();
     await loadCrews();
-    hydrateFromStorage();
+    hydrateFromStorage();    // set signedTeam if remembered
+    renderItems();           // re-render with possible locks
+    if (signedTeam) await syncLocksFromServer(); // cross-device sync on load
     maybeShowForm();
   }
 
@@ -190,16 +196,32 @@
     scavForm.addEventListener('submit', onSubmit);
   }
 
+  // ---------- Render items with team locks ----------
+  function getDoneSet(){
+    if(!signedTeam) return new Set();
+    try { return new Set(JSON.parse(localStorage.getItem(DONE_KEY(signedTeam.code)) || '[]')); }
+    catch { return new Set(); }
+  }
+  function saveDoneSet(set){
+    if(!signedTeam) return;
+    localStorage.setItem(DONE_KEY(signedTeam.code), JSON.stringify([...set]));
+  }
+
   function renderItems(){
+    const done = getDoneSet();
     checks.innerHTML = "";
-    ITEMS.forEach((it,i)=>{
+    ITEMS.forEach((it)=>{
       const row = document.createElement('label');
-      row.innerHTML = `<input type="checkbox" value="${escapeHtml(it.title)}" data-id="${it.id}"> <span>${escapeHtml(it.title)}</span>`;
+      const isDone = done.has(it.id);
+      row.className = isDone ? 'done' : '';
+      row.innerHTML = `<input type="checkbox" ${isDone?'disabled':''} value="${escapeHtml(it.title)}" data-id="${it.id}">
+                       <span>${escapeHtml(it.title)}</span>
+                       ${isDone?'<span class="tag">Submitted</span>':''}`;
       checks.appendChild(row);
     });
   }
 
-  // Event state
+  // ---------- Event state ----------
   async function refreshState(){
     setBanner('🧭','Checking event…',false);
     runningBadge.style.display='none'; timeBadge.style.display='none';
@@ -232,7 +254,7 @@
   function setBanner(e,t,r){ stateEmoji.textContent=e; stateText.textContent=t; runningBadge.style.display=r?'inline-block':'none'; }
   function gateForm(){ const off = EVENT_STATE!=='RUNNING'; scavForm.classList.toggle('dimmed',off); submitBtn.disabled = off; }
 
-  // Crews
+  // ---------- Crews ----------
   async function loadCrews(){
     teamSelect.innerHTML = `<option value="">Loading crews…</option>`;
     try{
@@ -253,7 +275,7 @@
     }
   }
 
-  // Sign-in
+  // ---------- Sign-in ----------
   async function onSignIn(ev){
     ev.preventDefault(); clearLoginAlert();
     const teamCode = teamSelect.value.trim();
@@ -270,11 +292,14 @@
       const json = await res.json();
       if(json.success && json.valid===false) return showLoginError("PIN doesn’t match this crew.");
       if(!json.success) return showLoginError('Sign-in failed. Try again.');
+
       const t = TEAMS.find(x=>x.teamCode===teamCode);
       signedTeam = { code: teamCode, name: t ? t.teamName : 'Crew' };
       if(json.token) localStorage.setItem(STORAGE_TOKEN, json.token);
       localStorage.setItem(STORAGE_TEAM, JSON.stringify(signedTeam));
       showCrewStrip(); showForm();
+      await syncLocksFromServer(); // cross-device sync on sign-in
+      renderItems(); // refresh locks for this team
     }catch(e){ showLoginError('Sign-in service unavailable. Try again later.'); }
   }
 
@@ -283,9 +308,7 @@
       const raw = localStorage.getItem(STORAGE_TEAM);
       if(raw){
         const t = JSON.parse(raw);
-        if(t && t.code && t.name && TEAMS.some(x=>x.teamCode===t.code)){
-          signedTeam = { code:t.code, name:t.name }; showCrewStrip();
-        }else{ localStorage.removeItem(STORAGE_TEAM); }
+        if(t && t.code && t.name){ signedTeam = { code:t.code, name:t.name }; showCrewStrip(); }
       }
     }catch{}
   }
@@ -293,7 +316,44 @@
   function showCrewStrip(){ crewStrip.style.display='block'; crewStrip.textContent = `Crew: ${signedTeam.name}`; }
   function showForm(){ loginForm.style.display='none'; quickRules.style.display='block'; scavForm.style.display='grid'; gateForm(); }
 
-  // Uploadcare
+  // ---------- Cross-device lock sync ----------
+  async function syncLocksFromServer(){
+    if(!signedTeam) return;
+    try{
+      const headers = { 'Content-Type':'application/json' };
+      const tok = localStorage.getItem(STORAGE_TOKEN);
+      if(tok) headers['Authorization'] = `Bearer ${tok}`;
+
+      const res = await fetch('/.netlify/functions/get_scavenger_submissions_function', {
+        method:'POST', headers, body: JSON.stringify({ eventId, teamCode: signedTeam.code })
+      });
+      if(!res.ok) return; // silent if unavailable
+      const data = await res.json();
+
+      const union = getDoneSet(); // merge with any local cache
+      // Common shapes:
+      // 1) { success, submissions:[{ itemId, ... }]}
+      if (Array.isArray(data?.submissions)) {
+        data.submissions.forEach(s=>{
+          if (s.itemId) union.add(String(s.itemId));
+          // handle label arrays if present
+          if (Array.isArray(s.items)) {
+            s.items.forEach(lbl=>{
+              const m = ITEMS.find(it=>it.title===lbl);
+              if (m) union.add(m.id);
+            });
+          }
+        });
+      }
+      // 2) { itemIds:[...] }
+      if (Array.isArray(data?.itemIds)) data.itemIds.forEach(id=>union.add(String(id)));
+
+      saveDoneSet(union);
+      renderItems();
+    }catch(_){ /* ignore */ }
+  }
+
+  // ---------- Uploadcare ----------
   function onFilePicked(){
     const f = fileInput.files && fileInput.files[0];
     if(!f){ uploaderBox.classList.remove('has-file'); uploadText.textContent='📸 Add your photo'; return; }
@@ -313,7 +373,7 @@
     return `https://ucarecdn.com/${j.file}/`;
   }
 
-  // Submit
+  // ---------- Submit ----------
   async function onSubmit(ev){
     ev.preventDefault(); clearFormAlert();
     if(EVENT_STATE!=='RUNNING') return toast(formAlert,'Submissions are closed.',false);
@@ -325,16 +385,20 @@
     const checked = Array.from(checks.querySelectorAll('input[type=checkbox]:checked'));
     if(checked.length<1) return toast(formAlert,'Tick at least one item.',false);
 
-    // Build primary item (first checked) to satisfy old function
+    // Primary item = first ticked
     const title = checked[0].value;
-    const itemDef = ITEMS.find(x=>x.title===title) || { id:'item', title };
-    const description = buildAutoDescription(checked.map(c=>c.value));
+    const itemDef = ITEMS.find(x=>x.title===title) || ITEMS[0];
+
+    const done = getDoneSet();
+    if(done.has(itemDef.id)) return toast(formAlert,'That one is already submitted for this crew.',false);
+
+    const description = buildAutoDescription(checked.map(c=>c.value)); // to satisfy newer backend
 
     disableForm(true);
     try{
       const photoUrl = await uploadToUploadcare(file);
 
-      // Build superset payload for both backends
+      // Superset payload for both backends
       const payload = {
         // old function fields:
         teamCode: signedTeam.code,
@@ -347,7 +411,7 @@
         // new function fields:
         eventId,
         items: checked.map(c=>c.value),
-        description // >=20 chars auto-generated
+        description
       };
 
       const headers = { 'Content-Type':'application/json' };
@@ -364,8 +428,14 @@
 
       if(!res.ok) throw new Error(`HTTP ${res.status}${msg?` (${msg})`:''}`);
 
+      // Success → lock this item for this team and sync
+      done.add(itemDef.id);
+      saveDoneSet(done);
+      renderItems();
       toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
       lockAfterSuccess();
+      // optional: pull server once more (in case backend aggregates labels → ids differently)
+      syncLocksFromServer();
     }catch(e){
       console.error('Submit error:', e);
       toast(formAlert, `Submission failed. ${e.message||''}`.trim(), false);
