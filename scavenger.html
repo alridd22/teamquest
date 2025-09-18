@@ -7,85 +7,61 @@
 <style>
   :root{
     --brown:#6f4426; --brown-d:#53321c; --tan:#f5e6d3; --tan-2:#ead7c0;
-    --gold:#daa520; --gold-2:#ffb648; --gold-3:#ffd56a; --error:#8b0000; --ok:#0b6b2e;
+    --gold:#daa520; --gold-2:#ffb648; --error:#8b0000; --ok:#0b6b2e;
   }
   *{box-sizing:border-box}
-  body{
-    margin:0; font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    background:linear-gradient(135deg,#8b5a2b,#a1642f 40%,#f4a460); color:#2a1a10;
-  }
-
-  /* Fixed Nav */
-  .nav{position:fixed; inset:0 0 auto 0; height:64px; z-index:50;
-    background:linear-gradient(135deg,#8b4513,#5d361d); border-bottom:3px solid var(--gold);
-    display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(0,0,0,.35);}
-  .nav-inner{width:100%; max-width:1200px; display:flex; align-items:center; gap:16px; padding:0 16px;}
-  .brand{display:flex; align-items:center; gap:10px; text-decoration:none;}
-  .brand img{height:40px; width:auto; display:block; filter:drop-shadow(0 2px 4px rgba(0,0,0,.6));}
-  .links{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
-  .nav a{color:#f5e6d3; text-decoration:none; font-weight:700; font-size:14px;
-    padding:8px 12px; border:2px solid rgba(218,165,32,.5); border-radius:10px; background:rgba(255,255,255,.06);}
-  .nav a:hover{background:linear-gradient(135deg,var(--gold),#ff8c00); color:#fff; border-color:var(--gold)}
-  .nav .active{background:linear-gradient(135deg,#d2a146,#b78020); color:#fff; border-color:var(--gold)}
-
-  /* Page shell */
-  .page{max-width:980px; margin:96px auto 24px; padding:16px;}
-  .card{background:linear-gradient(145deg,var(--tan),var(--tan-2)); border:3px solid var(--brown);
-    border-radius:18px; padding:18px; box-shadow:0 18px 36px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.35); position:relative;}
-  .card:before{content:""; position:absolute; left:12px; right:12px; top:12px; bottom:12px;
-    border:2px solid var(--gold); border-radius:14px; pointer-events:none;}
-
-  /* Event banner + badges */
-  .banner{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;
-    background:#fff6dd; border:2px dashed var(--gold); border-radius:12px; padding:10px 12px; margin-bottom:14px;}
-  .banner .state{font-weight:800; color:#5a3b1f; display:flex; align-items:center; gap:8px}
-  .badge{border:2px dashed var(--gold); border-radius:999px; padding:4px 10px; font-weight:700; background:#fff; color:#5a3b1f;}
-  .btn{appearance:none; border:0; border-radius:12px; padding:10px 14px; cursor:pointer; font-weight:800;
-    display:inline-flex; align-items:center; gap:8px; transition:transform .08s ease;}
+  body{margin:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(135deg,#8b5a2b,#a1642f 40%,#f4a460);color:#2a1a10}
+  /* Nav */
+  .nav{position:fixed;inset:0 0 auto 0;height:64px;z-index:50;
+    background:linear-gradient(135deg,#8b4513,#5d361d);border-bottom:3px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+  .nav-inner{width:100%;max-width:1200px;display:flex;align-items:center;gap:16px;padding:0 16px}
+  .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+  .brand img{height:40px;width:auto;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+  .links{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+  .nav a{color:#f5e6d3;text-decoration:none;font-weight:700;font-size:14px;padding:8px 12px;
+    border:2px solid rgba(218,165,32,.5);border-radius:10px;background:rgba(255,255,255,.06)}
+  .nav a:hover{background:linear-gradient(135deg,#daa520,#ff8c00);color:#fff;border-color:#daa520}
+  .nav .active{background:linear-gradient(135deg,#d2a146,#b78020);color:#fff;border-color:#daa520}
+  /* Shell */
+  .page{max-width:980px;margin:96px auto 24px;padding:16px}
+  .card{background:linear-gradient(145deg,var(--tan),var(--tan-2));border:3px solid var(--brown);
+    border-radius:18px;padding:18px;box-shadow:0 18px 36px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35);position:relative}
+  .card:before{content:"";position:absolute;left:12px;right:12px;top:12px;bottom:12px;border:2px solid #daa520;border-radius:14px;pointer-events:none}
+  /* Banner + buttons */
+  .banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:#fff6dd;border:2px dashed #daa520;border-radius:12px;padding:10px 12px;margin-bottom:14px}
+  .state{font-weight:800;color:#5a3b1f;display:flex;align-items:center;gap:8px}
+  .badge{border:2px dashed #daa520;border-radius:999px;padding:4px 10px;font-weight:700;background:#fff;color:#5a3b1f}
+  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800;display:inline-flex;align-items:center;gap:8px}
   .btn:active{transform:translateY(1px)}
-  .btn-gold{background:linear-gradient(135deg,var(--gold-2),var(--gold)); color:#301c0e; border:3px solid var(--brown-d);}
-  .btn-ghost{background:transparent; border:2px solid var(--gold); color:#5a3b1f;}
-  .btn[disabled]{opacity:.6; cursor:not-allowed}
-
-  /* Form bits */
-  .row{display:grid; gap:12px}
+  .btn-gold{background:linear-gradient(135deg,var(--gold-2),#daa520);color:#301c0e;border:3px solid #53321c}
+  .btn-ghost{background:transparent;border:2px solid #daa520;color:#5a3b1f}
+  .btn[disabled]{opacity:.6;cursor:not-allowed}
+  /* Forms */
+  .row{display:grid;gap:12px}
   .grid-2{grid-template-columns:1fr 1fr}
-  @media (max-width:780px){ .grid-2{grid-template-columns:1fr} }
-
-  label{font-weight:700; color:#6b3f23; margin-bottom:4px; display:block}
-  input, select, textarea{width:100%; padding:12px; border-radius:12px; border:3px solid var(--gold);
-    background:#fff; font-size:15px; font-family:inherit;}
-  .hint{font-size:12px; color:#6b3f23; opacity:.9}
-
-  .crew-strip{background:linear-gradient(135deg,#8b4513,#a0522d); color:#fff; padding:12px 14px;
-    border:2px solid var(--gold); border-radius:12px; font-weight:800; margin-bottom:10px; display:none;}
-
-  .alert{display:none; padding:12px 14px; border-radius:12px; border:3px solid; font-weight:700; text-align:center}
-  .alert-ok{background:#e7f7ea; color:var(--ok); border-color:#2f9a4a}
-  .alert-err{background:#ffe4e7; color:var(--error); border-color:#b20a20}
-
-  .quick{background:#fffdf6; border:2px dashed var(--gold); border-radius:12px; padding:10px 12px; margin:8px 0 12px;}
-
-  .checks{display:grid; grid-template-columns:1fr; gap:8px}
-  .checks label{border:2px dashed var(--gold); border-radius:12px; padding:10px; background:#fff;
-    display:flex; align-items:center; gap:10px; cursor:pointer; user-select:none;}
+  @media (max-width:780px){.grid-2{grid-template-columns:1fr}}
+  label{font-weight:700;color:#6b3f23;margin-bottom:4px;display:block}
+  input,select{width:100%;padding:12px;border-radius:12px;border:3px solid #daa520;background:#fff;font-size:15px;font-family:inherit}
+  .crew-strip{background:linear-gradient(135deg,#8b4513,#a0522d);color:#fff;padding:12px 14px;border:2px solid #daa520;border-radius:12px;font-weight:800;margin-bottom:10px;display:none}
+  .alert{display:none;padding:12px 14px;border-radius:12px;border:3px solid;font-weight:700;text-align:center}
+  .alert-ok{background:#e7f7ea;color:#0b6b2e;border-color:#2f9a4a}
+  .alert-err{background:#ffe4e7;color:#8b0000;border-color:#b20a20}
+  .quick{background:#fffdf6;border:2px dashed #daa520;border-radius:12px;padding:10px 12px;margin:8px 0 12px}
+  .checks{display:grid;grid-template-columns:1fr;gap:8px}
+  .checks label{border:2px dashed #daa520;border-radius:12px;padding:10px;background:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
   .checks input{width:auto}
-
-  .uploader{border:4px dashed var(--gold); border-radius:16px; padding:16px; text-align:center; background:#fffef7;}
-  .uploader.has-file{border-style:solid; background:#f2ffef; border-color:#2f9a4a}
-
-  .dimmed{opacity:.5; pointer-events:none}
-  .footer-note{font-size:12px; opacity:.8; text-align:center; margin-top:8px}
+  .uploader{border:4px dashed #daa520;border-radius:16px;padding:16px;text-align:center;background:#fffef7}
+  .uploader.has-file{border-style:solid;background:#f2ffef;border-color:#2f9a4a}
+  .dimmed{opacity:.5;pointer-events:none}
+  .footer-note{font-size:12px;opacity:.8;text-align:center;margin-top:8px}
 </style>
 </head>
 <body>
-
-<!-- NAV -->
 <nav class="nav">
   <div class="nav-inner">
-    <a class="brand" href="/">
-      <img src="/Team Quest Logo-01.png" alt="TeamQuest" />
-    </a>
+    <a class="brand" href="/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
     <div class="links">
       <a href="/clue_hunt_challenge">Treasure Hunt</a>
       <a class="active" href="#">Scavenger</a>
@@ -99,62 +75,54 @@
 
 <main class="page">
   <section class="card">
-
     <!-- Event banner -->
     <div class="banner" id="eventBanner">
-      <div class="state">
-        <span id="stateEmoji">🧭</span>
-        <span id="stateText">Checking event…</span>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+      <div class="state"><span id="stateEmoji">🧭</span><span id="stateText">Checking event…</span></div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span class="badge" id="runningBadge" style="display:none">Running</span>
         <span class="badge" id="timeBadge" style="display:none">Time remaining: —</span>
         <button class="btn btn-gold" id="refreshStateBtn">⟳ Refresh</button>
       </div>
     </div>
 
-    <!-- LOGIN -->
+    <!-- Sign-in -->
     <form id="loginForm" class="row" autocomplete="off">
       <div class="row grid-2">
         <div>
           <label for="teamSelect">Crew</label>
-          <select id="teamSelect" required>
-            <option value="">Loading crews…</option>
-          </select>
+          <select id="teamSelect" required><option value="">Loading crews…</option></select>
         </div>
         <div>
           <label for="pin">4-digit PIN</label>
-          <input id="pin" type="text" inputmode="numeric" pattern="[0-9]{4}"
-                 minlength="4" maxlength="4" placeholder="1234" required />
-          <div class="hint">Exactly 4 digits</div>
+          <input id="pin" type="text" inputmode="numeric" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="1234" required />
+          <div style="font-size:12px;color:#6b3f23">Exactly 4 digits</div>
         </div>
       </div>
-      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <button class="btn btn-gold" type="submit">🔓 Sign in</button>
         <button class="btn btn-ghost" type="button" id="refreshCrewsBtn">⟳ Reload crews</button>
       </div>
       <div id="loginAlert" class="alert"></div>
     </form>
 
-    <!-- TEAM STRIP -->
     <div id="crewStrip" class="crew-strip"></div>
 
-    <!-- QUICK RULES -->
+    <!-- Quick rules -->
     <div class="quick" id="quickRules" style="display:none">
       <strong>Quick rules</strong>
-      <ul style="margin:8px 0 0 16px; padding:0">
+      <ul style="margin:8px 0 0 16px;padding:0">
         <li>Upload 1 photo per submit.</li>
         <li>Tick what it is. Boom. 🏴‍☠️</li>
       </ul>
     </div>
 
-    <!-- FORM -->
+    <!-- Scavenger form -->
     <form id="scavForm" class="row" style="display:none">
       <div class="uploader" id="uploaderBox">
         <p id="uploadText">📸 Add your photo</p>
         <input type="file" id="file" accept="image/*" style="display:none" />
         <button type="button" class="btn btn-gold" id="pickBtn">Upload photo</button>
-        <div class="hint">Required • JPEG/PNG/WebP • Max ~20MB</div>
+        <div style="font-size:12px;color:#6b3f23">Required • JPEG/PNG/WebP • Max ~20MB</div>
       </div>
 
       <div>
@@ -166,7 +134,6 @@
       <div class="footer-note" id="busyNote" style="display:none">Submitting… hold tight ⚡</div>
       <div id="formAlert" class="alert"></div>
     </form>
-
   </section>
 </main>
 
@@ -176,38 +143,38 @@
   const eventId = (qs.get('eventId') || qs.get('event') || '').trim();
   const el = id => document.getElementById(id);
 
+  // UI refs
   const stateText = el('stateText'), stateEmoji = el('stateEmoji');
-  const runningBadge = el('runningBadge'), timeBadge = el('timeBadge');
-  const refreshStateBtn = el('refreshStateBtn');
+  const runningBadge = el('runningBadge'), timeBadge = el('timeBadge'), refreshStateBtn = el('refreshStateBtn');
   const loginForm = el('loginForm'), loginAlert = el('loginAlert'), refreshCrewsBtn = el('refreshCrewsBtn');
   const teamSelect = el('teamSelect'), pinInput = el('pin');
-  const crewStrip = el('crewStrip');
-  const quickRules = el('quickRules');
+  const crewStrip = el('crewStrip'), quickRules = el('quickRules');
   const scavForm = el('scavForm'), formAlert = el('formAlert'), submitBtn = el('submitBtn'), busyNote = el('busyNote');
   const pickBtn = el('pickBtn'), fileInput = el('file'), uploaderBox = el('uploaderBox'), uploadText = el('uploadText');
   const checks = el('checks');
 
-  const STORAGE_TEAM = keyFor('team');   // tq_<event>_team
+  const STORAGE_TEAM = keyFor('team');   // tq_<event>_team  -> {code,name}
   const STORAGE_TOKEN = keyFor('token'); // tq_<event>_token
 
   let EVENT_STATE = 'UNKNOWN';
   let TEAMS = [];
   let signedTeam = null;
 
-  const FIND_ITEMS = [
-    "Ancient British Coin (2023)",
-    "Metal Binding Clip",
-    "Spiral Shell Treasure",
-    "Sky Messenger Plume",
-    "Flexible Circle Treasure",
-    "Sporting Peg Treasure"
+  // Stable IDs + titles (matches your earlier HTML)
+  const ITEMS = [
+    { id:'british_coin_2023', title:'Ancient British Coin (2023)' },
+    { id:'paperclip',         title:'Metal Binding Clip' },
+    { id:'snail_shell',       title:'Spiral Shell Treasure' },
+    { id:'feather',           title:'Sky Messenger Plume' },
+    { id:'elastic_band',      title:'Flexible Circle Treasure' },
+    { id:'golf_tee',          title:'Sporting Peg Treasure' }
   ];
 
   init();
 
   async function init(){
     wireUI();
-    renderFindItems();
+    renderItems();
     await refreshState();
     await loadCrews();
     hydrateFromStorage();
@@ -217,25 +184,22 @@
   function wireUI(){
     refreshStateBtn.addEventListener('click', refreshState);
     refreshCrewsBtn.addEventListener('click', loadCrews);
-
     loginForm.addEventListener('submit', onSignIn);
     pickBtn.addEventListener('click', ()=> fileInput.click());
     fileInput.addEventListener('change', onFilePicked);
-
-    scavForm.addEventListener('submit', onSubmitFind);
+    scavForm.addEventListener('submit', onSubmit);
   }
 
-  function renderFindItems(){
+  function renderItems(){
     checks.innerHTML = "";
-    FIND_ITEMS.forEach((label,i)=>{
-      const id = `f_${i}`;
+    ITEMS.forEach((it,i)=>{
       const row = document.createElement('label');
-      row.innerHTML = `<input type="checkbox" id="${id}" value="${escapeHtml(label)}" /> <span>${escapeHtml(label)}</span>`;
+      row.innerHTML = `<input type="checkbox" value="${escapeHtml(it.title)}" data-id="${it.id}"> <span>${escapeHtml(it.title)}</span>`;
       checks.appendChild(row);
     });
   }
 
-  // ===== Event state =====
+  // Event state
   async function refreshState(){
     setBanner('🧭','Checking event…',false);
     runningBadge.style.display='none'; timeBadge.style.display='none';
@@ -265,10 +229,10 @@
       gateForm();
     }
   }
-  function setBanner(emoji,text,running){ stateEmoji.textContent=emoji; stateText.textContent=text; runningBadge.style.display=running?'inline-block':'none'; }
-  function gateForm(){ const notRun = EVENT_STATE!=='RUNNING'; scavForm.classList.toggle('dimmed',notRun); submitBtn.disabled = notRun; }
+  function setBanner(e,t,r){ stateEmoji.textContent=e; stateText.textContent=t; runningBadge.style.display=r?'inline-block':'none'; }
+  function gateForm(){ const off = EVENT_STATE!=='RUNNING'; scavForm.classList.toggle('dimmed',off); submitBtn.disabled = off; }
 
-  // ===== Crews =====
+  // Crews
   async function loadCrews(){
     teamSelect.innerHTML = `<option value="">Loading crews…</option>`;
     try{
@@ -278,39 +242,37 @@
       const data = await res.json();
       const list = Array.isArray(data.teams) ? data.teams : Array.isArray(data.leaderboard) ? data.leaderboard : null;
       if(!list) throw new Error('No crews array');
-      TEAMS = list.filter(t=>t && t.teamCode && t.teamName)
-                  .map(t=>({teamCode:String(t.teamCode), teamName:String(t.teamName)}))
+      TEAMS = list.filter(t=>t && t.teamCode && t.teamName).map(t=>({teamCode:String(t.teamCode), teamName:String(t.teamName)}))
                   .sort((a,b)=>a.teamName.localeCompare(b.teamName));
-      teamSelect.innerHTML = `<option value="">Select crew…</option>` + TEAMS.map(t=>(
-        `<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`)).join('');
+      teamSelect.innerHTML = `<option value="">Select crew…</option>` + TEAMS.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
       showLoginInfo('');
     }catch(e){
-      TEAMS = []; teamSelect.innerHTML = `<option value="">—</option>`;
+      TEAMS = [];
+      teamSelect.innerHTML = `<option value="">—</option>`;
       showLoginError("Couldn't load crews. Refresh and try again.");
     }
   }
 
-  // ===== Sign-in =====
+  // Sign-in
   async function onSignIn(ev){
     ev.preventDefault(); clearLoginAlert();
     const teamCode = teamSelect.value.trim();
     const pin = (pinInput.value||'').trim();
-    if(!teamCode){ return showLoginError('Pick your crew first.'); }
-    if(!/^\d{4}$/.test(pin)){ return showLoginError('Enter a 4-digit PIN.'); }
+    if(!teamCode) return showLoginError('Pick your crew first.');
+    if(!/^\d{4}$/.test(pin)) return showLoginError('Enter a 4-digit PIN.');
     try{
       const res = await fetch('/.netlify/functions/verify_team_pin_function', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body:JSON.stringify({ eventId, teamCode, pin })
       });
-      if(res.status===404 || res.status>=500){ return showLoginError('Sign-in service unavailable. Try again later.'); }
-      if(!res.ok){ return showLoginError('Sign-in failed. Try again.'); }
+      if(res.status===404 || res.status>=500) return showLoginError('Sign-in service unavailable. Try again later.');
+      if(!res.ok) return showLoginError('Sign-in failed. Try again.');
       const json = await res.json();
-      if(json.success && json.valid===false){ return showLoginError("PIN doesn’t match this crew."); }
-      if(!json.success){ return showLoginError('Sign-in failed. Try again.'); }
-
-      const teamObj = TEAMS.find(t=>t.teamCode===teamCode);
-      signedTeam = { code: teamCode, name: teamObj ? teamObj.teamName : 'Crew' };
-      if(json.token){ localStorage.setItem(STORAGE_TOKEN, json.token); }
+      if(json.success && json.valid===false) return showLoginError("PIN doesn’t match this crew.");
+      if(!json.success) return showLoginError('Sign-in failed. Try again.');
+      const t = TEAMS.find(x=>x.teamCode===teamCode);
+      signedTeam = { code: teamCode, name: t ? t.teamName : 'Crew' };
+      if(json.token) localStorage.setItem(STORAGE_TOKEN, json.token);
       localStorage.setItem(STORAGE_TEAM, JSON.stringify(signedTeam));
       showCrewStrip(); showForm();
     }catch(e){ showLoginError('Sign-in service unavailable. Try again later.'); }
@@ -327,18 +289,18 @@
       }
     }catch{}
   }
-  function maybeShowForm(){ if(signedTeam && EVENT_STATE==='RUNNING'){ showForm(); } else { loginForm.style.display='grid'; } }
+  function maybeShowForm(){ if(signedTeam && EVENT_STATE==='RUNNING') showForm(); else loginForm.style.display='grid'; }
   function showCrewStrip(){ crewStrip.style.display='block'; crewStrip.textContent = `Crew: ${signedTeam.name}`; }
   function showForm(){ loginForm.style.display='none'; quickRules.style.display='block'; scavForm.style.display='grid'; gateForm(); }
 
-  // ===== Uploadcare =====
+  // Uploadcare
   function onFilePicked(){
-    const file = fileInput.files && fileInput.files[0];
-    if(!file){ uploaderBox.classList.remove('has-file'); uploadText.textContent='📸 Add your photo'; return; }
-    const okTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
-    if(!okTypes.includes(file.type)){ return toast(formAlert,'Use JPEG/PNG/WebP.',false); }
-    if(file.size > 20*1024*1024){ return toast(formAlert,'Image too large (max ~20MB).',false); }
-    uploaderBox.classList.add('has-file'); uploadText.textContent = `✅ ${file.name}`;
+    const f = fileInput.files && fileInput.files[0];
+    if(!f){ uploaderBox.classList.remove('has-file'); uploadText.textContent='📸 Add your photo'; return; }
+    const ok = ['image/jpeg','image/jpg','image/png','image/webp'];
+    if(!ok.includes(f.type)) return toast(formAlert,'Use JPEG/PNG/WebP.',false);
+    if(f.size>20*1024*1024) return toast(formAlert,'Image too large (max ~20MB).',false);
+    uploaderBox.classList.add('has-file'); uploadText.textContent = `✅ ${f.name}`;
   }
   async function uploadToUploadcare(file){
     const form = new FormData();
@@ -351,87 +313,90 @@
     return `https://ucarecdn.com/${j.file}/`;
   }
 
-  // ===== Submit find =====
-  async function onSubmitFind(ev){
+  // Submit
+  async function onSubmit(ev){
     ev.preventDefault(); clearFormAlert();
-    if(EVENT_STATE!=='RUNNING'){ return toast(formAlert,'Submissions are closed.',false); }
-    if(!signedTeam){ return toast(formAlert,'Sign in first.',false); }
+    if(EVENT_STATE!=='RUNNING') return toast(formAlert,'Submissions are closed.',false);
+    if(!signedTeam)           return toast(formAlert,'Sign in first.',false);
 
     const file = fileInput.files && fileInput.files[0];
-    if(!file){ return toast(formAlert,'Add a photo.',false); }
+    if(!file) return toast(formAlert,'Add a photo.',false);
 
-    const picked = Array.from(checks.querySelectorAll('input[type="checkbox"]:checked')).map(c=>c.value);
-    if(picked.length < 1){ return toast(formAlert,'Tick at least one item.',false); }
+    const checked = Array.from(checks.querySelectorAll('input[type=checkbox]:checked'));
+    if(checked.length<1) return toast(formAlert,'Tick at least one item.',false);
 
-    const description = buildAutoDescription(picked); // generated to satisfy backend
+    // Build primary item (first checked) to satisfy old function
+    const title = checked[0].value;
+    const itemDef = ITEMS.find(x=>x.title===title) || { id:'item', title };
+    const description = buildAutoDescription(checked.map(c=>c.value));
 
     disableForm(true);
-
     try{
       const photoUrl = await uploadToUploadcare(file);
 
+      // Build superset payload for both backends
       const payload = {
-        eventId,
+        // old function fields:
         teamCode: signedTeam.code,
         teamName: signedTeam.name,
-        items: picked,
-        description,              // auto-generated
-        photoUrl
+        itemId: itemDef.id,
+        itemTitle: itemDef.title,
+        itemDescription: description,
+        maxPoints: 15,
+        photoUrl,
+        // new function fields:
+        eventId,
+        items: checked.map(c=>c.value),
+        description // >=20 chars auto-generated
       };
 
       const headers = { 'Content-Type':'application/json' };
       const token = localStorage.getItem(STORAGE_TOKEN);
-      if(token){ headers['Authorization'] = `Bearer ${token}`; }
+      if(token) headers['Authorization'] = `Bearer ${token}`;
 
       const res = await fetch('/.netlify/functions/submit_scavenger_function', {
         method:'POST', headers, body: JSON.stringify(payload)
       });
 
-      let serverMsg = '';
-      try{
-        const text = await res.text();
-        serverMsg = text;
-        try{ const j = JSON.parse(text); serverMsg = j.message || JSON.stringify(j); if(j.success===true){ serverMsg=''; } }catch{}
-      }catch{}
+      const text = await res.text();
+      let msg = text;
+      try{ const j = JSON.parse(text); msg = j.message || JSON.stringify(j); if(j.success) msg=''; }catch{}
 
-      if(!res.ok){
-        const pretty = serverMsg ? ` (${serverMsg})` : '';
-        throw new Error(`HTTP ${res.status}${pretty}`);
-      }
+      if(!res.ok) throw new Error(`HTTP ${res.status}${msg?` (${msg})`:''}`);
 
       toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
       lockAfterSuccess();
     }catch(e){
       console.error('Submit error:', e);
-      toast(formAlert, `Submission failed. ${e.message || 'Please try again.'}`, false);
+      toast(formAlert, `Submission failed. ${e.message||''}`.trim(), false);
       disableForm(false);
     }
   }
 
-  function buildAutoDescription(picked){
-    let base = `Find: ${picked.join(', ')}`;
-    if(base.length < 20) base += ' — TeamQuest scavenger';
-    return base;
+  function buildAutoDescription(labels){
+    let s = `Find: ${labels.join(', ')}`;
+    if(s.length < 20) s += ' — TeamQuest scavenger';
+    return s;
   }
 
   function lockAfterSuccess(){
     uploaderBox.classList.add('dimmed');
-    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{ el.disabled = true; });
+    document.querySelectorAll('#scavForm input, #scavForm button').forEach(n=>n.disabled = true);
   }
   function disableForm(v){
     busyNote.style.display = v ? 'block' : 'none';
     submitBtn.disabled = v || EVENT_STATE!=='RUNNING';
-    document.querySelectorAll('#scavForm input, #scavForm textarea, #scavForm button').forEach(el=>{ if(el!==submitBtn) el.disabled = v; });
+    document.querySelectorAll('#scavForm input, #scavForm button').forEach(n=>{ if(n!==submitBtn) n.disabled = v; });
   }
 
-  // ===== Helpers =====
+  // helpers
   function keyFor(kind){ return `tq_${eventId}_${kind}`; }
   function toast(node,msg,ok){ node.className=`alert ${ok?'alert-ok':'alert-err'}`; node.textContent=msg; node.style.display='block'; }
   function clearLoginAlert(){ loginAlert.style.display='none'; }
   function clearFormAlert(){ formAlert.style.display='none'; }
   function showLoginError(msg){ loginAlert.className='alert alert-err'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
-  function showLoginInfo(msg){ if(!msg){ loginAlert.style.display='none'; return;} loginAlert.className='alert alert-ok'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
-  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function showLoginInfo(msg){ if(!msg){ loginAlert.style.display='none'; return; } loginAlert.className='alert alert-ok'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   function fmtTime(sec){ const s=Math.max(0,Math.floor(sec)); const m=Math.floor(s/60), r=s%60; return `${m}:${String(r).padStart(2,'0')}`; }
 })();
 </script>
