@@ -180,12 +180,10 @@
 
 <script>
 (function(){
-  // ===== URL + EVENT =====
   const qs = new URLSearchParams(location.search);
   const eventId = (qs.get('eventId') || qs.get('event') || '').trim();
   const el = id => document.getElementById(id);
 
-  // UI els
   const stateText = el('stateText'), stateEmoji = el('stateEmoji');
   const runningBadge = el('runningBadge'), timeBadge = el('timeBadge');
   const refreshStateBtn = el('refreshStateBtn');
@@ -197,14 +195,13 @@
   const pickBtn = el('pickBtn'), fileInput = el('file'), uploaderBox = el('uploaderBox'), uploadText = el('uploadText');
   const desc = el('desc'), charCount = el('charCount'), checks = el('checks');
 
-  const STORAGE_TEAM = keyFor('team');   // tq_<eventId>_team
-  const STORAGE_TOKEN = keyFor('token'); // tq_<eventId>_token
+  const STORAGE_TEAM = keyFor('team');   // tq_<event>_team
+  const STORAGE_TOKEN = keyFor('token'); // tq_<event>_token
 
   let EVENT_STATE = 'UNKNOWN';
   let TEAMS = [];
-  let signedTeam = null; // {code,name}
+  let signedTeam = null;
 
-  // The six items from your previous HTML (titles)
   const FIND_ITEMS = [
     "Ancient British Coin (2023)",
     "Metal Binding Clip",
@@ -214,14 +211,6 @@
     "Sporting Peg Treasure"
   ];
 
-  // Guard: require eventId
-  if(!eventId){
-    setBanner('❗', "No event specified. Add ?event=EVT-… to the URL.", false);
-    teamSelect.innerHTML = `<option value="">No event</option>`;
-    // keep page visible so user sees message
-  }
-
-  // Init
   init();
 
   async function init(){
@@ -387,8 +376,10 @@
     if(picked.length < 1){ return toast(formAlert,'Tick at least one item.',false); }
 
     disableForm(true);
+
     try{
       const photoUrl = await uploadToUploadcare(file);
+
       const payload = {
         eventId,
         teamCode: signedTeam.code,
@@ -397,18 +388,34 @@
         description: txt,
         photoUrl
       };
+
+      const headers = { 'Content-Type':'application/json' };
+      const token = localStorage.getItem(STORAGE_TOKEN);
+      if(token){ headers['Authorization'] = `Bearer ${token}`; }
+
       const res = await fetch('/.netlify/functions/submit_scavenger_function', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)
+        method:'POST', headers, body: JSON.stringify(payload)
       });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const j = await res.json();
-      if(!j.success) throw new Error(j.message || 'Submit failed');
+
+      let serverMsg = '';
+      try{
+        const text = await res.text();
+        // try parse json; else keep raw text
+        serverMsg = text;
+        try{ const j = JSON.parse(text); serverMsg = j.message || JSON.stringify(j); if(j.success===false) throw new Error(); if(j.success===true){ serverMsg = ''; } }catch{}
+      }catch{}
+
+      if(!res.ok){
+        // show status + any server message
+        const pretty = serverMsg ? ` (${serverMsg})` : '';
+        throw new Error(`HTTP ${res.status}${pretty}`);
+      }
 
       toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
       lockAfterSuccess();
     }catch(e){
-      console.error(e);
-      toast(formAlert,'Submission failed. Please try again.',false);
+      console.error('Submit error:', e);
+      toast(formAlert, `Submission failed. ${e.message || 'Please try again.'}`, false);
       disableForm(false);
     }
   }
