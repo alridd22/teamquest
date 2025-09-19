@@ -1,21 +1,16 @@
 // netlify/functions/submit_limerick_function.js
+const { ok, error, isPreflight, getSheets, tabRange, SHEET_ID } = require("./_utils.js");
+const https = require("node:https");
 
-const {
-  ok, error, isPreflight,
-  getSheets, tabRange, SHEET_ID
-} = require("./_utils.js");
-
-// Ensure the canonical "submissions" sheet exists with our standard columns
+// ---------- helpers ----------
 async function ensureSheetExists(sheets, spreadsheetId, title, headers) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
   const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
   if (exists) return;
-
   await sheets.spreadsheets.batchUpdate({
     spreadsheetId,
     requestBody: { requests: [{ addSheet: { properties: { title } } }] }
   });
-
   await sheets.spreadsheets.values.update({
     spreadsheetId,
     range: `${title}!A1`,
@@ -24,107 +19,113 @@ async function ensureSheetExists(sheets, spreadsheetId, title, headers) {
   });
 }
 
-const HEADERS = [
-  "Timestamp",   // A
-  "Team Code",   // B
-  "Activity",    // C
-  "Nonce",       // D
-  "Payload",     // E
-  "AI Status",   // F
-  "AI Attempts", // G
-  "AI Score",    // H
-  "Final Score", // I
-  "Idempotency", // J
-  "Event Id"     // K
-];
-
-function randNonce(prefix = "limerick") {
-  return `${prefix}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+function randNonce(len = 6) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
 }
 
+function postJson(url, data, timeoutMs = 4000) {
+  return new Promise((resolve, reject) => {
+    if (!url) return resolve();
+    if (typeof fetch === "function") {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), timeoutMs);
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      }).then(() => { clearTimeout(t); resolve(); })
+        .catch(err => { clearTimeout(t); reject(err); });
+      return;
+    }
+    try {
+      const u = new URL(url);
+      const req = https.request({
+        host: u.hostname,
+        path: `${u.pathname}${u.search || ""}`,
+        port: u.port || (u.protocol === "https:" ? 443 : 80),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        timeout: timeoutMs
+      }, res => { res.on("data", () => {}); res.on("end", resolve); });
+      req.on("timeout", () => req.destroy(new Error("timeout")));
+      req.on("error", reject);
+      req.write(JSON.stringify(data));
+      req.end();
+    } catch (e) { reject(e); }
+  });
+}
+
+// ---------- handler ----------
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
     if (event.httpMethod !== "POST") return error(405, "POST only");
 
-    // ---- Parse & validate body ----
     let body = {};
     try { body = JSON.parse(event.body || "{}"); }
     catch { return error(400, "Invalid JSON body"); }
 
-    const eventId      = String(body.eventId || "").trim();
-    const teamCode     = String(body.teamCode || "").trim();
-    const teamName     = String(body.teamName || "").trim(); // optional, stored in payload
-    const topic        = String(body.topic || "").trim();
-    const limerickRaw  = String(body.limerickText || "").trim();
+    const activity  = "limerick";
+    const eventId   = (body.eventId || "").toString().trim();
+    const teamCode  = (body.teamCode || "").toString().trim();
+    const teamName  = (body.teamName || "").toString().trim();
 
-    if (!teamCode || !limerickRaw) {
-      return error(400, "teamCode and limerickText are required");
-    }
-    if (!eventId) {
-      // We store Event Id in column K and your Zap filters on it, so require it
-      return error(400, "eventId is required");
-    }
+    const limerickText = (body.limerick || body.text || "").toString().trim(); // required
+    const topic        = (body.topic || "").toString().trim();
+    const photoUrl     = (body.photoUrl || "").toString().trim(); // optional
 
-    // Normalise & cap text length a bit (safety)
-    const limerickText = limerickRaw.replace(/\r\n/g, "\n").slice(0, 2000);
+    if (!teamCode) return error(400, "teamCode is required");
+    if (limerickText.length < 20) return error(400, "limerick text must be at least 20 characters");
 
-    // Build payload JSON (matches Kindness layout: JSON string in E)
-    const payload = JSON.stringify({
-      activity: "limerick",
-      topic,
-      limerick: limerickText,
-      teamName
-    });
+    const sheets = await getSheets();
+    await ensureSheetExists(
+      sheets,
+      SHEET_ID,
+      "submissions",
+      ["Timestamp","Team Code","Activity","Nonce","Payload","AI Status","AI Attempts","AI Score","Final Score","Idempotency","Event Id"]
+    );
 
-    // ---- Sheets client ----
-    const sheets = await getSheets(); // throws if service account env missing
-    const spreadsheetId = SHEET_ID;
+    const timestamp   = new Date().toISOString();
+    const nonce       = randNonce(6);
+    const idempotency = `${activity}|${eventId}|${teamCode}`;
 
-    // Make sure the "submissions" sheet exists with expected headers
-    await ensureSheetExists(sheets, spreadsheetId, "submissions", HEADERS);
-
-    // ---- Row data (columns A–K) ----
-    const timestamp    = new Date().toISOString();
-    const nonce        = randNonce();                 // Column D
-    const idempotency  = `limerick|${eventId}`;       // Column J (matches Kindness pattern)
+    const payloadObj = { limerick: limerickText, topic, photoUrl, teamName };
+    const payloadStr = JSON.stringify(payloadObj);
 
     await sheets.spreadsheets.values.append({
-      spreadsheetId,
+      spreadsheetId: SHEET_ID,
       range: tabRange("submissions", "A1"),
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
-      requestBody: {
-        values: [[
-          timestamp,          // A Timestamp
-          teamCode,           // B Team Code
-          "limerick",         // C Activity
-          nonce,              // D Nonce
-          payload,            // E Payload (JSON string)
-          "QUEUED",           // F AI Status (same as Kindness)
-          "0",                // G AI Attempts
-          "",                 // H AI Score (blank - Zap/AI fills)
-          "",                 // I Final Score (Zap fills)
-          idempotency,        // J Idempotency
-          eventId             // K Event Id
-        ]]
-      }
+      requestBody: { values: [[
+        timestamp, teamCode, activity, nonce, payloadStr,
+        "QUEUED", "0", "", "", idempotency, eventId
+      ]]}
     });
+
+    // webhook ping (non-blocking)
+    const hook = process.env.ZAP_LIMERICK_HOOK || "";
+    try {
+      await postJson(hook, {
+        activity, eventId, teamCode, teamName, timestamp, nonce,
+        idempotency, sheetId: SHEET_ID, worksheet: "submissions",
+        payload: payloadObj
+      });
+    } catch (e) {
+      console.warn("Limerick hook ping failed:", e.message);
+    }
 
     return ok({
       success: true,
-      message: "Limerick submitted",
-      nonce,
-      idempotency,
-      eventId
+      message: "Limerick submission queued",
+      teamCode, teamName, eventId
     });
-
   } catch (e) {
     console.error("submit_limerick_function error:", e);
-    // Provide a clearer message when service account env vars are missing
-    const msg = /invalid_grant|unauthorized_client|JWT|private key|credentials/i.test(String(e && e.message))
-      ? "Missing Google service account (set GOOGLE_SERVICE_ACCOUNT_JSON[_B64] or EMAIL/PRIVATE_KEY)"
-      : (e && e.message) || "Unexpected error";
-    return error(500, msg);
+    return error(500, e.message || "Unexpected error");
   }
 };
