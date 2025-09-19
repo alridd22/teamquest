@@ -1,385 +1,363 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TeamQuest – Terry’s Verse Vault</title>
-  <style>
-    /* ————— NAV ————— */
-    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:80px}
-    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
-    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
-    .nav-logo:hover{transform:scale(1.05)}
-    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
-    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
-    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
-    .nav-item{position:relative}
-    .nav-link{color:#F5DEB3;text-decoration:none;font-size:1rem;font-weight:bold;padding:12px 18px;border-radius:8px;transition:.3s;display:block;text-shadow:1px 1px 2px rgba(0,0,0,.7);background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
-    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321 0%,#8B4513 100%);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s;box-shadow:0 8px 20px rgba(0,0,0,.3)}
-    .nav-item:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
-    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 18px;font-size:.95rem;border-bottom:1px solid rgba(218,165,32,.2);transition:.3s;background:rgba(101,67,33,.2);margin:2px;border-radius:6px;font-weight:600}
-    .dropdown-link:last-child{border-bottom:none}
-    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;padding-left:25px;transform:translateX(5px);box-shadow:0 2px 8px rgba(255,140,0,.3)}
-    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
-    @media (max-width:768px){
-      .treasure-nav{height:120px}
-      .nav-container{justify-content:center;position:relative}
-      .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-      .nav-logo img{height:85px!important}
-      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
-      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513 0%,#654321 100%);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .3s;overflow-y:auto}
-      .nav-menu.active{left:0}
-      .nav-link{font-size:1.1rem;padding:15px 25px;width:280px;text-align:center;background:linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6));border:2px solid #DAA520;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.3)}
-      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none;background:rgba(101,67,33,.9);border:2px solid #DAA520;border-radius:12px;margin-top:10px;width:280px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TeamQuest · The Limerick Challenge</title>
+<style>
+  :root{
+    --brown:#7a4b27; --brown2:#5b361d; --tan:#f3e7d6; --gold:#d6a628; --gold2:#ffb52e; --ink:#2b190e;
+    --cream:#fff7ec; --ok:#1b7f3a; --err:#8b1212; --okbg:#e8fbef; --errbg:#ffe9ed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    background: radial-gradient(1200px 600px at 20% 0,#8b5a2b22,transparent),
+                radial-gradient(1000px 600px at 80% 100%,#d6a62822,transparent),
+                linear-gradient(180deg,#8b5a2b 0%,#a96d3a 50%,#cf9258 100%);
+    min-height:100dvh; color:var(--ink);
+  }
 
-    /* ————— PAGE ————— */
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;padding-top:100px!important;position:relative}
-    @media (max-width:768px){body{padding-top:140px!important}}
-    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border-radius:25px;padding:34px;box-shadow:0 20px 40px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.3);max-width:720px;width:100%;position:relative;overflow:hidden;border:3px solid #8B4513}
-    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
-    .logo{text-align:center;margin-bottom:10px}
-    h1{color:#8B4513;text-align:center;margin-bottom:6px;font-size:2.1em;font-weight:800}
-    .subtitle{text-align:center;color:#A0522D;margin-bottom:16px;font-size:1.05em;font-weight:600}
-    .status-banner{display:none;margin:12px 0 18px;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:10px;padding:12px 14px;color:#654321;font-weight:600}
-    .status-banner.paused{border-left-color:#DAA520}
-    .status-banner.ended{border-left-color:#8B0000}
-    .status-banner.published{border-left-color:#32CD32}
+  /* Fixed nav */
+  .nav{
+    position:fixed; inset:0 0 auto 0; height:64px; z-index:20;
+    background:linear-gradient(135deg,var(--brown) 0%,var(--brown2) 100%);
+    border-bottom:3px solid var(--gold);
+    display:flex; align-items:center; gap:14px; padding:0 14px;
+  }
+  .brand{display:flex; align-items:center; gap:10px; text-decoration:none}
+  .brand img{height:36px; width:auto; display:block; filter:drop-shadow(0 1px 2px #0006)}
+  .navlinks{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+  .pill{
+    color:#ffe9b6; font-weight:700; text-decoration:none; padding:10px 14px; border-radius:10px;
+    border:2px solid #e7c26a55; background:#ffffff12; display:inline-flex; align-items:center; gap:8px;
+  }
+  .pill:hover{background:linear-gradient(135deg,#e7b748,#ff9800); color:#fff}
+  .active{outline:2px dashed #ffd36b; outline-offset:2px}
 
-    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:14px;text-align:center;font-size:1.05em;font-weight:700;margin-bottom:12px;box-shadow:0 5px 15px rgba(139,69,19,.3);border:2px solid #DAA520}
-    .auth-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px dashed #DAA520;border-radius:14px;padding:16px;margin:10px 0}
-    .auth-grid{display:grid;grid-template-columns:1fr 160px;gap:10px}
-    @media (max-width:560px){.auth-grid{grid-template-columns:1fr}}
-    .small-btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}
-    .small-btn:hover{background:#A0522D}
-    .message{padding:16px;border-radius:14px;margin:16px 0;text-align:center;display:none;border:3px solid;font-weight:700}
-    .success-message{background:linear-gradient(135deg,#90EE90 0%,#98FB98 100%);border-color:#32CD32;color:#064b06}
-    .error-message{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
+  /* Page shell */
+  .wrap{max-width:980px; margin:84px auto 32px; padding:16px}
+  .card{
+    background:linear-gradient(145deg,#f7efe3 0%,#eeddc9 100%);
+    border:3px solid var(--brown); border-radius:20px; padding:18px 18px 6px;
+    box-shadow:0 18px 42px #00000022, inset 0 1px 0 #fff8;
+    position:relative;
+  }
+  .card:before{
+    content:""; position:absolute; inset:12px; border:2px solid var(--gold); border-radius:14px; pointer-events:none;
+  }
 
-    .form-group{margin-bottom:16px}
-    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700;font-size:1.02em}
-    select,input[type="text"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%)}
-    select:focus,input[type="text"]:focus,textarea:focus{outline:none;border-color:#FF8C00;background:#fff;box-shadow:0 0 0 3px rgba(255,140,0,.2)}
-    textarea{min-height:160px;resize:vertical;line-height:1.55;font-family:'Georgia','Times New Roman',serif}
-    .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:5px;font-weight:600}
+  /* Banner / badges */
+  .banner{
+    background:#fff7ee; border:2px dashed var(--gold); border-radius:14px; padding:14px 12px; display:flex;
+    align-items:center; justify-content:space-between; gap:10px; margin:6px 0 14px;
+  }
+  .status{
+    display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:999px;
+    border:2px dashed var(--gold); font-weight:800; background:#fff4d9;
+  }
+  .btn, button{
+    appearance:none; border:none; cursor:pointer; font-weight:800;
+    background:linear-gradient(135deg,var(--gold) 0%,var(--gold2) 100%);
+    color:#3c240f; border-radius:12px; padding:12px 16px; box-shadow:0 2px 0 #5b361d;
+    border:2px solid #8b5a2b; display:inline-flex; align-items:center; gap:8px;
+  }
+  .btn.small{padding:8px 12px; border-radius:10px}
+  .btn:disabled{opacity:.6; cursor:not-allowed; filter:saturate(.6)}
+  .ghost{
+    background:linear-gradient(135deg,#8b5a2b,#6b3f22); color:#fff; border-color:#4b2a17;
+  }
 
-    .submit-btn{width:100%;background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:16px;border-radius:14px;font-size:1.1em;font-weight:900;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px;border:3px solid #8B4513}
-    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 12px 25px rgba(255,140,0,.3);background:linear-gradient(135deg,#FFB347,#F0C814)}
-    .submit-btn:disabled{opacity:.6;cursor:not-allowed}
-    .loading{display:none;text-align:center;margin-top:12px;color:#8B4513;font-weight:800}
-  </style>
+  /* Form + inputs */
+  label{font-weight:700; color:#5a3218; margin-bottom:6px; display:block}
+  .field{
+    border:3px solid var(--gold); border-radius:12px; padding:12px 14px;
+    background:linear-gradient(145deg,#fff 0%,#fff8e6 100%); width:100%; font-size:16px;
+  }
+  textarea.field{min-height:160px; resize:vertical}
+  .row{display:grid; grid-template-columns:1fr 160px; gap:12px}
+  .strip{
+    background:linear-gradient(135deg,#8b5a2b,#a86737); color:#fff; border:2px solid #3e2313;
+    border-radius:12px; padding:12px 14px; font-weight:800; margin:8px 0 14px;
+  }
+  .box{
+    background:#fffdf7; border:2px dashed var(--gold); border-radius:14px; padding:14px; margin:10px 0 16px;
+  }
+  .help{color:#6b3f22; font-size:.9rem}
+  .ctr{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .message{display:none; margin:12px 0 8px; padding:12px 14px; border-radius:12px; font-weight:700; text-align:center}
+  .message.ok{display:block; background:var(--okbg); color:var(--ok); border:2px solid #20a45a}
+  .message.err{display:block; background:var(--errbg); color:var(--err); border:2px solid #e06a7a}
+  .muted{opacity:.65; pointer-events:none}
+
+  @media (max-width:720px){ .row{grid-template-columns:1fr} .nav{height:72px} .wrap{margin-top:96px}}
+</style>
 </head>
 <body>
-  <!-- NAV -->
-  <nav class="treasure-nav" id="treasure-nav">
-    <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
-      </a>
-      <ul class="nav-menu" id="nav-menu">
-        <li class="nav-item">
-          <a href="#" class="nav-link">🎯 Activities ▼</a>
-          <div class="nav-dropdown">
-            <a class="dropdown-link" href="https://theteamquest.netlify.app/clue_hunt_challenge">💎 The Treasure Hunt</a>
-            <a class="dropdown-link" href="https://theteamquest.netlify.app/scavenger_hunt">🔍 The Scavenger Hunt</a>
-            <a class="dropdown-link" href="https://theteamquest.netlify.app/quiz_challenge">⏰ The Timed Quiz</a>
-            <a class="dropdown-link" href="https://theteamquest.netlify.app/kindness_challenge_page">❤️ The Kindness Task</a>
-          </div>
-        </li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_leaderboard">🏆 The Leaderboard</a></li>
-        <li class="nav-item"><a class="nav-link" href="https://theteamquest.netlify.app/teamquest_gallery">📸 The Gallery</a></li>
-      </ul>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+  <!-- Fixed nav -->
+  <nav class="nav">
+    <a class="brand" href="/">
+      <img src="/Team Quest Logo-01.png" alt="TeamQuest" />
+    </a>
+    <div class="navlinks">
+      <a class="pill" href="/clue_hunt_challenge">Treasure Hunt</a>
+      <a class="pill" href="/scavenger_hunt">Scavenger</a>
+      <a class="pill" href="/quiz_challenge">Timed Quiz</a>
+      <a class="pill" href="/kindness_challenge_page">Kindness</a>
+      <a class="pill active" href="#">Limerick</a>
+      <a class="pill" href="/teamquest_gallery">Gallery</a>
     </div>
   </nav>
 
-  <div class="container">
-    <div class="logo">
-      <h1>Terry’s Verse Vault</h1>
-      <p class="subtitle">Write a limerick. Make us smile. Earn doubloons.</p>
-    </div>
-
-    <div id="stateBanner" class="status-banner" role="status" aria-live="polite"></div>
-
-    <div class="team-info" id="teamInfo">Crew: unknown</div>
-
-    <!-- Sign-in -->
-    <div class="auth-card" id="signinCard" aria-live="polite">
-      <div class="auth-grid">
-        <div>
-          <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect">
-            <option value="">Loading teams…</option>
-          </select>
-        </div>
-        <div>
-          <label for="teamPin">Crew PIN</label>
-          <input id="teamPin" type="text" inputmode="numeric" maxlength="4" placeholder="1234"/>
+  <main class="wrap">
+    <div class="card">
+      <!-- Event banner -->
+      <div class="banner">
+        <div id="eventMsg">⛳ Checking event…</div>
+        <div class="ctr">
+          <span id="eventBadge" class="status">—</span>
+          <button id="refreshState" class="btn small">↻ Refresh</button>
         </div>
       </div>
-      <div style="margin-top:10px">
-        <button class="small-btn" id="signinBtn">🔓 Sign in</button>
+
+      <!-- Sign-in -->
+      <div class="box">
+        <div class="row" style="align-items:end">
+          <div>
+            <label for="teamSelect">Choose your crew</label>
+            <select id="teamSelect" class="field">
+              <option value="">Loading crews…</option>
+            </select>
+          </div>
+          <div>
+            <label for="pinInput">Crew PIN</label>
+            <input id="pinInput" class="field" inputmode="numeric" autocomplete="one-time-code" maxlength="4" placeholder="1234" />
+          </div>
+        </div>
+        <div class="ctr" style="margin-top:10px">
+          <button id="signInBtn" class="btn">🔐 Sign in</button>
+          <button id="reloadCrews" class="btn ghost">↻ Reload crews</button>
+        </div>
+        <div id="signMsg" class="message"></div>
       </div>
-      <div class="message" id="signinMsg"></div>
+
+      <!-- Crew strip -->
+      <div id="crewStrip" class="strip" style="display:none">Crew: <span id="crewName">—</span></div>
+
+      <!-- Quick rules -->
+      <div class="box">
+        <strong>Quick rules</strong>
+        <ul style="margin:8px 0 0 18px; line-height:1.5">
+          <li>Five lines. Keep it fun + clean.</li>
+          <li>At least 20 characters total.</li>
+          <li>One submit at a time per crew.</li>
+        </ul>
+      </div>
+
+      <!-- Limerick form -->
+      <form id="limerickForm" class="box" novalidate>
+        <div style="margin-bottom:10px">
+          <label for="topic">Topic (optional)</label>
+          <input id="topic" class="field" placeholder="e.g. Castle gates / teamwork / parrot…" />
+        </div>
+
+        <div style="margin-bottom:10px">
+          <label for="limerick">Your limerick</label>
+          <textarea id="limerick" class="field" maxlength="500" placeholder="There once was a crew bold and keen…"></textarea>
+          <div class="help"><span id="charCount">0</span>/500 characters remaining</div>
+        </div>
+
+        <div class="ctr">
+          <button id="submitBtn" class="btn" type="submit">📜 Submit to the Vault</button>
+          <div id="busy" class="help" style="display:none">⏳ Sending…</div>
+        </div>
+
+        <div id="formMsg" class="message"></div>
+      </form>
     </div>
+  </main>
 
-    <!-- Limerick form -->
-    <form id="limerickForm" style="display:none">
-      <div class="form-group">
-        <label for="limerickTopic">Topic (optional)</label>
-        <input id="limerickTopic" type="text" placeholder="e.g., Pirates, a map mishap, sea shanties…"/>
-      </div>
+<script>
+(function(){
+  // --------- helpers
+  const $ = sel => document.querySelector(sel);
+  const state = { eventId:"", eventState:"", crews:[], teamCode:"", teamName:"", signed:false, canSubmit:false };
 
-      <div class="form-group">
-        <label for="limerickText">Your limerick</label>
-        <textarea id="limerickText" maxlength="500" placeholder="Write 5 lines (AABBA). Keep it playful and clean."></textarea>
-        <div class="char-count"><span id="charCount">500</span> characters remaining</div>
-      </div>
+  function getEventId(){
+    const q = new URLSearchParams(location.search);
+    return q.get("event") || q.get("eventId") || "";
+  }
+  function showMsg(el, text, ok=false){
+    const box = $(el);
+    if(!box) return;
+    box.textContent = text;
+    box.className = "message " + (ok ? "ok":"err");
+    box.style.display = "block";
+  }
+  function clearMsg(el){ const box=$(el); if(box){ box.style.display="none"; } }
+  function setBadge(text){ const b=$("#eventBadge"); if(b) b.textContent = text; }
+  function setBanner(message){ const m=$("#eventMsg"); if(m) m.textContent = message; }
+  function lockForm(disabled=true){
+    $("#topic").disabled = disabled;
+    $("#limerick").disabled = disabled;
+    $("#submitBtn").disabled = disabled;
+    state.canSubmit = !disabled;
+  }
+  function setCrewStrip(){
+    if(state.teamName){
+      $("#crewName").textContent = state.teamName;
+      $("#crewStrip").style.display = "block";
+    } else {
+      $("#crewStrip").style.display = "none";
+    }
+  }
 
-      <button type="submit" class="submit-btn" id="submitBtn">🪙 Submit to the Vault</button>
-      <div class="loading" id="loading">✨ Terry is logging your poem… check back in a few minutes for a score.</div>
-      <div class="message" id="feedback"></div>
-    </form>
-  </div>
+  // --------- Event state
+  async function fetchEventState(){
+    try{
+      const res = await fetch("/.netlify/functions/get_event_state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId:state.eventId})});
+      const data = await res.json();
+      state.eventState = (data && data.state) || "RUNNING";
+    }catch(e){
+      state.eventState = "RUNNING";
+    }
+    if(state.eventState === "RUNNING"){ setBanner("Event running — submit your limerick when ready."); setBadge("Running"); }
+    else if(state.eventState === "PAUSED"){ setBanner("Event paused — submissions are closed"); setBadge("Paused"); }
+    else if(state.eventState === "ENDED"){ setBanner("Event ended — submissions are closed"); setBadge("Ended"); }
+    else if(state.eventState === "PUBLISHED"){ setBanner("Results published — submissions closed"); setBadge("Published"); }
+    lockForm(state.eventState !== "RUNNING" || !state.signed);
+  }
 
-  <script>
-    /* ===== URL / STORAGE ===== */
-    const qs        = new URLSearchParams(location.search);
-    const EVENT_ID  = qs.get('event') || qs.get('eventId') || '';
+  // --------- Crews
+  async function loadCrews(){
+    const sel = $("#teamSelect");
+    sel.innerHTML = '<option value="">Loading crews…</option>';
+    try{
+      const res = await fetch("/.netlify/functions/get_leaderboard?eventId="+encodeURIComponent(state.eventId));
+      if(!res.ok) throw new Error("bad");
+      const data = await res.json();
+      const list = (Array.isArray(data.teams)?data.teams : (Array.isArray(data.leaderboard)?data.leaderboard:[]))
+        .map(t => ({teamCode: t.teamCode, teamName: t.teamName}))
+        .filter(t => t.teamCode && t.teamName);
+      state.crews = list;
+      sel.innerHTML = '<option value="">Choose your crew…</option>' +
+        list.sort((a,b)=>a.teamName.localeCompare(b.teamName))
+            .map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join("");
+    }catch(e){
+      sel.innerHTML = '<option value="">—</option>';
+      showMsg("#signMsg","Couldn’t load crews. Refresh and try again.");
+    }
+  }
 
-    const token    = () => localStorage.getItem('teamToken') || '';
-    const teamCode = () => localStorage.getItem('teamCode') || '';
-    const teamName = () => localStorage.getItem('teamName') || '';
+  // --------- Sign in
+  async function signIn(){
+    clearMsg("#signMsg");
+    const teamCode = $("#teamSelect").value;
+    const pin = ($("#pinInput").value || "").replace(/\D/g,"").slice(0,4);
+    if(!teamCode){ showMsg("#signMsg","Pick your crew from the list."); return; }
+    if(pin.length !== 4){ showMsg("#signMsg","Enter a 4-digit PIN."); return; }
 
-    /* ===== FETCH HELPER (same as Kindness) ===== */
-    async function callFn(path, payload){
-      const res = await fetch(`/.netlify/functions/${path}`,{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(token() ? {'Authorization': `Bearer ${token()}`} : {})
-        },
-        body: JSON.stringify(payload || {})
+    $("#signInBtn").disabled = true;
+    try{
+      const res = await fetch("/.netlify/functions/verify_team_pin_function",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({eventId:state.eventId, teamCode, pin})
+      });
+      if(res.status === 404){ showMsg("#signMsg","Sign-in service unavailable. Try again later."); return; }
+      const data = await res.json();
+      if(data && data.success && data.valid){
+        const t = state.crews.find(c=>c.teamCode===teamCode);
+        state.teamCode = teamCode;
+        state.teamName = t ? t.teamName : "";
+        state.signed = true;
+        localStorage.setItem("tq.teamCode", state.teamCode);
+        localStorage.setItem("tq.teamName", state.teamName);
+        if(data.token){ localStorage.setItem("tq.token", data.token); }
+        setCrewStrip();
+        clearMsg("#signMsg");
+        lockForm(state.eventState !== "RUNNING" ? true : false);
+      }else if(data && data.success === true && data.valid === false){
+        showMsg("#signMsg","PIN doesn’t match this crew.");
+      }else{
+        showMsg("#signMsg","Sign-in failed. Try again.");
+      }
+    }catch(e){
+      showMsg("#signMsg","Sign-in service unavailable. Try again later.");
+    }finally{
+      $("#signInBtn").disabled = false;
+    }
+  }
+
+  // --------- Submit limerick
+  $("#limerick").addEventListener("input",()=>{
+    const val = ($("#limerick").value||"");
+    const left = 500 - val.length;
+    $("#charCount").textContent = 500 - (left<0?0:(500-left));
+    // keep it simple to show remaining
+    $("#charCount").textContent = val.length;
+  });
+
+  $("#limerickForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    clearMsg("#formMsg");
+    if(!state.signed){ showMsg("#formMsg","Please sign in first."); return; }
+    if(state.eventState!=="RUNNING"){ showMsg("#formMsg","Submissions are closed."); return; }
+    const text = ($("#limerick").value||"").trim();
+    if(text.length < 20){ showMsg("#formMsg","Write at least 20 characters."); return; }
+
+    const payload = {
+      eventId: state.eventId,
+      teamCode: state.teamCode,
+      teamName: state.teamName,
+      limerick: text,
+      topic: ($("#topic").value||"").trim()
+      // photoUrl optional – omitted here
+    };
+
+    $("#submitBtn").disabled = true; $("#busy").style.display="inline";
+
+    try{
+      const res = await fetch("/.netlify/functions/submit_limerick_function",{
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify(payload)
       });
       const data = await res.json().catch(()=>({}));
-      if(!res.ok || data.success === false){
-        throw new Error(data.message || `Request failed (${res.status})`);
+      if(!res.ok){
+        showMsg("#formMsg", (data && (data.message||data.error)) || `Couldn’t submit. Request failed (${res.status})`);
+        $("#submitBtn").disabled = false; $("#busy").style.display="none";
+        return;
       }
-      return data;
+      showMsg("#formMsg","🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes.", true);
+      // grey/disable to avoid double-submit
+      $("#topic").classList.add("muted"); $("#limerick").classList.add("muted");
+      lockForm(true);
+    }catch(err){
+      showMsg("#formMsg","Network error. Try again.");
+      $("#submitBtn").disabled = false;
+    }finally{
+      $("#busy").style.display="none";
     }
+  });
 
-    /* ===== EL REFS ===== */
-    const navToggle   = document.getElementById('nav-toggle');
-    const navMenu     = document.getElementById('nav-menu');
+  // --------- Boot
+  async function boot(){
+    state.eventId = getEventId();
+    await fetchEventState();
+    await loadCrews();
 
-    const stateBanner = document.getElementById('stateBanner');
-    const teamInfo    = document.getElementById('teamInfo');
-    const teamSelect  = document.getElementById('teamSelect');
-    const teamPin     = document.getElementById('teamPin');
-    const signinBtn   = document.getElementById('signinBtn');
-    const signinMsg   = document.getElementById('signinMsg');
-
-    const form        = document.getElementById('limerickForm');
-    const topicEl     = document.getElementById('limerickTopic');
-    const textEl      = document.getElementById('limerickText');
-    const countEl     = document.getElementById('charCount');
-    const submitBtn   = document.getElementById('submitBtn');
-    const loadingEl   = document.getElementById('loading');
-    const feedbackEl  = document.getElementById('feedback');
-
-    /* ===== NAV ===== */
-    navToggle?.addEventListener('click', ()=>{
-      navMenu.classList.toggle('active');
-      navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-    });
-    document.addEventListener('click', (e)=>{
-      const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-      if(!inside && navMenu.classList.contains('active')){
-        navMenu.classList.remove('active'); navToggle.textContent='☰';
-      }
-    });
-
-    /* ===== UI HELPERS ===== */
-    const setSigninMsg = (msg,type='error')=>{
-      signinMsg.textContent = msg;
-      signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`;
-      signinMsg.style.display = 'block';
-    };
-    const clearSigninMsg = ()=>{ signinMsg.textContent=''; signinMsg.style.display='none'; };
-
-    const setFeedback = (msg,type)=>{
-      feedbackEl.innerHTML = msg;
-      feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`;
-      feedbackEl.style.display = 'block';
-    };
-    const clearFeedback = ()=>{ feedbackEl.textContent=''; feedbackEl.style.display='none'; };
-
-    function updateCrewLabel(){
-      teamInfo.textContent = teamName() ? `Crew: ${teamName()}` :
-                             (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown');
+    // Autofill from prior sign-in
+    const tc = localStorage.getItem("tq.teamCode"); const tn = localStorage.getItem("tq.teamName");
+    if(tc && tn){
+      state.teamCode = tc; state.teamName = tn; state.signed = true; setCrewStrip();
+      lockForm(state.eventState!=="RUNNING");
     }
+  }
 
-    /* ===== EVENT STATE (same pattern) ===== */
-    async function refreshEventState(){
-      if(!EVENT_ID){
-        stateBanner.textContent = 'Missing eventId in the URL (?event=...).';
-        stateBanner.className = 'status-banner ended';
-        stateBanner.style.display='block';
-        form.style.display='none';
-        return 'UNKNOWN';
-      }
-      try{
-        const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        let text='', cls='status-banner';
-        let lock=false;
-        if(state==='NOT_STARTED'){ text='Event not started yet.'; cls+=' paused'; lock=true; }
-        if(state==='PAUSED'){ text='Event paused — submissions closed for now.'; cls+=' paused'; lock=true; }
-        if(state==='RUNNING'){ text='Event running — submit your limerick when ready.'; lock=false; }
-        if(state==='ENDED'){ text='Event ended — submissions are closed.'; cls+=' ended'; lock=true; }
-        if(state==='PUBLISHED'){ text='Results published! Check the Gallery.'; cls+=' published'; lock=true; }
-        stateBanner.textContent = text; stateBanner.className = cls; stateBanner.style.display = text ? 'block':'none';
-        submitBtn.disabled = lock;
-        return state;
-      }catch{
-        stateBanner.textContent = 'Could not verify event state.'; stateBanner.className='status-banner'; stateBanner.style.display='block';
-        return 'UNKNOWN';
-      }
-    }
-
-    /* ===== TEAMS (same method as Kindness; NO static fallback) ===== */
-    function extractTeams(data){
-      if(Array.isArray(data?.teams)) return data.teams;
-      if(Array.isArray(data?.leaderboard)){
-        return data.leaderboard.map(r=>({
-          teamCode: r.teamCode || r.code || r.teamId || '',
-          teamName: r.teamName || r.name || ''
-        })).filter(t=>t.teamName);
-      }
-      if(Array.isArray(data?.rows)){
-        return data.rows.map(r=>({
-          teamCode: r.teamCode || r.code || '',
-          teamName: r.teamName || r.name || ''
-        })).filter(t=>t.teamName);
-      }
-      return [];
-    }
-
-    async function loadTeams(){
-      try{
-        let data  = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        let teams = extractTeams(data);
-
-        if(!teams.length){
-          // GET fallback only (to match Kindness’ robustness)
-          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-          if(res.ok){
-            data  = await res.json().catch(()=>({}));
-            teams = extractTeams(data);
-          }
-        }
-        if(!teams.length) throw new Error('No teams returned');
-
-        teams.sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||''));
-        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` +
-          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
-        clearSigninMsg();
-      }catch(err){
-        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
-        setSigninMsg('Couldn’t load crews. Refresh this page or return to the team start page.', 'error');
-      }
-    }
-
-    /* ===== SIGN-IN (identical flow) ===== */
-    async function signIn(){
-      clearSigninMsg(); clearFeedback();
-      const code = teamSelect.value;
-      const pin  = (teamPin.value || '').trim();
-      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
-      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
-
-      try{
-        const res = await callFn('verify_team_pin_function',{ eventId: EVENT_ID, teamCode: code, pin });
-        if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
-        if(res.token) localStorage.setItem('teamToken', res.token);
-        localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
-        updateCrewLabel();
-        setSigninMsg('Signed in. You can submit now!', 'success');
-        form.style.display='block';
-      }catch(err){
-        if(String(err.message).includes('404')){
-          setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
-        }else{
-          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
-        }
-      }
-    }
-
-    /* ===== CHARACTER COUNT ===== */
-    function updateCount(){
-      const remaining = 500 - (textEl.value?.length || 0);
-      countEl.textContent = remaining;
-      countEl.style.color = remaining < 50 ? '#DC143C' : '#8B4513';
-    }
-    textEl.addEventListener('input', updateCount);
-
-    /* ===== SUBMIT ===== */
-    async function submitLimerick(e){
-      e.preventDefault();
-      clearFeedback();
-
-      if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
-      if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
-
-      // Minimum basic validation
-      const text = (textEl.value || '').trim();
-      if(text.length < 50){ setFeedback('Please write a longer limerick (at least 50 characters).','error'); return; }
-      const lines = text.split('\n').filter(l=>l.trim().length>0);
-      if(lines.length < 3){ setFeedback('Write your limerick across multiple lines (AABBA).','error'); return; }
-
-      submitBtn.disabled = true;
-      loadingEl.style.display = 'block';
-
-      try{
-        await callFn('submit_limerick_function',{
-          eventId: EVENT_ID,
-          teamCode: teamCode(),
-          token: token(),
-          topic: (topicEl.value || '').trim(),
-          limerickText: text
-        });
-
-        setFeedback('🎉 Submitted! Your verse is in Terry’s vault. Check the leaderboard/gallery in a few minutes for your score.', 'success');
-        form.querySelectorAll('input, textarea, button').forEach(el=>el.disabled=true);
-        form.style.opacity='0.6';
-      }catch(err){
-        setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'}`, 'error');
-      }finally{
-        submitBtn.disabled = false;
-        loadingEl.style.display = 'none';
-      }
-    }
-
-    /* ===== WIRE UP & INIT ===== */
-    signinBtn.addEventListener('click', signIn);
-    form.addEventListener('submit', submitLimerick);
-
-    (async function init(){
-      // close mobile menu when following a link
-      document.querySelectorAll('.nav-link,.dropdown-link').forEach(a=>{
-        a.addEventListener('click',()=>{ navMenu.classList.remove('active'); navToggle.textContent='☰'; });
-      });
-
-      updateCrewLabel();
-      const state = await refreshEventState();
-      await loadTeams();
-
-      // If already signed in on this device and event is running, show form
-      if(teamCode() && state==='RUNNING'){ form.style.display='block'; }
-      updateCount();
-    })();
-  </script>
+  $("#refreshState").addEventListener("click", fetchEventState);
+  $("#reloadCrews").addEventListener("click", loadCrews);
+  $("#signInBtn").addEventListener("click", signIn);
+  boot();
+})();
+</script>
 </body>
 </html>
