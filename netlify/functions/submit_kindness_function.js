@@ -1,260 +1,133 @@
-// /.netlify/functions/submit_kindness_function.js
-// Kindness submission (Zapier-compatible row shape)
-//
-// Writes rows that match your historic columns so Zapier keeps working:
-//
-// A Timestamp     | B Team Code | C Activity | D Nonce
-// E Payload (JSON)| F AI Status | G AI Attempts | H AI Score
-// I Final Score   | J Idempotency | K Event Id
-//
-// Auth: accepts Bearer team JWT if present; otherwise allows teamCode-only
-// by confirming the team exists in the Teams tab.
-//
-// Env: reuses your _utils.js if present (same auth/env as the hardened funcs).
-// Spreadsheet id is taken from GOOGLE_SHEET_ID (or the usual fallbacks).
+// netlify/functions/submit_kindness_function.js
+const { ok, error, isPreflight, getSheets, tabRange, SHEET_ID } = require("./_utils.js");
+const https = require("node:https");
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
-const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
-const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
-
-let U = null;
-try { U = require('./_utils'); } catch {}
-
-function getSpreadsheetId() {
-  return (
-    (U && (U.SPREADSHEET_ID || U.SHEET_ID || U.spreadsheetId)) ||
-    process.env.GOOGLE_SHEET_ID ||
-    process.env.SPREADSHEET_ID ||
-    process.env.SHEET_ID ||
-    ''
-  );
+// ---------- helpers ----------
+async function ensureSheetExists(sheets, spreadsheetId, title, headers) {
+  const meta = await sheets.spreadsheets.get({ spreadsheetId });
+  const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
+  if (exists) return;
+  await sheets.spreadsheets.batchUpdate({
+    spreadsheetId,
+    requestBody: { requests: [{ addSheet: { properties: { title } } }] }
+  });
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: `${title}!A1`,
+    valueInputOption: "RAW",
+    requestBody: { values: [headers] }
+  });
 }
 
-async function getSheets() {
-  // Prefer your shared utils wiring
-  if (U) {
-    if (typeof U.getSheetsClient === 'function') return await U.getSheetsClient();
-    if (typeof U.getSheets === 'function') {
-      const s = await U.getSheets();
-      if (s?.spreadsheets?.values?.get) return s;
-      if (s?.sheets?.spreadsheets?.values?.get) return s.sheets;
-    }
-    if (U.sheets?.spreadsheets?.values?.get) return U.sheets;
-    if (U.google && U.auth && typeof U.google.sheets === 'function') {
-      return U.google.sheets({ version:'v4', auth: U.auth });
-    }
-  }
-
-  // Fallback: direct googleapis with flexible env
-  const { google } = require('googleapis');
-  let raw =
-    process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
-    process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
-    process.env.GCP_SERVICE_ACCOUNT ||
-    process.env.FIREBASE_SERVICE_ACCOUNT ||
-    '';
-  let sa = null;
-  if (raw) {
-    const text = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
-    sa = JSON.parse(text);
-  } else {
-    const email =
-      process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-      process.env.GCP_SA_EMAIL ||
-      process.env.GCLOUD_CLIENT_EMAIL ||
-      process.env.SERVICE_ACCOUNT_EMAIL || '';
-    let key =
-      process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY ||
-      process.env.GCP_SA_KEY ||
-      process.env.GCLOUD_PRIVATE_KEY ||
-      process.env.SERVICE_ACCOUNT_PRIVATE_KEY || '';
-    if (email && key) {
-      key = key.replace(/\\n/g, '\n');
-      sa = { client_email: email, private_key: key };
-    }
-  }
-  if (!sa) throw new Error('Missing Google service account (set JSON or EMAIL/PRIVATE_KEY)');
-
-  const auth = new google.auth.JWT(sa.client_email, null, sa.private_key, [
-    'https://www.googleapis.com/auth/spreadsheets',
-  ]);
-  await auth.authorize();
-  return google.sheets({ version:'v4', auth });
+function randNonce(len = 6) {
+  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let out = "";
+  for (let i = 0; i < len; i++) out += alphabet[Math.floor(Math.random() * alphabet.length)];
+  return out;
 }
 
-// Optional: decode team JWT if present (silently ignore errors)
-async function getTeamFromAuth(event) {
-  const hdr = event.headers || {};
-  const authz = hdr.authorization || hdr.Authorization || '';
-  if (!authz?.startsWith?.('Bearer ')) return null;
-  const token = authz.slice(7).trim();
-
-  if (U) {
+// Post JSON using global fetch if present; else node:https (Netlify Node16 safe)
+function postJson(url, data, timeoutMs = 4000) {
+  return new Promise((resolve, reject) => {
+    if (!url) return resolve();
+    if (typeof fetch === "function") {
+      const controller = new AbortController();
+      const t = setTimeout(() => controller.abort(), timeoutMs);
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        signal: controller.signal
+      }).then(() => { clearTimeout(t); resolve(); })
+        .catch(err => { clearTimeout(t); reject(err); });
+      return;
+    }
     try {
-      if (typeof U.verifyTeamToken === 'function') return await U.verifyTeamToken(token);
-      if (typeof U.verifyJwt === 'function')       return await U.verifyJwt(token);
-    } catch { /* ignore */ }
-  }
+      const u = new URL(url);
+      const req = https.request({
+        host: u.hostname,
+        path: `${u.pathname}${u.search || ""}`,
+        port: u.port || (u.protocol === "https:" ? 443 : 80),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        timeout: timeoutMs
+      }, res => { res.on("data", () => {}); res.on("end", resolve); });
+      req.on("timeout", () => req.destroy(new Error("timeout")));
+      req.on("error", reject);
+      req.write(JSON.stringify(data));
+      req.end();
+    } catch (e) { reject(e); }
+  });
+}
+
+// ---------- handler ----------
+module.exports.handler = async (event) => {
   try {
-    const jwt = require('jsonwebtoken');
-    const secret = process.env.TQ_TEAM_JWT_SECRET || process.env.JWT_SECRET || process.env.SECRET;
-    if (!secret) return null;
-    return jwt.verify(token, secret);
-  } catch { return null; }
-}
+    if (isPreflight(event)) return ok({});
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
-const norm = (s='') => String(s).toLowerCase().replace(/[^a-z0-9]+/g,'');
-const findIdx = (hdrs, names) => {
-  const H = hdrs.map(norm);
-  for (const n of names) { const i = H.indexOf(norm(n)); if (i >= 0) return i; }
-  return -1;
-};
+    let body = {};
+    try { body = JSON.parse(event.body || "{}"); }
+    catch { return error(400, "Invalid JSON body"); }
 
-async function teamExists(sheets, spreadsheetId, code) {
-  const ranges = ['teams!A:Z','Teams!A:Z','TEAMS!A:Z'];
-  for (const range of ranges) {
-    try {
-      const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range });
-      const rows = resp.data.values || [];
-      if (!rows.length) continue;
-      const headers = rows[0];
-      const idxCode = findIdx(headers, ['teamcode','code','team_code','id','team id','crew code','crew id']);
-      if (idxCode < 0) continue;
-      const found = rows.slice(1).some(r => (r[idxCode] || '').toString().trim() === code);
-      if (found) return true;
-    } catch {}
-  }
-  return false;
-}
+    const activity  = "kindness";
+    const eventId   = (body.eventId || "").toString().trim();
+    const teamCode  = (body.teamCode || "").toString().trim();
+    const teamName  = (body.teamName || "").toString().trim();
 
-// Look for an existing row by Idempotency or by (eventId + teamCode + activity)
-async function alreadySubmitted(sheets, spreadsheetId, activity, teamCode, eventId, idemKey) {
-  const ranges = ['submissions!A:Z','Submissions!A:Z'];
-  for (const range of ranges) {
-    try {
-      const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range });
-      const rows = resp.data.values || [];
-      if (!rows.length) continue;
-      const headers = rows[0];
-      const idxIdem  = findIdx(headers, ['idempotency','idem','idempotencykey']);
-      const idxAct   = findIdx(headers, ['activity','type']);
-      const idxTeam  = findIdx(headers, ['teamcode','team','team_code','code','crew','crewcode']);
-      const idxEvent = findIdx(headers, ['eventid','event','event_id']);
+    // flexible payload
+    const description = (body.description || body.message || "").toString().trim(); // required
+    const photoUrl    = (body.photoUrl || "").toString().trim();                    // optional
+    const location    = (body.location || "").toString().trim();
 
-      for (const r of rows.slice(1)) {
-        const idemOk = idxIdem >= 0 && (r[idxIdem] || '').toString().trim() === idemKey;
-        const tripOk = (idxAct<0 || norm(r[idxAct]||'')===norm(activity))
-                    && (idxTeam<0 || (r[idxTeam]||'').toString().trim()===teamCode)
-                    && (idxEvent<0 || (r[idxEvent]||'').toString().trim()===eventId);
-        if (idemOk || tripOk) return true;
-      }
-    } catch {}
-  }
-  return false;
-}
-
-async function appendRowZapierShape(sheets, spreadsheetId, row) {
-  const targets = ['submissions!A:K','Submissions!A:K'];
-  for (const range of targets) {
-    try {
-      await sheets.spreadsheets.values.append({
-        spreadsheetId,
-        range,
-        valueInputOption: 'RAW',
-        insertDataOption: 'INSERT_ROWS',
-        requestBody: { values: [row] },
-      });
-      return true;
-    } catch {}
-  }
-  throw new Error('Could not append to submissions/Submissions A:K');
-}
-
-const ts = () => new Date().toISOString().slice(0,19).replace('T',' ');
-const makeNonce = () => `kindness-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6)}`;
-const makeIdem  = (eventId, teamCode) => `kindness|${eventId}|${teamCode}`;
-
-exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return ok({ success:true });
-  if (event.httpMethod !== 'POST')   return bad(405,'Use POST');
-
-  console.info('Kindness submission started');
-
-  let body = {};
-  try { body = JSON.parse(event.body || '{}'); } catch { return bad(400,'Invalid JSON'); }
-
-  const eventId = (body.eventId || body.event || '').toString().trim();
-  let teamCode  = (body.teamCode || body.team || '').toString().trim();
-
-  // Prefer team from JWT if present
-  const claims = await getTeamFromAuth(event);
-  if (claims?.teamCode) teamCode = claims.teamCode;
-
-  // Payload fields (flexible aliases)
-  const description = (body.description || body.text || body.story || body.storyText || body.desc || '').toString().trim();
-  const location    = (body.location || body.place || body.where || '').toString().trim();
-  const photoUrl    = (body.photoUrl || body.imageUrl || body.imgUrl || body.url || body.photo || '').toString().trim();
-
-  if (!eventId)  return bad(400,'Missing eventId');
-  if (!teamCode) return bad(400,'Missing teamCode (sign in first)');
-  if (!description || description.length < 5) return bad(400,'Please include a short description');
-  if (!photoUrl) return bad(400,'Please include a photoUrl (Uploadcare URL)');
-
-  const spreadsheetId = getSpreadsheetId();
-  if (!spreadsheetId) return bad(500,'Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
-
-  try {
-    // optional: respect event state if your utils expose it
-    if (U && typeof U.getEventState === 'function') {
-      const state = await U.getEventState(eventId).catch(()=>null);
-      if (state && state !== 'RUNNING') {
-        return bad(400, `Event state is ${state}; submissions are closed`);
-      }
-    }
+    if (!teamCode) return error(400, "teamCode is required");
+    if (description.length < 20) return error(400, "description must be at least 20 characters");
 
     const sheets = await getSheets();
+    await ensureSheetExists(
+      sheets,
+      SHEET_ID,
+      "submissions",
+      ["Timestamp","Team Code","Activity","Nonce","Payload","AI Status","AI Attempts","AI Score","Final Score","Idempotency","Event Id"]
+    );
 
-    // If no JWT, at least validate the team exists
-    if (!claims?.teamCode) {
-      const exists = await teamExists(sheets, spreadsheetId, teamCode);
-      if (!exists) return bad(401,'Unknown teamCode');
+    const timestamp   = new Date().toISOString();
+    const nonce       = randNonce(6);
+    const idempotency = `${activity}|${eventId}|${teamCode}`;
+
+    const payloadObj = { description, photoUrl, location, teamName };
+    const payloadStr = JSON.stringify(payloadObj);
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SHEET_ID,
+      range: tabRange("submissions", "A1"),
+      valueInputOption: "RAW",
+      insertDataOption: "INSERT_ROWS",
+      requestBody: { values: [[
+        timestamp, teamCode, activity, nonce, payloadStr,
+        "QUEUED", "0", "", "", idempotency, eventId
+      ]]}
+    });
+
+    // webhook ping (non-blocking)
+    const hook = process.env.ZAP_KINDNESS_HOOK || "";
+    try {
+      await postJson(hook, {
+        activity, eventId, teamCode, teamName, timestamp, nonce,
+        idempotency, sheetId: SHEET_ID, worksheet: "submissions",
+        payload: payloadObj
+      });
+    } catch (e) {
+      console.warn("Kindness hook ping failed:", e.message);
     }
 
-    const activity = 'kindness';
-    const nonce = makeNonce();
-    const idempotencyKey = makeIdem(eventId, teamCode);
-
-    // De-dupe: one kindness per team/event
-    if (await alreadySubmitted(sheets, spreadsheetId, activity, teamCode, eventId, idempotencyKey)) {
-      return ok({ success:true, message:'Already submitted' });
-    }
-
-    // Zapier-friendly payload as a single JSON string
-    const payload = JSON.stringify({ description, photoUrl, location });
-
-    // Row shape that matches your historical columns
-    const row = [
-      ts(),            // A Timestamp (yyyy-mm-dd HH:MM:SS)
-      teamCode,        // B Team Code
-      activity,        // C Activity
-      nonce,           // D Nonce (unique per submission)
-      payload,         // E Payload (JSON)
-      'QUEUED',        // F AI Status (initial state)
-      0,               // G AI Attempts
-      '',              // H AI Score
-      '',              // I Final Score
-      idempotencyKey,  // J Idempotency
-      eventId          // K Event Id
-    ];
-
-    await appendRowZapierShape(sheets, spreadsheetId, row);
-    return ok({ success:true, message:'Submitted' });
-  } catch (err) {
-    console.error('Kindness submission error:', err);
-    return bad(400, err.message || 'Submission failed');
+    return ok({
+      success: true,
+      message: "Kindness submission queued",
+      teamCode, teamName, eventId
+    });
+  } catch (e) {
+    console.error("submit_kindness_function error:", e);
+    return error(500, e.message || "Unexpected error");
   }
 };
