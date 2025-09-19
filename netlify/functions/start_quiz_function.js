@@ -1,8 +1,7 @@
-// netlify/functions/submit_quiz_function.js
-// Writes quiz results straight to the "Quiz" sheet (no Zapier).
+// netlify/functions/start_quiz_function.js
+// Records the quiz "start" and prevents restarts. No Zapier needed.
 const { ok, error, isPreflight, getDoc } = require("./_utils.js");
 
-// Ensure GoogleSpreadsheet "Quiz" sheet exists with expected headers
 async function ensureQuizSheet(doc) {
   const headers = [
     "Team Code",
@@ -32,101 +31,64 @@ async function ensureQuizSheet(doc) {
   return sheet;
 }
 
-function parseISO(s) {
-  const d = new Date(s);
-  return isNaN(+d) ? null : d;
-}
-
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
-
     if (event.httpMethod !== "POST") return error(405, "POST only");
 
     let body = {};
     try { body = JSON.parse(event.body || "{}"); }
     catch { return error(400, "Invalid JSON body"); }
 
-    const {
-      teamCode,
-      teamName,
-      totalScore,
-      questionsCorrect,
-      totalQuestions,
-      quizStartTime,
-      completionTime,
-      // answers is optional; not stored in this simplified sheet
-    } = body || {};
-
-    // Basic validation
-    if (!teamCode || !teamName) {
-      return error(400, "teamCode and teamName are required");
-    }
-    if (
-      typeof totalScore !== "number" ||
-      typeof questionsCorrect !== "number" ||
-      typeof totalQuestions !== "number"
-    ) {
-      return error(400, "totalScore, questionsCorrect, totalQuestions must be numbers");
+    const { teamCode, teamName, quizStartTime } = body || {};
+    if (!teamCode || !teamName || !quizStartTime) {
+      return error(400, "teamCode, teamName and quizStartTime are required");
     }
 
-    const startDt = parseISO(quizStartTime) || new Date();
-    const endDt = parseISO(completionTime) || new Date();
-    const durationMins = Math.max(0, Math.round((endDt - startDt) / 60000));
-    const percentage = totalQuestions > 0
-      ? Math.round((questionsCorrect / totalQuestions) * 100)
-      : 0;
-    const submittedAt = new Date().toISOString();
-
-    // Open doc and ensure sheet
     const doc = await getDoc?.();
     if (!doc) return error(500, "Spreadsheet client not available");
 
     const sheet = await ensureQuizSheet(doc);
 
-    // Find existing row for this team (single-attempt model)
+    // Single attempt per team (per sheet). If row exists with a start time, block.
     const rows = await sheet.getRows({ limit: 10000 });
     const existing = rows.find(r => r.get("Team Code") === teamCode);
 
+    if (existing && existing.get("Quiz Start Time")) {
+      return {
+        statusCode: 409,
+        headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+        body: JSON.stringify({
+          success: false,
+          error: "Quiz already started",
+          started: true,
+          completed: !!existing.get("Completion Time")
+        })
+      };
+    }
+
     if (existing) {
       existing.set("Team Name", teamName);
-      existing.set("Total Score", String(totalScore));
-      existing.set("Questions Correct", String(questionsCorrect));
-      existing.set("Total Questions", String(totalQuestions));
-      existing.set("Quiz Start Time", startDt.toISOString());
-      existing.set("Completion Time", endDt.toISOString());
-      existing.set("Duration (mins)", String(durationMins));
-      existing.set("Percentage", String(percentage));
-      existing.set("Submission Time", submittedAt);
+      existing.set("Quiz Start Time", new Date(quizStartTime).toISOString());
       await existing.save();
     } else {
       await sheet.addRow({
         "Team Code": teamCode,
         "Team Name": teamName,
-        "Total Score": String(totalScore),
-        "Questions Correct": String(questionsCorrect),
-        "Total Questions": String(totalQuestions),
-        "Quiz Start Time": startDt.toISOString(),
-        "Completion Time": endDt.toISOString(),
-        "Duration (mins)": String(durationMins),
-        "Percentage": String(percentage),
-        "Submission Time": submittedAt
+        "Total Score": "",
+        "Questions Correct": "",
+        "Total Questions": "",
+        "Quiz Start Time": new Date(quizStartTime).toISOString(),
+        "Completion Time": "",
+        "Duration (mins)": "",
+        "Percentage": "",
+        "Submission Time": ""
       });
     }
 
-    return ok({
-      success: true,
-      message: "Quiz submission recorded",
-      teamCode,
-      teamName,
-      totalScore,
-      questionsCorrect,
-      totalQuestions,
-      durationMins,
-      percentage
-    });
+    return ok({ success: true, message: "Quiz start recorded" });
   } catch (e) {
-    console.error("submit_quiz_function error:", e);
+    console.error("start_quiz_function error:", e);
     return error(500, e.message || "Unexpected error");
   }
 };
