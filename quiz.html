@@ -1,1846 +1,650 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - The Quiz Challenge</title>
-    <style>
-        /* Updated Navigation Styles with TeamQuest Logo */
-        .treasure-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #8B4513 0%, #654321 50%, #8B4513 100%);
-            border-bottom: 3px solid #DAA520;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 80px; /* Increased height for logo */
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            height: 100%;
-        }
-
-        .nav-logo {
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-logo:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-logo img {
-            height: 50px; /* Desktop size */
-            width: auto;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-            transition: all 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .nav-logo img {
-                height: 85px !important; /* Much bigger on mobile */
-            }
-        }
-
-        .nav-logo:hover img {
-            filter: drop-shadow(2px 2px 8px rgba(255,215,0,0.6));
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 30px;
-        }
-
-        .nav-item {
-            position: relative;
-        }
-
-        .nav-link {
-            color: #F5DEB3;
-            text-decoration: none;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 12px 18px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            display: block;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            background: rgba(101, 67, 33, 0.3);
-            border: 2px solid rgba(218, 165, 32, 0.4);
-            white-space: nowrap;
-        }
-
-        .nav-link:hover {
-            background: linear-gradient(135deg, #DAA520, #FF8C00);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4);
-            border-color: #DAA520;
-        }
-
-        .nav-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: linear-gradient(135deg, #654321 0%, #8B4513 100%);
-            border: 2px solid #DAA520;
-            border-radius: 8px;
-            min-width: 180px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .nav-item:hover .nav-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-link {
-            display: block;
-            color: #F5DEB3;
-            text-decoration: none;
-            padding: 12px 18px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
-            transition: all 0.3s ease;
-            background: rgba(101, 67, 33, 0.2);
-            margin: 2px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .dropdown-link:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-link:hover {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding-left: 25px;
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
-        }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: #DAA520;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            .treasure-nav {
-                height: 120px; /* Taller for bigger logo */
-            }
-
-            .nav-container {
-                justify-content: center;
-                position: relative;
-            }
-
-            .nav-logo {
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .nav-toggle {
-                position: absolute;
-                right: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                display: block;
-            }
-
-            .nav-menu {
-                position: fixed;
-                top: 120px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 120px);
-                background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
-                flex-direction: column;
-                align-items: center;
-                padding-top: 30px;
-                gap: 20px;
-                transition: left 0.3s ease;
-                overflow-y: auto;
-            }
-
-            .nav-menu.active {
-                left: 0;
-            }
-
-            .nav-link {
-                font-size: 1.1rem;
-                padding: 15px 25px;
-                width: 280px;
-                text-align: center;
-                background: linear-gradient(135deg, rgba(101, 67, 33, 0.8), rgba(139, 69, 19, 0.6));
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .nav-link:hover {
-                background: linear-gradient(135deg, #DAA520, #FF8C00);
-                transform: translateY(-3px);
-                box-shadow: 0 6px 15px rgba(218, 165, 32, 0.4);
-            }
-
-            .nav-dropdown {
-                position: static;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                background: rgba(101, 67, 33, 0.9);
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                margin-top: 10px;
-                width: 280px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            }
-
-            .dropdown-link {
-                padding: 12px 20px;
-                font-size: 1rem;
-                margin: 4px;
-                border-radius: 8px;
-                text-align: center;
-                background: rgba(139, 69, 19, 0.4);
-                border: 1px solid rgba(218, 165, 32, 0.3);
-            }
-
-            .dropdown-link:hover {
-                background: linear-gradient(135deg, #FF8C00, #DAA520);
-                padding-left: 20px;
-                transform: translateY(-2px);
-            }
-        }
-
-        /* Original Page Styles - Updated for Navigation */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            padding-top: 100px !important; /* Account for taller fixed nav */
-            position: relative;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 140px !important; /* Account for mobile nav height */
-            }
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255,140,0,0.1) 0%, transparent 50%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-            max-width: 900px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            border: 3px solid #8B4513;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
-        }
-
-        .container::after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border: 2px solid #DAA520;
-            border-radius: 20px;
-            pointer-events: none;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .quiz-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: pulse 2s infinite;
-            filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        h1 {
-            color: #8B4513;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #A0522D;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-        .team-info {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
-            border: 2px solid #DAA520;
-        }
-
-        .login-section, .ready-section, .quiz-section, .results-section, .already-started-section {
-            display: none;
-            position: relative;
-            z-index: 2;
-        }
-
-        .login-section.active, .ready-section.active, .quiz-section.active, .results-section.active, .already-started-section.active {
-            display: block;
-        }
-
-        .instructions {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-left: 6px solid #DAA520;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-radius: 0 15px 15px 0;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
-            border: 2px solid #DAA520;
-            border-left: 6px solid #FF8C00;
-        }
-
-        .instructions h3 {
-            color: #8B4513;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .instructions ul {
-            margin-left: 20px;
-            color: #654321;
-            line-height: 1.8;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8B4513;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 15px;
-            border: 3px solid #DAA520;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus, select:focus {
-            outline: none;
-            border-color: #FF8C00;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
-            transform: translateY(-1px);
-        }
-
-        .pin-input {
-            text-align: center;
-            font-size: 1.5em;
-            letter-spacing: 3px;
-            font-weight: bold;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            border: 2px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 15px;
-            border: 2px solid #DAA520;
-        }
-
-        .question-counter {
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #8B4513;
-        }
-
-        .timer {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .timer-circle {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: conic-gradient(#DAA520 0deg, #F5E6D3 0deg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #8B4513;
-            transition: all 0.1s ease;
-            border: 3px solid #8B4513;
-        }
-
-        .timer-circle.warning {
-            background: conic-gradient(#FF8C00 0deg, #FFE4B5 0deg);
-            animation: shake 0.5s infinite;
-        }
-
-        .timer-circle.danger {
-            background: conic-gradient(#DC143C 0deg, #FFB6C1 0deg);
-            animation: shake 0.2s infinite;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        .question-card {
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            border: 3px solid #DAA520;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 10px 25px rgba(139,69,19,0.15);
-        }
-
-        .question-number {
-            color: #FF8C00;
-            font-size: 1.1em;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .question-text {
-            font-size: 1.3em;
-            color: #654321;
-            margin-bottom: 25px;
-            line-height: 1.4;
-            font-weight: 500;
-        }
-
-        .question-image {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 15px;
-            margin: 20px 0;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-            border: 3px solid #DAA520;
-        }
-
-        .audio-player {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            text-align: center;
-        }
-
-        .audio-player audio {
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .play-instruction {
-            color: #8B4513;
-            font-weight: bold;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-
-        .options-grid {
-            display: grid;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .option {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 1.1em;
-        }
-
-        .option:hover {
-            background: linear-gradient(135deg, #FFE4B5 0%, #DDD3C2 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
-        }
-
-        .option.selected {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border-color: #8B4513;
-        }
-
-        .option.correct {
-            background: linear-gradient(135deg, #32CD32, #228B22);
-            color: white;
-            border-color: #006400;
-        }
-
-        .option.incorrect {
-            background: linear-gradient(135deg, #DC143C, #B22222);
-            color: white;
-            border-color: #8B0000;
-        }
-
-        .option-letter {
-            background: white;
-            color: #8B4513;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-            border: 2px solid #DAA520;
-        }
-
-        .option.selected .option-letter {
-            background: #FFF8DC;
-            color: #8B4513;
-        }
-
-        .option.correct .option-letter {
-            background: #006400;
-            color: white;
-            border-color: #004000;
-        }
-
-        .option.incorrect .option-letter {
-            background: #8B0000;
-            color: white;
-            border-color: #600000;
-        }
-
-        .text-input {
-            width: 100%;
-            padding: 15px;
-            border: 3px solid #DAA520;
-            border-radius: 12px;
-            font-size: 1.2em;
-            text-align: center;
-            margin-bottom: 20px;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-        }
-
-        .text-input:focus {
-            outline: none;
-            border-color: #FF8C00;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
-        }
-
-        .results-summary {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .final-score {
-            font-size: 3em;
-            color: #FF8C00;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .score-breakdown {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 15px;
-            padding: 30px;
-            margin: 30px 0;
-            border: 2px solid #DAA520;
-        }
-
-        .breakdown-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #DAA520;
-        }
-
-        .breakdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .message {
-            padding: 15px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-            display: none;
-            border: 2px solid;
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #98FB98 0%, #90EE90 100%);
-            border-color: #32CD32;
-            color: #006400;
-        }
-
-        .error-message {
-            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
-            border-color: #DC143C;
-            color: #8B0000;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-            color: #8B4513;
-            font-weight: 600;
-        }
-
-        .ready-countdown {
-            font-size: 4em;
-            color: #FF8C00;
-            font-weight: bold;
-            text-align: center;
-            margin: 30px 0;
-            animation: pulse 1s infinite;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .ready-instructions {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border: 3px solid #DAA520;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .ready-instructions h3 {
-            color: #8B4513;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .ready-instructions ul {
-            text-align: left;
-            margin: 20px 0;
-            color: #654321;
-            font-size: 1.1em;
-            line-height: 1.8;
-        }
-
-        .ready-instructions li {
-            margin-bottom: 10px;
-        }
-
-        .start-quiz-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #32CD32, #228B22);
-            color: white;
-            border: none;
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 1.3em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 30px;
-            animation: glow 2s infinite;
-            border: 2px solid #006400;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .start-quiz-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 30px rgba(50,205,50,0.4);
-            background: linear-gradient(135deg, #50C878, #32CD32);
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 5px 15px rgba(50,205,50,0.3); }
-            50% { box-shadow: 0 10px 25px rgba(50,205,50,0.5); }
-        }
-
-        .terry-greeting {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            margin: 20px 0;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 20px;
-            padding: 25px;
-            border: 3px solid #DAA520;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
-        }
-
-        .terry-character {
-            flex-shrink: 0;
-        }
-
-        .terry-image {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid #DAA520;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.3);
-            object-fit: cover;
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-        }
-
-        .terry-speech {
-            flex: 1;
-            position: relative;
-        }
-
-        .terry-speech::before {
-            content: '';
-            position: absolute;
-            left: -15px;
-            top: 20px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 15px 15px 15px 0;
-            border-color: transparent #FFD700 transparent transparent;
-        }
-
-        .terry-note {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #8B4513;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 0;
-            border: 3px solid #DAA520;
-            position: relative;
-            font-weight: 500;
-            line-height: 1.6;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
-        }
-
-        .terry-note::before {
-            display: none;
-        }
-
-        .already-started-warning {
-            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
-            border: 3px solid #DC143C;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .already-started-warning h3 {
-            color: #8B0000;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-        }
-
-        .already-started-warning p {
-            color: #8B0000;
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        @media (max-width: 768px) {
-            .terry-greeting {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .terry-speech::before {
-                display: none;
-            }
-
-            .terry-image {
-                width: 100px;
-                height: 100px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .quiz-header {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .timer-circle {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2em;
-            }
-        }
-    </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>TeamQuest - The Quiz Challenge</title>
+<style>
+  :root{
+    --brown:#8B4513; --brown2:#654321; --tan:#F5E6D3; --tan2:#E8D7C3; --gold:#DAA520; --gold2:#FF8C00;
+    --ink:#3b2412; --ok:#1f7a3a; --err:#8b0000; --okbg:#e9f9ef; --errbg:#ffedf1;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
+    min-height:100dvh; color:var(--ink); padding:20px; padding-top:100px !important;
+  }
+  @media (max-width:768px){ body{ padding-top:140px !important; } }
+
+  /* Fixed nav */
+  .treasure-nav{
+    position:fixed; inset:0 0 auto 0; height:80px; z-index:1000;
+    background: linear-gradient(135deg,var(--brown) 0%,var(--brown2) 50%,var(--brown) 100%);
+    border-bottom:3px solid var(--gold); box-shadow:0 4px 15px rgba(0,0,0,.3);
+  }
+  .nav-container{ max-width:1200px; margin:0 auto; height:100%; display:flex; align-items:center; justify-content:space-between; padding:0 20px; }
+  .nav-logo{ display:flex; align-items:center; text-decoration:none; transition:.2s transform; }
+  .nav-logo:hover{ transform:scale(1.05); }
+  .nav-logo img{ height:50px; width:auto; filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5)); }
+  @media (max-width:768px){ .nav-logo img{ height:85px !important; } }
+
+  .nav-menu{ display:flex; gap:30px; list-style:none; margin:0; padding:0; }
+  .nav-item{ position:relative; }
+  .nav-link{
+    color:#F5DEB3; text-decoration:none; font-weight:700; padding:12px 18px; border-radius:8px;
+    background: rgba(101,67,33,.3); border:2px solid rgba(218,165,32,.4); text-shadow:1px 1px 2px rgba(0,0,0,.7);
+    display:block; white-space:nowrap; transition:.2s;
+  }
+  .nav-link:hover{ background: linear-gradient(135deg,var(--gold),var(--gold2)); color:#fff; transform:translateY(-2px); box-shadow:0 4px 12px rgba(218,165,32,.4); border-color:var(--gold); }
+  .nav-dropdown{
+    position:absolute; top:100%; left:0; min-width:180px; opacity:0; visibility:hidden; transform:translateY(-10px);
+    background: linear-gradient(135deg,#654321 0%,#8B4513 100%); border:2px solid var(--gold); border-radius:8px; transition:.2s; box-shadow:0 8px 20px rgba(0,0,0,.3);
+  }
+  .nav-item:hover .nav-dropdown{ opacity:1; visibility:visible; transform:translateY(0); }
+  .dropdown-link{
+    display:block; color:#F5DEB3; text-decoration:none; padding:12px 18px; font-weight:600; margin:2px; border-radius:6px;
+    background: rgba(101,67,33,.2); border-bottom:1px solid rgba(218,165,32,.2);
+  }
+  .dropdown-link:hover{ background: linear-gradient(135deg,#FF8C00,#DAA520); color:#fff; padding-left:25px; transform:translateX(5px); box-shadow:0 2px 8px rgba(255,140,0,.3); }
+  .nav-toggle{ display:none; background:none; border:none; color:var(--gold); font-size:1.8rem; cursor:pointer; }
+  @media (max-width:768px){
+    .treasure-nav{ height:120px; }
+    .nav-container{ justify-content:center; position:relative; }
+    .nav-logo{ position:absolute; left:50%; transform:translateX(-50%); }
+    .nav-toggle{ position:absolute; right:20px; top:50%; transform:translateY(-50%); display:block; }
+    .nav-menu{
+      position:fixed; top:120px; left:-100%; width:100%; height:calc(100vh - 120px);
+      background: linear-gradient(135deg,#8B4513 0%,#654321 100%); flex-direction:column; align-items:center; gap:20px; padding-top:30px;
+      transition:left .3s ease; overflow-y:auto;
+    }
+    .nav-menu.active{ left:0; }
+    .nav-link{ width:280px; text-align:center; background: linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6)); border:2px solid var(--gold); border-radius:12px; }
+    .nav-dropdown{ position:static; opacity:1; visibility:visible; transform:none; width:280px; margin-top:10px; border-radius:12px; }
+  }
+
+  /* Shell card */
+  .container{
+    background: linear-gradient(145deg,var(--tan) 0%,var(--tan2) 100%);
+    border-radius:25px; padding:40px; max-width:900px; width:100%;
+    box-shadow:0 20px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3);
+    border:3px solid var(--brown); position:relative; overflow:hidden; z-index:1;
+  }
+  .container::before{ content:""; position:absolute; top:0; left:0; right:0; height:8px; background: linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700); }
+  .container::after{ content:""; position:absolute; inset:15px; border:2px solid var(--gold); border-radius:20px; pointer-events:none; }
+
+  .logo{ text-align:center; margin-bottom:30px; }
+  .quiz-icon{ font-size:48px; margin-bottom:20px; animation:pulse 2s infinite; filter:drop-shadow(2px 2px 4px rgba(139,69,19,.3)); }
+  @keyframes pulse{ 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+  h1{ color:var(--brown); text-align:center; margin-bottom:10px; font-size:2.5em; font-weight:700; text-shadow:2px 2px 4px rgba(0,0,0,.1); }
+  .subtitle{ text-align:center; color:#A0522D; margin-bottom:30px; font-weight:500; }
+
+  .team-info{
+    background: linear-gradient(135deg,#8B4513,#A0522D); color:#fff; padding:20px; border-radius:15px;
+    text-align:center; font-weight:800; margin-bottom:20px; border:2px solid var(--gold); box-shadow:0 5px 15px rgba(139,69,19,.3);
+  }
+  .section{ display:none; }
+  .section.active{ display:block; }
+
+  /* Banner + badges */
+  .banner{
+    display:flex; align-items:center; justify-content:space-between; gap:12px; margin:6px 0 16px;
+    background:#fffdf7; border:2px dashed var(--gold); border-radius:14px; padding:10px 12px;
+  }
+  .status{ display:inline-flex; align-items:center; gap:8px; border:2px dashed var(--gold); border-radius:999px; padding:8px 12px; background:#fff4d9; font-weight:800; }
+
+  label{ display:block; margin-bottom:8px; color:var(--brown); font-weight:600; }
+  .field{
+    width:100%; padding:15px; border:3px solid var(--gold); border-radius:12px; font-size:16px;
+    background: linear-gradient(145deg,#fff 0%,#FFF8DC 100%);
+  }
+  .field:focus{ outline:none; border-color:var(--gold2); box-shadow:0 0 0 3px rgba(255,140,0,.2); transform:translateY(-1px); }
+  .pin-input{ text-align:center; font-size:1.5em; letter-spacing:3px; font-weight:800; }
+
+  .btn{
+    appearance:none; border:none; cursor:pointer; font-weight:800; border-radius:12px; padding:18px; width:100%;
+    background: linear-gradient(135deg,var(--gold2),var(--gold)); color:#fff; text-shadow:1px 1px 2px rgba(0,0,0,.2);
+    border:2px solid var(--brown); display:flex; align-items:center; justify-content:center; gap:10px; margin-top:12px;
+  }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 10px 20px rgba(255,140,0,.3); }
+  .btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+  .btn-ghost{ background: linear-gradient(135deg,#8B4513,#A0522D); }
+  .small{ padding:10px 14px; width:auto; }
+
+  .instructions{
+    background: linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);
+    border-left:6px solid var(--gold2); border:2px solid var(--gold); border-radius:0 15px 15px 0;
+    padding:25px; margin-bottom:20px; box-shadow:0 4px 12px rgba(139,69,19,.1);
+  }
+  .message{ display:none; padding:15px; border-radius:12px; margin:16px 0; text-align:center; border:2px solid }
+  .success-message{ display:block; background:linear-gradient(135deg,#98FB98 0%,#90EE90 100%); border-color:#32CD32; color:#006400; }
+  .error-message{ display:block; background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000; }
+
+  .quiz-header{
+    display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; padding:16px;
+    background: linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%); border:2px solid var(--gold); border-radius:15px;
+  }
+  .question-card{
+    background: linear-gradient(145deg,#fff 0%,#FFF8DC 100%); border:3px solid var(--gold); border-radius:20px; padding:24px; margin-bottom:20px;
+    box-shadow:0 10px 25px rgba(139,69,19,.15);
+  }
+  .options-grid{ display:grid; gap:15px; }
+  .option{
+    background: linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%); border:3px solid var(--gold); border-radius:15px; padding:20px;
+    cursor:pointer; display:flex; align-items:center; gap:15px; font-size:1.1em; transition:.2s;
+  }
+  .option:hover{ background: linear-gradient(135deg,#FFE4B5 0%,#DDD3C2 100%); transform:translateY(-2px); box-shadow:0 5px 15px rgba(139,69,19,.2); }
+  .option.selected{ background: linear-gradient(135deg,#FF8C00,#DAA520); color:#fff; border-color:#8B4513; }
+  .option.correct{ background: linear-gradient(135deg,#32CD32,#228B22); color:#fff; border-color:#006400; }
+  .option.incorrect{ background: linear-gradient(135deg,#DC143C,#B22222); color:#fff; border-color:#8B0000; }
+  .option-letter{ background:#fff; color:#8B4513; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; border:2px solid var(--gold); flex-shrink:0; }
+
+  .timer{ display:flex; align-items:center; gap:10px; }
+  .timer-circle{
+    width:60px; height:60px; border-radius:50%; border:3px solid var(--brown); display:flex; align-items:center; justify-content:center; font-weight:800;
+    background:conic-gradient(var(--gold) 0deg,#F5E6D3 0deg); color:var(--brown); transition:.1s;
+  }
+  .timer-circle.warning{ background:conic-gradient(#FF8C00 0deg,#FFE4B5 0deg); animation:shake .5s infinite; }
+  .timer-circle.danger{ background:conic-gradient(#DC143C 0deg,#FFB6C1 0deg); animation:shake .2s infinite; }
+  @keyframes shake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-2px)} 75%{transform:translateX(2px)} }
+
+  .text-input{ width:100%; padding:15px; border:3px solid var(--gold); border-radius:12px; font-size:1.2em; text-align:center; margin-bottom:20px; background: linear-gradient(145deg,#fff 0%,#FFF8DC 100%); }
+
+  .results-summary{ text-align:center; padding:24px; }
+  .final-score{ font-size:3em; color:#FF8C00; font-weight:800; margin-bottom:10px; text-shadow:2px 2px 4px rgba(0,0,0,.1); }
+  .score-breakdown{ background: linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%); border:2px solid var(--gold); border-radius:15px; padding:20px; margin:20px 0; }
+
+  @media (max-width:768px){ .quiz-header{flex-direction:column} .timer-circle{ width:50px; height:50px; font-size:1.2em; } }
+</style>
 </head>
 <body>
-    <!-- Navigation Menu with TeamQuest Logo -->
-    <nav class="treasure-nav" id="treasure-nav">
-        <div class="nav-container">
-            <a href="https://theteamquest.netlify.app/" class="nav-logo">
-                <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
-            </a>
-            
-            <ul class="nav-menu" id="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link">🎯 Activities ▼</a>
-                    <div class="nav-dropdown">
-                        <a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="dropdown-link">💎 The Treasure Hunt</a>
-                        <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link">🔍 The Scavenger Hunt</a>
-                        <!-- Current activity (Quiz Challenge) excluded from menu -->
-                        <a href="https://theteamquest.netlify.app/kindness_challenge_page" class="dropdown-link">❤️ The Kindness Task</a>
-                        <a href="https://theteamquest.netlify.app/limerick_challenge_page" class="dropdown-link">📝 The Limerick Challenge</a>
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a>
-                </li>
-            </ul>
-            
-            <button class="nav-toggle" id="nav-toggle">☰</button>
-        </div>
-    </nav>
+  <!-- Nav -->
+  <nav class="treasure-nav" id="treasure-nav">
+    <div class="nav-container">
+      <a class="nav-logo" href="https://theteamquest.netlify.app/"><img src="/Team Quest Logo-01.png" alt="TeamQuest Logo"></a>
+      <ul class="nav-menu" id="nav-menu">
+        <li class="nav-item">
+          <a href="#" class="nav-link">🎯 Activities ▼</a>
+          <div class="nav-dropdown">
+            <a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="dropdown-link">💎 The Treasure Hunt</a>
+            <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link">🔍 The Scavenger Hunt</a>
+            <a href="https://theteamquest.netlify.app/kindness_challenge_page" class="dropdown-link">❤️ The Kindness Task</a>
+            <a href="https://theteamquest.netlify.app/limerick_challenge_page" class="dropdown-link">📝 The Limerick Challenge</a>
+          </div>
+        </li>
+        <li class="nav-item"><a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a></li>
+        <li class="nav-item"><a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a></li>
+      </ul>
+      <button class="nav-toggle" id="nav-toggle">☰</button>
+    </div>
+  </nav>
 
-    <div class="container">
-        <!-- Login Section -->
-        <div class="login-section active" id="loginSection">
-            <div class="logo">
-                <div class="quiz-icon">🧠</div>
-                <h1>The Quiz Challenge</h1>
-                <p class="subtitle">10 riddles from Terry's archives! Prove your wit and claim doubloons!</p>
-            </div>
-
-            <div class="terry-greeting">
-                <div class="terry-character">
-                    <img src="/terry-thumbs-up.png" alt="Terry Quest" class="terry-image">
-                </div>
-                <div class="terry-speech">
-                    <div class="terry-note">
-                        <strong>Greetings, brave adventurers!</strong> I am Terry Quest, keeper of these treasure vaults. Before ye may claim yer doubloons, ye must prove yer knowledge worthy of a true treasure hunter! Answer me riddles ten, and riches shall be yours!
-                    </div>
-                </div>
-            </div>
-
-            <div class="instructions">
-                <h3>📜 Challenge Rules</h3>
-                <ul>
-                    <li>10 challenging riddles from Terry's ancient archives</li>
-                    <li>15 seconds per question - the treasure waits for no one!</li>
-                    <li>Some riddles include mysterious audio clues - <strong>make sure your volume is up and ready!</strong></li>
-                    <li>Choose wisely before time runs out</li>
-                    <li>No turning back once answered - fortune favors the bold!</li>
-                    <li>Earn up to 100 doubloons for perfect knowledge mastery!</li>
-                </ul>
-            </div>
-
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="teamSelect">Select Your Crew</label>
-                    <select id="teamSelect" name="teamSelect" required>
-                        <option value="">Choose your treasure hunting crew...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="teamPin">Enter Your Crew's Secret Code</label>
-                    <input type="number" id="teamPin" name="teamPin" class="pin-input" 
-                           min="1000" max="9999" placeholder="1234" required>
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    🏴‍☠️ Begin the Knowledge Trial
-                </button>
-            </form>
-
-            <div class="message" id="loginMessage"></div>
-        </div>
-
-        <!-- Already Started Section -->
-        <div class="already-started-section" id="alreadyStartedSection">
-            <div class="team-info" id="alreadyStartedTeamInfo">
-                Crew: Loading...
-            </div>
-
-            <div class="logo">
-                <div class="quiz-icon">⚠️</div>
-                <h1>Trial Already in Progress</h1>
-            </div>
-
-            <div class="already-started-warning">
-                <h3>🔒 Knowledge Trial Locked</h3>
-                <p><strong>This crew has already accepted the challenge!</strong></p>
-                <p>The trial began but was not completed. According to Terry's ancient rules, once a crew accepts the challenge, there can be no turning back or restarting.</p>
-                <p>The knowledge trial has been marked as <strong>attempted</strong> and cannot be retaken.</p>
-                <p>Your crew's final score remains at <strong>0 doubloons</strong> for this challenge.</p>
-            </div>
-
-            <div class="terry-greeting">
-                <div class="terry-character">
-                    <img src="/terry-thumbs-up.png" alt="Terry Quest" class="terry-image">
-                </div>
-                <div class="terry-speech">
-                    <div class="terry-note">
-                        <strong>Alas, brave souls!</strong> The trial cannot be attempted twice. The ancient magic that protects these riddles has already been activated for your crew. Your chance has been used, and the treasure vault remains sealed to ye forever more!
-                    </div>
-                </div>
-            </div>
-
-            <button class="submit-btn" onclick="window.location.href='/teamquest_leaderboard.html'">
-                🗺️ Return to Treasure Map
-            </button>
-        </div>
-
-        <!-- Ready Section -->
-        <div class="ready-section" id="readySection">
-            <div class="team-info" id="readyTeamInfo">
-                Crew: Loading...
-            </div>
-
-            <div class="logo">
-                <div class="quiz-icon">🧠</div>
-                <h1>Prepare for the Trial!</h1>
-            </div>
-
-            <div class="ready-instructions">
-                <h3>⚡ Terry's Knowledge Trial</h3>
-                <ul>
-                    <li><strong>10 riddles</strong> total - mix of ancient puzzles and modern mysteries</li>
-                    <li><strong>15 seconds per riddle</strong> - time is precious as doubloons!</li>
-                    <li><strong>No turning back</strong> - once answered or time expires, ye sail forward</li>
-                    <li><strong>Audio clues</strong> - some riddles contain mystical sound traces, <strong>ensure your volume is up!</strong></li>
-                    <li><strong>One trial only</strong> - your wit will be tested and your doubloons earned</li>
-                    <li><strong>Maximum 100 doubloons</strong> - 10 doubloons per correct answer</li>
-                </ul>
-                
-                <div style="margin-top: 25px; padding: 15px; background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%); border-radius: 10px; color: #8B4513; border: 2px solid #DAA520;">
-                    <strong>⚠️ Heed this warning:</strong> Once the trial begins, there be no stopping or restarting. Prepare your mind and find a quiet harbor before ye proceed!
-                </div>
-            </div>
-
-            <button class="start-quiz-btn" onclick="acceptChallenge()">
-                🚀 Accept the Challenge
-            </button>
-        </div>
-
-        <!-- Quiz Section -->
-        <div class="quiz-section" id="quizSection">
-            <div class="team-info" id="teamInfo">
-                Crew: Loading...
-            </div>
-
-            <div class="quiz-header">
-                <div class="question-counter" id="questionCounter">
-                    Riddle 1 of 10
-                </div>
-                <div class="timer">
-                    <div class="timer-circle" id="timerCircle">15</div>
-                    <div style="color: #8B4513; font-weight: bold;">seconds</div>
-                </div>
-            </div>
-
-            <div class="question-card" id="questionCard">
-                <!-- Question content will be inserted here -->
-            </div>
-
-            <button class="submit-btn" id="nextBtn" style="display: none;" onclick="nextQuestion()">
-                Next Riddle →
-            </button>
-        </div>
-
-        <!-- Results Section -->
-        <div class="results-section" id="resultsSection">
-            <div class="team-info" id="resultsTeamInfo">
-                Crew: Loading...
-            </div>
-
-            <div class="results-summary">
-                <h2>🎉 Trial Complete!</h2>
-                <div class="final-score" id="finalScore">0/10</div>
-                <p style="font-size: 1.2em; color: #8B4513; margin-bottom: 30px;">
-                    Doubloons earned: <span id="doubloonsEarned" style="color: #FF8C00; font-weight: bold;">0</span> 🪙
-                </p>
-
-                <div class="terry-note">
-                    <strong>Well done, brave soul!</strong> Ye have completed me trial of knowledge. Your doubloons have been added to your crew's treasure chest. Check the treasure map to see how ye fare against other adventurers!
-                </div>
-
-                <div class="score-breakdown" id="scoreBreakdown">
-                    <!-- Score breakdown will be inserted here -->
-                </div>
-
-                <p style="color: #8B4513; margin-top: 30px;">
-                    Your knowledge has been tested and your doubloons claimed! Return to the treasure map to continue your quest for riches!
-                </p>
-
-                <button class="submit-btn" onclick="window.location.href='/teamquest_leaderboard.html'">
-                    🗺️ View Treasure Map
-                </button>
-            </div>
-
-            <div class="loading" id="submitLoading">
-                🪙 Recording your doubloons in the treasure ledger...
-            </div>
-
-            <div class="message" id="submitMessage"></div>
-        </div>
+  <div class="container">
+    <!-- Event banner -->
+    <div class="banner">
+      <div id="eventMsg">⛳ Checking event…</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span id="eventBadge" class="status">—</span>
+        <button id="refreshState" class="btn small">↻ Refresh</button>
+      </div>
     </div>
 
-    <script>
-        // Navigation Menu JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            const navToggle = document.getElementById('nav-toggle');
-            const navMenu = document.getElementById('nav-menu');
+    <!-- Login -->
+    <div id="loginSection" class="section active">
+      <div class="logo">
+        <div class="quiz-icon">🧠</div>
+        <h1>The Quiz Challenge</h1>
+        <p class="subtitle">10 riddles. 15s each. Nab those doubloons!</p>
+      </div>
 
-            if (navToggle && navMenu) {
-                navToggle.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
+      <div class="instructions">
+        <strong>Quick rules</strong>
+        <ul style="margin:10px 0 0 18px; line-height:1.6">
+          <li>10 riddles · 15s per question</li>
+          <li>One run per crew</li>
+          <li>No back button once answered</li>
+        </ul>
+      </div>
 
-                // Close mobile menu when clicking on links
-                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    });
-                });
+      <form id="loginForm" novalidate>
+        <label for="teamSelect">Select your crew</label>
+        <select id="teamSelect" class="field">
+          <option value="">Loading crews…</option>
+        </select>
 
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
-                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    }
-                });
-            }
+        <label for="teamPin" style="margin-top:14px">Crew PIN</label>
+        <input id="teamPin" class="field pin-input" inputmode="numeric" autocomplete="one-time-code"
+               pattern="\\d{4}" maxlength="4" placeholder="1234" />
 
-            // Initialize quiz functionality
-            loadTeamsList();
-        });
+        <button class="btn" type="submit">🔐 Sign in</button>
+      </form>
+      <div id="loginMessage" class="message"></div>
+    </div>
 
-        // Original Quiz Challenge JavaScript
-        let currentTeam = null;
-        let allTeams = [];
-        let currentQuestionIndex = 0;
-        let timeLeft = 15;
-        let timerInterval = null;
-        let userAnswers = [];
-        let quizStartTime = null;
-        let quizStatus = null; // 'not_started', 'started', 'completed'
+    <!-- Already started -->
+    <div id="alreadyStartedSection" class="section">
+      <div id="alreadyStartedTeamInfo" class="team-info">Crew: —</div>
+      <div class="logo"><div class="quiz-icon">⚠️</div><h1>Trial already in progress</h1></div>
+      <div class="message error-message" style="display:block">
+        This crew has already started the quiz. It can’t be restarted.
+      </div>
+      <button class="btn btn-ghost" onclick="location.href='/teamquest_leaderboard'">🗺️ Back to leaderboard</button>
+    </div>
 
-        // Quiz questions data
-        const quizQuestions = [
-            {
-                id: 1,
-                type: 'multiple_choice',
-                question: 'What 3 letter animal makes this noise?',
-                audioUrl: '/animal-sound',
-                audioDescription: 'Animal sound clip',
-                options: [
-                    { letter: 'A', text: 'Pig' },
-                    { letter: 'B', text: 'Cow' },
-                    { letter: 'C', text: 'Yak' },
-                    { letter: 'D', text: 'Elk' }
-                ],
-                correctAnswer: 'C',
-                doubloons: 10
-            },
-            {
-                id: 2,
-                type: 'multiple_choice',
-                question: 'What is the meaning of the word: Gambado?',
-                options: [
-                    { letter: 'A', text: 'Colourful Hat' },
-                    { letter: 'B', text: 'Native of Gambia' },
-                    { letter: 'C', text: 'Prank' },
-                    { letter: 'D', text: 'Foolish bet' }
-                ],
-                correctAnswer: 'C',
-                doubloons: 10
-            },
-            {
-                id: 3,
-                type: 'multiple_choice',
-                question: 'Which UK island has its own railway, currency, and parliament, but is not part of the United Kingdom?',
-                options: [
-                    { letter: 'A', text: 'Isle of Man' },
-                    { letter: 'B', text: 'Isle of Skye' },
-                    { letter: 'C', text: 'Isle of Wight' },
-                    { letter: 'D', text: 'Isles of Scilly' }
-                ],
-                correctAnswer: 'A',
-                doubloons: 10
-            },
-            {
-                id: 4,
-                type: 'multiple_choice',
-                question: 'Answer this riddle: What gets wetter the more it dries?',
-                options: [
-                    { letter: 'A', text: '___s_' },
-                    { letter: 'B', text: '__w__' },
-                    { letter: 'C', text: '___t' },
-                    { letter: 'D', text: '_a__' }
-                ],
-                correctAnswer: 'B',
-                explanation: 'Answer: Towel',
-                doubloons: 10
-            },
-            {
-                id: 5,
-                type: 'text_input',
-                question: 'Name the one-word sport depicted in this image?',
-                imageUrl: '/tennis-sport.png',
-                imageDescription: 'Sports image showing tennis',
-                correctAnswer: 'tennis',
-                acceptableAnswers: ['tennis', 'Tennis', 'TENNIS'],
-                doubloons: 10
-            },
-            {
-                id: 6,
-                type: 'multiple_choice',
-                question: 'Who is this talking in this clip?',
-                audioUrl: '/voice-clip.mp3',
-                audioDescription: 'Voice identification clip',
-                options: [
-                    { letter: 'A', text: 'Ed Sheeran' },
-                    { letter: 'B', text: 'Harry Styles' },
-                    { letter: 'C', text: 'Tom Holland' },
-                    { letter: 'D', text: 'Taron Egerton' }
-                ],
-                correctAnswer: 'C',
-                doubloons: 10
-            },
-            {
-                id: 7,
-                type: 'text_input',
-                question: 'What is the number of the only other month, after August (8), for Augustus, to be named after a mortal man?',
-                correctAnswer: '7',
-                acceptableAnswers: ['7', 'seven', 'Seven', 'SEVEN', 'july', 'July', 'JULY', 'Jul', 'jul', 'JUL'],
-                explanation: 'Answer: 7 (July)',
-                doubloons: 10
-            },
-            {
-                id: 8,
-                type: 'text_input',
-                question: 'Which one-word car manufacturer uses this logo?',
-                imageUrl: '/smart-logo.png',
-                imageDescription: 'Smart car manufacturer logo',
-                correctAnswer: 'smart',
-                acceptableAnswers: ['smart', 'Smart', 'SMART', 'SmArt', 'sMaRt'],
-                doubloons: 10
-            },
-            {
-                id: 9,
-                type: 'multiple_choice',
-                question: 'Listen to this intro. Which band had a huge hit with this song?',
-                audioUrl: '/song-intro.mp3',
-                audioDescription: 'Song intro clip',
-                options: [
-                    { letter: 'A', text: 'Red Hot Chili Peppers' },
-                    { letter: 'B', text: 'The Killers' },
-                    { letter: 'C', text: 'The Foo Fighters' },
-                    { letter: 'D', text: 'Kings of Leon' }
-                ],
-                correctAnswer: 'B',
-                doubloons: 10
-            },
-            {
-                id: 10,
-                type: 'multiple_choice',
-                question: 'Five friends are waiting in line to get coffee. Ross is behind Joey but not last. Chandler is behind Monica, who is in front of both Ross and Joey. Rachel is second. Who is at the front of the line?',
-                options: [
-                    { letter: 'A', text: 'Ross' },
-                    { letter: 'B', text: 'Joey' },
-                    { letter: 'C', text: 'Chandler' },
-                    { letter: 'D', text: 'Monica' },
-                    { letter: 'E', text: 'Rachel' }
-                ],
-                correctAnswer: 'D',
-                doubloons: 10
-            }
-        ];
+    <!-- Ready -->
+    <div id="readySection" class="section">
+      <div id="readyTeamInfo" class="team-info">Crew: —</div>
+      <div class="logo"><div class="quiz-icon">🧠</div><h1>Ready to roll?</h1></div>
+      <div class="instructions">
+        <ul style="margin:0 0 0 18px; line-height:1.7">
+          <li>15 seconds per riddle</li>
+          <li>Choose carefully—no changes</li>
+          <li>Audio clues may appear</li>
+        </ul>
+      </div>
+      <div class="message" id="readyMsg"></div>
+      <button id="acceptBtn" class="btn" onclick="acceptChallenge()">🚀 Accept the challenge</button>
+    </div>
 
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const selectedTeamCode = document.getElementById('teamSelect').value;
-            const enteredPin = document.getElementById('teamPin').value;
-            
-            if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
-                return;
-            }
-            
-            if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
-                return;
-            }
+    <!-- Quiz -->
+    <div id="quizSection" class="section">
+      <div id="teamInfo" class="team-info">Crew: —</div>
+      <div class="quiz-header">
+        <div id="questionCounter" style="font-weight:800;color:#8B4513">Riddle 1 of 10</div>
+        <div class="timer">
+          <div id="timerCircle" class="timer-circle">15</div>
+          <div style="font-weight:700;color:#8B4513">seconds</div>
+        </div>
+      </div>
+      <div id="questionCard" class="question-card"></div>
+      <button id="nextBtn" class="btn" style="display:none" onclick="nextQuestion()">Next riddle →</button>
+    </div>
 
-            try {
-                // Check quiz status first
-                const status = await checkQuizStatus(selectedTeamCode);
-                
-                if (status.completed) {
-                    showMessage('loginMessage', 'This crew has already completed the knowledge trial. Doubloons are final and cannot be earned again.', 'error');
-                    return;
-                }
-                
-                if (status.started) {
-                    // Verify PIN then show "already started" section
-                    const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
-                    if (isValid) {
-                        const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
-                        currentTeam = selectedTeam;
-                        showAlreadyStartedSection();
-                    } else {
-                        showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
-                    }
-                    return;
-                }
+    <!-- Results -->
+    <div id="resultsSection" class="section">
+      <div id="resultsTeamInfo" class="team-info">Crew: —</div>
+      <div class="results-summary">
+        <h2>🎉 Trial complete!</h2>
+        <div id="finalScore" class="final-score">0/10</div>
+        <p style="font-size:1.1em;color:#8B4513;margin:0 0 12px">Doubloons earned: <span id="doubloonsEarned" style="color:#FF8C00;font-weight:800">0</span> 🪙</p>
+        <div id="scoreBreakdown" class="score-breakdown"></div>
+        <button class="btn btn-ghost" onclick="location.href='/teamquest_leaderboard'">🗺️ View leaderboard</button>
+        <div id="submitLoading" class="message" style="display:none">🪙 Recording your doubloons…</div>
+        <div id="submitMessage" class="message"></div>
+      </div>
+    </div>
+  </div>
 
-                // Quiz not started - proceed normally
-                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
-                
-                if (isValid) {
-                    const selectedTeam = allTeams.find(team => team.teamCode === selectedTeamCode);
-                    currentTeam = selectedTeam;
-                    showReadyScreen();
-                } else {
-                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Check your code and try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
-            }
-        });
+<script>
+/* ----------------- NAV ----------------- */
+document.addEventListener('DOMContentLoaded', () => {
+  const navToggle = document.getElementById('nav-toggle');
+  const navMenu = document.getElementById('nav-menu');
+  if(navToggle && navMenu){
+    navToggle.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕':'☰'; });
+    document.addEventListener('click', (e)=>{
+      const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
+      if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+    });
+  }
+});
 
-        function showReadyScreen() {
-            document.getElementById('readyTeamInfo').textContent = 'Crew: ' + currentTeam.teamName;
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('readySection').classList.add('active');
-        }
+/* ----------------- QUIZ LOGIC ----------------- */
+const state = {
+  eventId: "",
+  eventState: "RUNNING",
+  crews: [],
+  currentTeam: null,
+  started: false,
+  completed: false,
 
-        function showAlreadyStartedSection() {
-            document.getElementById('alreadyStartedTeamInfo').textContent = 'Crew: ' + currentTeam.teamName;
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('alreadyStartedSection').classList.add('active');
-        }
+  qi: 0, timeLeft: 15, tmr: null, answers: [], startedAt: null
+};
 
-        async function acceptChallenge() {
-            try {
-                console.log('Accept Challenge clicked for team:', currentTeam);
-                
-                // CRITICAL: Record quiz start in backend IMMEDIATELY
-                const startResponse = await fetch('/.netlify/functions/start_quiz_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        teamCode: currentTeam.teamCode,
-                        teamName: currentTeam.teamName,
-                        quizStartTime: new Date().toISOString()
-                    })
-                });
+const quizQuestions = [
+  { id:1, type:'multiple_choice', question:'What 3 letter animal makes this noise?', audioUrl:'/animal-sound', audioDescription:'Animal sound', options:[
+    {letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}], correctAnswer:'C', doubloons:10 },
+  { id:2, type:'multiple_choice', question:'What is the meaning of the word: Gambado?', options:[
+    {letter:'A',text:'Colourful Hat'},{letter:'B',text:'Native of Gambia'},{letter:'C',text:'Prank'},{letter:'D',text:'Foolish bet'}], correctAnswer:'C', doubloons:10 },
+  { id:3, type:'multiple_choice', question:'Which UK island has its own railway, currency, and parliament, but is not part of the United Kingdom?', options:[
+    {letter:'A',text:'Isle of Man'},{letter:'B',text:'Isle of Skye'},{letter:'C',text:'Isle of Wight'},{letter:'D',text:'Isles of Scilly'}], correctAnswer:'A', doubloons:10 },
+  { id:4, type:'multiple_choice', question:'Answer this riddle: What gets wetter the more it dries?', options:[
+    {letter:'A',text:'___s_'},{letter:'B',text:'__w__'},{letter:'C',text:'___t'},{letter:'D',text:'_a__'}], correctAnswer:'B', explanation:'Answer: Towel', doubloons:10 },
+  { id:5, type:'text_input', question:'Name the one-word sport depicted in this image?', imageUrl:'/tennis-sport.png', imageDescription:'Sports image showing tennis', correctAnswer:'tennis', acceptableAnswers:['tennis','Tennis','TENNIS'], doubloons:10 },
+  { id:6, type:'multiple_choice', question:'Who is this talking in this clip?', audioUrl:'/voice-clip.mp3', audioDescription:'Voice identification', options:[
+    {letter:'A',text:'Ed Sheeran'},{letter:'B',text:'Harry Styles'},{letter:'C',text:'Tom Holland'},{letter:'D',text:'Taron Egerton'}], correctAnswer:'C', doubloons:10 },
+  { id:7, type:'text_input', question:'What is the number of the only other month, after August (8), for Augustus, to be named after a mortal man?', correctAnswer:'7',
+    acceptableAnswers:['7','seven','Seven','SEVEN','july','July','JULY','Jul','jul','JUL'], explanation:'Answer: 7 (July)', doubloons:10 },
+  { id:8, type:'text_input', question:'Which one-word car manufacturer uses this logo?', imageUrl:'/smart-logo.png', imageDescription:'Smart logo', correctAnswer:'smart',
+    acceptableAnswers:['smart','Smart','SMART','SmArt','sMaRt'], doubloons:10 },
+  { id:9, type:'multiple_choice', question:'Listen to this intro. Which band had a huge hit with this song?', audioUrl:'/song-intro.mp3', audioDescription:'Song intro', options:[
+    {letter:'A',text:'Red Hot Chili Peppers'},{letter:'B',text:'The Killers'},{letter:'C',text:'The Foo Fighters'},{letter:'D',text:'Kings of Leon'}], correctAnswer:'B', doubloons:10 },
+  { id:10, type:'multiple_choice', question:'Five friends are waiting in line to get coffee... Who is at the front of the line?', options:[
+    {letter:'A',text:'Ross'},{letter:'B',text:'Joey'},{letter:'C',text:'Chandler'},{letter:'D',text:'Monica'},{letter:'E',text:'Rachel'}], correctAnswer:'D', doubloons:10 },
+];
 
-                console.log('Start quiz response status:', startResponse.status);
+function $(sel){ return document.querySelector(sel); }
+function showSection(id){ document.querySelectorAll('.section').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+function badge(text){ $('#eventBadge').textContent = text; }
+function banner(text){ $('#eventMsg').textContent = text; }
+function showMsg(id, text, type='error'){ const el=$(id); el.textContent=text; el.className = 'message ' + (type==='error'?'error-message':'success-message'); el.style.display='block'; }
+function clearMsg(id){ const el=$(id); if(el) el.style.display='none'; }
+function getEventId(){ const q=new URLSearchParams(location.search); return q.get('event') || q.get('eventId') || ''; }
 
-                if (!startResponse.ok) {
-                    console.error('Start quiz response not OK:', startResponse.status, startResponse.statusText);
-                    throw new Error('Failed to record quiz start - HTTP ' + startResponse.status);
-                }
+async function fetchEventState(){
+  try{
+    const res = await fetch('/.netlify/functions/get_event_state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({eventId: state.eventId})});
+    const data = await res.json().catch(()=> ({}));
+    state.eventState = data?.state || 'RUNNING';
+  }catch{ state.eventState='RUNNING'; }
+  if(state.eventState==='RUNNING'){ banner('Event running — take the quiz 🧠'); badge('Running'); }
+  else if(state.eventState==='PAUSED'){ banner('Event paused — submissions are closed'); badge('Paused'); }
+  else if(state.eventState==='ENDED'){ banner('Event ended — submissions are closed'); badge('Ended'); }
+  else if(state.eventState==='PUBLISHED'){ banner('Results published — submissions closed'); badge('Published'); }
+  // gate the Accept button
+  $('#acceptBtn')?.toggleAttribute('disabled', state.eventState!=='RUNNING');
+}
 
-                const startResult = await startResponse.json();
-                console.log('Start quiz result:', startResult);
-                
-                if (!startResult.success) {
-                    throw new Error('Quiz start recording failed: ' + (startResult.error || 'Unknown error'));
-                }
+async function loadCrews(){
+  const sel = $('#teamSelect'); sel.innerHTML = '<option value="">Loading crews…</option>';
+  try{
+    const res = await fetch('/.netlify/functions/get_leaderboard?eventId='+encodeURIComponent(state.eventId));
+    if(!res.ok) throw new Error('bad');
+    const data = await res.json();
+    const list = (Array.isArray(data.teams)?data.teams:(Array.isArray(data.leaderboard)?data.leaderboard:[]))
+      .map(t=>({teamCode:t.teamCode, teamName:t.teamName})).filter(t=>t.teamCode&&t.teamName);
+    state.crews = list;
+    sel.innerHTML = '<option value="">Choose your treasure hunting crew...</option>' +
+      list.sort((a,b)=>a.teamName.localeCompare(b.teamName)).map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+  }catch(e){
+    sel.innerHTML = '<option value="">—</option>';
+    showMsg('#loginMessage',"Couldn't load crews. Refresh and try again.",'error');
+  }
+}
 
-                console.log('Quiz start recorded successfully, beginning countdown...');
-                // Quiz start successfully recorded - now begin countdown
-                startQuizCountdown();
+async function verifyTeamAndPin(teamCode, pin){
+  try{
+    const res = await fetch('/.netlify/functions/verify_team_pin_function',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ eventId: state.eventId, teamCode, pin })
+    });
+    if(res.status===404){ showMsg('#loginMessage','Sign-in service unavailable. Try again later.','error'); return false; }
+    const result = await res.json();
+    if(result.success && result.valid){
+      if(result.token) localStorage.setItem('tq.token', result.token);
+      return true;
+    }
+    if(result.success===true && result.valid===false){ showMsg('#loginMessage',"PIN doesn’t match this crew.",'error'); }
+    return false;
+  }catch{ showMsg('#loginMessage','Sign-in service unavailable. Try again later.','error'); return false; }
+}
 
-            } catch (error) {
-                console.error('Error recording quiz start:', error);
-                
-                // TEMPORARY: Allow quiz to proceed anyway for testing
-                console.log('BYPASSING backend check - starting quiz anyway for testing');
-                alert('⚠️ Backend function not available. Starting quiz in test mode.\n\nNote: Quiz restart prevention will not work until functions are deployed.');
-                startQuizCountdown();
-                
-                // Production version would use this instead:
-                // showMessage('loginMessage', 'Failed to start quiz trial. Please try again. Error: ' + error.message, 'error');
-            }
-        }
+async function checkQuizStatus(teamCode){
+  try{
+    const res = await fetch('/.netlify/functions/check_quiz_status_function',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ eventId: state.eventId, teamCode })
+    });
+    if(!res.ok) return { started:false, completed:false };
+    const data = await res.json();
+    return { started: !!data.started, completed: !!data.completed };
+  }catch{ return { started:false, completed:false }; }
+}
 
-        function startQuizCountdown() {
-            const readySection = document.getElementById('readySection');
-            
-            readySection.innerHTML = `
-                <div class="team-info">Crew: ${currentTeam.teamName}</div>
-                <div class="logo">
-                    <div class="quiz-icon">🧠</div>
-                    <h1>Prepare Yourself!</h1>
-                </div>
-                <div class="ready-countdown" id="countdownNumber">3</div>
-                <div style="text-align: center; font-size: 1.2em; color: #8B4513;">
-                    Trial begins in...
-                </div>
-            `;
-            
-            let countdown = 3;
-            const countdownElement = document.getElementById('countdownNumber');
-            
-            const countdownInterval = setInterval(() => {
-                countdown--;
-                if (countdown > 0) {
-                    countdownElement.textContent = countdown;
-                } else if (countdown === 0) {
-                    countdownElement.textContent = 'FORTH!';
-                    countdownElement.style.color = '#32CD32';
-                } else {
-                    clearInterval(countdownInterval);
-                    startQuiz();
-                }
-            }, 1000);
-        }
+/* ---------- Login flow ---------- */
+$('#loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault(); clearMsg('#loginMessage');
+  const teamCode = $('#teamSelect').value;
+  const pin = ($('#teamPin').value || '').replace(/\D/g,'').slice(0,4);
+  if(!teamCode){ showMsg('#loginMessage','Please select your crew from the list.','error'); return; }
+  if(!/^\d{4}$/.test(pin)){ showMsg('#loginMessage','Please enter a valid 4-digit secret code.','error'); return; }
 
-        function startQuiz() {
-            quizStartTime = new Date();
-            currentQuestionIndex = 0;
-            userAnswers = [];
-            
-            document.getElementById('teamInfo').textContent = 'Crew: ' + currentTeam.teamName;
-            document.getElementById('readySection').classList.remove('active');
-            document.getElementById('quizSection').classList.add('active');
-            
-            showQuestion();
-        }
+  const status = await checkQuizStatus(teamCode);
+  state.started = status.started; state.completed = status.completed;
 
-        function showQuestion() {
-            const question = quizQuestions[currentQuestionIndex];
-            const questionCard = document.getElementById('questionCard');
-            
-            document.getElementById('questionCounter').textContent = 
-                'Riddle ' + (currentQuestionIndex + 1) + ' of ' + quizQuestions.length;
-            
-            timeLeft = 15;
-            updateTimer();
-            startTimer();
-            
-            let questionHTML = '<div class="question-number">Riddle ' + (currentQuestionIndex + 1) + '</div>';
-            questionHTML += '<div class="question-text">' + question.question + '</div>';
-            
-            if (question.audioUrl) {
-                questionHTML += '<div class="audio-player">';
-                questionHTML += '<div class="play-instruction">🎵 Listen to this mysterious clue:</div>';
-                questionHTML += '<audio controls preload="auto" id="questionAudio">';
-                questionHTML += '<source src="' + question.audioUrl + '" type="audio/mpeg">';
-                questionHTML += 'Your browser does not support the audio element.';
-                questionHTML += '</audio>';
-                questionHTML += '</div>';
-            }
-            
-            if (question.imageUrl) {
-                questionHTML += '<img src="' + question.imageUrl + '" alt="' + question.imageDescription + '" class="question-image">';
-            }
-            
-            if (question.type === 'multiple_choice') {
-                questionHTML += '<div class="options-grid">';
-                question.options.forEach(option => {
-                    questionHTML += '<div class="option" onclick="selectOption(\'' + option.letter + '\')">';
-                    questionHTML += '<div class="option-letter">' + option.letter + '</div>';
-                    questionHTML += '<div>' + option.text + '</div>';
-                    questionHTML += '</div>';
-                });
-                questionHTML += '</div>';
-            } else if (question.type === 'text_input') {
-                questionHTML += '<input type="text" class="text-input" id="textAnswer" placeholder="Type your answer here..." maxlength="50">';
-            }
-            
-            questionCard.innerHTML = questionHTML;
-            
-            const audio = document.getElementById('questionAudio');
-            if (audio) {
-                audio.play().catch(e => console.log('Audio autoplay blocked'));
-            }
-        }
+  const ok = await verifyTeamAndPin(teamCode, pin);
+  if(!ok) return;
 
-        function selectOption(letter) {
-            document.querySelectorAll('.option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            event.target.closest('.option').classList.add('selected');
-            submitAnswer(letter);
-        }
+  const found = state.crews.find(t=>t.teamCode===teamCode);
+  state.currentTeam = found || { teamCode, teamName:"" };
+  localStorage.setItem('tq.teamCode', state.currentTeam.teamCode);
+  localStorage.setItem('tq.teamName', state.currentTeam.teamName);
 
-        function submitAnswer(answer) {
-            clearInterval(timerInterval);
-            
-            const question = quizQuestions[currentQuestionIndex];
-            let isCorrect = false;
-            
-            if (question.type === 'multiple_choice') {
-                isCorrect = (answer === question.correctAnswer);
-            } else if (question.type === 'text_input') {
-                if (!answer) {
-                    answer = document.getElementById('textAnswer').value.trim();
-                }
-                isCorrect = checkTextAnswer(answer, question);
-            }
-            
-            userAnswers.push({
-                questionId: question.id,
-                userAnswer: answer,
-                correctAnswer: question.correctAnswer,
-                isCorrect: isCorrect,
-                doubloons: isCorrect ? question.doubloons : 0,
-                timeLeft: timeLeft
-            });
-            
-            showAnswerFeedback(isCorrect, question);
-            
-            setTimeout(() => {
-                if (currentQuestionIndex < quizQuestions.length - 1) {
-                    currentQuestionIndex++;
-                    showQuestion();
-                } else {
-                    finishQuiz();
-                }
-            }, 2000);
-        }
+  if(state.completed){
+    showMsg('#loginMessage','This crew has already completed the quiz.','error');
+    return;
+  }
+  if(state.started && !state.completed){
+    $('#alreadyStartedTeamInfo').textContent = 'Crew: ' + state.currentTeam.teamName;
+    showSection('#alreadyStartedSection');
+    return;
+  }
 
-        function checkTextAnswer(userAnswer, question) {
-            if (!userAnswer || typeof userAnswer !== 'string') {
-                return false;
-            }
-            
-            const normalizedUser = normalizeText(userAnswer);
-            
-            if (question.acceptableAnswers) {
-                return question.acceptableAnswers.some(acceptable => {
-                    const normalizedAcceptable = normalizeText(acceptable);
-                    return normalizedUser === normalizedAcceptable;
-                });
-            }
-            
-            const normalizedCorrect = normalizeText(question.correctAnswer);
-            return normalizedUser === normalizedCorrect;
-        }
+  $('#readyTeamInfo').textContent = 'Crew: ' + state.currentTeam.teamName;
+  showSection('#readySection');
+  // gate by event RUNNING
+  $('#acceptBtn')?.toggleAttribute('disabled', state.eventState!=='RUNNING');
+});
 
-        function normalizeText(text) {
-            if (!text || typeof text !== 'string') {
-                return '';
-            }
-            
-            return text
-                .toLowerCase()
-                .trim()
-                .replace(/[^\w\s]/g, '')
-                .replace(/\s+/g, ' ')
-                .replace(/\s/g, '');
-        }
+/* ---------- Accept & countdown ---------- */
+async function acceptChallenge(){
+  clearMsg('#readyMsg');
+  if(state.eventState!=='RUNNING'){ showMsg('#readyMsg','Submissions are closed.','error'); return; }
+  $('#acceptBtn').disabled = true;
 
-        function showAnswerFeedback(isCorrect, question) {
-            if (question.type === 'multiple_choice') {
-                document.querySelectorAll('.option').forEach(opt => {
-                    const letter = opt.querySelector('.option-letter').textContent;
-                    if (letter === question.correctAnswer) {
-                        opt.classList.add('correct');
-                    } else if (opt.classList.contains('selected') && !isCorrect) {
-                        opt.classList.add('incorrect');
-                    }
-                    opt.style.pointerEvents = 'none';
-                });
-            }
-            
-            if (question.explanation) {
-                const questionCard = document.getElementById('questionCard');
-                questionCard.innerHTML += '<div style="margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%); border-radius: 10px; color: #8B4513; font-weight: bold; border: 2px solid #DAA520;">' + question.explanation + '</div>';
-            }
-        }
+  try{
+    const res = await fetch('/.netlify/functions/start_quiz_function',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        eventId: state.eventId,
+        teamCode: state.currentTeam.teamCode,
+        teamName: state.currentTeam.teamName,
+        quizStartTime: new Date().toISOString()
+      })
+    });
+    if(!res.ok){ const text = await res.text(); throw new Error(text || ('HTTP '+res.status)); }
+    const data = await res.json().catch(()=>({}));
+    if(!data.success) throw new Error(data.message || 'Failed to start quiz');
 
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimer();
-                
-                if (timeLeft <= 0) {
-                    submitAnswer('');
-                }
-            }, 1000);
-        }
+    // Countdown UI
+    const rs = document.getElementById('readySection');
+    rs.innerHTML = `
+      <div class="team-info">Crew: ${state.currentTeam.teamName}</div>
+      <div class="logo"><div class="quiz-icon">🧠</div><h1>Prepare yourself!</h1></div>
+      <div class="final-score" id="countdownNum" style="margin:10px 0 0">3</div>
+      <p style="text-align:center;color:#8B4513;font-weight:700;margin-top:6px">Trial begins in…</p>
+    `;
+    let n=3; const cEl = document.getElementById('countdownNum');
+    const iv = setInterval(()=>{ n--; if(n>0){ cEl.textContent=n; } else if(n===0){ cEl.textContent='GO!'; cEl.style.color='#1f7a3a'; } else { clearInterval(iv); startQuiz(); } },1000);
+  }catch(err){
+    showMsg('#readyMsg', 'Couldn’t start the quiz. Please try again.', 'error');
+    $('#acceptBtn').disabled = false;
+  }
+}
 
-        function updateTimer() {
-            const timerCircle = document.getElementById('timerCircle');
-            timerCircle.textContent = timeLeft;
-            
-            timerCircle.classList.remove('warning', 'danger');
-            if (timeLeft <= 3) {
-                timerCircle.classList.add('danger');
-            } else if (timeLeft <= 5) {
-                timerCircle.classList.add('warning');
-            }
-            
-            const percentage = (timeLeft / 15) * 360;
-            if (timeLeft <= 3) {
-                timerCircle.style.background = 'conic-gradient(#DC143C ' + percentage + 'deg, #FFB6C1 ' + percentage + 'deg)';
-            } else if (timeLeft <= 5) {
-                timerCircle.style.background = 'conic-gradient(#FF8C00 ' + percentage + 'deg, #FFE4B5 ' + percentage + 'deg)';
-            } else {
-                timerCircle.style.background = 'conic-gradient(#DAA520 ' + percentage + 'deg, #F5E6D3 ' + percentage + 'deg)';
-            }
-        }
+function startQuiz(){
+  state.startedAt = new Date();
+  state.qi = 0; state.answers = []; state.timeLeft = 15;
+  $('#teamInfo').textContent = 'Crew: ' + state.currentTeam.teamName;
+  showSection('#quizSection');
+  showQuestion();
+}
 
-        function finishQuiz() {
-            const totalCorrect = userAnswers.filter(answer => answer.isCorrect).length;
-            const totalDoubloons = userAnswers.reduce((sum, answer) => sum + answer.doubloons, 0);
-            
-            document.getElementById('quizSection').classList.remove('active');
-            document.getElementById('resultsSection').classList.add('active');
-            document.getElementById('resultsTeamInfo').textContent = 'Crew: ' + currentTeam.teamName;
-            document.getElementById('finalScore').textContent = totalCorrect + '/' + quizQuestions.length;
-            document.getElementById('doubloonsEarned').textContent = totalDoubloons;
-            
-            let breakdownHTML = '';
-            userAnswers.forEach((answer, index) => {
-                const question = quizQuestions[index];
-                breakdownHTML += '<div class="breakdown-item">';
-                breakdownHTML += '<div>Riddle ' + (index + 1) + ': ' + question.question.substring(0, 50) + '...</div>';
-                breakdownHTML += '<div style="color: ' + (answer.isCorrect ? '#32CD32' : '#DC143C') + '; font-weight: bold;">';
-                breakdownHTML += answer.isCorrect ? '✓ +' + answer.doubloons + ' doubloons' : '✗ 0 doubloons';
-                breakdownHTML += '</div>';
-                breakdownHTML += '</div>';
-            });
-            document.getElementById('scoreBreakdown').innerHTML = breakdownHTML;
-            
-            submitQuizResults(totalDoubloons, userAnswers);
-        }
+/* ---------- Q&A ---------- */
+function showQuestion(){
+  const q = quizQuestions[state.qi];
+  $('#questionCounter').textContent = `Riddle ${state.qi+1} of ${quizQuestions.length}`;
+  let html = `<div style="color:#FF8C00;font-weight:800;margin-bottom:10px">Riddle ${state.qi+1}</div>
+              <div style="font-size:1.2em;color:#654321;margin-bottom:14px">${q.question}</div>`;
+  if(q.audioUrl){
+    html += `<div style="background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px solid var(--gold);border-radius:15px;padding:16px;margin:16px 0;text-align:center">
+               <div style="color:#8B4513;font-weight:700;margin-bottom:10px">🎵 Listen:</div>
+               <audio controls preload="auto" id="questionAudio"><source src="${q.audioUrl}" type="audio/mpeg">Unsupported.</audio>
+             </div>`;
+  }
+  if(q.imageUrl){
+    html += `<img src="${q.imageUrl}" alt="${q.imageDescription||''}" style="max-width:100%;max-height:300px;border-radius:15px;border:3px solid var(--gold);display:block;margin:16px auto">`;
+  }
+  if(q.type==='multiple_choice'){
+    html += `<div class="options-grid">` + q.options.map(o =>
+      `<div class="option" data-letter="${o.letter}"><div class="option-letter">${o.letter}</div><div>${o.text}</div></div>`
+    ).join('') + `</div>`;
+  } else {
+    html += `<input id="textAnswer" class="text-input" maxlength="50" placeholder="Type your answer here…">`;
+  }
+  $('#questionCard').innerHTML = html;
 
-        async function submitQuizResults(totalDoubloons, answers) {
-            const submitLoading = document.getElementById('submitLoading');
-            const submitMessage = document.getElementById('submitMessage');
-            
-            submitLoading.style.display = 'block';
-            
-            try {
-                const quizData = {
-                    teamCode: currentTeam.teamCode,
-                    teamName: currentTeam.teamName,
-                    totalScore: totalDoubloons,
-                    questionsCorrect: answers.filter(a => a.isCorrect).length,
-                    totalQuestions: quizQuestions.length,
-                    completionTime: new Date().toISOString(),
-                    quizStartTime: quizStartTime.toISOString(),
-                    answers: answers
-                };
-                
-                const response = await fetch('/.netlify/functions/submit_quiz_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(quizData)
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    showMessage('submitMessage', '🎉 Doubloons successfully added to your treasure chest! Check the treasure map to see your crew\'s standing.', 'success');
-                } else {
-                    throw new Error(result.error || 'Submission failed');
-                }
-                
-            } catch (error) {
-                console.error('Quiz submission error:', error);
-                showMessage('submitMessage', 'Failed to record doubloons. Your score: ' + totalDoubloons + ' doubloons.', 'error');
-            } finally {
-                submitLoading.style.display = 'none';
-            }
-        }
+  if(q.type==='multiple_choice'){
+    document.querySelectorAll('.option').forEach(el=>{
+      el.addEventListener('click', ()=> selectOption(el.getAttribute('data-letter')));
+    });
+  } else {
+    const inp = $('#textAnswer');
+    inp?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ submitAnswer(inp.value.trim()); } });
+  }
 
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Enter' && document.getElementById('textAnswer')) {
-                const answer = document.getElementById('textAnswer').value.trim();
-                if (answer) {
-                    submitAnswer(answer);
-                }
-            }
-        });
+  const audio = document.getElementById('questionAudio'); audio?.play().catch(()=>{});
+  state.timeLeft = 15; updateTimer(); startTimer();
+}
 
-        async function loadTeamsList() {
-            try {
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
-                }
-                
-                const data = await response.json();
-                
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
-                }
-                
-                throw new Error('Invalid response structure from leaderboard');
-                
-            } catch (error) {
-                console.error('Failed to load crews:', error);
-                showMessage('loginMessage', 'Unable to load crew list from the system. Please refresh the page or contact your organizer.', 'error');
-            }
-        }
+function selectOption(letter){
+  document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+  const el = [...document.querySelectorAll('.option')].find(o=>o.getAttribute('data-letter')===letter);
+  el?.classList.add('selected');
+  submitAnswer(letter);
+}
 
-        function populateTeamDropdown(teams) {
-            const select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
-            
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-        }
+function normalizeText(s){
+  return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim();
+}
+function textCorrect(user, q){
+  const u = normalizeText(user);
+  if(q.acceptableAnswers) return q.acceptableAnswers.some(a => normalizeText(a)===u);
+  return normalizeText(q.correctAnswer)===u;
+}
 
-        async function verifyTeamAndPin(teamCode, enteredPin) {
-            try {
-                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        teamCode: teamCode,
-                        pin: enteredPin
-                    })
-                });
-                
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    return result.valid;
-                } else {
-                    throw new Error(result.error || 'Verification failed');
-                }
-                
-            } catch (error) {
-                console.error('Error verifying team and PIN:', error);
-                return false;
-            }
-        }
+function submitAnswer(ans){
+  clearInterval(state.tmr);
+  const q = quizQuestions[state.qi];
+  let correct=false;
+  if(q.type==='multiple_choice'){ correct = (ans === q.correctAnswer); }
+  else { if(!ans){ ans = $('#textAnswer')?.value.trim() || ''; } correct = textCorrect(ans, q); }
 
-        function showMessage(containerId, message, type) {
-            const container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
-            container.style.display = 'block';
-        }
+  state.answers.push({ questionId:q.id, userAnswer:ans, correctAnswer:q.correctAnswer, isCorrect:correct, doubloons: correct? q.doubloons:0, timeLeft: state.timeLeft });
 
-        async function checkQuizStatus(teamCode) {
-            try {
-                const response = await fetch('/.netlify/functions/check_quiz_status_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ teamCode: teamCode })
-                });
-                
-                if (response.ok) {
-                    const result = await response.json();
-                    return {
-                        started: result.started || false,
-                        completed: result.completed || false
-                    };
-                }
-                
-                // If function doesn't exist yet, assume not started
-                return { started: false, completed: false };
-                
-            } catch (error) {
-                console.log('Quiz status check failed (assuming not started):', error);
-                return { started: false, completed: false };
-            }
-        }
-    </script>
+  // highlight
+  if(q.type==='multiple_choice'){
+    document.querySelectorAll('.option').forEach(opt=>{
+      const L = opt.getAttribute('data-letter');
+      if(L===q.correctAnswer) opt.classList.add('correct');
+      else if(opt.classList.contains('selected') && !correct) opt.classList.add('incorrect');
+      opt.style.pointerEvents='none';
+    });
+  }
+  if(q.explanation){
+    $('#questionCard').insertAdjacentHTML('beforeend',
+      `<div style="margin-top:14px;padding:12px;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px solid var(--gold);border-radius:12px;color:#8B4513;font-weight:700">${q.explanation}</div>`);
+  }
+
+  setTimeout(()=>{ 
+    if(state.qi < quizQuestions.length-1){ state.qi++; showQuestion(); }
+    else { finishQuiz(); }
+  }, 1600);
+}
+
+function startTimer(){
+  state.tmr = setInterval(()=>{
+    state.timeLeft--; updateTimer();
+    if(state.timeLeft<=0){ submitAnswer(''); }
+  },1000);
+}
+function updateTimer(){
+  const t = $('#timerCircle'); t.textContent = state.timeLeft;
+  t.classList.remove('warning','danger');
+  if(state.timeLeft<=3) t.classList.add('danger'); else if(state.timeLeft<=5) t.classList.add('warning');
+  const deg = (Math.max(state.timeLeft,0)/15)*360;
+  if(state.timeLeft<=3) t.style.background = `conic-gradient(#DC143C ${deg}deg, #FFB6C1 ${deg}deg)`;
+  else if(state.timeLeft<=5) t.style.background = `conic-gradient(#FF8C00 ${deg}deg, #FFE4B5 ${deg}deg)`;
+  else t.style.background = `conic-gradient(${getComputedStyle(document.documentElement).getPropertyValue('--gold')} ${deg}deg, #F5E6D3 ${deg}deg)`;
+}
+
+function finishQuiz(){
+  const correct = state.answers.filter(a=>a.isCorrect).length;
+  const total = quizQuestions.length;
+  const score = state.answers.reduce((s,a)=>s+a.doubloons,0);
+
+  $('#finalScore').textContent = `${correct}/${total}`;
+  $('#doubloonsEarned').textContent = score;
+  $('#resultsTeamInfo').textContent = 'Crew: ' + state.currentTeam.teamName;
+
+  let breakdown='';
+  state.answers.forEach((a,i)=>{
+    const q = quizQuestions[i];
+    breakdown += `<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid ${getComputedStyle(document.documentElement).getPropertyValue('--gold')}">
+      <div>Riddle ${i+1}: ${q.question.substring(0,50)}…</div>
+      <div style="font-weight:800;color:${a.isCorrect?'#32CD32':'#DC143C'}">${a.isCorrect?('✓ +'+a.doubloons):'✗ 0'}</div>
+    </div>`;
+  });
+  $('#scoreBreakdown').innerHTML = breakdown;
+
+  showSection('#resultsSection');
+  submitQuizResults(score, correct, total);
+}
+
+async function submitQuizResults(totalDoubloons, correct, total){
+  const loader = $('#submitLoading'); const msg = $('#submitMessage');
+  loader.style.display='block'; msg.style.display='none';
+  try{
+    const payload = {
+      eventId: state.eventId,
+      teamCode: state.currentTeam.teamCode,
+      teamName: state.currentTeam.teamName,
+      totalScore: totalDoubloons,
+      questionsCorrect: correct,
+      totalQuestions: total,
+      quizStartTime: state.startedAt?.toISOString?.() || new Date().toISOString(),
+      completionTime: new Date().toISOString(),
+      answers: state.answers
+    };
+    const res = await fetch('/.netlify/functions/submit_quiz_function',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(()=>({}));
+    if(!res.ok || !data.success){ throw new Error(data.message || 'Submission failed'); }
+    msg.className='message success-message'; msg.textContent="🎉 Doubloons recorded. Check the leaderboard in a minute."; msg.style.display='block';
+  }catch(e){
+    msg.className='message error-message'; msg.textContent="Failed to record doubloons. Your score is shown above."; msg.style.display='block';
+  }finally{
+    loader.style.display='none';
+  }
+}
+
+/* ---------- Boot ---------- */
+async function boot(){
+  state.eventId = getEventId();
+  await fetchEventState();
+  await loadCrews();
+
+  // Auto restore sign-in if present
+  const tc = localStorage.getItem('tq.teamCode'); const tn = localStorage.getItem('tq.teamName');
+  if(tc && tn){
+    state.currentTeam = { teamCode: tc, teamName: tn };
+    const st = await checkQuizStatus(tc);
+    if(st.completed){
+      // Completed: keep on login with message (no retake)
+      showMsg('#loginMessage','This crew has already completed the quiz.','error');
+    }else if(st.started){
+      $('#alreadyStartedTeamInfo').textContent = 'Crew: ' + tn;
+      showSection('#alreadyStartedSection');
+    }else{
+      $('#readyTeamInfo').textContent = 'Crew: ' + tn;
+      showSection('#readySection');
+      $('#acceptBtn')?.toggleAttribute('disabled', state.eventState!=='RUNNING');
+    }
+  }
+}
+$('#refreshState').addEventListener('click', fetchEventState);
+document.addEventListener('DOMContentLoaded', boot);
+</script>
 </body>
 </html>
