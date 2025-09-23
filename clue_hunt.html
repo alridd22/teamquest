@@ -66,7 +66,7 @@
       </select>
 
       <label for="teamPin">Crew PIN</label>
-      <input id="teamPin" class="pin" inputmode="numeric" minlength="4" maxlength="4" placeholder="1234">
+      <input id="teamPin" class="pin" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="4" placeholder="1234">
 
       <button id="signinBtn" class="btn">🗺️ Begin Treasure Hunt</button>
       <div id="loginMessage" class="msg"></div>
@@ -181,7 +181,7 @@
       }
     }
 
-    // --- Sign in (POST { teamCode, pin } to verify_team_pin_function) -------
+    // --- Sign in (POST { eventId, teamCode, pin }) --------------------------
     async function signIn(){
       clearMsg(loginMsg);
       const code = teamSelect.value;
@@ -193,7 +193,7 @@
       try{
         const res = await fetch('/.netlify/functions/verify_team_pin_function', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ teamCode: code, pin })
+          body: JSON.stringify({ eventId: EVENT_ID, teamCode: code, pin })
         });
         if(!res.ok){
           const text = await res.text();
@@ -206,7 +206,6 @@
         localStorage.setItem('teamCode', code);
         localStorage.setItem('teamName', data.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
 
-        // UI on
         teamInfo.textContent = 'Crew: ' + (localStorage.getItem('teamName') || '—');
         loginSection.classList.add('hidden');
         huntSection.classList.remove('hidden');
@@ -219,14 +218,12 @@
       }
     }
 
-    // --- Clue engine (unchanged logic) --------------------------------------
-    let currentTeam = null;           // we’ll set from localStorage when needed
+    // --- Clue engine --------------------------------------------------------
     let currentClue = null;
     let completedClues = {};
     let currentScore = 0;
     let returnTimeout = null;
 
-    // 20 placeholder clues, 140 total points
     const clueHuntData = [
       { id:1,  clue:"What comes after zero?",             answer:"one",       acceptableAnswers:["one","1","One"], points:6 },
       { id:2,  clue:"What number comes after one?",       answer:"two",       acceptableAnswers:["two","2","Two"], points:5 },
@@ -292,14 +289,11 @@
 
     function submitAnswer(){
       const val = answerInput.value.trim();
-      if(!val){ showResult('Please enter an answer.', false, 0, ''); return; }
-      if(!currentClue){ showResult('No clue selected.', false, 0, ''); return; }
+      if(!val){ showResult('Please enter an answer.', false); return; }
+      if(!currentClue){ showResult('No clue selected.', false); return; }
 
       const user = normalize(val);
-      let correct = false;
-      for(const a of currentClue.acceptableAnswers){
-        if(user === normalize(a)){ correct = true; break; }
-      }
+      const correct = currentClue.acceptableAnswers.some(a => user === normalize(a));
 
       if(correct){
         completedClues[currentClue.id] = {
@@ -310,7 +304,7 @@
           wasCorrect: true
         };
         currentScore += currentClue.points;
-        showResult(`🎉 Treasure claimed! +${currentClue.points} doubloons`, true, currentClue.points, currentClue.answer);
+        showResult(`🎉 Treasure claimed! +${currentClue.points} doubloons`, true);
         updateScore(); updateProgress();
         submitClueToBackend(currentClue, val, currentClue.points, true);
       }else{
@@ -321,7 +315,7 @@
           completedAt: new Date().toISOString(),
           wasCorrect: false
         };
-        showResult(`❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, false, 0, currentClue.answer);
+        showResult(`❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, false);
         updateProgress();
         submitClueToBackend(currentClue, val, 0, false);
       }
@@ -332,7 +326,7 @@
       returnTimeout = setTimeout(continueToMap, 5000);
     }
 
-    function showResult(msg, ok, pts, answer){
+    function showResult(msg, ok){
       resultMessage.textContent = msg;
       resultMessage.className = 'result ' + (ok?'ok':'bad');
       resultMessage.style.display = 'block';
@@ -355,7 +349,7 @@
 
     function updateProgress(){
       const attempted = Object.keys(completedClues).length;
-      let correct = 0; for(const k in completedClues){ if(completedClues[k].wasCorrect) correct++; }
+      const correct = Object.values(completedClues).filter(c=>c.wasCorrect).length;
       const pct = Math.max((attempted / clueHuntData.length) * 100, 15);
       progressFill.style.width = pct + '%';
       progressFill.textContent = `${correct}/20 Solved • ${attempted} Explored`;
@@ -366,14 +360,12 @@
       completedClues = {}; currentScore = 0;
       const code = localStorage.getItem('teamCode');
       const name = localStorage.getItem('teamName');
-      currentTeam = { teamCode: code, teamName: name };
-
       if(!code) return;
 
       try{
         const res = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
           method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ teamCode: code })
+          body: JSON.stringify({ eventId: EVENT_ID, teamCode: code })
         });
         if(res.ok){
           const data = await res.json();
@@ -399,6 +391,7 @@
       if(!code) return;
 
       const payload = {
+        eventId: EVENT_ID,
         teamCode: code, teamName: name,
         clueId: clue.id, clueText: clue.clue,
         userAnswer, correctAnswer: clue.answer,
