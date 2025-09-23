@@ -1,89 +1,137 @@
 // netlify/functions/get_leaderboard.js
-const { ok, error, isPreflight, getDoc } = require("./_utils.js");
+const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
 
-module.exports.handler = async (event) => {
-  try {
-    if (isPreflight(event)) return ok({});
-
-    const eventId =
-      event.queryStringParameters?.eventId ||
-      process.env.DEFAULT_EVENT_ID ||
-      "";
-
-    const doc = await getDoc();
-    if (!doc) return error(500, "Spreadsheet client not available");
-
-    const teamsSheet =
-      doc.sheetsByTitle["Teams"] ||
-      doc.sheetsByTitle["teams"] ||
-      doc.sheetsByTitle["Crews"];
-    const submissionsSheet =
-      doc.sheetsByTitle["submissions"] ||
-      doc.sheetsByTitle["Submissions"];
-
-    if (!teamsSheet || !submissionsSheet) {
-      return error(500, "Required sheets not found");
-    }
-
-    await Promise.all([teamsSheet.loadHeaderRow(), submissionsSheet.loadHeaderRow()]);
-    const [teamRows, subRows] = await Promise.all([
-      teamsSheet.getRows(),
-      submissionsSheet.getRows(),
-    ]);
-
-    // Build team map
-    const teams = new Map();
-    for (const r of teamRows) {
-      const code =
-        r.get("Team Code") || r.get("teamCode") || r.get("Code") || "";
-      const name =
-        r.get("Team Name") || r.get("teamName") || r.get("Name") || "";
-      if (!code) continue;
-      teams.set(code, {
-        teamCode: code,
-        teamName: name,
-        kindness: 0,
-        limerick: 0,
-        scavenger: 0,
-        quiz: 0,
-        total: 0,
+/**
+ * Helper: read a tab by any of a few likely titles.
+ */
+async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
+  for (const name of tabNames) {
+    try {
+      const res = await sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${name}!${range}`,
       });
+      const values = res?.data?.values || [];
+      if (values.length) return { name, values };
+    } catch (e) {
+      // try next
+    }
+  }
+  return { name: null, values: [] };
+}
+
+function indexHeaders(row = []) {
+  const idx = {};
+  row.forEach((h, i) => {
+    const key = String(h || "").trim().toLowerCase();
+    if (key) idx[key] = i;
+  });
+  return idx;
+}
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function activityKey(raw) {
+  const k = String(raw || "").trim().toLowerCase();
+  if (["kindness"].includes(k)) return "kindness";
+  if (["limerick"].includes(k)) return "limerick";
+  if (["scavenger","hunt","scav","scavenger hunt"].includes(k)) return "scavenger";
+  if (["quiz","timed quiz","the timed quiz"].includes(k)) return "quiz";
+  return null; // unknown/ignored for breakdown (still counted in total if present)
+}
+
+exports.handler = async (event) => {
+  try {
+    // Allow both POST {eventId:"..."} and GET ?eventId=...
+    const payload = event.httpMethod === "POST"
+      ? (JSON.parse(event.body || "{}") || {})
+      : (Object.fromEntries(new URLSearchParams(event.queryStringParameters || {})));
+
+    // Even if an eventId is passed, we’ll compute from the Scores tab
+    // (no filtering by event in this stabilizer).
+    const sheets = await getSheets();
+    const spreadsheetId = SHEET_ID;
+
+    // 1) Read Scores tab (various likely names)
+    const { values: scoreRows } = await readTabValues(
+      sheets,
+      spreadsheetId,
+      ["scores", "Scores", "scoreboard", "Scoreboard", "Points", "points", "Sheet1"]
+    );
+
+    if (!scoreRows.length) {
+      return ok({ leaderboard: [] }); // nothing to show
     }
 
-    const ACTIVITY_KEYS = new Set(["kindness", "limerick", "scavenger", "quiz"]);
+    const header = scoreRows[0] || [];
+    const idx = indexHeaders(header);
+    // Expected headers (case-insensitive): Team Code, Activity, Score, Status
+    const outByTeam = new Map();
 
-    // Aggregate from submissions
-    for (const r of subRows) {
-      const activity = String(r.get("Activity") || "").toLowerCase().trim();
-      if (!ACTIVITY_KEYS.has(activity)) continue;
+    for (let i = 1; i < scoreRows.length; i++) {
+      const row = scoreRows[i] || [];
+      const teamCode = (row[idx["team code"]] || row[idx["team"]] || "").trim();
+      if (!teamCode) continue;
 
-      const code = r.get("Team Code") || r.get("teamCode") || "";
-      if (!teams.has(code)) continue;
+      const status = String(row[idx["status"]] || "").trim().toLowerCase();
+      if (status && status !== "final") continue; // only final rows
 
-      const rowEventId = (r.get("Event Id") || r.get("eventId") || "").trim();
-      if (eventId && rowEventId && rowEventId !== eventId) continue;
+      const act = activityKey(row[idx["activity"]]);
+      const score = num(row[idx["score"]]);
 
-      // For AI-scored items, only count FINAL. Quiz is immediate, so allow it regardless.
-      const status = String(r.get("AI Status") || "FINAL").toUpperCase();
-      if (activity !== "quiz" && status !== "FINAL") continue;
-
-      const scoreNum = Number(r.get("Final Score") || r.get("AI Score") || 0) || 0;
-      if (!scoreNum) continue;
-
-      const t = teams.get(code);
-      t[activity] = (t[activity] || 0) + scoreNum;
+      if (!outByTeam.has(teamCode)) {
+        outByTeam.set(teamCode, {
+          teamCode,
+          teamName: "", // filled from Teams sheet below
+          kindness: 0,
+          limerick: 0,
+          scavenger: 0,
+          quiz: 0,
+          total: 0
+        });
+      }
+      const agg = outByTeam.get(teamCode);
+      if (act && Object.prototype.hasOwnProperty.call(agg, act)) {
+        agg[act] += score;
+      }
+      agg.total += score;
     }
 
-    // Totals & output
-    const out = Array.from(teams.values()).map((t) => ({
-      ...t,
-      total: (t.kindness || 0) + (t.limerick || 0) + (t.scavenger || 0) + (t.quiz || 0),
-    }));
+    // 2) Merge team names from Teams tab (if available)
+    const { values: teamRows } = await readTabValues(
+      sheets,
+      spreadsheetId,
+      ["teams", "Teams", "Team List", "team_list", "teamlist"]
+    );
 
-    // sort by total desc, then name
-    out.sort((a, b) => (b.total - a.total) || a.teamName.localeCompare(b.teamName));
+    if (teamRows.length) {
+      const h2 = indexHeaders(teamRows[0] || []);
+      const codeIdx = h2["team code"] ?? h2["code"] ?? h2["team"] ?? null;
+      const nameIdx = h2["team name"] ?? h2["name"] ?? null;
 
-    return ok({ success: true, eventId, teams: out });
+      if (codeIdx != null && nameIdx != null) {
+        for (let i = 1; i < teamRows.length; i++) {
+          const r = teamRows[i] || [];
+          const code = String(r[codeIdx] || "").trim();
+          const name = String(r[nameIdx] || "").trim();
+          if (!code || !name) continue;
+          const agg = outByTeam.get(code);
+          if (agg) agg.teamName = name;
+        }
+      }
+    }
+
+    // If a teamName wasn’t found, fallback to code
+    const leaderboard = [...outByTeam.values()]
+      .map(t => ({ ...t, teamName: t.teamName || t.teamCode }))
+      .sort((a, b) => b.total - a.total);
+
+    // Final, stable shape
+    return ok({ leaderboard });
+
   } catch (e) {
     console.error("get_leaderboard error:", e);
     return error(500, e.message || "Unexpected error");
