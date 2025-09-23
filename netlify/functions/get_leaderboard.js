@@ -1,7 +1,9 @@
 // netlify/functions/get_leaderboard.js
 const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
 
-/** Helper: read a tab by any of a few likely titles. */
+/**
+ * Helper: read a tab by any of a few likely titles.
+ */
 async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
   for (const name of tabNames) {
     try {
@@ -32,25 +34,16 @@ function num(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
+// Map sheet "Activity" values to leaderboard keys
 function activityKey(raw) {
   const k = String(raw || "").trim().toLowerCase();
-
-  // existing buckets
   if (["kindness"].includes(k)) return "kindness";
   if (["limerick"].includes(k)) return "limerick";
   if (["scavenger", "hunt", "scav", "scavenger hunt"].includes(k)) return "scavenger";
+  // NEW: treat "clue" (and variants) as Clue Hunt column
+  if (["clue", "clue hunt", "cluehunt", "clue-hunt"].includes(k)) return "cluehunt";
   if (["quiz", "timed quiz", "the timed quiz"].includes(k)) return "quiz";
-
-  // NEW: Clue Hunt (match several ways + fuzzy)
-  if (
-    ["clue hunt", "clue-hunt", "cluehunt", "clue"].includes(k) ||
-    k.includes("clue") ||
-    k.includes("treasure") // covers "treasure hunt" if you use that label
-  ) {
-    return "cluehunt";
-  }
-
-  return null; // unknown/ignored for breakdown (still counted in total if present)
+  return null; // unknown/ignored for breakdown (still added to total below)
 }
 
 exports.handler = async (event) => {
@@ -61,22 +54,24 @@ exports.handler = async (event) => {
         ? (JSON.parse(event.body || "{}") || {})
         : Object.fromEntries(new URLSearchParams(event.queryStringParameters || {}));
 
-    // Compute from Scores tab (no event filter here).
+    // Even if an eventId is passed, we compute from the Scores tab
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // 1) Read Scores tab
+    // 1) Read Scores tab (various likely names)
     const { values: scoreRows } = await readTabValues(
       sheets,
       spreadsheetId,
       ["scores", "Scores", "scoreboard", "Scoreboard", "Points", "points", "Sheet1"]
     );
 
-    if (!scoreRows.length) return ok({ leaderboard: [] });
+    if (!scoreRows.length) {
+      return ok({ leaderboard: [] }); // nothing to show
+    }
 
     const header = scoreRows[0] || [];
     const idx = indexHeaders(header);
-    // Expected headers include: Team Code, Activity, Score, Status
+    // Expected headers (case-insensitive): Team Code, Activity, Score, Status
     const outByTeam = new Map();
 
     for (let i = 1; i < scoreRows.length; i++) {
@@ -97,8 +92,8 @@ exports.handler = async (event) => {
           kindness: 0,
           limerick: 0,
           scavenger: 0,
+          cluehunt: 0, // NEW column
           quiz: 0,
-          cluehunt: 0, // <-- NEW column
           total: 0,
         });
       }
@@ -106,7 +101,7 @@ exports.handler = async (event) => {
       if (act && Object.prototype.hasOwnProperty.call(agg, act)) {
         agg[act] += score;
       }
-      // Always add to total (even if activity was unknown/future)
+      // Always add to total, even if the activity is not one of the tracked buckets
       agg.total += score;
     }
 
@@ -134,11 +129,12 @@ exports.handler = async (event) => {
       }
     }
 
-    // Output
+    // If a teamName wasn’t found, fallback to code
     const leaderboard = [...outByTeam.values()]
       .map((t) => ({ ...t, teamName: t.teamName || t.teamCode }))
       .sort((a, b) => b.total - a.total);
 
+    // Final, stable shape
     return ok({ leaderboard });
   } catch (e) {
     console.error("get_leaderboard error:", e);
