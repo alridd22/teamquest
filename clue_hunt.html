@@ -1,1668 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamQuest - Terry's Treasure Hunt</title>
-    <!-- Cache busting for reliable content delivery -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <style>
-        /* Updated Navigation Styles with TeamQuest Logo */
-        .treasure-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, #8B4513 0%, #654321 50%, #8B4513 100%);
-            border-bottom: 3px solid #DAA520;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            z-index: 1000;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            height: 80px; /* Increased height for logo */
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
-            height: 100%;
-        }
-
-        .nav-logo {
-            text-decoration: none;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .nav-logo:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-logo img {
-            height: 50px; /* Desktop size */
-            width: auto;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
-            transition: all 0.3s ease;
-        }
-
-        @media (max-width: 768px) {
-            .nav-logo img {
-                height: 85px !important; /* Much bigger on mobile */
-            }
-        }
-
-        .nav-logo:hover img {
-            filter: drop-shadow(2px 2px 8px rgba(255,215,0,0.6));
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 30px;
-        }
-
-        .nav-item {
-            position: relative;
-        }
-
-        .nav-link {
-            color: #F5DEB3;
-            text-decoration: none;
-            font-size: 1rem;
-            font-weight: bold;
-            padding: 12px 18px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            display: block;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-            background: rgba(101, 67, 33, 0.3);
-            border: 2px solid rgba(218, 165, 32, 0.4);
-            white-space: nowrap;
-        }
-
-        .nav-link:hover {
-            background: linear-gradient(135deg, #DAA520, #FF8C00);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(218, 165, 32, 0.4);
-            border-color: #DAA520;
-        }
-
-        .nav-dropdown {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: linear-gradient(135deg, #654321 0%, #8B4513 100%);
-            border: 2px solid #DAA520;
-            border-radius: 8px;
-            min-width: 180px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        .nav-item:hover .nav-dropdown {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .dropdown-link {
-            display: block;
-            color: #F5DEB3;
-            text-decoration: none;
-            padding: 12px 18px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
-            transition: all 0.3s ease;
-            background: rgba(101, 67, 33, 0.2);
-            margin: 2px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .dropdown-link:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-link:hover {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding-left: 25px;
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
-        }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: #DAA520;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            .treasure-nav {
-                height: 120px; /* Taller for bigger logo */
-            }
-
-            .nav-container {
-                justify-content: center;
-                position: relative;
-            }
-
-            .nav-logo {
-                position: absolute;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            .nav-toggle {
-                position: absolute;
-                right: 20px;
-                top: 50%;
-                transform: translateY(-50%);
-                display: block;
-            }
-
-            .nav-menu {
-                position: fixed;
-                top: 120px;
-                left: -100%;
-                width: 100%;
-                height: calc(100vh - 120px);
-                background: linear-gradient(135deg, #8B4513 0%, #654321 100%);
-                flex-direction: column;
-                align-items: center;
-                padding-top: 30px;
-                gap: 20px;
-                transition: left 0.3s ease;
-                overflow-y: auto;
-            }
-
-            .nav-menu.active {
-                left: 0;
-            }
-
-            .nav-link {
-                font-size: 1.1rem;
-                padding: 15px 25px;
-                width: 280px;
-                text-align: center;
-                background: linear-gradient(135deg, rgba(101, 67, 33, 0.8), rgba(139, 69, 19, 0.6));
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .nav-link:hover {
-                background: linear-gradient(135deg, #DAA520, #FF8C00);
-                transform: translateY(-3px);
-                box-shadow: 0 6px 15px rgba(218, 165, 32, 0.4);
-            }
-
-            .nav-dropdown {
-                position: static;
-                opacity: 1;
-                visibility: visible;
-                transform: none;
-                background: rgba(101, 67, 33, 0.9);
-                border: 2px solid #DAA520;
-                border-radius: 12px;
-                margin-top: 10px;
-                width: 280px;
-                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            }
-
-            .dropdown-link {
-                padding: 12px 20px;
-                font-size: 1rem;
-                margin: 4px;
-                border-radius: 8px;
-                text-align: center;
-                background: rgba(139, 69, 19, 0.4);
-                border: 1px solid rgba(218, 165, 32, 0.3);
-            }
-
-            .dropdown-link:hover {
-                background: linear-gradient(135deg, #FF8C00, #DAA520);
-                padding-left: 20px;
-                transform: translateY(-2px);
-            }
-        }
-
-        /* Original Page Styles - Updated for Navigation */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #8B4513 0%, #D2691E 30%, #F4A460 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            padding-top: 100px !important; /* Account for taller fixed nav */
-            position: relative;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding-top: 140px !important; /* Account for mobile nav height */
-            }
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 20%, rgba(255,215,0,0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(255,140,0,0.1) 0%, transparent 50%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>');
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .container {
-            background: linear-gradient(145deg, #F5E6D3 0%, #E8D7C3 100%);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 
-                0 20px 40px rgba(0,0,0,0.2),
-                inset 0 1px 0 rgba(255,255,255,0.3);
-            max-width: 1000px;
-            width: 100%;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            border: 3px solid #8B4513;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 8px;
-            background: linear-gradient(90deg, #FFD700, #FF8C00, #DAA520, #FFD700);
-        }
-
-        .container::after {
-            content: '';
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
-            bottom: 15px;
-            border: 2px solid #DAA520;
-            border-radius: 20px;
-            pointer-events: none;
-        }
-
-        .logo {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-            z-index: 2;
-        }
-
-        .hunt-icon {
-            font-size: 48px;
-            margin-bottom: 20px;
-            animation: bounce 2s infinite;
-            filter: drop-shadow(2px 2px 4px rgba(139,69,19,0.3));
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        h1 {
-            color: #8B4513;
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #A0522D;
-            margin-bottom: 30px;
-            font-size: 1.1em;
-            font-weight: 500;
-        }
-
-        .team-info {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
-            border: 2px solid #DAA520;
-            position: relative;
-            z-index: 2;
-        }
-
-        .login-section, .hunt-section {
-            display: none;
-            position: relative;
-            z-index: 2;
-        }
-
-        .login-section.active, .hunt-section.active {
-            display: block;
-        }
-
-        /* Completion message section */
-        .completion-section {
-            display: none;
-            position: relative;
-            z-index: 2;
-            text-align: center;
-        }
-
-        .completion-section.active {
-            display: block;
-        }
-
-        .completion-message {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #8B4513;
-            padding: 40px;
-            border-radius: 25px;
-            margin-bottom: 30px;
-            border: 4px solid #DAA520;
-            box-shadow: 0 10px 30px rgba(255,215,0,0.4);
-        }
-
-        .completion-message h2 {
-            font-size: 2.2em;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .completion-message p {
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            font-weight: 500;
-            line-height: 1.5;
-        }
-
-        .final-score {
-            font-size: 2.2em;
-            margin: 25px 0;
-            font-weight: bold;
-            color: #8B4513;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 18px 30px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 20px;
-            border: 2px solid #8B4513;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-        }
-
-        .terry-greeting {
-            display: flex;
-            align-items: flex-start;
-            gap: 20px;
-            margin: 20px 0;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 20px;
-            padding: 25px;
-            border: 3px solid #DAA520;
-            box-shadow: 0 5px 15px rgba(139,69,19,0.2);
-        }
-
-        .terry-character {
-            flex-shrink: 0;
-        }
-
-        .terry-character img {
-            width: 120px !important;
-            height: 120px !important;
-            border-radius: 15px !important;
-            border: 4px solid #DAA520;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.3);
-            object-fit: cover;
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            display: block;
-        }
-
-        .terry-speech {
-            flex: 1;
-            position: relative;
-        }
-
-        .terry-speech::before {
-            content: '';
-            position: absolute;
-            left: -15px;
-            top: 20px;
-            width: 0;
-            height: 0;
-            border-style: solid;
-            border-width: 15px 15px 15px 0;
-            border-color: transparent #FFD700 transparent transparent;
-        }
-
-        .terry-note {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #8B4513;
-            padding: 25px;
-            border-radius: 15px;
-            margin: 0;
-            border: 3px solid #DAA520;
-            position: relative;
-            font-weight: 500;
-            line-height: 1.6;
-            box-shadow: 0 5px 15px rgba(255,215,0,0.3);
-        }
-
-        .instructions {
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-left: 6px solid #DAA520;
-            padding: 25px;
-            margin-bottom: 30px;
-            border-radius: 0 15px 15px 0;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
-            border: 2px solid #DAA520;
-            border-left: 6px solid #FF8C00;
-        }
-
-        .instructions h3 {
-            color: #8B4513;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .instructions ul {
-            margin-left: 20px;
-            color: #654321;
-            line-height: 1.8;
-        }
-
-        .instructions li {
-            margin-bottom: 8px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #8B4513;
-            font-weight: 600;
-            font-size: 1.1em;
-        }
-
-        input[type="text"], input[type="number"], select {
-            width: 100%;
-            padding: 15px;
-            border: 3px solid #DAA520;
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus, input[type="number"]:focus, select:focus {
-            outline: none;
-            border-color: #FF8C00;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
-            transform: translateY(-1px);
-        }
-
-        .pin-input {
-            text-align: center;
-            font-size: 1.5em;
-            letter-spacing: 3px;
-            font-weight: bold;
-        }
-
-        .submit-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-            border: 2px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255,140,0,0.3);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-        }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .progress-bar {
-            background: linear-gradient(135deg, #A0522D, #8B4513);
-            border-radius: 15px;
-            padding: 5px;
-            margin-bottom: 30px;
-            min-height: 45px;
-            border: 3px solid #DAA520;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.2);
-        }
-
-        .progress-fill {
-            background: linear-gradient(135deg, #FFD700, #FFA500);
-            height: 32px;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #8B4513;
-            font-weight: bold;
-            font-size: 0.9em;
-            text-align: center;
-            padding: 0 15px;
-            box-sizing: border-box;
-            white-space: nowrap;
-            overflow: hidden;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
-        }
-
-        .score-display {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            padding: 25px;
-            border-radius: 20px;
-            text-align: center;
-            font-size: 1.6em;
-            font-weight: bold;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 20px rgba(255,140,0,0.3);
-            border: 3px solid #8B4513;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .clue-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 18px;
-            margin-bottom: 30px;
-        }
-
-        .clue-button {
-            background: linear-gradient(135deg, #FF8C00, #DAA520);
-            color: white;
-            border: none;
-            padding: 22px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            border: 3px solid #8B4513;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-            box-shadow: 0 4px 12px rgba(255,140,0,0.2);
-        }
-
-        .clue-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(255,140,0,0.4);
-            background: linear-gradient(135deg, #FFB347, #F0C814);
-        }
-
-        .clue-button.completed {
-            background: linear-gradient(135deg, #32CD32, #228B22);
-            border-color: #006400;
-            cursor: not-allowed;
-        }
-
-        .clue-button.completed::after {
-            content: '✓';
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            font-size: 1.5em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .clue-button.incorrect {
-            background: linear-gradient(135deg, #DC143C, #B22222);
-            border-color: #8B0000;
-            cursor: not-allowed;
-        }
-
-        .clue-button.incorrect::after {
-            content: '✗';
-            position: absolute;
-            top: 8px;
-            right: 12px;
-            font-size: 1.5em;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        }
-
-        .clue-section {
-            display: none;
-            background: linear-gradient(135deg, #FFF8DC 0%, #F5E6D3 100%);
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 3px solid #DAA520;
-            box-shadow: 0 8px 20px rgba(139,69,19,0.1);
-        }
-
-        .clue-section.active {
-            display: block;
-        }
-
-        .clue-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-        }
-
-        .clue-number {
-            font-size: 1.6em;
-            font-weight: bold;
-            color: #FF8C00;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-        }
-
-        .back-btn {
-            background: linear-gradient(135deg, #8B4513, #A0522D);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            border: 2px solid #654321;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: linear-gradient(135deg, #A0522D, #CD853F);
-            transform: translateY(-1px);
-        }
-
-        .clue-text {
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            padding: 30px;
-            font-size: 1.3em;
-            color: #654321;
-            margin-bottom: 25px;
-            line-height: 1.6;
-            box-shadow: 0 4px 12px rgba(139,69,19,0.1);
-            font-weight: 500;
-        }
-
-        .answer-input {
-            width: 100%;
-            padding: 20px;
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            font-size: 1.3em;
-            text-align: center;
-            margin-bottom: 20px;
-            background: linear-gradient(145deg, #FFFFFF 0%, #FFF8DC 100%);
-            color: #654321;
-            font-weight: 500;
-        }
-
-        .answer-input:focus {
-            outline: none;
-            border-color: #FF8C00;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
-            background: white;
-        }
-
-        .result-message {
-            padding: 25px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.3em;
-            font-weight: bold;
-            margin: 20px 0;
-            display: none;
-            border: 3px solid;
-        }
-
-        .result-message.success {
-            background: linear-gradient(135deg, #90EE90 0%, #98FB98 100%);
-            border-color: #32CD32;
-            color: #006400;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
-        }
-
-        .result-message.error {
-            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
-            border-color: #DC143C;
-            color: #8B0000;
-            text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
-        }
-
-        .completion-celebration {
-            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
-            color: #8B4513;
-            padding: 40px;
-            border-radius: 25px;
-            text-align: center;
-            margin-top: 30px;
-            display: none;
-            border: 4px solid #DAA520;
-            box-shadow: 0 10px 30px rgba(255,215,0,0.4);
-        }
-
-        .completion-celebration.show {
-            display: block;
-            animation: celebrationPulse 1s ease;
-        }
-
-        .completion-celebration h2 {
-            color: #8B4513;
-            font-size: 2.2em;
-            margin-bottom: 15px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .completion-celebration p {
-            font-size: 1.2em;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        @keyframes celebrationPulse {
-            0% { transform: scale(0.9); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .message {
-            padding: 18px;
-            border-radius: 12px;
-            margin: 20px 0;
-            text-align: center;
-            display: none;
-            border: 2px solid;
-            font-weight: 500;
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #90EE90 0%, #98FB98 100%);
-            border-color: #32CD32;
-            color: #006400;
-        }
-
-        .error-message {
-            background: linear-gradient(135deg, #FFB6C1 0%, #FFA0B4 100%);
-            border-color: #DC143C;
-            color: #8B0000;
-        }
-
-        .treasure-explainer {
-            background: linear-gradient(135deg, #FFE4B5 0%, #DEB887 100%);
-            border: 3px solid #DAA520;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-left: 6px solid #FF8C00;
-        }
-
-        .treasure-explainer h4 {
-            color: #8B4513;
-            margin-bottom: 15px;
-            font-weight: 700;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .treasure-explainer p {
-            color: #654321;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .clue-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 12px;
-            }
-            
-            .clue-button {
-                padding: 18px;
-                font-size: 1em;
-            }
-
-            .terry-greeting {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-
-            .terry-speech::before {
-                display: none;
-            }
-
-            .terry-character img {
-                width: 100px !important;
-                height: 100px !important;
-            }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TeamQuest – Clue Hunt</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <style>
+    :root { --gold:#DAA520; --amber:#FF8C00; --brown:#8B4513; --sand:#F5E6D3; }
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:linear-gradient(135deg,#8B4513 0%,#D2691E 35%,#F4A460 100%); padding:24px}
+    /* nav */
+    .nav{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B4513,#654321);border:0;border-bottom:3px solid var(--gold);padding:8px 14px;display:flex;gap:16px;align-items:center}
+    .nav img{height:36px}
+    .wrap{max-width:980px;margin:24px auto;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);border:3px solid var(--brown);border-radius:22px;padding:28px}
+    h1{margin:0 0 4px;color:var(--brown)}
+    .muted{color:#7a5a37;margin:0 0 18px}
+    /* sections */
+    .section{display:none}.section.active{display:block}
+    /* card bits */
+    .team{background:linear-gradient(135deg,#8B4513,#A0522D);border:2px solid var(--gold);color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:700;margin:10px 0 18px}
+    .rulebox{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border-left:6px solid var(--amber);border:2px solid var(--gold);border-radius:12px;padding:16px;margin:16px 0}
+    label{display:block;margin:10px 0 6px;color:var(--brown);font-weight:600}
+    select,input[type="number"],input[type="text"]{width:100%;padding:14px;border-radius:10px;border:3px solid var(--gold);background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
+    select:focus,input:focus{outline:none;border-color:#ff9a1f;box-shadow:0 0 0 3px rgba(255,140,0,.2)}
+    .btn{width:100%;padding:16px;border-radius:12px;border:2px solid var(--brown);background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .msg{display:none;margin:14px 0;padding:14px;border-radius:10px;border:2px solid}
+    .msg.ok{display:block;background:#aaf0b3;border-color:#2e8b57;color:#084c1f}
+    .msg.err{display:block;background:#ffb5c0;border-color:#b00020;color:#6b0014}
+    /* grid */
+    .score{background:linear-gradient(135deg,#FF8C00,#DAA520);border:3px solid var(--brown);color:#fff;border-radius:14px;text-align:center;padding:18px;font-weight:800;margin:10px 0 18px}
+    .bar{border:3px solid var(--gold);border-radius:12px;background:linear-gradient(135deg,#A0522D,#8B4513);padding:5px;margin-bottom:20px}
+    .fill{height:28px;border-radius:8px;background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;font-weight:800;color:#704a18}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+    .clue{padding:18px;border-radius:12px;border:3px solid var(--brown);background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer;position:relative}
+    .clue.completed{background:linear-gradient(135deg,#32CD32,#228B22);border-color:#0d5d0d;cursor:not-allowed}
+    .clue.incorrect{background:linear-gradient(135deg,#DC143C,#B22222);border-color:#7a0000;cursor:not-allowed}
+    .clue.completed::after{content:"✓";position:absolute;top:6px;right:10px;font-size:18px}
+    .clue.incorrect::after{content:"✗";position:absolute;top:6px;right:10px;font-size:18px}
+    .panel{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:3px solid var(--gold);border-radius:16px;padding:18px;margin-top:16px}
+    .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+    .back{padding:10px 14px;border-radius:10px;border:2px solid #654321;background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;font-weight:700;cursor:pointer}
+  </style>
 </head>
 <body>
-    <!-- Navigation Menu with TeamQuest Logo -->
-    <nav class="treasure-nav" id="treasure-nav">
-        <div class="nav-container">
-            <a href="https://theteamquest.netlify.app/" class="nav-logo">
-                <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
-            </a>
-            
-            <ul class="nav-menu" id="nav-menu">
-                <li class="nav-item">
-                    <a href="#" class="nav-link">🎯 Activities ▼</a>
-                    <div class="nav-dropdown">
-                        <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link">🔍 The Scavenger Hunt</a>
-                        <a href="https://theteamquest.netlify.app/quiz_challenge" class="dropdown-link">⏰ The Timed Quiz</a>
-                        <a href="https://theteamquest.netlify.app/kindness_challenge_page" class="dropdown-link">❤️ The Kindness Task</a>
-                        <a href="https://theteamquest.netlify.app/limerick_challenge_page" class="dropdown-link">📝 The Limerick Challenge</a>
-                        <!-- Current activity (Treasure Hunt) excluded from menu -->
-                    </div>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a>
-                </li>
-                <li class="nav-item">
-                    <a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a>
-                </li>
-            </ul>
-            
-            <button class="nav-toggle" id="nav-toggle">☰</button>
+  <div class="nav">
+    <a href="https://theteamquest.netlify.app/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
+  </div>
+
+  <div class="wrap">
+    <h1>Clue Hunt</h1>
+    <p class="muted">Solve clues in any order. Each correct answer earns hidden doubloons.</p>
+
+    <!-- ——— Sign in ——— -->
+    <section id="signin" class="section active">
+      <div class="rulebox">
+        <ul style="margin:0 0 0 18px;line-height:1.7">
+          <li>20 clues • one try each</li>
+          <li>Hidden reward per clue (5–10)</li>
+          <li>Come and go anytime — progress saves</li>
+        </ul>
+      </div>
+
+      <label for="teamSelect">Select your crew</label>
+      <select id="teamSelect"><option value="">Loading…</option></select>
+
+      <label for="teamPin">Crew PIN</label>
+      <input id="teamPin" type="number" inputmode="numeric" placeholder="1234" min="1000" max="9999"/>
+
+      <button id="signinBtn" class="btn" style="margin-top:12px">📖 Begin Treasure Hunt</button>
+      <div id="signinMsg" class="msg"></div>
+    </section>
+
+    <!-- ——— Hunt ——— -->
+    <section id="hunt" class="section">
+      <div id="crewTag" class="team">Crew: —</div>
+      <div id="scoreBox" class="score">Treasure: 0 doubloons</div>
+
+      <div class="bar"><div id="fill" class="fill" style="width:15%">0/20 Solved • 0 Explored</div></div>
+
+      <div id="gridWrap">
+        <h3 style="color:#8B4513;margin:10px 0 14px">Pick a clue</h3>
+        <div id="clueGrid" class="grid"></div>
+      </div>
+
+      <div id="cluePanel" class="panel" style="display:none">
+        <div class="row">
+          <strong id="clueTitle" style="color:#FF8C00">Clue #</strong>
+          <button class="back" id="backBtn">← Back</button>
         </div>
-    </nav>
+        <p id="clueText" style="margin:12px 0 14px;font-weight:600;color:#654321"></p>
+        <input id="answer" type="text" placeholder="Your answer…" maxlength="60"/>
+        <button id="submitAnswer" class="btn" style="margin-top:10px">💰 Claim treasure</button>
+        <div id="result" class="msg" style="margin-top:12px"></div>
+      </div>
+    </section>
+  </div>
 
-    <div class="container">
-        <!-- Login Section -->
-        <div class="login-section active" id="loginSection">
-            <div class="logo">
-                <div class="hunt-icon">🗺️</div>
-                <h1>Terry's Treasure Hunt</h1>
-                <p class="subtitle">Follow the clues, discover the treasures, collect doubloons!</p>
-            </div>
+  <script>
+    // ============ Config / helpers ============
+    const EVENT_ID = new URLSearchParams(location.search).get('event') || localStorage.getItem('eventId') || '';
+    const $ = id => document.getElementById(id);
 
-            <div class="terry-greeting">
-                <div class="terry-character">
-                    <img src="/terry-thinking.png" alt="Terry Quest" class="terry-image">
-                </div>
-                <div class="terry-speech">
-                    <div class="terry-note">
-                        <strong>Ahoy, clue solver!</strong> Welcome to me treasure hunt! I've scattered 20 clues across this mystical place, each guarding a secret cache of doubloons. Choose wisely - each treasure chest holds a different bounty, but ye won't know how many doubloons await until ye crack the clue!
-                    </div>
-                </div>
-            </div>
+    async function callFn(name, payload){
+      const res = await fetch(`/.netlify/functions/${name}`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload || {})
+      });
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
 
-            <div class="instructions">
-                <h3>🗺️ Treasure Map Rules</h3>
-                <ul>
-                    <li><strong>20 clues await:</strong> Each clue guards a different treasure cache</li>
-                    <li><strong>Choose your path:</strong> Solve clues in any order ye prefer</li>
-                    <li><strong>Mystery doubloons:</strong> Each treasure chest contains a different bounty (5-10 doubloons) - only revealed when solved!</li>
-                    <li><strong>One chance per clue:</strong> Once attempted, each clue location is marked on your map</li>
-                    <li><strong>Track your progress:</strong> Your running treasure total is displayed as ye explore</li>
-                </ul>
-            </div>
+    // ============ Team list + sign-in (same pattern as other activities) ============
+    // ——— Load teams (robust) ———
+    function extractTeams(data){
+      if(Array.isArray(data?.teams)) return data.teams;
+      if(Array.isArray(data?.leaderboard)) {
+        return data.leaderboard.map(r=>({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      }
+      if(Array.isArray(data?.rows)) {
+        return data.rows.map(r=>({ teamCode: r.teamCode || r.code || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      }
+      return [];
+    }
 
-            <div class="treasure-explainer">
-                <h4>💰 How Doubloon Rewards Work</h4>
-                <p><strong>Mystery Treasures:</strong> Each clue location contains a hidden treasure chest with 5-10 doubloons. You won't know the value until you solve the clue correctly!</p>
-                <p><strong>Risk & Reward:</strong> Choose your clues wisely - some chests contain more doubloons than others, so keep your fingers crossed.</p>
-                <p><strong>One Attempt:</strong> Whether you solve a clue correctly or incorrectly, that location becomes marked on your map and cannot be attempted again.</p>
-            </div>
+    async function loadTeams(){
+      try{
+        // Try POST first (preferred)
+        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        let teams = extractTeams(data);
 
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="teamSelect">Select Your Treasure Hunting Crew</label>
-                    <select id="teamSelect" name="teamSelect" required>
-                        <option value="">Choose your treasure hunting crew...</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="teamPin">Enter Your Crew's Secret Code</label>
-                    <input type="number" id="teamPin" name="teamPin" class="pin-input" 
-                           min="1000" max="9999" placeholder="1234" required>
-                </div>
-
-                <button type="submit" class="submit-btn">
-                    🗺️ Begin Treasure Hunt
-                </button>
-            </form>
-
-            <div class="message" id="loginMessage"></div>
-        </div>
-
-        <!-- Completion Section -->
-        <div class="completion-section" id="completionSection">
-            <div class="logo">
-                <div class="hunt-icon">🏴‍☠️</div>
-                <h1>Quest Complete!</h1>
-            </div>
-
-            <div class="completion-message">
-                <h2>🏴‍☠️ Treasure Map Complete, Matey!</h2>
-                <p>Your crew has already conquered this treasure hunt and claimed all the doubloons!</p>
-                <div class="final-score" id="completionScore">Total Doubloons Earned: 0</div>
-                <p>Well done, ye master treasure hunters! Your adventure is complete.</p>
-                <p>Check the treasure leaderboard to see how your crew's haul compares to other adventurers!</p>
-                <a href="https://theteamquest.netlify.app/teamquest_main.html" class="btn-primary">
-                    Return to Main Quest
-                </a>
-            </div>
-        </div>
-
-        <!-- Hunt Section -->
-        <div class="hunt-section" id="huntSection">
-            <div class="team-info" id="teamInfo">
-                Crew: Loading...
-            </div>
-
-            <div class="score-display" id="scoreDisplay">
-                💰 Treasure Collected: 0 doubloons
-            </div>
-
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill" style="width: 0%;">
-                    0/20 Clues Explored
-                </div>
-            </div>
-
-            <!-- Clue Grid -->
-            <div id="clueGridSection">
-                <h2 style="text-align: center; margin-bottom: 30px; color: #8B4513; font-size: 1.8em; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">🗺️ Choose Your Clue Location</h2>
-                
-                <div class="clue-grid" id="clueGrid">
-                    <!-- Clue buttons will be populated here -->
-                </div>
-            </div>
-
-            <!-- Individual Clue Section -->
-            <div class="clue-section" id="clueSection">
-                <div class="clue-header">
-                    <div class="clue-number" id="clueNumber">Clue #</div>
-                    <button class="back-btn" onclick="showClueGrid()">← Back to Map</button>
-                </div>
-                
-                <div class="clue-text" id="clueText">
-                    <!-- Clue content will be inserted here -->
-                </div>
-                
-                <input type="text" class="answer-input" id="answerInput" 
-                       placeholder="Enter your answer to claim the treasure..." maxlength="50">
-                
-                <button class="submit-btn" id="submitAnswerBtn" onclick="submitAnswer()">
-                    💰 Claim Treasure
-                </button>
-                
-                <div class="result-message" id="resultMessage">
-                    <!-- Result will be shown here -->
-                </div>
-                
-                <button class="submit-btn" id="continueBtn" onclick="continueToMap()" style="display: none;">
-                    🗺️ Continue to Treasure Map
-                </button>
-            </div>
-
-            <div class="completion-celebration" id="completionCelebration">
-                <h2>🏴‍☠️ Treasure Map Complete!</h2>
-                <p>Magnificent work, ye master treasure hunter! Ye've solved every clue and claimed all the doubloons!</p>
-                <div style="font-size: 2.2em; margin: 25px 0; font-weight: bold;" id="finalScore">Final Treasure: 0 doubloons</div>
-                <p>Check the treasure leaderboard to see how your crew's haul compares to other adventurers!</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Navigation Menu JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            const navToggle = document.getElementById('nav-toggle');
-            const navMenu = document.getElementById('nav-menu');
-
-            if (navToggle && navMenu) {
-                navToggle.addEventListener('click', function() {
-                    navMenu.classList.toggle('active');
-                    navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-                });
-
-                // Close mobile menu when clicking on links
-                const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', function() {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    });
-                });
-
-                // Close mobile menu when clicking outside
-                document.addEventListener('click', function(event) {
-                    const isClickInsideNav = navToggle.contains(event.target) || navMenu.contains(event.target);
-                    if (!isClickInsideNav && navMenu.classList.contains('active')) {
-                        navMenu.classList.remove('active');
-                        navToggle.textContent = '☰';
-                    }
-                });
-            }
-
-            // Initialize treasure hunt functionality
-            console.log('Script starting...');
-            loadTeamsList();
-            renderClueGrid();
-        });
-
-        // Original Treasure Hunt JavaScript
-        console.log('Script starting...');
-        
-        var currentTeam = null;
-        var allTeams = [];
-        var currentClue = null;
-        var completedClues = {};
-        var currentScore = 0;
-        var returnTimeout = null;
-
-        // Treasure Hunt clue data - 140 doubloons total (randomised distribution)
-        var clueHuntData = [
-            { id: 1, clue: "What comes after zero?", answer: "one", acceptableAnswers: ["one", "1", "One"], points: 6 },
-            { id: 2, clue: "What number comes after one?", answer: "two", acceptableAnswers: ["two", "2", "Two"], points: 5 },
-            { id: 3, clue: "What number comes after two?", answer: "three", acceptableAnswers: ["three", "3", "Three"], points: 8 },
-            { id: 4, clue: "What number comes after three?", answer: "four", acceptableAnswers: ["four", "4", "Four"], points: 7 },
-            { id: 5, clue: "What number comes after four?", answer: "five", acceptableAnswers: ["five", "5", "Five"], points: 9 },
-            { id: 6, clue: "What number comes after five?", answer: "six", acceptableAnswers: ["six", "6", "Six"], points: 5 },
-            { id: 7, clue: "What number comes after six?", answer: "seven", acceptableAnswers: ["seven", "7", "Seven"], points: 7 },
-            { id: 8, clue: "What number comes after seven?", answer: "eight", acceptableAnswers: ["eight", "8", "Eight"], points: 6 },
-            { id: 9, clue: "What number comes after eight?", answer: "nine", acceptableAnswers: ["nine", "9", "Nine"], points: 5 },
-            { id: 10, clue: "What number comes after nine?", answer: "ten", acceptableAnswers: ["ten", "10", "Ten"], points: 8 },
-            { id: 11, clue: "What number comes after ten?", answer: "eleven", acceptableAnswers: ["eleven", "11", "Eleven"], points: 10 },
-            { id: 12, clue: "What number comes after eleven?", answer: "twelve", acceptableAnswers: ["twelve", "12", "Twelve"], points: 6 },
-            { id: 13, clue: "What number comes after twelve?", answer: "thirteen", acceptableAnswers: ["thirteen", "13", "Thirteen"], points: 7 },
-            { id: 14, clue: "What number comes after thirteen?", answer: "fourteen", acceptableAnswers: ["fourteen", "14", "Fourteen"], points: 5 },
-            { id: 15, clue: "What number comes after fourteen?", answer: "fifteen", acceptableAnswers: ["fifteen", "15", "Fifteen"], points: 9 },
-            { id: 16, clue: "What number comes after fifteen?", answer: "sixteen", acceptableAnswers: ["sixteen", "16", "Sixteen"], points: 6 },
-            { id: 17, clue: "What number comes after sixteen?", answer: "seventeen", acceptableAnswers: ["seventeen", "17", "Seventeen"], points: 8 },
-            { id: 18, clue: "What number comes after seventeen?", answer: "eighteen", acceptableAnswers: ["eighteen", "18", "Eighteen"], points: 7 },
-            { id: 19, clue: "What number comes after eighteen?", answer: "nineteen", acceptableAnswers: ["nineteen", "19", "Nineteen"], points: 5 },
-            { id: 20, clue: "What number comes after nineteen?", answer: "twenty", acceptableAnswers: ["twenty", "20", "Twenty"], points: 6 }
-        ];
-
-        // Enhanced completion status checking
-        async function checkCompletionStatus() {
-            const teamCode = localStorage.getItem('teamCode');
-            if (!teamCode) {
-                return false;
-            }
-
-            try {
-                console.log('Checking completion status for team:', teamCode);
-                
-                // Check backend for completion status
-                const response = await fetch('/.netlify/functions/check-clue-completion', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ teamCode })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Completion check response:', data);
-                    
-                    if (data.completed) {
-                        showCompletionMessage(data.totalScore);
-                        return true;
-                    }
-                }
-                
-                return false;
-            } catch (error) {
-                console.error('Error checking completion:', error);
-                return false;
-            }
+        // GET fallback
+        if(!teams.length){
+          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
+          if(res.ok){ data = await res.json().catch(()=>({})); teams = extractTeams(data); }
         }
 
-        // Show completion message and prevent re-entry
-        function showCompletionMessage(score) {
-            console.log('Showing completion message with score:', score);
-            
-            // Hide login and hunt sections
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('huntSection').classList.remove('active');
-            
-            // Show completion section
-            document.getElementById('completionSection').classList.add('active');
-            document.getElementById('completionScore').textContent = `Total Doubloons Earned: ${score}`;
+        if(!teams.length) throw new Error('No teams returned');
+
+        teams.sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||''));
+        $('teamSelect').innerHTML = `<option value="">Choose your crew…</option>` +
+          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        clearSigninMsg();
+      }catch(e){
+        $('teamSelect').innerHTML = `<option value="">Couldn’t load teams</option>`;
+        setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
+      }
+    }
+
+    function setSigninMsg(txt, kind='error'){ const el=$('signinMsg'); el.className='msg ' + (kind==='error'?'err':'ok'); el.textContent=txt; el.style.display='block'; }
+    function clearSigninMsg(){ const el=$('signinMsg'); el.style.display='none'; el.textContent=''; el.className='msg'; }
+    function updateCrewLabel(){ $('crewTag').textContent = 'Crew: ' + (localStorage.getItem('teamName') || localStorage.getItem('teamCode') || ''); }
+
+    // ——— Sign in (dropdown + PIN) ———
+    async function signIn(){
+      clearSigninMsg();
+      const code = $('teamSelect').value;
+      const pin  = (String($('teamPin').value || '')).trim();
+      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
+      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
+
+      try{
+        const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
+        // expected: { success:true, valid:true, token?:string, teamName?:string }
+        if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
+        if(res.token) localStorage.setItem('teamToken', res.token);
+        localStorage.setItem('teamCode', code);
+        localStorage.setItem('teamName', res.teamName || ($('teamSelect').options[$('teamSelect').selectedIndex]?.textContent || ''));
+        updateCrewLabel();
+        setSigninMsg('Signed in. Loading your map…', 'success');
+        await beginHunt(); // move into the hunt after success
+      }catch(err){
+        if(String(err.message).includes('HTTP 404')){
+          setSigninMsg('Sign-in service is off. Enable verify_team_pin_function.', 'error');
+        }else{
+          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
         }
+      }
+    }
 
-        async function loadTeamsList() {
-            try {
-                console.log('Loading crews from leaderboard function...');
-                
-                const response = await fetch('/.netlify/functions/get_leaderboard_function');
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-                
-                const data = await response.json();
-                console.log('Leaderboard response:', data);
-                
-                if (data && data.success && data.teams && Array.isArray(data.teams)) {
-                    console.log('Found', data.teams.length, 'crews');
-                    allTeams = data.teams;
-                    populateTeamDropdown(data.teams);
-                    return;
-                }
-                
-                throw new Error('Invalid response structure');
-                
-            } catch (error) {
-                console.error('Failed to load crews:', error);
-                showMessage('loginMessage', 'Unable to load crew list from the system. Please refresh the page or contact your organiser.', 'error');
-            }
+    // ============ Hunt state ============
+    let currentTeam = null;
+    let completedClues = {};  // { [id]: {points,answer,correctAnswer,completedAt,wasCorrect} }
+    let currentScore = 0;
+    let activeClue = null;
+
+    // 20 simple placeholder clues (5–10 pts each; total 140)
+    const clueData = [
+      {id:1,clue:"What comes after zero?",answer:"one",accept:["one","1","One"],points:6},
+      {id:2,clue:"What comes after one?",answer:"two",accept:["two","2","Two"],points:5},
+      {id:3,clue:"What comes after two?",answer:"three",accept:["three","3","Three"],points:8},
+      {id:4,clue:"What comes after three?",answer:"four",accept:["four","4","Four"],points:7},
+      {id:5,clue:"What comes after four?",answer:"five",accept:["five","5","Five"],points:9},
+      {id:6,clue:"What comes after five?",answer:"six",accept:["six","6","Six"],points:5},
+      {id:7,clue:"What comes after six?",answer:"seven",accept:["seven","7","Seven"],points:7},
+      {id:8,clue:"What comes after seven?",answer:"eight",accept:["eight","8","Eight"],points:6},
+      {id:9,clue:"What comes after eight?",answer:"nine",accept:["nine","9","Nine"],points:5},
+      {id:10,clue:"What comes after nine?",answer:"ten",accept:["ten","10","Ten"],points:8},
+      {id:11,clue:"What comes after ten?",answer:"eleven",accept:["eleven","11","Eleven"],points:10},
+      {id:12,clue:"What comes after eleven?",answer:"twelve",accept:["twelve","12","Twelve"],points:6},
+      {id:13,clue:"What comes after twelve?",answer:"thirteen",accept:["thirteen","13","Thirteen"],points:7},
+      {id:14,clue:"What comes after thirteen?",answer:"fourteen",accept:["fourteen","14","Fourteen"],points:5},
+      {id:15,clue:"What comes after fourteen?",answer:"fifteen",accept:["fifteen","15","Fifteen"],points:9},
+      {id:16,clue:"What comes after fifteen?",answer:"sixteen",accept:["sixteen","16","Sixteen"],points:6},
+      {id:17,clue:"What comes after sixteen?",answer:"seventeen",accept:["seventeen","17","Seventeen"],points:8},
+      {id:18,clue:"What comes after seventeen?",answer:"eighteen",accept:["eighteen","18","Eighteen"],points:7},
+      {id:19,clue:"What comes after eighteen?",answer:"nineteen",accept:["nineteen","19","Nineteen"],points:5},
+      {id:20,clue:"What comes after nineteen?",answer:"twenty",accept:["twenty","20","Twenty"],points:6}
+    ];
+
+    function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
+    function correct(user, clue){ const u=norm(user); return clue.accept.some(a=>norm(a)===u); }
+
+    function renderGrid(){
+      const g = $('clueGrid'); g.innerHTML='';
+      clueData.forEach(c=>{
+        const status = completedClues[c.id];
+        const btn = document.createElement('button');
+        btn.className = 'clue' + (status ? (status.wasCorrect ? ' completed' : ' incorrect') : '');
+        btn.textContent = `Clue ${c.id}`;
+        if(!status){
+          btn.addEventListener('click', ()=>openClue(c));
+        }else{
+          btn.disabled = true;
         }
+        g.appendChild(btn);
+      });
+    }
 
-        function populateTeamDropdown(teams) {
-            console.log('Populating dropdown with crews:', teams);
-            var select = document.getElementById('teamSelect');
-            select.innerHTML = '<option value="">Choose your treasure hunting crew...</option>';
-            
-            // Sort teams alphabetically
-            teams
-                .sort((a, b) => a.teamName.localeCompare(b.teamName))
-                .forEach(team => {
-                    const option = document.createElement('option');
-                    option.value = team.teamCode;
-                    option.textContent = team.teamName;
-                    select.appendChild(option);
-                });
-            console.log('Dropdown populated');
-        }
+    function openClue(c){
+      activeClue = c;
+      $('gridWrap').style.display='none';
+      $('cluePanel').style.display='block';
+      $('clueTitle').textContent = `Clue ${c.id}`;
+      $('clueText').textContent  = c.clue;
+      $('result').style.display='none';
+      $('answer').value='';
+      $('answer').focus();
+    }
 
-        function renderClueGrid() {
-            var grid = document.getElementById('clueGrid');
-            grid.innerHTML = '';
+    function backToGrid(){
+      $('cluePanel').style.display='none';
+      $('gridWrap').style.display='block';
+      renderGrid();
+    }
 
-            for (var i = 0; i < clueHuntData.length; i++) {
-                var clue = clueHuntData[i];
-                var clueStatus = completedClues[clue.id];
-                
-                var button = document.createElement('button');
-                var buttonClass = 'clue-button';
-                
-                if (clueStatus) {
-                    // Clue has been attempted
-                    if (clueStatus.wasCorrect) {
-                        buttonClass += ' completed';  // Green with checkmark
-                    } else {
-                        buttonClass += ' incorrect';  // Red with cross
-                    }
-                    button.disabled = true;
-                } else {
-                    // Clue not yet attempted - allow clicking
-                    button.setAttribute('data-clue-id', clue.id);
-                    button.onclick = function() {
-                        var clueId = parseInt(this.getAttribute('data-clue-id'));
-                        var clueData = null;
-                        for (var j = 0; j < clueHuntData.length; j++) {
-                            if (clueHuntData[j].id === clueId) {
-                                clueData = clueHuntData[j];
-                                break;
-                            }
-                        }
-                        if (clueData) selectClue(clueData);
-                    };
-                }
-                
-                button.className = buttonClass;
-                button.textContent = 'Clue ' + clue.id;
-                
-                grid.appendChild(button);
-            }
-        }
+    function updateScoreUI(){
+      $('scoreBox').textContent = `Treasure: ${currentScore} doubloons`;
+      const attempted = Object.keys(completedClues).length;
+      const solved = Object.values(completedClues).filter(v=>v.wasCorrect).length;
+      const pct = Math.max(15, (attempted/clueData.length)*100);
+      $('fill').style.width = `${pct}%`;
+      $('fill').textContent = `${solved}/${clueData.length} Solved • ${attempted} Explored`;
+    }
 
-        function selectClue(clue) {
-            currentClue = clue;
-            document.getElementById('clueNumber').textContent = 'Clue #' + clue.id;
-            document.getElementById('clueText').textContent = clue.clue;
-            document.getElementById('answerInput').value = '';
-            document.getElementById('resultMessage').style.display = 'none';
-            document.getElementById('continueBtn').style.display = 'none';
-            document.getElementById('submitAnswerBtn').disabled = false;
-            
-            document.getElementById('clueGridSection').style.display = 'none';
-            document.getElementById('clueSection').classList.add('active');
-            
-            setTimeout(function() {
-                document.getElementById('answerInput').focus();
-            }, 100);
-        }
+    async function submitActive(){
+      const ans = $('answer').value.trim();
+      if(!activeClue){ return; }
+      if(!ans){ showResult('Enter an answer.', false, true); return; }
 
-        function showClueGrid() {
-            document.getElementById('clueSection').classList.remove('active');
-            document.getElementById('clueGridSection').style.display = 'block';
-            renderClueGrid();
-        }
+      const ok = correct(ans, activeClue);
+      const points = ok ? activeClue.points : 0;
 
-        function submitAnswer() {
-            var userAnswer = document.getElementById('answerInput').value.trim();
-            
-            if (!userAnswer) {
-                showResultMessage('Please enter an answer to claim the treasure!', 'error');
-                return;
-            }
-            
-            if (!currentClue) {
-                showResultMessage('No clue selected!', 'error');
-                return;
-            }
-            
-            var isCorrect = checkAnswer(userAnswer, currentClue);
-            
-            if (isCorrect) {
-                // Correct answer - award doubloons
-                completedClues[currentClue.id] = {
-                    points: currentClue.points,
-                    answer: userAnswer,
-                    correctAnswer: currentClue.answer,
-                    completedAt: new Date().toISOString(),
-                    wasCorrect: true
-                };
-                
-                currentScore += currentClue.points;
-                
-                showResultMessage('🎉 Treasure claimed! You discovered ' + currentClue.points + ' doubloons in this chest!', 'success');
-                
-                updateScore();
-                updateProgress();
-                
-                submitClueToBackend(currentClue, userAnswer, currentClue.points, true);
-                
-            } else {
-                // Incorrect answer - no doubloons, show correct answer with doubloon value
-                completedClues[currentClue.id] = {
-                    points: 0,
-                    answer: userAnswer,
-                    correctAnswer: currentClue.answer,
-                    completedAt: new Date().toISOString(),
-                    wasCorrect: false
-                };
-                
-                showResultMessage('❌ The treasure chest remains locked! The correct answer was: ' + currentClue.answer + ' (worth ' + currentClue.points + ' doubloons)', 'error');
-                
-                updateProgress();
-                
-                submitClueToBackend(currentClue, userAnswer, 0, false);
-            }
-            
-            // Always return to map after showing result (whether correct or incorrect)
-            document.getElementById('continueBtn').style.display = 'flex';
-            document.getElementById('submitAnswerBtn').disabled = true;
-            
-            returnTimeout = setTimeout(function() {
-                continueToMap();
-            }, 5000); // 5 seconds to read the message
-        }
+      completedClues[activeClue.id] = {
+        points, answer:ans, correctAnswer:activeClue.answer,
+        completedAt:new Date().toISOString(), wasCorrect:ok
+      };
+      if(ok) currentScore += points;
 
-        function checkAnswer(userAnswer, clue) {
-            if (!userAnswer || !clue) return false;
-            
-            var normalizedUser = normaliseText(userAnswer);
-            
-            for (var i = 0; i < clue.acceptableAnswers.length; i++) {
-                var normalizedAcceptable = normaliseText(clue.acceptableAnswers[i]);
-                if (normalizedUser === normalizedAcceptable) {
-                    return true;
-                }
-            }
-            return false;
-        }
+      updateScoreUI();
+      renderGrid();
 
-        function normaliseText(text) {
-            if (!text || typeof text !== 'string') return '';
-            
-            return text
-                .toLowerCase()
-                .trim()
-                .replace(/[^\w\s]/g, '')
-                .replace(/\s+/g, ' ')
-                .replace(/\s/g, '');
-        }
+      showResult(
+        ok ? `🎉 Correct! +${points} doubloons` : `✗ Not quite. Correct answer: ${activeClue.answer} (worth ${activeClue.points})`,
+        ok
+      );
 
-        function showResultMessage(message, type) {
-            var resultMessage = document.getElementById('resultMessage');
-            resultMessage.textContent = message;
-            resultMessage.className = 'result-message ' + type;
-            resultMessage.style.display = 'block';
-        }
+      // persist attempt
+      try{
+        const payload = {
+          teamCode: localStorage.getItem('teamCode'),
+          teamName: localStorage.getItem('teamName'),
+          clueId: activeClue.id,
+          clueText: activeClue.clue,
+          userAnswer: ans,
+          correctAnswer: activeClue.answer,
+          points, currentScore, wasCorrect: ok, eventId: EVENT_ID
+        };
+        await callFn('submit_cluehunt_function', payload);
+      }catch(e){ /* non-blocking */ }
 
-        function continueToMap() {
-            // Clear the timeout if it exists
-            if (returnTimeout) {
-                clearTimeout(returnTimeout);
-                returnTimeout = null;
-            }
-            
-            // Hide the continue button
-            document.getElementById('continueBtn').style.display = 'none';
-            
-            // Return to the clue grid
-            showClueGrid();
-            
-            // Check if all clues are completed for celebration
-            if (Object.keys(completedClues).length === clueHuntData.length) {
-                showCompletionCelebration();
-            }
-        }
+      // small delay then return
+      setTimeout(backToGrid, 1500);
+    }
 
-        function updateScore() {
-            document.getElementById('scoreDisplay').textContent = '💰 Treasure Collected: ' + currentScore + ' doubloons';
-        }
+    function showResult(text, good, force=false){
+      const el=$('result');
+      el.className = 'msg ' + (good ? 'ok' : 'err');
+      el.textContent = text;
+      el.style.display = 'block';
+    }
 
-        function updateProgress() {
-            var attempted = Object.keys(completedClues).length;
-            var correct = 0;
-            
-            // Count correct answers
-            for (var clueId in completedClues) {
-                if (completedClues[clueId].wasCorrect) {
-                    correct++;
-                }
-            }
-            
-            var total = clueHuntData.length;
-            var percentage = (attempted / total) * 100;
-            
-            var progressFill = document.getElementById('progressFill');
-            progressFill.style.width = Math.max(percentage, 15) + '%'; // Minimum 15% width to show text
-            progressFill.textContent = correct + '/' + total + ' Solved • ' + attempted + ' Explored';
-        }
-
-        function showCompletionCelebration() {
-            var celebration = document.getElementById('completionCelebration');
-            document.getElementById('finalScore').textContent = 'Final Treasure: ' + currentScore + ' doubloons';
-            celebration.classList.add('show');
-        }
-
-        function submitClueToBackend(clue, userAnswer, points, wasCorrect) {
-            if (!currentTeam) return;
-            
-            var submissionData = {
-                teamCode: currentTeam.teamCode,
-                teamName: currentTeam.teamName,
-                clueId: clue.id,
-                clueText: clue.clue,
-                userAnswer: userAnswer,
-                correctAnswer: clue.answer,
-                points: points,
-                currentScore: currentScore,
-                wasCorrect: wasCorrect
+    // load prior attempts for this team (resume)
+    async function loadPrevious(){
+      completedClues = {}; currentScore = 0;
+      try{
+        const teamCode = localStorage.getItem('teamCode');
+        if(!teamCode) return;
+        const res = await callFn('get_cluehunt_submissions_function', { teamCode, eventId: EVENT_ID });
+        if(res?.success && Array.isArray(res.submissions)){
+          res.submissions.forEach(s=>{
+            completedClues[s.clueId] = {
+              points: s.points || 0,
+              answer: s.userAnswer || '',
+              correctAnswer: s.correctAnswer || '',
+              completedAt: s.attemptTime || '',
+              wasCorrect: (s.points||0) > 0
             };
-            
-            fetch('/.netlify/functions/submit_cluehunt_function', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(submissionData)
-            }).then(function(response) {
-                return response.json();
-            }).then(function(result) {
-                console.log('Clue submitted successfully:', result);
-            }).catch(function(error) {
-                console.error('Failed to submit clue to backend:', error);
-            });
+          });
+          currentScore = Number(res.totalScore || 0);
         }
+      }catch(e){ /* ignore */ }
+    }
 
-        // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            var selectedTeamCode = document.getElementById('teamSelect').value;
-            var enteredPin = document.getElementById('teamPin').value;
-            
-            if (!selectedTeamCode) {
-                showMessage('loginMessage', 'Please select your crew from the list.', 'error');
-                return;
-            }
-            
-            if (!/^\d{4}$/.test(enteredPin)) {
-                showMessage('loginMessage', 'Please enter a valid 4-digit secret code.', 'error');
-                return;
-            }
+    // Start the hunt UI
+    async function beginHunt(){
+      currentTeam = {
+        teamCode: localStorage.getItem('teamCode') || '',
+        teamName: localStorage.getItem('teamName') || ''
+      };
+      updateCrewLabel();
+      await loadPrevious();
+      updateScoreUI();
+      renderGrid();
+      $('signin').classList.remove('active');
+      $('hunt').classList.add('active');
+    }
 
-            try {
-                // Verify crew selection and secret code
-                const isValid = await verifyTeamAndPin(selectedTeamCode, enteredPin);
-                
-                if (isValid) {
-                    // Find selected crew
-                    var selectedTeam = null;
-                    for (var i = 0; i < allTeams.length; i++) {
-                        if (allTeams[i].teamCode === selectedTeamCode) {
-                            selectedTeam = allTeams[i];
-                            break;
-                        }
-                    }
-                    
-                    if (selectedTeam) {
-                        currentTeam = selectedTeam;
-                        
-                        // Store team code for completion checking
-                        localStorage.setItem('teamCode', selectedTeam.teamCode);
-                        
-                        // Load previous clue attempts for this crew
-                        await loadPreviousAttempts();
-                        
-                        // Check if quest is already completed
-                        const isCompleted = await checkCompletionStatus();
-                        
-                        if (!isCompleted) {
-                            // Continue with normal hunt
-                            document.getElementById('teamInfo').textContent = 'Crew: ' + selectedTeam.teamName;
-                            
-                            // Re-render grid to show completed clues
-                            renderClueGrid();
-                            
-                            document.getElementById('loginSection').classList.remove('active');
-                            document.getElementById('huntSection').classList.add('active');
-                            
-                            updateProgress();
-                            updateScore();
-                        }
-                    }
-                } else {
-                    showMessage('loginMessage', 'Incorrect secret code for the selected crew. Please check your code and try again.', 'error');
-                }
-            } catch (error) {
-                showMessage('loginMessage', 'Error verifying crew credentials. Please try again.', 'error');
-            }
-        });
+    // ============ Wire up ============
+    $('signinBtn').addEventListener('click', signIn);
+    $('backBtn').addEventListener('click', backToGrid);
+    $('submitAnswer').addEventListener('click', submitActive);
+    $('answer').addEventListener('keydown', e=>{ if(e.key==='Enter') submitActive(); });
 
-        async function verifyTeamAndPin(teamCode, enteredPin) {
-            try {
-                console.log('Attempting to verify crew:', teamCode, 'with secret code:', enteredPin);
-                
-                const response = await fetch('/.netlify/functions/verify_team_pin_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        teamCode: teamCode,
-                        pin: enteredPin
-                    })
-                });
-                
-                console.log('Secret code verification response status:', response.status);
-                console.log('Secret code verification response ok:', response.ok);
-                
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('Secret code verification HTTP error:', errorText);
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const result = await response.json();
-                console.log('Secret code verification result:', result);
-                
-                if (result.success) {
-                    return result.valid;
-                } else {
-                    throw new Error(result.error || 'Verification failed');
-                }
-                
-            } catch (error) {
-                console.error('Error verifying crew and secret code:', error);
-                return false;
-            }
-        }
-
-        async function loadPreviousAttempts() {
-            // Clear current state
-            completedClues = {};
-            currentScore = 0;
-
-            try {
-                console.log('Loading previous clue attempts for crew:', currentTeam.teamCode);
-                
-                const response = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        teamCode: currentTeam.teamCode
-                    })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Treasure hunt submissions response:', data);
-                    
-                    if (data.success && data.submissions) {
-                        // Restore completed clues and score
-                        data.submissions.forEach(submission => {
-                            completedClues[submission.clueId] = {
-                                points: submission.points,
-                                answer: submission.userAnswer,
-                                correctAnswer: submission.correctAnswer,
-                                completedAt: submission.attemptTime,
-                                wasCorrect: submission.points > 0 // Determine correctness based on points earned
-                            };
-                        });
-                        
-                        // Restore total score
-                        currentScore = data.totalScore || 0;
-                        
-                        console.log('Loaded previous clue attempts:', Object.keys(completedClues).length);
-                        console.log('Restored treasure:', currentScore);
-                    }
-                } else {
-                    console.log('No previous clue attempts found or API error');
-                }
-                
-            } catch (error) {
-                console.error('Error loading previous clue attempts:', error);
-                // Continue with empty data if API fails
-            }
-        }
-
-        function showMessage(containerId, message, type) {
-            var container = document.getElementById(containerId);
-            container.textContent = message;
-            container.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
-            container.style.display = 'block';
-        }
-
-        console.log('Script loaded successfully');
-    </script>
+    // boot
+    loadTeams();
+  </script>
 </body>
 </html>
