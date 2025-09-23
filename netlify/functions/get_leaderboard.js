@@ -1,9 +1,7 @@
 // netlify/functions/get_leaderboard.js
 const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
 
-/**
- * Helper: read a tab by any of a few likely titles.
- */
+/** Read the first tab that exists from a list of likely names */
 async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
   for (const name of tabNames) {
     try {
@@ -13,9 +11,7 @@ async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999"
       });
       const values = res?.data?.values || [];
       if (values.length) return { name, values };
-    } catch (e) {
-      // try next
-    }
+    } catch (_) { /* try next */ }
   }
   return { name: null, values: [] };
 }
@@ -34,41 +30,42 @@ function num(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** Map messy activity labels to canonical keys used for columns */
 function activityKey(raw) {
   const k = String(raw || "").trim().toLowerCase();
+
   if (["kindness"].includes(k)) return "kindness";
   if (["limerick"].includes(k)) return "limerick";
-  if (["scavenger","hunt","scav","scavenger hunt"].includes(k)) return "scavenger";
-  if (["quiz","timed quiz","the timed quiz"].includes(k)) return "quiz";
-  return null; // unknown/ignored for breakdown (still counted in total if present)
+  if (["scavenger", "hunt", "scav", "scavenger hunt"].includes(k)) return "scavenger";
+  if (["clue", "cluehunt", "clue hunt", "treasure", "treasure hunt"].includes(k)) return "clue";
+  if (["quiz", "timed quiz", "the timed quiz"].includes(k)) return "quiz";
+
+  return null; // unknown/ignored for per-column, still counted in total
 }
 
 exports.handler = async (event) => {
   try {
-    // Allow both POST {eventId:"..."} and GET ?eventId=...
+    // Allow POST {eventId:"..."} or GET ?eventId=... (we don't filter by event)
     const payload = event.httpMethod === "POST"
       ? (JSON.parse(event.body || "{}") || {})
       : (Object.fromEntries(new URLSearchParams(event.queryStringParameters || {})));
 
-    // Even if an eventId is passed, we’ll compute from the Scores tab
-    // (no filtering by event in this stabilizer).
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // 1) Read Scores tab (various likely names)
+    // 1) Read Scores
     const { values: scoreRows } = await readTabValues(
       sheets,
       spreadsheetId,
       ["scores", "Scores", "scoreboard", "Scoreboard", "Points", "points", "Sheet1"]
     );
 
-    if (!scoreRows.length) {
-      return ok({ leaderboard: [] }); // nothing to show
-    }
+    if (!scoreRows.length) return ok({ leaderboard: [] });
 
     const header = scoreRows[0] || [];
     const idx = indexHeaders(header);
-    // Expected headers (case-insensitive): Team Code, Activity, Score, Status
+
+    // Expected headers: Team Code | Activity | Score | Status (case-insensitive)
     const outByTeam = new Map();
 
     for (let i = 1; i < scoreRows.length; i++) {
@@ -89,18 +86,20 @@ exports.handler = async (event) => {
           kindness: 0,
           limerick: 0,
           scavenger: 0,
+          clue: 0,        // <<< NEW COLUMN
           quiz: 0,
-          total: 0
+          total: 0,
         });
       }
+
       const agg = outByTeam.get(teamCode);
       if (act && Object.prototype.hasOwnProperty.call(agg, act)) {
-        agg[act] += score;
+        agg[act] += score;    // put into its column
       }
-      agg.total += score;
+      agg.total += score;     // always accumulates into Total
     }
 
-    // 2) Merge team names from Teams tab (if available)
+    // 2) Merge team names from Teams tab
     const { values: teamRows } = await readTabValues(
       sheets,
       spreadsheetId,
@@ -124,14 +123,11 @@ exports.handler = async (event) => {
       }
     }
 
-    // If a teamName wasn’t found, fallback to code
     const leaderboard = [...outByTeam.values()]
       .map(t => ({ ...t, teamName: t.teamName || t.teamCode }))
       .sort((a, b) => b.total - a.total);
 
-    // Final, stable shape
     return ok({ leaderboard });
-
   } catch (e) {
     console.error("get_leaderboard error:", e);
     return error(500, e.message || "Unexpected error");
