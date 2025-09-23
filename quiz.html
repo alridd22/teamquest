@@ -493,7 +493,7 @@
 
     async function loadTeamsList(){
       try{
-        const r=await fetch('/.netlify/functions/get_leaderboard_function');
+        const r=await fetch('/.netlify/functions/get_leaderboard');
         if(!r.ok) throw new Error('HTTP '+r.status);
         const data=await r.json();
         if(data?.success && Array.isArray(data.teams)){ allTeams=data.teams; populateTeamDropdown(data.teams); }
