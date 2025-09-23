@@ -1,8 +1,6 @@
-// netlify/functions/submit_quiz_function.js
 const { ok, error, isPreflight, getSheets, SHEET_ID } = require("./_utils.js");
 
 async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
-  // Create the sheet if missing and seed headers
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
   const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
   if (!exists) {
@@ -30,14 +28,14 @@ module.exports.handler = async (event) => {
 
     const {
       teamCode,
-      teamName,                // optional
-      totalScore,              // number (0..100)
-      questionsCorrect,        // number
-      totalQuestions,          // number
-      completionTime,          // ISO string
-      quizStartTime,           // ISO string
-      answers,                 // array (optional)
-      eventId                  // optional
+      teamName,
+      totalScore,              // 0..100
+      questionsCorrect,
+      totalQuestions,
+      completionTime,
+      quizStartTime,
+      answers,
+      eventId
     } = body;
 
     if (!teamCode || totalScore == null || totalQuestions == null) {
@@ -47,41 +45,33 @@ module.exports.handler = async (event) => {
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // Make sure the two tabs exist
+    // Ensure tabs exist (keep your existing headers in Scores if already present)
     await ensureSheetWithHeader(
       sheets, spreadsheetId, "submissions",
       [
-        "Timestamp",     // A
-        "Team Code",     // B
-        "Activity",      // C
-        "Nonce",         // D
-        "Payload",       // E (JSON)
-        "AI Status",     // F
-        "AI Attempts",   // G
-        "AI Score",      // H
-        "Final Score",   // I
-        "Idempotency",   // J
-        "Event Id"       // K
+        "Timestamp","Team Code","Activity","Nonce","Payload",
+        "AI Status","AI Attempts","AI Score","Final Score","Idempotency","Event Id"
       ]
     );
+    // Do NOT force a new header if Scores already exists in legacy order.
+    const scoresHeaderRes = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: "Scores!1:1"
+    }).catch(() => null);
 
-    await ensureSheetWithHeader(
-      sheets, spreadsheetId, "Scores",
-      [
-        "Timestamp",     // A
-        "Team Code",     // B
-        "Activity",      // C
-        "Score",         // D
-        "Status",        // E
-        "Event Id"       // F
-      ]
-    );
+    if (!scoresHeaderRes || !(scoresHeaderRes.data?.values?.[0]?.length)) {
+      // Create with legacy order (matches your sheet)
+      await ensureSheetWithHeader(
+        sheets, spreadsheetId, "Scores",
+        ["Team Code","Activity","Score","Status","SubmissionID","Event Id"]
+      );
+    }
 
     const nowIso = new Date().toISOString();
     const percentage = Math.round((Number(questionsCorrect || 0) / Number(totalQuestions || 1)) * 100);
-    const idempotency = `quiz:${eventId || ""}:${teamCode}`; // simple de-dupe key
+    const idempotency = `quiz:${eventId || ""}:${teamCode}`;
 
-    // 1) Append to submissions (detailed log)
+    // 1) Append detailed log to submissions
     const payload = JSON.stringify({
       activity: "quiz",
       questionsCorrect: Number(questionsCorrect || 0),
@@ -101,37 +91,68 @@ module.exports.handler = async (event) => {
       insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [[
-          nowIso,           // Timestamp
-          teamCode,         // Team Code
-          "quiz",           // Activity
-          "",               // Nonce (unused)
-          payload,          // Payload (JSON)
-          "FINAL",          // AI Status (treated as final)
-          "0",              // AI Attempts
-          "",               // AI Score
-          Number(totalScore) || 0, // Final Score
-          idempotency,      // Idempotency
-          eventId || ""     // Event Id
+          nowIso,                 // Timestamp
+          teamCode,               // Team Code
+          "quiz",                 // Activity
+          "",                     // Nonce
+          payload,                // Payload
+          "FINAL",                // AI Status
+          "0",                    // AI Attempts
+          "",                     // AI Score
+          Number(totalScore) || 0,// Final Score
+          idempotency,            // Idempotency
+          eventId || ""           // Event Id
         ]]
       }
     });
 
-    // 2) Append to Scores (what your leaderboard reads)
+    // 2) Append to Scores respecting current header order
+    const header = (scoresHeaderRes?.data?.values?.[0] || []).map(h => String(h).trim().toLowerCase());
+
+    const isLegacy =
+      header[0] === "team code" &&
+      header[1] === "activity" &&
+      header[2] === "score" &&
+      header[3] === "status";
+
+    const isNew =
+      header[0] === "timestamp" &&
+      header.includes("team code") &&
+      header.includes("activity") &&
+      header.includes("score") &&
+      header.includes("status");
+
+    let scoresRow;
+
+    if (isLegacy || !isNew) {
+      // Your sheet’s layout:
+      // A Team Code, B Activity, C Score, D Status, E SubmissionID, F Event Id
+      scoresRow = [
+        teamCode,
+        "quiz",
+        Number(totalScore) || 0,
+        "final",
+        idempotency,
+        eventId || ""
+      ];
+    } else {
+      // New layout (Timestamp first)
+      scoresRow = [
+        nowIso,
+        teamCode,
+        "quiz",
+        Number(totalScore) || 0,
+        "FINAL",
+        eventId || ""
+      ];
+    }
+
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: "Scores!A1",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
-      requestBody: {
-        values: [[
-          nowIso,                 // Timestamp
-          teamCode,               // Team Code
-          "quiz",                 // Activity
-          Number(totalScore) || 0,// Score
-          "FINAL",                // Status
-          eventId || ""           // Event Id
-        ]]
-      }
+      requestBody: { values: [scoresRow] }
     });
 
     return ok({
