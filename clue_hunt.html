@@ -1,63 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TeamQuest – Clue Hunt</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TeamQuest — Clue Hunt</title>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
   <style>
-    :root { --gold:#DAA520; --amber:#FF8C00; --brown:#8B4513; --sand:#F5E6D3; }
-    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
-      background:linear-gradient(135deg,#8B4513 0%,#D2691E 35%,#F4A460 100%); padding:24px}
-    /* nav */
-    .nav{position:sticky;top:0;z-index:10;background:linear-gradient(135deg,#8B4513,#654321);border:0;border-bottom:3px solid var(--gold);padding:8px 14px;display:flex;gap:16px;align-items:center}
-    .nav img{height:36px}
-    .wrap{max-width:980px;margin:24px auto;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);border:3px solid var(--brown);border-radius:22px;padding:28px}
-    h1{margin:0 0 4px;color:var(--brown)}
-    .muted{color:#7a5a37;margin:0 0 18px}
-    /* sections */
-    .section{display:none}.section.active{display:block}
-    /* card bits */
-    .team{background:linear-gradient(135deg,#8B4513,#A0522D);border:2px solid var(--gold);color:#fff;padding:14px;border-radius:12px;text-align:center;font-weight:700;margin:10px 0 18px}
-    .rulebox{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border-left:6px solid var(--amber);border:2px solid var(--gold);border-radius:12px;padding:16px;margin:16px 0}
-    label{display:block;margin:10px 0 6px;color:var(--brown);font-weight:600}
-    select,input[type="number"],input[type="text"]{width:100%;padding:14px;border-radius:10px;border:3px solid var(--gold);background:linear-gradient(145deg,#fff,#FFF8DC);font-size:16px}
-    select:focus,input:focus{outline:none;border-color:#ff9a1f;box-shadow:0 0 0 3px rgba(255,140,0,.2)}
-    .btn{width:100%;padding:16px;border-radius:12px;border:2px solid var(--brown);background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .msg{display:none;margin:14px 0;padding:14px;border-radius:10px;border:2px solid}
-    .msg.ok{display:block;background:#aaf0b3;border-color:#2e8b57;color:#084c1f}
-    .msg.err{display:block;background:#ffb5c0;border-color:#b00020;color:#6b0014}
-    /* grid */
-    .score{background:linear-gradient(135deg,#FF8C00,#DAA520);border:3px solid var(--brown);color:#fff;border-radius:14px;text-align:center;padding:18px;font-weight:800;margin:10px 0 18px}
-    .bar{border:3px solid var(--gold);border-radius:12px;background:linear-gradient(135deg,#A0522D,#8B4513);padding:5px;margin-bottom:20px}
-    .fill{height:28px;border-radius:8px;background:linear-gradient(135deg,#FFD700,#FFA500);display:flex;align-items:center;justify-content:center;font-weight:800;color:#704a18}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
-    .clue{padding:18px;border-radius:12px;border:3px solid var(--brown);background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer;position:relative}
-    .clue.completed{background:linear-gradient(135deg,#32CD32,#228B22);border-color:#0d5d0d;cursor:not-allowed}
-    .clue.incorrect{background:linear-gradient(135deg,#DC143C,#B22222);border-color:#7a0000;cursor:not-allowed}
-    .clue.completed::after{content:"✓";position:absolute;top:6px;right:10px;font-size:18px}
-    .clue.incorrect::after{content:"✗";position:absolute;top:6px;right:10px;font-size:18px}
-    .panel{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:3px solid var(--gold);border-radius:16px;padding:18px;margin-top:16px}
-    .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
-    .back{padding:10px 14px;border-radius:10px;border:2px solid #654321;background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;font-weight:700;cursor:pointer}
+    :root{--brown:#8B4513;--gold:#DAA520;--orange:#FF8C00;--cream:#F5E6D3}
+    *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513,#D2691E 35%,#F4A460);padding:20px}
+    .card{max-width:980px;margin:0 auto;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);border:3px solid var(--brown);border-radius:22px;padding:28px;box-shadow:0 14px 36px rgba(0,0,0,.2)}
+    h1{margin:0 0 8px;color:var(--brown)} .sub{color:#754d22;margin:0 0 20px}
+    .rules{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:2px solid var(--gold);border-left:6px solid var(--orange);border-radius:12px;padding:18px;margin:12px 0 22px}
+    label{display:block;margin:14px 0 6px;color:var(--brown);font-weight:600}
+    select,input{width:100%;font-size:16px;padding:14px;border:3px solid var(--gold);border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC)}
+    .pin{text-align:center;letter-spacing:3px;font-weight:700}
+    .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;border:2px solid var(--brown);color:#fff;cursor:pointer;font-weight:700;
+      background:linear-gradient(135deg,var(--orange),var(--gold))}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(255,140,0,.35)}
+    .msg{display:none;margin-top:14px;padding:14px;border-radius:10px;border:2px solid}
+    .msg.ok{display:block;background:linear-gradient(135deg,#98FB98,#90EE90);border-color:#32CD32;color:#065d06}
+    .msg.err{display:block;background:linear-gradient(135deg,#FFB6C1,#FFA0B4);border-color:#DC143C;color:#7a0010}
+    .hidden{display:none}
+    .bar{background:linear-gradient(135deg,#A0522D,#8B4513);border:3px solid var(--gold);border-radius:14px;padding:6px;margin:18px 0}
+    .fill{height:30px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5b3a06;font-weight:700}
+    .score{background:linear-gradient(135deg,var(--orange),var(--gold));border:3px solid var(--brown);color:#fff;font-weight:800;border-radius:14px;text-align:center;padding:16px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0}
+    .clue{position:relative;border:3px solid var(--brown);border-radius:14px;padding:18px;color:#fff;font-weight:700;cursor:pointer;text-align:center;
+      background:linear-gradient(135deg,var(--orange),var(--gold))}
+    .clue:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(255,140,0,.35)}
+    .clue.completed{background:linear-gradient(135deg,#32CD32,#228B22);border-color:#0e5b0e;cursor:not-allowed}
+    .clue.completed::after{content:"✓";position:absolute;right:10px;top:6px;font-size:18px}
+    .clue.incorrect{background:linear-gradient(135deg,#DC143C,#B22222);border-color:#7a0010;cursor:not-allowed}
+    .clue.incorrect::after{content:"✗";position:absolute;right:10px;top:6px;font-size:18px}
+    .panel{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:3px solid var(--gold);border-radius:16px;padding:22px}
+    .row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .back{background:linear-gradient(135deg,#8B4513,#A0522D);border:2px solid #5b3512;color:#fff;border-radius:10px;padding:10px 14px;cursor:pointer}
+    .answer{width:100%;margin:10px 0 14px;font-size:20px;text-align:center}
+    .result{display:none;margin:10px 0;border:3px solid;border-radius:12px;padding:14px;font-weight:700}
+    .result.ok{display:block;background:linear-gradient(135deg,#90EE90,#98FB98);border-color:#32CD32;color:#065d06}
+    .result.bad{display:block;background:linear-gradient(135deg,#FFB6C1,#FFA0B4);border-color:#DC143C;color:#7a0010}
+    .cele{display:none;margin-top:18px;background:linear-gradient(135deg,#FFD700,#FFA500);border:4px solid var(--gold);border-radius:16px;padding:22px;text-align:center}
+    @media (max-width:640px){.card{padding:22px}}
   </style>
 </head>
 <body>
-  <div class="nav">
-    <a href="https://theteamquest.netlify.app/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
-  </div>
+  <div class="card">
+    <!-- Login -->
+    <section id="loginSection">
+      <h1>Clue Hunt</h1>
+      <p class="sub">Solve clues in any order. Each correct answer earns hidden doubloons.</p>
 
-  <div class="wrap">
-    <h1>Clue Hunt</h1>
-    <p class="muted">Solve clues in any order. Each correct answer earns hidden doubloons.</p>
-
-    <!-- ——— Sign in ——— -->
-    <section id="signin" class="section active">
-      <div class="rulebox">
-        <ul style="margin:0 0 0 18px;line-height:1.7">
+      <div class="rules">
+        <ul style="margin:0 0 8px 18px;line-height:1.7;color:#61431f">
           <li>20 clues • one try each</li>
           <li>Hidden reward per clue (5–10)</li>
           <li>Come and go anytime — progress saves</li>
@@ -65,288 +61,364 @@
       </div>
 
       <label for="teamSelect">Select your crew</label>
-      <select id="teamSelect"><option value="">Loading…</option></select>
+      <select id="teamSelect">
+        <option value="">Loading crews…</option>
+      </select>
 
       <label for="teamPin">Crew PIN</label>
-      <input id="teamPin" type="number" inputmode="numeric" placeholder="1234" min="1000" max="9999"/>
+      <input id="teamPin" class="pin" inputmode="numeric" minlength="4" maxlength="4" placeholder="1234">
 
-      <button id="signinBtn" class="btn" style="margin-top:12px">📖 Begin Treasure Hunt</button>
-      <div id="signinMsg" class="msg"></div>
+      <button id="signinBtn" class="btn">🗺️ Begin Treasure Hunt</button>
+      <div id="loginMessage" class="msg"></div>
     </section>
 
-    <!-- ——— Hunt ——— -->
-    <section id="hunt" class="section">
-      <div id="crewTag" class="team">Crew: —</div>
-      <div id="scoreBox" class="score">Treasure: 0 doubloons</div>
+    <!-- Hunt -->
+    <section id="huntSection" class="hidden">
+      <div id="teamInfo" class="score">Crew: —</div>
+      <div id="scoreDisplay" class="score" style="margin-top:10px">💰 Treasure Collected: 0 doubloons</div>
 
-      <div class="bar"><div id="fill" class="fill" style="width:15%">0/20 Solved • 0 Explored</div></div>
+      <div class="bar"><div id="progressFill" class="fill" style="width:15%">0/20 Solved • 0 Explored</div></div>
 
-      <div id="gridWrap">
-        <h3 style="color:#8B4513;margin:10px 0 14px">Pick a clue</h3>
-        <div id="clueGrid" class="grid"></div>
+      <div id="clueGridSection">
+        <div class="grid" id="clueGrid"></div>
       </div>
 
-      <div id="cluePanel" class="panel" style="display:none">
+      <div id="clueSection" class="panel hidden">
         <div class="row">
-          <strong id="clueTitle" style="color:#FF8C00">Clue #</strong>
-          <button class="back" id="backBtn">← Back</button>
+          <div id="clueNumber" style="color:var(--orange);font-weight:800">Clue #</div>
+          <button class="back" onclick="showClueGrid()">← Back to map</button>
         </div>
-        <p id="clueText" style="margin:12px 0 14px;font-weight:600;color:#654321"></p>
-        <input id="answer" type="text" placeholder="Your answer…" maxlength="60"/>
-        <button id="submitAnswer" class="btn" style="margin-top:10px">💰 Claim treasure</button>
-        <div id="result" class="msg" style="margin-top:12px"></div>
+        <div id="clueText" style="font-size:18px;color:#5b3a12;margin-bottom:10px"></div>
+        <input id="answerInput" class="answer" placeholder="Enter your answer…">
+        <button id="submitAnswerBtn" class="btn">💰 Claim treasure</button>
+        <div id="resultMessage" class="result"></div>
+        <button id="continueBtn" class="btn hidden">🗺️ Continue to map</button>
+      </div>
+
+      <div id="completionCelebration" class="cele">
+        <h3 style="margin:0 0 6px;color:#623c11">Treasure map complete!</h3>
+        <div id="finalScore" style="font-size:22px;font-weight:800;margin:6px 0">Final Treasure: 0 doubloons</div>
+        <p style="margin:0;color:#623c11">Check the leaderboard to see how you rank!</p>
       </div>
     </section>
   </div>
 
   <script>
-    // ============ Config / helpers ============
-    const EVENT_ID = new URLSearchParams(location.search).get('event') || localStorage.getItem('eventId') || '';
-    const $ = id => document.getElementById(id);
+    // --- Config / refs -------------------------------------------------------
+    const EVENT_ID = new URLSearchParams(location.search).get('event') || '';
+    const teamSelect = document.getElementById('teamSelect');
+    const teamPin    = document.getElementById('teamPin');
+    const signinBtn  = document.getElementById('signinBtn');
+    const loginMsg   = document.getElementById('loginMessage');
+
+    const loginSection = document.getElementById('loginSection');
+    const huntSection  = document.getElementById('huntSection');
+    const teamInfo     = document.getElementById('teamInfo');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const progressFill = document.getElementById('progressFill');
+
+    const clueGridSection = document.getElementById('clueGridSection');
+    const clueGrid        = document.getElementById('clueGrid');
+    const clueSection     = document.getElementById('clueSection');
+    const clueNumber      = document.getElementById('clueNumber');
+    const clueText        = document.getElementById('clueText');
+    const answerInput     = document.getElementById('answerInput');
+    const submitAnswerBtn = document.getElementById('submitAnswerBtn');
+    const resultMessage   = document.getElementById('resultMessage');
+    const continueBtn     = document.getElementById('continueBtn');
+    const completionCelebration = document.getElementById('completionCelebration');
+    const finalScoreEl    = document.getElementById('finalScore');
+
+    // --- Helpers (shared style) ---------------------------------------------
+    function setMsg(el, text, kind='err'){ el.textContent = text; el.className = 'msg ' + (kind==='error'?'err':'ok'); el.style.display = 'block'; }
+    function clearMsg(el){ el.textContent=''; el.style.display='none'; }
 
     async function callFn(name, payload){
       const res = await fetch(`/.netlify/functions/${name}`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload || {})
+        body: JSON.stringify(payload||{})
       });
       if(!res.ok) throw new Error(`HTTP ${res.status}`);
       return res.json();
     }
 
-    // ============ Team list + sign-in (same pattern as other activities) ============
-    // ——— Load teams (robust) ———
+    // --- Load teams (same pattern as other pages) ---------------------------
     function extractTeams(data){
       if(Array.isArray(data?.teams)) return data.teams;
-      if(Array.isArray(data?.leaderboard)) {
-        return data.leaderboard.map(r=>({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      if(Array.isArray(data?.leaderboard)){
+        return data.leaderboard.map(r => ({
+          teamCode: r.teamCode || r.code || r.teamId || '',
+          teamName: r.teamName || r.name || ''
+        })).filter(t => t.teamName);
       }
-      if(Array.isArray(data?.rows)) {
-        return data.rows.map(r=>({ teamCode: r.teamCode || r.code || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
+      if(Array.isArray(data?.rows)){
+        return data.rows.map(r => ({
+          teamCode: r.teamCode || r.code || '',
+          teamName: r.teamName || r.name || ''
+        })).filter(t => t.teamName);
       }
       return [];
     }
 
     async function loadTeams(){
       try{
-        // Try POST first (preferred)
         let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
         let teams = extractTeams(data);
 
-        // GET fallback
         if(!teams.length){
           const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
           if(res.ok){ data = await res.json().catch(()=>({})); teams = extractTeams(data); }
         }
+        if(!teams.length) throw new Error('No teams');
 
-        if(!teams.length) throw new Error('No teams returned');
-
-        teams.sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||''));
-        $('teamSelect').innerHTML = `<option value="">Choose your crew…</option>` +
-          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
-        clearSigninMsg();
+        teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
+        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` +
+          teams.map(t => `<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        clearMsg(loginMsg);
       }catch(e){
-        $('teamSelect').innerHTML = `<option value="">Couldn’t load teams</option>`;
-        setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
+        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
+        setMsg(loginMsg, 'Unable to load crew list. Please refresh or try again.', 'error');
       }
     }
 
-    function setSigninMsg(txt, kind='error'){ const el=$('signinMsg'); el.className='msg ' + (kind==='error'?'err':'ok'); el.textContent=txt; el.style.display='block'; }
-    function clearSigninMsg(){ const el=$('signinMsg'); el.style.display='none'; el.textContent=''; el.className='msg'; }
-    function updateCrewLabel(){ $('crewTag').textContent = 'Crew: ' + (localStorage.getItem('teamName') || localStorage.getItem('teamCode') || ''); }
-
-    // ——— Sign in (dropdown + PIN) ———
+    // --- Sign in (POST { teamCode, pin } to verify_team_pin_function) -------
     async function signIn(){
-      clearSigninMsg();
-      const code = $('teamSelect').value;
-      const pin  = (String($('teamPin').value || '')).trim();
-      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
-      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
+      clearMsg(loginMsg);
+      const code = teamSelect.value;
+      const pin  = (teamPin.value || '').trim();
+
+      if(!code){ setMsg(loginMsg,'Pick your crew from the list.','error'); return; }
+      if(!/^\d{4}$/.test(pin)){ setMsg(loginMsg,'Enter your 4-digit PIN.','error'); return; }
 
       try{
-        const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
-        // expected: { success:true, valid:true, token?:string, teamName?:string }
-        if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
-        if(res.token) localStorage.setItem('teamToken', res.token);
-        localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', res.teamName || ($('teamSelect').options[$('teamSelect').selectedIndex]?.textContent || ''));
-        updateCrewLabel();
-        setSigninMsg('Signed in. Loading your map…', 'success');
-        await beginHunt(); // move into the hunt after success
-      }catch(err){
-        if(String(err.message).includes('HTTP 404')){
-          setSigninMsg('Sign-in service is off. Enable verify_team_pin_function.', 'error');
-        }else{
-          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
+        const res = await fetch('/.netlify/functions/verify_team_pin_function', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ teamCode: code, pin })
+        });
+        if(!res.ok){
+          const text = await res.text();
+          throw new Error(`HTTP ${res.status} – ${text || 'verify_team_pin_function'}`);
         }
+        const data = await res.json(); // { success:true, valid:true, teamName?, token? }
+        if(!data.valid){ setMsg(loginMsg,'That PIN doesn’t match this crew.','error'); return; }
+
+        if(data.token) localStorage.setItem('teamToken', data.token);
+        localStorage.setItem('teamCode', code);
+        localStorage.setItem('teamName', data.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
+
+        // UI on
+        teamInfo.textContent = 'Crew: ' + (localStorage.getItem('teamName') || '—');
+        loginSection.classList.add('hidden');
+        huntSection.classList.remove('hidden');
+
+        await loadPreviousAttempts(); // restore progress if any
+        renderClueGrid(); updateProgress(); updateScore();
+      }catch(err){
+        setMsg(loginMsg, err.message || 'Could not sign you in. Try again.', 'error');
+        console.error('signIn error:', err);
       }
     }
 
-    // ============ Hunt state ============
-    let currentTeam = null;
-    let completedClues = {};  // { [id]: {points,answer,correctAnswer,completedAt,wasCorrect} }
+    // --- Clue engine (unchanged logic) --------------------------------------
+    let currentTeam = null;           // we’ll set from localStorage when needed
+    let currentClue = null;
+    let completedClues = {};
     let currentScore = 0;
-    let activeClue = null;
+    let returnTimeout = null;
 
-    // 20 simple placeholder clues (5–10 pts each; total 140)
-    const clueData = [
-      {id:1,clue:"What comes after zero?",answer:"one",accept:["one","1","One"],points:6},
-      {id:2,clue:"What comes after one?",answer:"two",accept:["two","2","Two"],points:5},
-      {id:3,clue:"What comes after two?",answer:"three",accept:["three","3","Three"],points:8},
-      {id:4,clue:"What comes after three?",answer:"four",accept:["four","4","Four"],points:7},
-      {id:5,clue:"What comes after four?",answer:"five",accept:["five","5","Five"],points:9},
-      {id:6,clue:"What comes after five?",answer:"six",accept:["six","6","Six"],points:5},
-      {id:7,clue:"What comes after six?",answer:"seven",accept:["seven","7","Seven"],points:7},
-      {id:8,clue:"What comes after seven?",answer:"eight",accept:["eight","8","Eight"],points:6},
-      {id:9,clue:"What comes after eight?",answer:"nine",accept:["nine","9","Nine"],points:5},
-      {id:10,clue:"What comes after nine?",answer:"ten",accept:["ten","10","Ten"],points:8},
-      {id:11,clue:"What comes after ten?",answer:"eleven",accept:["eleven","11","Eleven"],points:10},
-      {id:12,clue:"What comes after eleven?",answer:"twelve",accept:["twelve","12","Twelve"],points:6},
-      {id:13,clue:"What comes after twelve?",answer:"thirteen",accept:["thirteen","13","Thirteen"],points:7},
-      {id:14,clue:"What comes after thirteen?",answer:"fourteen",accept:["fourteen","14","Fourteen"],points:5},
-      {id:15,clue:"What comes after fourteen?",answer:"fifteen",accept:["fifteen","15","Fifteen"],points:9},
-      {id:16,clue:"What comes after fifteen?",answer:"sixteen",accept:["sixteen","16","Sixteen"],points:6},
-      {id:17,clue:"What comes after sixteen?",answer:"seventeen",accept:["seventeen","17","Seventeen"],points:8},
-      {id:18,clue:"What comes after seventeen?",answer:"eighteen",accept:["eighteen","18","Eighteen"],points:7},
-      {id:19,clue:"What comes after eighteen?",answer:"nineteen",accept:["nineteen","19","Nineteen"],points:5},
-      {id:20,clue:"What comes after nineteen?",answer:"twenty",accept:["twenty","20","Twenty"],points:6}
+    // 20 placeholder clues, 140 total points
+    const clueHuntData = [
+      { id:1,  clue:"What comes after zero?",             answer:"one",       acceptableAnswers:["one","1","One"], points:6 },
+      { id:2,  clue:"What number comes after one?",       answer:"two",       acceptableAnswers:["two","2","Two"], points:5 },
+      { id:3,  clue:"What number comes after two?",       answer:"three",     acceptableAnswers:["three","3","Three"], points:8 },
+      { id:4,  clue:"What number comes after three?",     answer:"four",      acceptableAnswers:["four","4","Four"], points:7 },
+      { id:5,  clue:"What number comes after four?",      answer:"five",      acceptableAnswers:["five","5","Five"], points:9 },
+      { id:6,  clue:"What number comes after five?",      answer:"six",       acceptableAnswers:["six","6","Six"], points:5 },
+      { id:7,  clue:"What number comes after six?",       answer:"seven",     acceptableAnswers:["seven","7","Seven"], points:7 },
+      { id:8,  clue:"What number comes after seven?",     answer:"eight",     acceptableAnswers:["eight","8","Eight"], points:6 },
+      { id:9,  clue:"What number comes after eight?",     answer:"nine",      acceptableAnswers:["nine","9","Nine"], points:5 },
+      { id:10, clue:"What number comes after nine?",      answer:"ten",       acceptableAnswers:["ten","10","Ten"], points:8 },
+      { id:11, clue:"What number comes after ten?",       answer:"eleven",    acceptableAnswers:["eleven","11","Eleven"], points:10 },
+      { id:12, clue:"What number comes after eleven?",    answer:"twelve",    acceptableAnswers:["twelve","12","Twelve"], points:6 },
+      { id:13, clue:"What number comes after twelve?",    answer:"thirteen",  acceptableAnswers:["thirteen","13","Thirteen"], points:7 },
+      { id:14, clue:"What number comes after thirteen?",  answer:"fourteen",  acceptableAnswers:["fourteen","14","Fourteen"], points:5 },
+      { id:15, clue:"What number comes after fourteen?",  answer:"fifteen",   acceptableAnswers:["fifteen","15","Fifteen"], points:9 },
+      { id:16, clue:"What number comes after fifteen?",   answer:"sixteen",   acceptableAnswers:["sixteen","16","Sixteen"], points:6 },
+      { id:17, clue:"What number comes after sixteen?",   answer:"seventeen", acceptableAnswers:["seventeen","17","Seventeen"], points:8 },
+      { id:18, clue:"What number comes after seventeen?", answer:"eighteen",  acceptableAnswers:["eighteen","18","Eighteen"], points:7 },
+      { id:19, clue:"What number comes after eighteen?",  answer:"nineteen",  acceptableAnswers:["nineteen","19","Nineteen"], points:5 },
+      { id:20, clue:"What number comes after nineteen?",  answer:"twenty",    acceptableAnswers:["twenty","20","Twenty"], points:6 }
     ];
 
-    function norm(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
-    function correct(user, clue){ const u=norm(user); return clue.accept.some(a=>norm(a)===u); }
-
-    function renderGrid(){
-      const g = $('clueGrid'); g.innerHTML='';
-      clueData.forEach(c=>{
-        const status = completedClues[c.id];
+    function renderClueGrid(){
+      clueGrid.innerHTML = '';
+      for(const clue of clueHuntData){
+        const state = completedClues[clue.id];
         const btn = document.createElement('button');
-        btn.className = 'clue' + (status ? (status.wasCorrect ? ' completed' : ' incorrect') : '');
-        btn.textContent = `Clue ${c.id}`;
-        if(!status){
-          btn.addEventListener('click', ()=>openClue(c));
-        }else{
+        btn.className = 'clue';
+        btn.textContent = 'Clue ' + clue.id;
+
+        if(state){
+          btn.classList.add(state.wasCorrect ? 'completed' : 'incorrect');
           btn.disabled = true;
+        }else{
+          btn.addEventListener('click', ()=> selectClue(clue));
         }
-        g.appendChild(btn);
-      });
+        clueGrid.appendChild(btn);
+      }
     }
 
-    function openClue(c){
-      activeClue = c;
-      $('gridWrap').style.display='none';
-      $('cluePanel').style.display='block';
-      $('clueTitle').textContent = `Clue ${c.id}`;
-      $('clueText').textContent  = c.clue;
-      $('result').style.display='none';
-      $('answer').value='';
-      $('answer').focus();
+    function selectClue(clue){
+      currentClue = clue;
+      clueNumber.textContent = 'Clue #' + clue.id;
+      clueText.textContent = clue.clue;
+      answerInput.value = '';
+      resultMessage.className = 'result'; resultMessage.style.display = 'none';
+      continueBtn.classList.add('hidden');
+      submitAnswerBtn.disabled = false;
+
+      clueGridSection.classList.add('hidden');
+      clueSection.classList.remove('hidden');
+      setTimeout(()=>answerInput.focus(),100);
     }
 
-    function backToGrid(){
-      $('cluePanel').style.display='none';
-      $('gridWrap').style.display='block';
-      renderGrid();
+    function showClueGrid(){
+      clueSection.classList.add('hidden');
+      clueGridSection.classList.remove('hidden');
+      renderClueGrid();
     }
 
-    function updateScoreUI(){
-      $('scoreBox').textContent = `Treasure: ${currentScore} doubloons`;
-      const attempted = Object.keys(completedClues).length;
-      const solved = Object.values(completedClues).filter(v=>v.wasCorrect).length;
-      const pct = Math.max(15, (attempted/clueData.length)*100);
-      $('fill').style.width = `${pct}%`;
-      $('fill').textContent = `${solved}/${clueData.length} Solved • ${attempted} Explored`;
-    }
+    function normalize(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim(); }
 
-    async function submitActive(){
-      const ans = $('answer').value.trim();
-      if(!activeClue){ return; }
-      if(!ans){ showResult('Enter an answer.', false, true); return; }
+    function submitAnswer(){
+      const val = answerInput.value.trim();
+      if(!val){ showResult('Please enter an answer.', false, 0, ''); return; }
+      if(!currentClue){ showResult('No clue selected.', false, 0, ''); return; }
 
-      const ok = correct(ans, activeClue);
-      const points = ok ? activeClue.points : 0;
+      const user = normalize(val);
+      let correct = false;
+      for(const a of currentClue.acceptableAnswers){
+        if(user === normalize(a)){ correct = true; break; }
+      }
 
-      completedClues[activeClue.id] = {
-        points, answer:ans, correctAnswer:activeClue.answer,
-        completedAt:new Date().toISOString(), wasCorrect:ok
-      };
-      if(ok) currentScore += points;
-
-      updateScoreUI();
-      renderGrid();
-
-      showResult(
-        ok ? `🎉 Correct! +${points} doubloons` : `✗ Not quite. Correct answer: ${activeClue.answer} (worth ${activeClue.points})`,
-        ok
-      );
-
-      // persist attempt
-      try{
-        const payload = {
-          teamCode: localStorage.getItem('teamCode'),
-          teamName: localStorage.getItem('teamName'),
-          clueId: activeClue.id,
-          clueText: activeClue.clue,
-          userAnswer: ans,
-          correctAnswer: activeClue.answer,
-          points, currentScore, wasCorrect: ok, eventId: EVENT_ID
+      if(correct){
+        completedClues[currentClue.id] = {
+          points: currentClue.points,
+          answer: val,
+          correctAnswer: currentClue.answer,
+          completedAt: new Date().toISOString(),
+          wasCorrect: true
         };
-        await callFn('submit_cluehunt_function', payload);
-      }catch(e){ /* non-blocking */ }
+        currentScore += currentClue.points;
+        showResult(`🎉 Treasure claimed! +${currentClue.points} doubloons`, true, currentClue.points, currentClue.answer);
+        updateScore(); updateProgress();
+        submitClueToBackend(currentClue, val, currentClue.points, true);
+      }else{
+        completedClues[currentClue.id] = {
+          points: 0,
+          answer: val,
+          correctAnswer: currentClue.answer,
+          completedAt: new Date().toISOString(),
+          wasCorrect: false
+        };
+        showResult(`❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, false, 0, currentClue.answer);
+        updateProgress();
+        submitClueToBackend(currentClue, val, 0, false);
+      }
 
-      // small delay then return
-      setTimeout(backToGrid, 1500);
+      continueBtn.classList.remove('hidden');
+      submitAnswerBtn.disabled = true;
+      if(returnTimeout) clearTimeout(returnTimeout);
+      returnTimeout = setTimeout(continueToMap, 5000);
     }
 
-    function showResult(text, good, force=false){
-      const el=$('result');
-      el.className = 'msg ' + (good ? 'ok' : 'err');
-      el.textContent = text;
-      el.style.display = 'block';
+    function showResult(msg, ok, pts, answer){
+      resultMessage.textContent = msg;
+      resultMessage.className = 'result ' + (ok?'ok':'bad');
+      resultMessage.style.display = 'block';
     }
 
-    // load prior attempts for this team (resume)
-    async function loadPrevious(){
+    function continueToMap(){
+      if(returnTimeout){ clearTimeout(returnTimeout); returnTimeout=null; }
+      continueBtn.classList.add('hidden');
+      showClueGrid();
+
+      if(Object.keys(completedClues).length === clueHuntData.length){
+        finalScoreEl.textContent = 'Final Treasure: ' + currentScore + ' doubloons';
+        completionCelebration.style.display = 'block';
+      }
+    }
+
+    function updateScore(){
+      scoreDisplay.textContent = '💰 Treasure Collected: ' + currentScore + ' doubloons';
+    }
+
+    function updateProgress(){
+      const attempted = Object.keys(completedClues).length;
+      let correct = 0; for(const k in completedClues){ if(completedClues[k].wasCorrect) correct++; }
+      const pct = Math.max((attempted / clueHuntData.length) * 100, 15);
+      progressFill.style.width = pct + '%';
+      progressFill.textContent = `${correct}/20 Solved • ${attempted} Explored`;
+    }
+
+    // --- Persistence / backend calls ---------------------------------------
+    async function loadPreviousAttempts(){
       completedClues = {}; currentScore = 0;
+      const code = localStorage.getItem('teamCode');
+      const name = localStorage.getItem('teamName');
+      currentTeam = { teamCode: code, teamName: name };
+
+      if(!code) return;
+
       try{
-        const teamCode = localStorage.getItem('teamCode');
-        if(!teamCode) return;
-        const res = await callFn('get_cluehunt_submissions_function', { teamCode, eventId: EVENT_ID });
-        if(res?.success && Array.isArray(res.submissions)){
-          res.submissions.forEach(s=>{
-            completedClues[s.clueId] = {
-              points: s.points || 0,
-              answer: s.userAnswer || '',
-              correctAnswer: s.correctAnswer || '',
-              completedAt: s.attemptTime || '',
-              wasCorrect: (s.points||0) > 0
-            };
-          });
-          currentScore = Number(res.totalScore || 0);
+        const res = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ teamCode: code })
+        });
+        if(res.ok){
+          const data = await res.json();
+          if(data.success && Array.isArray(data.submissions)){
+            data.submissions.forEach(s=>{
+              completedClues[s.clueId] = {
+                points: s.points,
+                answer: s.userAnswer,
+                correctAnswer: s.correctAnswer,
+                completedAt: s.attemptTime,
+                wasCorrect: s.points > 0
+              };
+            });
+            currentScore = data.totalScore || 0;
+          }
         }
-      }catch(e){ /* ignore */ }
+      }catch(e){ console.warn('loadPreviousAttempts:', e); }
     }
 
-    // Start the hunt UI
-    async function beginHunt(){
-      currentTeam = {
-        teamCode: localStorage.getItem('teamCode') || '',
-        teamName: localStorage.getItem('teamName') || ''
+    function submitClueToBackend(clue, userAnswer, points, wasCorrect){
+      const code = localStorage.getItem('teamCode');
+      const name = localStorage.getItem('teamName');
+      if(!code) return;
+
+      const payload = {
+        teamCode: code, teamName: name,
+        clueId: clue.id, clueText: clue.clue,
+        userAnswer, correctAnswer: clue.answer,
+        points, currentScore, wasCorrect
       };
-      updateCrewLabel();
-      await loadPrevious();
-      updateScoreUI();
-      renderGrid();
-      $('signin').classList.remove('active');
-      $('hunt').classList.add('active');
+
+      fetch('/.netlify/functions/submit_cluehunt_function', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      }).catch(err => console.warn('submitClueToBackend:', err));
     }
 
-    // ============ Wire up ============
-    $('signinBtn').addEventListener('click', signIn);
-    $('backBtn').addEventListener('click', backToGrid);
-    $('submitAnswer').addEventListener('click', submitActive);
-    $('answer').addEventListener('keydown', e=>{ if(e.key==='Enter') submitActive(); });
+    // --- Wire up ------------------------------------------------------------
+    signinBtn.addEventListener('click', signIn);
+    submitAnswerBtn.addEventListener('click', submitAnswer);
+    answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitAnswer(); });
 
-    // boot
+    // bootstrap
     loadTeams();
+    renderClueGrid();
   </script>
 </body>
 </html>
