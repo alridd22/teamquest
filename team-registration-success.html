@@ -3,29 +3,29 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="theme-color" content="#F2E6D3">
+  <meta name="theme-color" content="#F7EED8">
   <title>Crew Registered - The Treasure Quest</title>
   <style>
     :root{
-      --color-bg:#F2E6D3;
-      --color-card:#FFFCF6;
+      --color-bg:#F7EED8;
+      --color-card:#FFFCF2;
       --color-ink:#2E2114;
-      --color-ink-muted:#5B4630;
-      --color-brand:#E0B218;
+      --color-ink-muted:#5A4630;
+      --color-brand:#F0C433;
       --color-accent:#FF7A1A;
-      --color-deep:#6B3A18;
+      --color-deep:#7A441D;
       --color-line:rgba(46,33,20,.18);
 
       --radius-md:16px; --radius-lg:20px; --radius-xl:24px;
       --shadow-2:0 14px 28px rgba(0,0,0,.16);
       --dur:180ms; --ease:cubic-bezier(.2,.6,.2,1);
 
-      --bg-vignette: radial-gradient(120% 90% at 50% -10%, rgba(224,178,24,.10) 0%, rgba(255,255,255,0) 55%),
-                     radial-gradient(80% 60% at 100% 0%, rgba(224,178,24,.08) 0%, rgba(255,255,255,0) 50%);
+      --bg-vignette: radial-gradient(120% 90% at 50% -10%, rgba(240,196,51,.12) 0%, rgba(255,255,255,0) 55%),
+                     radial-gradient(80% 60% at 100% 0%, rgba(240,196,51,.09) 0%, rgba(255,255,255,0) 50%);
       --bg-contours: url("data:image/svg+xml;utf8,\
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' opacity='0.07'>\
-        <path d='M0,120 C40,90 80,140 120,110 160,80 200,120 200,120' fill='none' stroke='%236B3A18' stroke-width='2' stroke-linecap='round'/>\
-        <path d='M0,60 C50,40 100,80 150,60 200,40 200,60 200,60' fill='none' stroke='%236B3A18' stroke-width='1.5' stroke-linecap='round'/>\
+      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 260' opacity='0.07'>\
+        <path d='M0,130 C50,100 100,150 150,120 200,90 260,130 260,130' fill='none' stroke='%237A441D' stroke-width='2' stroke-linecap='round'/>\
+        <path d='M0,70 C60,50 120,90 180,70 240,50 260,70 260,70' fill='none' stroke='%237A441D' stroke-width='1.6' stroke-linecap='round'/>\
       </svg>");
     }
 
@@ -37,7 +37,7 @@
       color:var(--color-ink);
       background:var(--color-bg);
       background-image: var(--bg-vignette), var(--bg-contours);
-      background-size: cover, 420px 420px;
+      background-size: cover, 520px 520px;
       background-repeat: no-repeat, repeat;
       display:flex; align-items:flex-start; justify-content:center;
       padding: max(16px, env(safe-area-inset-top)) 16px 24px;
@@ -45,9 +45,9 @@
     }
 
     .card{
-      width:100%; max-width:460px;
+      width:100%; max-width:480px;
       background:
-        linear-gradient(180deg, rgba(255,255,255,.6), rgba(255,255,255,0)),
+        linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0)),
         var(--color-card);
       border:2px solid var(--color-deep);
       border-radius:24px;
@@ -56,7 +56,11 @@
       position:relative; overflow:hidden; text-align:center;
     }
     .top-ribbon{ position:absolute; left:0; right:0; top:0; height:10px;
-      background:linear-gradient(90deg,#E0B218,#FF7A1A,#E0B218); opacity:.95; }
+      background:linear-gradient(90deg,#F0C433,#FF7A1A,#F0C433);
+      background-size:200% 100%;
+      animation: ribbon 8s linear infinite; opacity:.95; }
+    @keyframes ribbon{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+    @media (prefers-reduced-motion: reduce){ .top-ribbon{ animation:none } }
 
     /* Logo */
     .brand-wrap{
@@ -64,7 +68,7 @@
       display:flex; align-items:center; justify-content:center; position:relative;
     }
     .brand-logo{
-      display:block; width:min(180px, 55vw); height:auto;
+      display:block; width:min(184px, 56vw); height:auto;
       filter: drop-shadow(0 1px 0 rgba(0,0,0,.25)) drop-shadow(0 8px 14px rgba(0,0,0,.18));
     }
 
@@ -76,17 +80,18 @@
       padding:8px 12px; border-radius:999px; font-weight:800; font-size:14px;
       color:#fff; background:linear-gradient(135deg,#2e7d32,#43a047);
       border:2px solid rgba(0,0,0,.15);
+      box-shadow:0 6px 16px rgba(32,138,62,.25);
     }
     .crew-chip{
       display:inline-block; margin:8px 0 12px; padding:10px 14px;
-      border:2px dashed var(--color-brand); border-radius:14px; background:#FFF9E8;
+      border:2px dashed var(--color-brand); border-radius:14px; background:#FFF8E4;
       color:var(--color-deep); font-weight:900; font-size:16px;
     }
 
     .section{
       margin:12px 0; text-align:left;
       border:1px solid var(--color-line); border-left:4px solid var(--color-accent);
-      border-radius:12px; background:#FFF6EC; padding:12px;
+      border-radius:12px; background:#FFF5EA; padding:12px;
     }
     .section h2{ margin:0 0 6px; font-size:16px; color:var(--color-deep); }
     .section p{ margin:0; color:var(--color-ink-muted); line-height:1.55; font-size:14px; }
@@ -121,7 +126,7 @@
     <div class="ok-stamp">✅ Crew Registered</div>
     <div class="crew-chip" id="crew-name-display">Loading…</div>
 
-    <h1 class="title">Your team is in.</h1>
+    <h1 class="title">Your Quest Begins.</h1>
 
     <section class="section" aria-labelledby="next-title">
       <h2 id="next-title">What’s next?</h2>
@@ -135,7 +140,7 @@
   </main>
 
   <script>
-    // Populate crew name from query or localStorage (keeps existing hook #crew-name-display)
+    // Populate crew name (keeps hook #crew-name-display)
     const qs = new URLSearchParams(location.search);
     const teamFromQS = qs.get('team');
     const codeFromQS = qs.get('code');
