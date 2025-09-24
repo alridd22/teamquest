@@ -2,132 +2,119 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18">
   <title>Crew Registered - The Treasure Quest</title>
 
-  <!-- Handlee -->
+  <!-- Handlee font -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg:url("/TQ%20Web%20background-100.jpg"); /* success page background */
-      --ink:#2E2114; --ink-soft:#6A5A47;
-      --parchment:#F7EED8; --parchment-2:#F3E6CF;
-      --gold:#F0C433; --gold-deep:#A7711F;
-
-      --radius-card:22px;
-      --shadow-card:0 18px 40px rgba(0,0,0,.35);
-      --hero-h:300px;
-      --gutter:22px;
+      --ink:#2E2114;
+      --ink-soft:#6A5A47;
+      --parchment:#F7EED8;
+      --parchment-2:#F3E6CF;
+      --gold:#F0C433;
+      --radius-card:18px;
+      --shadow-card:0 12px 28px rgba(0,0,0,.25);
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
     body{
-      margin:0; font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      margin:0;
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      background:var(--bg) no-repeat top center/cover;
       color:var(--ink);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.26), rgba(0,0,0,.45)),
-        var(--bg);
-      background-size:cover;
-      background-position:top center;
-      background-attachment:fixed;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      display:flex; flex-direction:column; align-items:center;
+      min-height:100vh;
+      padding:16px;
     }
 
+    /* Logo hero */
     .hero{
-      min-height:var(--hero-h);
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:28px var(--gutter) 14px;
+      margin-top:12px; /* closer to top */
+      text-align:center;
     }
     .brand-logo{
-      width:min(210px, 62vw); height:auto; margin-bottom:10px;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
-    }
-    .title-pill{
-      color:#2E2114; font-size:22px; letter-spacing:.2px;
-      background:rgba(247,238,216,.88);
-      border:1px solid rgba(0,0,0,.08);
-      border-radius:999px; padding:10px 16px;
-      box-shadow:0 8px 20px rgba(0,0,0,.25);
-      backdrop-filter:saturate(120%) blur(3px);
+      width:220px; max-width:65vw;
+      height:auto;
+      display:block; margin:0 auto 12px;
     }
 
-    .stack{ padding:0 var(--gutter) 26px; }
+    /* Registration card */
     .card{
       background:var(--parchment);
       border-radius:var(--radius-card);
       box-shadow:var(--shadow-card);
       padding:18px 16px;
-      border:1px solid rgba(0,0,0,.06);
-      margin:0 auto 18px;
+      max-width:460px;
+      width:100%;
+      margin-top:8px;
       text-align:center;
     }
 
-    .stamp{
-      display:inline-flex; align-items:center; gap:8px;
-      color:#1F6E38; background:#CFF2DA;
-      border:2px solid #1F6E38; border-radius:999px;
-      padding:8px 12px; font-weight:900; font-size:18px; margin:2px 0 10px;
+    .title{
+      font-size:1.4rem;
+      font-weight:700;
+      margin:0 0 10px;
+      color:var(--ink);
     }
-    .chip{
-      display:inline-block; margin:6px 0 14px; padding:10px 14px;
-      border:3px solid var(--gold); border-radius:14px; background:#F4E7C9;
-      color:var(--ink); font-weight:900; font-size:20px; min-width:60%;
-    }
-    .title{ font-size:26px; margin:6px 0; color:var(--ink); }
 
-    .section{
+    .crew-name{
+      display:inline-block;
+      margin:6px 0 14px;
+      padding:8px 14px;
+      border:2px solid var(--gold);
+      border-radius:12px;
+      font-size:1.1rem;
       background:var(--parchment-2);
-      border-radius:var(--radius-card);
-      border:1px solid rgba(0,0,0,.06);
-      padding:16px 14px; text-align:left; margin-top:10px;
-      box-shadow:0 2px 6px rgba(0,0,0,.10);
     }
-    .section h2{ margin:0 0 8px; font-size:24px; color:var(--ink); text-align:center; }
-    .section p{ margin:0; line-height:1.6; font-size:18px; color:var(--ink); }
 
-    .note{ margin-top:12px; font-size:18px; color:#EEE3CD; text-shadow:0 1px 2px rgba(0,0,0,.4); text-align:center; }
+    .section-title{
+      font-size:1.25rem;
+      font-weight:700;
+      margin:16px 0 8px;
+      color:var(--ink);
+    }
 
-    @media (min-width:480px){
-      :root{ --hero-h: 340px; --gutter: 26px; }
+    .info{
+      background:var(--parchment-2);
+      border-radius:12px;
+      padding:14px;
+      font-size:1rem;
+      line-height:1.45;
     }
-    @media (prefers-reduced-motion: reduce){
-      *{ transition:none !important; animation-duration:0ms !important; }
-    }
+    .info strong{ color:var(--ink); }
   </style>
 </head>
 <body>
-  <header class="hero" role="banner">
-    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480" decoding="async"
-         onerror="this.remove()">
-    <div class="title-pill">Crew Registered</div>
+  <header class="hero">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="400" height="300">
+    <div class="title">Crew Registered</div>
   </header>
 
-  <main class="stack" role="main">
-    <section class="card">
-      <div class="stamp">✅ Crew Registered</div>
-      <div class="chip" id="crew-name-display">Loading…</div>
-      <h1 class="title">Your Quest Begins</h1>
-
-      <div class="section" aria-labelledby="next-title">
-        <h2 id="next-title">What’s next?</h2>
-        <p>Once the organiser presses <strong>START</strong> on their admin panel, the fun begins! Get ready to open your pack and see where your adventure takes you.</p>
-      </div>
-
-      <p class="note">You can close this webpage.</p>
-    </section>
+  <main class="card">
+    <div class="crew-name" id="crew-name-display">Loading…</div>
+    <div class="section-title">Your Quest Begins</div>
+    <div class="info">
+      <p><strong>What’s next?</strong></p>
+      <p>
+        Once the organiser presses <strong>START</strong> on their admin panel, the fun begins!
+        Get ready to open your pack and see where your adventure takes you.
+      </p>
+    </div>
   </main>
 
   <script>
-    // Populate crew name (hook preserved)
+    // Crew name from URL or localStorage
     const qs = new URLSearchParams(location.search);
-    const teamFromQS = qs.get('team');
-    const codeFromQS = qs.get('code');
-    const teamNameLS = localStorage.getItem('tq_team_name');
-    document.getElementById('crew-name-display').textContent =
-      teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
+    const teamFromQS  = qs.get('team');
+    const codeFromQS  = qs.get('code');
+    const teamNameLS  = localStorage.getItem('tq_team_name');
+    const crewEl = document.getElementById('crew-name-display');
+    crewEl.textContent = teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
   </script>
 </body>
 </html>
