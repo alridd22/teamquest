@@ -17,6 +17,7 @@
       --parchment:#F7EED8;
       --parchment-2:#F3E6CF;
       --gold:#F0C433;
+      --green:#34A853;
       --radius-card:18px;
       --shadow-card:0 12px 28px rgba(0,0,0,.25);
     }
@@ -34,7 +35,7 @@
 
     /* Logo hero */
     .hero{
-      margin-top:12px; /* closer to top */
+      margin-top:12px;
       text-align:center;
     }
     .brand-logo{
@@ -55,16 +56,24 @@
       text-align:center;
     }
 
-    .title{
-      font-size:1.4rem;
+    .status-pill{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:6px;
+      background:#E6F4EA;
+      color:var(--green);
+      border:2px solid var(--green);
+      border-radius:999px;
+      padding:6px 14px;
       font-weight:700;
-      margin:0 0 10px;
-      color:var(--ink);
+      margin-bottom:14px;
+    }
+    .status-pill svg{
+      width:16px; height:16px; fill:var(--green);
     }
 
     .crew-name{
       display:inline-block;
-      margin:6px 0 14px;
+      margin:0 0 14px;
       padding:8px 14px;
       border:2px solid var(--gold);
       border-radius:12px;
@@ -92,10 +101,15 @@
 <body>
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="400" height="300">
-    <div class="title">Crew Registered</div>
   </header>
 
   <main class="card">
+    <!-- New status pill -->
+    <div class="status-pill">
+      <svg viewBox="0 0 24 24"><path d="M20.285 6.709l-11.025 11.025-5.546-5.546 1.414-1.414 4.132 4.132 9.611-9.611z"/></svg>
+      Crew Registered
+    </div>
+
     <div class="crew-name" id="crew-name-display">Loading…</div>
     <div class="section-title">Your Quest Begins</div>
     <div class="info">
