@@ -31,31 +31,44 @@
       display:flex; flex-direction:column; align-items:center;
       min-height:100vh;
       padding:16px;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
     /* Logo hero */
-    .hero{
-      margin-top:12px;
-      text-align:center;
-    }
+    .hero{ margin-top:12px; text-align:center; }
     .brand-logo{
       width:220px; max-width:65vw;
-      height:auto;
-      display:block; margin:0 auto 12px;
+      height:auto; display:block; margin:0 auto 12px;
+      filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
     }
 
-    /* Registration card */
+    /* Parchment card */
     .card{
       background:var(--parchment);
       border-radius:var(--radius-card);
       box-shadow:var(--shadow-card);
       padding:18px 16px;
-      max-width:460px;
-      width:100%;
-      margin-top:8px;
-      text-align:center;
+      max-width:460px; width:100%;
+      margin-top:8px; text-align:center;
+      border:1px solid rgba(0,0,0,.06);
     }
 
+    /* Team name – bigger + bolder */
+    .crew-name{
+      display:inline-block;
+      margin:0 0 10px;
+      padding:10px 16px;
+      border:3px solid var(--gold);
+      border-radius:14px;
+      background:var(--parchment-2);
+      color:var(--ink);
+      font-weight:900;
+      font-size:1.35rem;       /* bigger */
+      line-height:1.1;
+      min-width:60%;
+    }
+
+    /* Status pill now under the crew name */
     .status-pill{
       display:inline-flex; align-items:center; justify-content:center;
       gap:6px;
@@ -64,71 +77,51 @@
       border:2px solid var(--green);
       border-radius:999px;
       padding:6px 14px;
-      font-weight:700;
-      margin-bottom:14px;
+      font-weight:800;
+      margin:2px 0 12px;
     }
-    .status-pill svg{
-      width:16px; height:16px; fill:var(--green);
-    }
-
-    .crew-name{
-      display:inline-block;
-      margin:0 0 14px;
-      padding:8px 14px;
-      border:2px solid var(--gold);
-      border-radius:12px;
-      font-size:1.1rem;
-      background:var(--parchment-2);
-    }
+    .status-pill svg{ width:16px; height:16px; fill:var(--green); }
 
     .section-title{
-      font-size:1.25rem;
-      font-weight:700;
-      margin:16px 0 8px;
-      color:var(--ink);
+      font-size:1.25rem; font-weight:700; margin:12px 0 8px; color:var(--ink);
     }
-
     .info{
       background:var(--parchment-2);
-      border-radius:12px;
-      padding:14px;
-      font-size:1rem;
-      line-height:1.45;
+      border-radius:12px; padding:14px;
+      font-size:1rem; line-height:1.45; color:var(--ink);
     }
     .info strong{ color:var(--ink); }
   </style>
 </head>
 <body>
   <header class="hero">
-    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="400" height="300">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="400" height="300" decoding="async" onerror="this.remove()">
   </header>
 
   <main class="card">
-    <!-- New status pill -->
-    <div class="status-pill">
-      <svg viewBox="0 0 24 24"><path d="M20.285 6.709l-11.025 11.025-5.546-5.546 1.414-1.414 4.132 4.132 9.611-9.611z"/></svg>
+    <div class="crew-name" id="crew-name-display">Loading…</div>
+
+    <!-- Moved here: green tick + label under the team name -->
+    <div class="status-pill" aria-live="polite">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.285 6.709l-11.025 11.025-5.546-5.546 1.414-1.414 4.132 4.132 9.611-9.611z"/></svg>
       Crew Registered
     </div>
 
-    <div class="crew-name" id="crew-name-display">Loading…</div>
     <div class="section-title">Your Quest Begins</div>
-    <div class="info">
-      <p><strong>What’s next?</strong></p>
-      <p>
-        Once the organiser presses <strong>START</strong> on their admin panel, the fun begins!
-        Get ready to open your pack and see where your adventure takes you.
-      </p>
+    <div class="info" aria-labelledby="next-title">
+      <p id="next-title"><strong>What’s next?</strong></p>
+      <p>Once the organiser presses <strong>START</strong> on their admin panel, the fun begins! Get ready to open your pack and see where your adventure takes you.</p>
     </div>
   </main>
 
   <script>
-    // Crew name from URL or localStorage
+    // Crew name from URL or localStorage (keeps #crew-name-display)
     const qs = new URLSearchParams(location.search);
     const teamFromQS  = qs.get('team');
     const codeFromQS  = qs.get('code');
     const teamNameLS  = localStorage.getItem('tq_team_name');
-    const crewEl = document.getElementById('crew-name-display');
-    crewEl.textContent = teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
+    document.getElementById('crew-name-display').textContent =
+      teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
   </script>
 </body>
 </html>
