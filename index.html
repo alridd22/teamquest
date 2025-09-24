@@ -50,7 +50,12 @@
     }
 
     .header{ text-align:center; margin-bottom:16px; }
-    .treasure-icon{ font-size:40px; line-height:1; }
+    /* TeamQuest brand logo */
+    .brand-logo{
+      display:block; margin:0 auto 8px;
+      width:min(320px, 70vw); height:auto;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.25)) drop-shadow(0 8px 20px rgba(0,0,0,.18));
+    }
     h1{ font-size:28px; margin:8px 0 4px; color:var(--color-deep); letter-spacing:.2px; }
     .subtitle{ color:var(--color-ink-muted); font-size:16px; }
 
@@ -133,7 +138,15 @@
 <body>
   <div class="container">
     <header class="header">
-      <div class="treasure-icon" aria-hidden="true">🏴‍☠️</div>
+      <!-- TeamQuest Logo -->
+      <img
+        src="/Team%20Quest%20Logo-01.png"
+        alt="TeamQuest"
+        class="brand-logo"
+        width="640" height="480"
+        decoding="async"
+        fetchpriority="high"
+      />
       <h1>The Treasure Quest</h1>
       <p class="subtitle">Crew Registration</p>
     </header>
@@ -144,7 +157,7 @@
       </div>
       <div class="terry-speech">
         <p id="welcome-title" class="terry-note">
-          <strong>Welcome aboard!</strong> Pick a crew name and confirm your 4-digit code to join the quest.
+          <strong>Welcome aboard!</strong> Pick a crew name and choose your 4-digit code to join the Quest.
         </p>
       </div>
     </section>
@@ -153,7 +166,7 @@
 
     <section class="instructions" aria-labelledby="how-title">
       <h3 id="how-title">🗺️ How it works</h3>
-      <p>Enter your crew name and create a 4 digit code. You’ll use this code to log-in and access challenges throughout the Quest.</p>
+      <p>Enter your crew name and create a 4 digit code. You’ll use this code to access challenges throughout the Quest.</p>
     </section>
 
     <form id="registrationForm" novalidate>
@@ -179,7 +192,7 @@
         <label for="teamPin">Crew Code (4 digits)</label>
         <div class="pin-group">
           <div>
-            <!-- Keep the same ID; switch to text for better keypad + pattern -->
+            <!-- Keep the same ID; text+pattern for keypad & validation -->
             <input
               type="text"
               id="teamPin"
@@ -194,7 +207,7 @@
           </div>
           <div class="pin-info" id="pinHelp">
             <strong>Remember it.</strong>
-            You’ll use this code to access activities during the Quest.
+            You’ll use this code to access activities during the quest.
           </div>
         </div>
       </div>
