@@ -51,25 +51,41 @@
         repeating-linear-gradient(0deg, rgba(0,0,0,.015), rgba(0,0,0,.015) 1px, transparent 1px, transparent 2px);
       pointer-events:none;
     }
-
     .top-ribbon{ position:absolute; left:0; right:0; top:0; height:10px;
       background:linear-gradient(90deg,#DAA520,#FF8C00,#DAA520); opacity:.95; }
+
+    /* Logo block */
+    .brand-wrap{
+      padding-top:16px; margin-bottom:8px;
+      display:flex; align-items:center; justify-content:center; position:relative;
+    }
+    .brand-logo{
+      display:block; width:min(180px, 55vw); height:auto;
+      filter: drop-shadow(0 1px 0 rgba(0,0,0,.25)) drop-shadow(0 8px 14px rgba(0,0,0,.18));
+    }
+    .burst{
+      position:absolute; inset:auto 0 0 0; top:8px; height:80px; pointer-events:none;
+      background:
+        radial-gradient(closest-side, rgba(255,255,255,.35), rgba(255,255,255,0) 70%),
+        radial-gradient(closest-side, rgba(218,165,32,.25), rgba(218,165,32,0) 70%);
+      opacity:.35; animation: floaty 6s var(--ease) infinite;
+    }
+    @keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
+    @media (prefers-reduced-motion: reduce){ .burst{ animation:none } }
 
     .title{
       margin:10px 0 6px; font-size:22px; color:var(--color-deep); letter-spacing:.2px; font-weight:800;
     }
-
+    .ok-stamp{
+      display:inline-flex; align-items:center; gap:8px; margin:6px 0 8px;
+      padding:8px 12px; border-radius:999px; font-weight:800; font-size:14px;
+      color:#fff; background:linear-gradient(135deg,#2e7d32,#43a047);
+      border:2px solid rgba(0,0,0,.15);
+    }
     .crew-chip{
       display:inline-block; margin:8px 0 12px; padding:10px 14px;
       border:2px dashed var(--color-brand); border-radius:14px; background:#FFFDF3;
       color:var(--color-deep); font-weight:900; font-size:16px;
-    }
-
-    .ok-stamp{
-      display:inline-flex; align-items:center; gap:8px; margin:8px 0 12px;
-      padding:8px 12px; border-radius:999px; font-weight:800; font-size:14px;
-      color:#fff; background:linear-gradient(135deg,#2e7d32,#43a047);
-      border:2px solid rgba(0,0,0,.15);
     }
 
     .section{
@@ -80,19 +96,12 @@
     .section h2{ margin:0 0 6px; font-size:16px; color:var(--color-deep); }
     .section p{ margin:0; color:var(--color-ink-muted); line-height:1.55; font-size:14px; }
 
-    .note{
-      margin-top:12px; font-size:13px; color:var(--color-ink-muted);
-    }
+    .note{ margin-top:12px; font-size:13px; color:var(--color-ink-muted); }
 
-    /* subtle celebratory spark */
-    .burst{
-      position:absolute; inset:auto 0 0 0; top:8px; height:80px; pointer-events:none;
-      background:
-        radial-gradient(closest-side, rgba(255,255,255,.35), rgba(255,255,255,0) 70%),
-        radial-gradient(closest-side, rgba(218,165,32,.25), rgba(218,165,32,0) 70%);
-      opacity:.35; animation: floaty 6s var(--ease) infinite;
+    @media (max-width:480px){
+      .card{ padding:16px 14px 18px; }
+      .title{ font-size:20px; }
     }
-    @keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
 
     @media (prefers-reduced-motion: reduce){
       *{ transition:none !important; animation-duration:0ms !important; }
@@ -102,12 +111,23 @@
 <body>
   <main class="card" role="main">
     <div class="top-ribbon" aria-hidden="true"></div>
-    <div class="burst" aria-hidden="true"></div>
+
+    <div class="brand-wrap">
+      <img
+        src="/Team%20Quest%20Logo-01.png"
+        alt="TeamQuest"
+        class="brand-logo"
+        width="640" height="480"
+        decoding="async"
+        onerror="this.closest('.brand-wrap').remove();"
+      />
+      <div class="burst" aria-hidden="true"></div>
+    </div>
 
     <div class="ok-stamp">✅ Crew Registered</div>
     <div class="crew-chip" id="crew-name-display">Loading…</div>
 
-    <h1 class="title">Your team is in.</h1>
+    <h1 class="title">Your Quest Begins.</h1>
 
     <section class="section" aria-labelledby="next-title">
       <h2 id="next-title">What’s next?</h2>
@@ -128,27 +148,6 @@
     const teamNameLS = localStorage.getItem('tq_team_name');
     const el = document.getElementById('crew-name-display');
     el.textContent = teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
-
-    // Tiny confetti (respect reduced motion)
-    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!prefersReduced){
-      const colors = ['#FFD700','#DAA520','#FF8C00','#8B4513','#DEB887'];
-      const kf = document.createElement('style');
-      kf.textContent = '@keyframes drop{to{transform:translateY(100vh) rotate(360deg);opacity:0}}';
-      document.head.appendChild(kf);
-      for (let i=0;i<18;i++){
-        setTimeout(()=>{
-          const d=document.createElement('div');
-          d.style.cssText = `
-            position: fixed; width: 8px; height: 8px; top: -12px; left: ${Math.random()*100}vw;
-            background: ${colors[(Math.random()*colors.length)|0]}; border-radius: 50%;
-            pointer-events:none; animation: drop 2.2s linear forwards; z-index: 1000; box-shadow:0 2px 4px rgba(0,0,0,.2);
-          `;
-          document.body.appendChild(d);
-          setTimeout(()=>d.remove(), 2300);
-        }, i*70);
-      }
-    }
   </script>
 </body>
 </html>
