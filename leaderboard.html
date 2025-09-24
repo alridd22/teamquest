@@ -5,110 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TeamQuest Leaderboard</title>
   <style>
-    /* ---------- Base ---------- */
     :root{
-      --bg: #F3EADB;
-      --card: #F7F0E5;
-      --brown: #8B4513;
-      --gold: #DAA520;
-      --gold2:#FFB347;
+      --bg:#F3EADB; --card:#F7F0E5; --brown:#8B4513; --gold:#DAA520; --gold2:#FFB347;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{
-      margin:0;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
-      color:#3a2a17;
-    }
-
-    /* ---------- Card ---------- */
-    .leaderboard-card{
-      max-width: 1050px;
-      margin: 42px auto;
-      background: var(--card);
-      border: 3px solid var(--brown);
-      border-radius: 18px;
-      box-shadow: 0 14px 28px rgba(0,0,0,.18);
-      padding: 26px 24px 22px;
-    }
-    .leaderboard-title{
-      color: var(--brown);
-      font-weight: 800;
-      font-size: 2.1rem;
-      margin: 0 0 6px;
-      text-align:left;
-    }
-    .leaderboard-sub{
-      color:#7b522a;
-      font-weight: 600;
-      margin: 0 0 18px;
-    }
-
-    /* ---------- Badges / Buttons ---------- */
+    body{margin:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
+      background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);color:#3a2a17;}
+    .leaderboard-card{max-width:1050px;margin:42px auto;background:var(--card);
+      border:3px solid var(--brown);border-radius:18px;box-shadow:0 14px 28px rgba(0,0,0,.18);
+      padding:26px 24px 22px;}
+    .leaderboard-title{color:var(--brown);font-weight:800;font-size:2.1rem;margin:0 0 6px;}
+    .leaderboard-sub{color:#7b522a;font-weight:600;margin:0 0 18px;}
     .cluster{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-
-    .badge{
-      display:inline-flex; align-items:center; gap:10px;
-      padding:10px 16px;
-      border:2px dashed var(--gold);
-      border-radius:14px;
-      background: #fff7e3;
-      font-weight:800;
-      color:#6a3f16;
-      user-select:none;
-    }
-    .badge .dot{
-      width:10px;height:10px;border-radius:999px;background:#2ecc71;
-      box-shadow:0 0 0 3px rgba(46,204,113,.25);
-      display:inline-block;
-    }
-    .badge.time .dot{
-      background:#ffd166;
-      box-shadow:0 0 0 3px rgba(255,209,102,.25);
-    }
-
-    .btn-refresh{
-      display:inline-flex; align-items:center; gap:8px;
-      padding:10px 16px; border-radius:12px; border:2px solid var(--brown);
-      background: linear-gradient(135deg, var(--gold2), var(--gold));
-      color:#fff; font-weight:800; cursor:pointer;
-      transition: transform .08s ease, filter .08s ease;
-      user-select:none;
-    }
-    .btn-refresh:hover{ filter:brightness(1.03); transform:translateY(-1px); }
-
-    /* ---------- Banners ---------- */
-    .banner{
-      margin:14px 0 10px; padding:12px 14px;
-      background: #fff7e3; border:2px solid var(--gold); border-radius:10px;
-      color:#6a3f16; font-weight:700;
-      display:none;
-    }
+    .badge{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:2px dashed var(--gold);
+      border-radius:14px;background:#fff7e3;font-weight:800;color:#6a3f16;user-select:none;}
+    .badge .dot{width:10px;height:10px;border-radius:999px;background:#2ecc71;
+      box-shadow:0 0 0 3px rgba(46,204,113,.25);display:inline-block;}
+    .badge.time .dot{background:#ffd166;box-shadow:0 0 0 3px rgba(255,209,102,.25);}
+    .btn-refresh{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;
+      border:2px solid var(--brown);background:linear-gradient(135deg,var(--gold2),var(--gold));
+      color:#fff;font-weight:800;cursor:pointer;transition:transform .08s ease,filter .08s ease;}
+    .btn-refresh:hover{filter:brightness(1.03);transform:translateY(-1px);}
+    .banner{margin:14px 0 10px;padding:12px 14px;background:#fff7e3;border:2px solid var(--gold);
+      border-radius:10px;color:#6a3f16;font-weight:700;display:none;}
     .banner.show{display:block}
-
-    /* ---------- Table ---------- */
-    table.leaderboard{
-      width:100%; border-collapse:separate; border-spacing:0;
-      background:#fff; border:2px solid #e7d8c4; border-radius:12px; overflow:hidden;
-    }
-    .leaderboard thead th{
-      background: linear-gradient(180deg,#fff8ea, #fdeac7);
-      color:#6a3f16; font-weight:800; padding:14px 12px; text-align:left;
-      border-bottom:2px solid #eddcc4; white-space:nowrap;
-    }
-    .leaderboard tbody td{ padding:14px 12px; color:#4a3a26; }
-    .leaderboard tbody tr:nth-child(even){ background:#fffaf2; }
-    .leaderboard tbody tr:hover{ background:#fff4df; }
-    .leaderboard td.rank{ width:52px; color:#7a5a34; font-weight:800; }
-    .leaderboard tbody td:nth-child(n+3){ text-align:right; font-variant-numeric: tabular-nums; }
-
-    .empty{
-      padding:18px 12px; color:#7b522a; font-weight:600;
-    }
-
-    /* ---------- Footer line ---------- */
-    .updated{ margin-top:12px; color:#7b522a; font-weight:600; }
+    table.leaderboard{width:100%;border-collapse:separate;border-spacing:0;background:#fff;
+      border:2px solid #e7d8c4;border-radius:12px;overflow:hidden;}
+    .leaderboard thead th{background:linear-gradient(180deg,#fff8ea,#fdeac7);color:#6a3f16;
+      font-weight:800;padding:14px 12px;text-align:left;border-bottom:2px solid #eddcc4;white-space:nowrap;}
+    .leaderboard tbody td{padding:14px 12px;color:#4a3a26;}
+    .leaderboard tbody tr:nth-child(even){background:#fffaf2;}
+    .leaderboard tbody tr:hover{background:#fff4df;}
+    .leaderboard td.rank{width:52px;color:#7a5a34;font-weight:800;}
+    .leaderboard tbody td:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums;}
+    .empty{padding:18px 12px;color:#7b522a;font-weight:600;}
+    .updated{margin-top:12px;color:#7b522a;font-weight:600;}
   </style>
 </head>
 <body>
@@ -122,11 +54,9 @@
       <button class="btn-refresh" id="refreshBtn">🔄 Refresh</button>
     </div>
 
-    <!-- messages -->
     <div class="banner" id="hideBanner">🔒 Scores hidden for the final push. Keep going!</div>
     <div class="banner" id="endedBanner">⚠️ Event complete — final results will appear once the host publishes them.</div>
 
-    <!-- table -->
     <table class="leaderboard" id="board" role="table" aria-describedby="statusText">
       <thead>
         <tr>
@@ -135,12 +65,13 @@
           <th>Kindness</th>
           <th>Limerick</th>
           <th>Scavenger</th>
+          <th>Clue Hunt</th> <!-- NEW -->
           <th>Quiz</th>
           <th>Total</th>
         </tr>
       </thead>
       <tbody id="rows">
-        <tr><td class="empty" colspan="7">Loading…</td></tr>
+        <tr><td class="empty" colspan="8">Loading…</td></tr> <!-- updated colspan -->
       </tbody>
     </table>
 
@@ -148,7 +79,6 @@
   </main>
 
   <script>
-    // ------- helpers -------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
@@ -179,14 +109,12 @@
     }
     function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
 
-    // tries multiple shapes for meta coming from different backends
     function extractMeta(data){
       const meta = data?.event || data || {};
       const state = (data?.state || meta.state || 'RUNNING').toUpperCase();
       const endsAtIso = meta.endsAt || meta.endAt || meta.ends || null;
       const serverNowIso = meta.now || data?.now || null;
       let remainingMs = null;
-
       if(data?.timeRemainingMs != null) remainingMs = num(data.timeRemainingMs);
       else if(data?.timeRemainingSec != null) remainingMs = num(data.timeRemainingSec)*1000;
       else if(meta.timeRemainingSec != null) remainingMs = num(meta.timeRemainingSec)*1000;
@@ -201,7 +129,6 @@
       const pretty = (state==='RUNNING'?'Running': state==='PAUSED'?'Paused'
                       : state==='PUBLISHED'?'Published' : 'Ended');
       statusText.textContent = pretty;
-      // green dot only for running
       statusBadge.querySelector('.dot').style.background =
         (state==='RUNNING') ? '#2ecc71' : (state==='PAUSED' ? '#ffd166' : '#ff6b6b');
     }
@@ -220,16 +147,16 @@
 
     function renderRows(list){
       if(!Array.isArray(list) || list.length===0){
-        rowsEl.innerHTML = `<tr><td class="empty" colspan="7">No teams yet.</td></tr>`;
+        rowsEl.innerHTML = `<tr><td class="empty" colspan="8">No teams yet.</td></tr>`;
         return;
       }
       rowsEl.innerHTML = list.map((t,i)=>{
-        // flexible property names for different function outputs
         const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
         const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
         const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
+        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt); // NEW
         const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
-        const total = num(t.total ?? (k+l+s+q));
+        const total = num(t.total ?? (k+l+s+c+q));
         const name = t.teamName || t.name || t.team || t.teamCode || '—';
         return `
           <tr>
@@ -238,6 +165,7 @@
             <td>${k}</td>
             <td>${l}</td>
             <td>${s}</td>
+            <td>${c}</td>
             <td>${q}</td>
             <td>${total}</td>
           </tr>`;
@@ -245,7 +173,6 @@
     }
 
     async function loadBoard(){
-      // fetch leaderboard (GET)
       const url = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
@@ -255,19 +182,16 @@
         if(!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // event meta
         const { state, remainingMs } = extractMeta(data);
         setStatus(state);
         setCountdown(remainingMs);
 
-        // visibility logic
         const hideForFinalPush = state === 'RUNNING' && remainingMs != null && remainingMs > 0 && remainingMs <= 15*60*1000;
         hideBanner.classList.toggle('show', hideForFinalPush);
         endedBanner.classList.toggle('show', (state !== 'RUNNING' && state !== 'PUBLISHED') || (remainingMs != null && remainingMs <=0));
 
-        // rows
         if(hideForFinalPush || (state !== 'RUNNING' && state !== 'PUBLISHED')){
-          rowsEl.innerHTML = `<tr><td class="empty" colspan="7">${hideForFinalPush ? 'Scores are hidden until the finish.' : 'Scores will appear once results are published.'}</td></tr>`;
+          rowsEl.innerHTML = `<tr><td class="empty" colspan="8">${hideForFinalPush ? 'Scores are hidden until the finish.' : 'Scores will appear once results are published.'}</td></tr>`;
         }else{
           const list = data.leaderboard || data.rows || data.teams || [];
           renderRows(list);
@@ -276,18 +200,15 @@
         lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
       }catch(err){
         console.error('Leaderboard load failed:', err);
-        rowsEl.innerHTML = `<tr><td class="empty" colspan="7">Couldn’t load leaderboard. Please try again.</td></tr>`;
+        rowsEl.innerHTML = `<tr><td class="empty" colspan="8">Couldn’t load leaderboard. Please try again.</td></tr>`;
         lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
       }
     }
 
-    // wire up
     refreshBtn.addEventListener('click', loadBoard);
     document.addEventListener('visibilitychange', () => { if(!document.hidden) loadBoard(); });
 
-    // initial
     loadBoard();
-    // gentle auto-refresh while running
     setInterval(loadBoard, 60_000);
   </script>
 </body>
