@@ -34,7 +34,7 @@
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
-    /* Logo hero */
+    /* Logo hero (kept high) */
     .hero{ margin-top:12px; text-align:center; }
     .brand-logo{
       width:220px; max-width:65vw;
@@ -53,44 +53,50 @@
       border:1px solid rgba(0,0,0,.06);
     }
 
-    /* Team name – bigger + bolder */
+    /* Team name – big + bold */
     .crew-name{
       display:inline-block;
       margin:0 0 10px;
-      padding:10px 16px;
+      padding:12px 18px;
       border:3px solid var(--gold);
       border-radius:14px;
       background:var(--parchment-2);
       color:var(--ink);
       font-weight:900;
-      font-size:1.35rem;       /* bigger */
+      font-size:1.45rem;
       line-height:1.1;
       min-width:60%;
     }
 
-    /* Status pill now under the crew name */
+    /* Status pill under team name */
     .status-pill{
       display:inline-flex; align-items:center; justify-content:center;
       gap:6px;
-      background:#E6F4EA;
-      color:var(--green);
+      background:#E6F4EA; color:var(--green);
       border:2px solid var(--green);
-      border-radius:999px;
-      padding:6px 14px;
-      font-weight:800;
-      margin:2px 0 12px;
+      border-radius:999px; padding:6px 14px;
+      font-weight:800; margin:4px 0 12px;
     }
     .status-pill svg{ width:16px; height:16px; fill:var(--green); }
 
-    .section-title{
-      font-size:1.25rem; font-weight:700; margin:12px 0 8px; color:var(--ink);
-    }
+    /* What's next block — larger type */
     .info{
       background:var(--parchment-2);
-      border-radius:12px; padding:14px;
-      font-size:1rem; line-height:1.45; color:var(--ink);
+      border-radius:12px;
+      padding:16px 14px;
+      color:var(--ink);
     }
-    .info strong{ color:var(--ink); }
+    .info-title{
+      font-size:1.4rem;
+      font-weight:900;
+      margin:0 0 6px;
+      color:var(--ink);
+    }
+    .info p{
+      margin:0;
+      font-size:1.15rem;   /* increased body size */
+      line-height:1.5;
+    }
   </style>
 </head>
 <body>
@@ -101,15 +107,13 @@
   <main class="card">
     <div class="crew-name" id="crew-name-display">Loading…</div>
 
-    <!-- Moved here: green tick + label under the team name -->
     <div class="status-pill" aria-live="polite">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.285 6.709l-11.025 11.025-5.546-5.546 1.414-1.414 4.132 4.132 9.611-9.611z"/></svg>
       Crew Registered
     </div>
 
-    <div class="section-title">Your Quest Begins</div>
     <div class="info" aria-labelledby="next-title">
-      <p id="next-title"><strong>What’s next?</strong></p>
+      <div id="next-title" class="info-title">What’s next?</div>
       <p>Once the organiser presses <strong>START</strong> on their admin panel, the fun begins! Get ready to open your pack and see where your adventure takes you.</p>
     </div>
   </main>
