@@ -3,281 +3,223 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
-  <meta name="theme-color" content="#F7EED8">
+  <meta name="theme-color" content="#2A1F18">
   <title>The Treasure Quest - Crew Registration</title>
+
+  <!-- Handlee (playful script) -->
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+
   <style>
-    /* ---------- Energetic Light Theme ---------- */
+    /* ===== Tokens matching the mockups ===== */
     :root{
-      /* Warmer parchment + brighter metals */
-      --color-bg:#F7EED8;          /* lively parchment */
-      --color-card:#FFFCF2;        /* warm card */
-      --color-ink:#2E2114;         /* deep readable ink */
-      --color-ink-muted:#5A4630;   /* softer ink */
+      --bg-image: url("/images/tq-bg-main.jpg"); /* ← replace with your actual background image */
+      --color-wood:#2A1F18;           /* deep wood */
+      --color-parchment:#F7EED8;      /* light parchment */
+      --color-parchment-2:#F3E6CF;    /* slightly deeper parchment */
+      --color-ink:#2E2114;            /* dark ink */
+      --color-ink-muted:#6A5A47;      /* muted ink */
+      --color-gold:#F0C433;           /* coin gold */
+      --color-gold-deep:#C89E14;      /* outline gold */
+      --color-orange:#FF8C00;         /* accent */
+      --color-chip:#D7C39B;           /* code chip fill */
+      --color-error:#B42318;
 
-      --color-brand:#F0C433;       /* bright coin gold */
-      --color-accent:#FF7A1A;      /* vibrant trail orange */
-      --color-deep:#7A441D;        /* explorer brown */
+      --radius-card:20px;
+      --radius-input:16px;
+      --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --shadow-soft:0 2px 6px rgba(0,0,0,.10);
 
-      --color-line:rgba(46,33,20,.18);
-      --color-success:#1F8A3B; --color-error:#B42318;
-
-      --radius-sm:12px; --radius-md:16px; --radius-lg:20px; --radius-xl:24px;
-      --shadow-1:0 2px 6px rgba(0,0,0,.10);
-      --shadow-2:0 14px 28px rgba(0,0,0,.16);
       --focus:0 0 0 3px rgba(240,196,51,.45);
       --dur:180ms; --ease:cubic-bezier(.2,.6,.2,1);
-
-      /* Background spice */
-      --bg-vignette: radial-gradient(120% 90% at 50% -10%, rgba(240,196,51,.12) 0%, rgba(255,255,255,0) 55%),
-                     radial-gradient(80% 60% at 100% 0%, rgba(240,196,51,.09) 0%, rgba(255,255,255,0) 50%);
-      --bg-contours: url("data:image/svg+xml;utf8,\
-      <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 260' opacity='0.07'>\
-        <path d='M0,130 C50,100 100,150 150,120 200,90 260,130 260,130' fill='none' stroke='%237A441D' stroke-width='2' stroke-linecap='round'/>\
-        <path d='M0,70 C60,50 120,90 180,70 240,50 260,70 260,70' fill='none' stroke='%237A441D' stroke-width='1.6' stroke-linecap='round'/>\
-      </svg>");
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin:0;
+      font-family: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
       color:var(--color-ink);
-      background:var(--color-bg);
-      background-image: var(--bg-vignette), var(--bg-contours);
-      background-size: cover, 520px 520px;
-      background-repeat: no-repeat, repeat;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      background-color:var(--color-wood);
+      background-image:
+        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.45)),
+        var(--bg-image);
+      background-size:cover;
+      background-position:top center;
+      background-attachment:fixed;
       display:flex; align-items:flex-start; justify-content:center;
-      padding: max(16px, env(safe-area-inset-top)) 16px 24px;
+      padding: max(16px, env(safe-area-inset-top)) 14px 24px;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
-    /* Container */
     .container{
-      width:100%; max-width:480px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,.7), rgba(255,255,255,0)),
-        var(--color-card);
-      border:2px solid var(--color-deep);
-      border-radius:24px;
-      box-shadow:var(--shadow-2);
-      padding:18px 16px 20px;
+      width:100%; max-width:500px;
+      background:linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.30)), var(--color-parchment);
+      border-radius:var(--radius-card);
+      box-shadow:var(--shadow-card);
+      padding:18px 14px 20px;
       position:relative; overflow:hidden;
+      border:1px solid rgba(255,255,255,.25);
     }
 
-    /* Animated header ribbon */
-    .top-ribbon{
-      position:absolute; left:0; right:0; top:0; height:10px;
-      background:linear-gradient(90deg,#F0C433,#FF7A1A,#F0C433);
-      background-size:200% 100%;
-      animation: ribbon 8s linear infinite;
-      opacity:.95;
+    /* Brand header */
+    .brand{
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      margin-top:8px; margin-bottom:10px;
+      text-align:center;
     }
-    @keyframes ribbon{ 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-    @media (prefers-reduced-motion: reduce){ .top-ribbon{ animation:none } }
-
-    .header{ text-align:center; margin-bottom:14px; padding-top:16px; position:relative; }
-    .brand-wrap{ display:flex; align-items:center; justify-content:center; margin-bottom:8px; }
     .brand-logo{
-      display:block; width:min(184px, 56vw); height:auto;
-      filter:
-        drop-shadow(0 1px 0 rgba(0,0,0,.25))
-        drop-shadow(0 8px 14px rgba(0,0,0,.18));
+      width:min(200px, 60vw); height:auto;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
+    }
+    .page-title{
+      font-size:24px; color:#EEE3CD; letter-spacing:.3px;
+      text-shadow:0 2px 6px rgba(0,0,0,.6);
+      margin-top:8px;
     }
 
-    /* Tiny sparkle behind the logo */
-    .burst{
-      position:absolute; inset:auto 0 0 0; top:8px; height:80px; pointer-events:none;
-      background:
-        radial-gradient(closest-side, rgba(255,255,255,.38), rgba(255,255,255,0) 70%),
-        radial-gradient(closest-side, rgba(240,196,51,.28), rgba(240,196,51,0) 70%);
-      opacity:.35; animation: floaty 6s var(--ease) infinite;
+    /* Cards */
+    .card{
+      background:var(--color-parchment);
+      border-radius:var(--radius-card);
+      box-shadow:var(--shadow-soft);
+      padding:16px;
+      border:1px solid rgba(0,0,0,.06);
+      margin:14px 8px;
     }
-    @keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
-    @media (prefers-reduced-motion: reduce){ .burst{ animation:none } }
+    .card + .card{ margin-top:16px; }
 
-    h1{ font-size:22px; margin:4px 0 2px; color:var(--color-deep); letter-spacing:.2px; }
-    .subtitle{ color:var(--color-ink-muted); font-size:14px; }
-
-    /* Welcome card */
-    .terry-greeting{
-      display:flex; gap:12px; margin:14px 0 12px; padding:12px;
-      border:2px solid var(--color-brand); border-radius:16px; background:#FFF1C7;
-      box-shadow:var(--shadow-1);
+    .card h2{
+      margin:0 0 10px; text-align:center;
+      font-size:26px; color:var(--color-ink);
     }
-    .terry-character img{
-      width:72px; height:72px; border-radius:10px; object-fit:cover;
-      border:3px solid var(--color-brand);
-    }
-    .terry-note{ margin:0; color:var(--color-ink); line-height:1.55; font-weight:600; }
-    .terry-note strong{ color:var(--color-deep); }
-
-    /* Crew code chip */
-    .team-code{
-      margin:6px 0 14px; padding:10px 12px; text-align:center; font-weight:900; font-size:14px;
-      border:2px dashed var(--color-brand); border-radius:14px; background:#FFF8E4; color:var(--color-deep);
+    .card p{
+      margin:0; line-height:1.6; color:var(--color-ink);
+      font-size:18px;
     }
 
-    /* Info */
-    .instructions{
-      border:1px solid var(--color-line); border-left:4px solid var(--color-accent);
-      padding:12px; border-radius:12px; margin-bottom:12px; background:#FFF5EA;
+    /* Crew code chip (dashed) */
+    .chip{
+      margin:14px auto 2px; text-align:center; display:inline-block;
+      background:var(--color-chip); color:var(--color-ink); font-weight:700;
+      padding:10px 14px; border-radius:14px; font-size:20px;
+      border:3px dashed rgba(0,0,0,.6);
     }
-    .instructions h3{ margin:0 0 6px; color:var(--color-deep); font-size:16px; }
-    .instructions p{ margin:0; color:var(--color-ink-muted); font-size:14px; }
 
-    form{ margin-top:4px; }
-    .form-group{ margin-bottom:12px; }
-    label{ display:block; font-weight:900; margin-bottom:6px; color:var(--color-deep); font-size:14px; }
-
-    input[type="text"], input[type="number"], input[type="tel"]{
-      width:100%; padding:14px 12px; border:2px solid var(--color-brand); border-radius:12px;
-      font-size:16px; background:#FFFFFF; color:var(--color-ink);
-      transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+    /* Inputs */
+    label{
+      display:block; margin:12px 6px 6px;
+      font-size:22px; color:var(--color-ink); font-weight:700;
     }
-    input::placeholder{ color:rgba(90,70,48,.7); }
-    input:focus{ outline:2px solid transparent; box-shadow:var(--focus); border-color:var(--color-accent); transform:translateY(-1px); }
-
-    .char-count{ margin-top:6px; font-size:12px; color:var(--color-ink-muted); text-align:right; }
-
-    .pin-group{ display:grid; grid-template-columns:1fr 1fr; gap:12px; align-items:start; }
-    .pin-info{
-      border:1px solid var(--color-line); border-radius:12px; padding:12px; background:#FFF3D8;
-      color:var(--color-ink); font-size:13px; line-height:1.5;
+    .input{
+      width:100%; padding:14px 12px; border-radius:var(--radius-input);
+      border:3px solid var(--color-gold); background:#fff; color:var(--color-ink);
+      font-size:20px; transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
     }
-    .pin-info strong{ display:block; margin-bottom:6px; color:var(--color-deep); }
+    .input::placeholder{ color:rgba(0,0,0,.35) }
+    .input:focus{ outline:none; box-shadow:var(--focus); border-color:var(--color-gold-deep); transform:translateY(-1px); }
 
-    /* Foil shimmer CTA */
+    .char-row{
+      display:flex; justify-content:space-between; align-items:center;
+      margin:6px 6px 0; color:var(--color-ink-muted); font-size:16px;
+    }
+
+    /* Remember panel */
+    .remember{
+      background:var(--color-parchment-2);
+      border-radius:var(--radius-card);
+      border:1px solid rgba(0,0,0,.06);
+      padding:18px 14px;
+      text-align:center;
+      margin:10px 8px 16px;
+      box-shadow:var(--shadow-soft);
+    }
+    .remember h3{
+      margin:10px 0 6px; font-size:26px; color:var(--color-ink);
+    }
+    .remember p{ margin:0; font-size:18px; color:var(--color-ink); }
+    .remember .icon{ font-size:34px; display:inline-block; }
+
+    /* CTA */
     .submit-btn{
-      --shine: linear-gradient(120deg, rgba(255,255,255,.0) 0%, rgba(255,255,255,.55) 45%, rgba(255,255,255,0) 70%);
-      width:100%;
-      background:
-        var(--shine),
-        linear-gradient(135deg,var(--color-accent),var(--color-brand));
-      background-size:200% 100%, 100% 100%;
-      background-position:-150% 0, 0 0;
-      color:#fff; border:none; padding:16px;
-      border-radius:14px; font-size:18px; font-weight:900; letter-spacing:.2px;
-      cursor:pointer; display:flex; gap:10px; align-items:center; justify-content:center;
-      transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity var(--dur) var(--ease), background-position 900ms ease;
-      border:2px solid var(--color-deep);
-      box-shadow:0 10px 22px rgba(255,122,26,.18);
+      width:calc(100% - 28px); margin:6px 14px 2px;
+      background:linear-gradient(90deg, #FDBA2D, #F0C433);
+      color:#4A2A11; font-weight:900; font-size:22px;
+      border-radius:16px; border:3px solid #A7711F;
+      padding:16px; cursor:pointer;
+      box-shadow:0 10px 22px rgba(0,0,0,.25);
+      transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
     }
-    .submit-btn:hover{ transform:translateY(-2px); background-position: 150% 0, 0 0; }
+    .submit-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(0,0,0,.3); }
     .submit-btn:active{ transform:translateY(0); }
-    .submit-btn:disabled{ opacity:.65; cursor:not-allowed; transform:none; }
+    .submit-btn:disabled{ opacity:.6; cursor:not-allowed; }
 
     .loading{
-      display:none; text-align:center; margin-top:12px; color:var(--color-deep); font-weight:800; font-size:15px;
+      display:none; text-align:center; margin-top:10px; color:#EEE3CD; font-weight:700; font-size:18px;
+      text-shadow:0 1px 2px rgba(0,0,0,.4);
     }
     .error-message{
-      display:none; margin-top:12px; padding:12px; border-radius:12px; font-weight:700; font-size:14px;
-      color:#FFFFFF; background:var(--color-error); border:2px solid #7E1C12; text-align:center;
+      display:none; margin:12px 14px 0; padding:10px; border-radius:12px;
+      font-weight:700; font-size:16px; text-align:center; color:#fff;
+      background:var(--color-error); border:2px solid #7E1C12;
     }
 
-    @media (max-width:480px){
-      .container{ padding:16px 14px 18px; }
-      h1{ font-size:20px; }
-      .pin-group{ grid-template-columns:1fr; gap:10px; }
-      .terry-greeting{ align-items:center; }
+    @media (max-width:420px){
+      .page-title{ font-size:22px }
+      .card h2, .remember h3{ font-size:24px }
     }
 
     @media (prefers-reduced-motion: reduce){
-      .top-ribbon{ animation:none }
-      .submit-btn{ transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease), opacity var(--dur) var(--ease); background-image: linear-gradient(135deg,var(--color-accent),var(--color-brand)); }
-      .burst{ animation:none }
-      *{ animation-duration:0ms !important; }
+      *{ transition:none !important; animation-duration:0ms !important; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="top-ribbon" aria-hidden="true"></div>
+    <div class="brand">
+      <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480" decoding="async"
+           onerror="this.remove()">
+      <div class="page-title">Crew Registration</div>
+    </div>
 
-    <header class="header">
-      <div class="brand-wrap">
-        <img
-          src="/Team%20Quest%20Logo-01.png"
-          alt="TeamQuest"
-          class="brand-logo"
-          width="640" height="480"
-          decoding="async"
-          onerror="this.closest('.brand-wrap').remove();"
-        />
-      </div>
-      <div class="burst" aria-hidden="true"></div>
-      <h1>Your Quest Begins</h1>
-      <p class="subtitle">Crew Registration</p>
-    </header>
-
-    <section class="terry-greeting" aria-labelledby="welcome-title">
-      <div class="terry-character">
-        <img src="/terry-thinking.png" alt="Terry Quest mascot">
-      </div>
-      <div class="terry-speech">
-        <p id="welcome-title" class="terry-note">
-          <strong>Welcome aboard!</strong> Pick a crew name and choose your 4-digit code to join the Quest.
-        </p>
-      </div>
+    <!-- Welcome card -->
+    <section class="card" aria-labelledby="welcome-title">
+      <h2 id="welcome-title">Welcome aboard!</h2>
+      <p>Pick a crew name and choose your 4-digit code to join the Quest.</p>
+      <div class="chip" id="teamCodeDisplay" aria-live="polite">Crew Code: Loading…</div>
     </section>
 
-    <div class="team-code" id="teamCodeDisplay" aria-live="polite">Crew Code: Loading…</div>
-
-    <section class="instructions" aria-labelledby="how-title">
-      <h3 id="how-title">🗺️ How it works</h3>
+    <!-- How it works -->
+    <section class="card" aria-labelledby="how-title">
+      <h2 id="how-title">How it works</h2>
       <p>Enter your crew name and create a 4-digit code. You’ll use this code to access challenges throughout the Quest.</p>
     </section>
 
+    <!-- Form (IDs/hooks preserved) -->
     <form id="registrationForm" novalidate>
-      <div class="form-group">
-        <label for="teamName">Crew Name</label>
-        <input
-          type="text"
-          id="teamName"
-          name="teamName"
-          maxlength="50"
-          placeholder="e.g., The Golden Compass Crew"
-          required
-          aria-describedby="charCount"
-          autocomplete="off"
-        >
-        <!-- Live counter only -->
-        <div class="char-count"><span id="charCount" aria-live="polite">50</span> characters remaining</div>
+      <label for="teamName">Crew Name</label>
+      <input type="text" id="teamName" name="teamName" maxlength="50"
+             placeholder="e.g., The Golden Compass Crew" required autocomplete="off" class="input" aria-describedby="charCount">
+      <div class="char-row"><span></span><span id="charCount" aria-live="polite">50/50</span></div>
+
+      <label for="teamPin">Crew Code (4-digits)</label>
+      <input type="text" id="teamPin" name="teamPin" inputmode="numeric" pattern="\d{4}" placeholder="1234"
+             required autocomplete="off" class="input" aria-describedby="pinHelp">
+
+      <div class="remember" id="pinHelp">
+        <div class="icon">⚠️</div>
+        <h3>Remember your code.</h3>
+        <p>You’ll use this code to access the activities during the Quest.</p>
       </div>
 
-      <div class="form-group">
-        <label for="teamPin">Crew Code (4 digits)</label>
-        <div class="pin-group">
-          <div>
-            <input
-              type="text"
-              id="teamPin"
-              name="teamPin"
-              inputmode="numeric"
-              pattern="\\d{4}"
-              placeholder="1234"
-              required
-              aria-describedby="pinHelp"
-              autocomplete="off"
-            >
-          </div>
-          <div class="pin-info" id="pinHelp">
-            <strong>Remember it.</strong>
-            You’ll use this code to access activities during the quest.
-          </div>
-        </div>
-      </div>
+      <button type="submit" class="submit-btn" id="submitBtn">Register Crew</button>
 
-      <button type="submit" class="submit-btn" id="submitBtn" aria-label="Register Crew">
-        🏴‍☠️ Register Crew
-      </button>
-
-      <div class="loading" id="loading" role="status" aria-live="polite">⚡ Registering your crew…</div>
+      <div class="loading" id="loading" role="status" aria-live="polite">Registering your crew…</div>
       <div class="error-message" id="errorMessage" role="alert" aria-live="assertive"></div>
     </form>
   </div>
 
   <script>
-    // --- Simple client storage helpers ---
+    // --- Client storage keys (unchanged) ---
     const LS = { token:"tq_token", teamCode:"tq_team_code", teamName:"tq_team_name", eventId:"tq_event_id" };
     function saveAuth({ token, teamCode, teamName, eventId }) {
       if (token) localStorage.setItem(LS.token, token);
@@ -296,60 +238,46 @@
     const charCount = document.getElementById('charCount');
     teamNameInput.addEventListener('input', function () {
       const remaining = 50 - this.value.length;
-      charCount.textContent = remaining;
-      charCount.style.color = remaining < 10 ? '#B42318' : '#5A4630';
+      charCount.textContent = `${remaining}/50`;
+      charCount.style.color = remaining < 8 ? '#B42318' : '#6A5A47';
     });
 
-    // Clamp to 4 digits
+    // 4-digit clamp
     const teamPinInput = document.getElementById('teamPin');
     teamPinInput.addEventListener('input', function () {
       this.value = this.value.replace(/\D/g, '').slice(0, 4);
     });
 
-    // Submit -> /.netlify/functions/team_register
+    // Submit -> /.netlify/functions/team_register (unchanged)
     document.getElementById('registrationForm').addEventListener('submit', async function (e) {
       e.preventDefault();
-
       const teamName = teamNameInput.value.trim();
-      const pin = (teamPinInput.value || "").trim(); // API expects "pin"
+      const pin = (teamPinInput.value || "").trim();
       const submitBtn = document.getElementById('submitBtn');
       const loading = document.getElementById('loading');
       const errorMessage = document.getElementById('errorMessage');
 
-      function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-        errorMessage.focus?.();
-      }
+      function showError(message){ errorMessage.textContent = message; errorMessage.style.display='block'; }
 
       if (!teamName) return showError('Please enter a crew name.');
       if (!pin || pin.length !== 4) return showError('Please enter exactly 4 digits for your crew code.');
 
-      submitBtn.disabled = true;
-      loading.style.display = 'block';
-      errorMessage.style.display = 'none';
+      submitBtn.disabled = true; loading.style.display = 'block'; errorMessage.style.display = 'none';
 
       try {
         const res = await fetch('/.netlify/functions/team_register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ teamCode, pin, teamName })
         });
         const result = await res.json();
-
-        if (!res.ok || result.success === false) {
-          throw new Error(result.message || 'Crew registration failed. Please try again.');
-        }
+        if (!res.ok || result.success === false) throw new Error(result.message || 'Crew registration failed. Please try again.');
 
         saveAuth({ token: result.token, teamCode: result.teamCode, teamName: result.teamName, eventId: result.eventId });
-
         window.location.href = `team-registration-success.html?team=${encodeURIComponent(result.teamName)}&code=${encodeURIComponent(teamCode)}`;
       } catch (err) {
-        console.error('Crew registration error:', err);
         showError(err.message || 'Crew registration failed. Please try again.');
       } finally {
-        submitBtn.disabled = false;
-        loading.style.display = 'none';
+        submitBtn.disabled = false; loading.style.display = 'none';
       }
     });
   </script>
