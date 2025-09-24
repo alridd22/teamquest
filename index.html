@@ -59,6 +59,28 @@
     h1{ font-size:28px; margin:8px 0 4px; color:var(--color-deep); letter-spacing:.2px; }
     .subtitle{ color:var(--color-ink-muted); font-size:16px; }
 
+    /* Header spacing (replace your existing .header rule) */
+.header{
+  text-align:center;
+  margin-bottom:16px;
+  padding-top:20px;   /* spacer above the logo */
+}
+
+/* TeamQuest brand logo – smaller + responsive (replace your existing .brand-logo rule) */
+.brand-logo{
+  display:block;
+  margin:0 auto 12px;     /* small gap under logo */
+  width:min(200px, 42vw); /* was larger; now slimmer by default */
+  height:auto;
+  filter:
+    drop-shadow(0 1px 0 rgba(0,0,0,.25))
+    drop-shadow(0 8px 20px rgba(0,0,0,.18));
+}
+
+/* Step up slightly on wider screens */
+@media (min-width:720px){
+  .brand-logo{ width:min(260px, 30vw); }
+}
     .terry-greeting{
       display:flex; gap:16px; margin:20px 0 16px; padding:16px;
       border:2px solid var(--color-brand); border-radius:16px; background:#FFF8DC;
