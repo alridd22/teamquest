@@ -2,172 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crew Registered - Terry's Treasure Quest</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#F7F0E5">
+  <title>Crew Registered - The Treasure Quest</title>
   <style>
-    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --color-bg:#F7F0E5;
+      --color-card:#FFFFFF;
+      --color-ink:#3B2A16;
+      --color-ink-muted:#6E5538;
+      --color-brand:#DAA520;   /* treasure gold */
+      --color-accent:#FF8C00;  /* trail orange */
+      --color-deep:#7A441D;    /* explorer brown */
+      --color-line:rgba(59,42,22,0.14);
+      --radius-md:16px; --radius-lg:20px; --radius-xl:24px;
+      --shadow-2:0 10px 24px rgba(0,0,0,.16);
+      --dur:180ms; --ease:cubic-bezier(.2,.6,.2,1);
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
     body{
-      font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
-      min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;position:relative
+      margin:0;
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color:var(--color-ink);
+      background:var(--color-bg);
+      background-image:
+        radial-gradient(120% 100% at 90% -10%, rgba(218,165,32,0.06) 0%, rgba(255,255,255,0) 60%),
+        linear-gradient(180deg, rgba(122,68,29,0.03), rgba(255,255,255,0));
+      display:flex; align-items:flex-start; justify-content:center;
+      padding: max(16px, env(safe-area-inset-top)) 16px 24px;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
-    body::before{
-      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+
+    .card{
+      width:100%; max-width:460px;
+      background:var(--color-card);
+      border:2px solid var(--color-deep);
+      border-radius:24px;
+      box-shadow:var(--shadow-2);
+      padding:18px 16px 20px;
+      position:relative; overflow:hidden; text-align:center;
+    }
+    .card::before{
+      content:""; position:absolute; inset:0;
       background:
-        radial-gradient(circle at 20% 20%, rgba(255,215,0,.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(255,140,0,.1) 0%, transparent 50%),
-        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="1" fill="rgba(255,215,0,0.3)"/><circle cx="80" cy="40" r="0.5" fill="rgba(255,140,0,0.2)"/><circle cx="40" cy="80" r="1.5" fill="rgba(218,165,32,0.2)"/></svg>')
+        linear-gradient(90deg, rgba(218,165,32,.10), transparent 35%, transparent 65%, rgba(218,165,32,.10)),
+        repeating-linear-gradient(0deg, rgba(0,0,0,.015), rgba(0,0,0,.015) 1px, transparent 1px, transparent 2px);
+      pointer-events:none;
     }
-    .container{
-      background:linear-gradient(145deg,#F5E6D3 0%, rgba(245,230,211,.95) 100%);
-      backdrop-filter:blur(10px);border-radius:25px;padding:40px;max-width:700px;width:100%;
-      text-align:center;animation:slideUp .6s ease-out;border:3px solid #8B4513;position:relative;z-index:1;
-      box-shadow:0 20px 40px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3)
+
+    .top-ribbon{ position:absolute; left:0; right:0; top:0; height:10px;
+      background:linear-gradient(90deg,#DAA520,#FF8C00,#DAA520); opacity:.95; }
+
+    .title{
+      margin:10px 0 6px; font-size:22px; color:var(--color-deep); letter-spacing:.2px; font-weight:800;
     }
-    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#DAA520,#FFD700)}
-    .container::after{content:'';position:absolute;top:15px;left:15px;right:15px;bottom:15px;border:2px solid #DAA520;border-radius:20px;pointer-events:none}
-    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
-    .success-icon{font-size:4rem;margin-bottom:20px;animation:bounce 1.5s ease-in-out;filter:drop-shadow(2px 2px 4px rgba(139,69,19,.3))}
-    @keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-    .title{color:#8B4513;font-size:2.2rem;font-weight:700;margin-bottom:10px;text-shadow:2px 2px 4px rgba(0,0,0,.1)}
-    .crew-name{
-      background:linear-gradient(135deg,#FFD700,#FF8C00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-      font-size:1.75rem;font-weight:bold;margin:8px 0 18px;border:3px solid #DAA520;border-radius:15px;padding:10px 14px;display:inline-block;
-      box-shadow:0 4px 12px rgba(139,69,19,.2)
+
+    .crew-chip{
+      display:inline-block; margin:8px 0 12px; padding:10px 14px;
+      border:2px dashed var(--color-brand); border-radius:14px; background:#FFFDF3;
+      color:var(--color-deep); font-weight:900; font-size:16px;
     }
-    .subtitle{color:#654321;font-size:1.05rem;margin-bottom:22px;font-weight:500}
-    .terry-greeting{display:flex;align-items:flex-start;gap:20px;margin:18px 0;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);
-      border-radius:20px;padding:20px;border:3px solid #DAA520;box-shadow:0 5px 15px rgba(139,69,19,.2);text-align:left}
-    .terry-character{flex-shrink:0}
-    .terry-character img{width:100px!important;height:100px!important;border-radius:15px!important;border:4px solid #DAA520;
-      box-shadow:0 4px 12px rgba(139,69,19,.3);object-fit:cover;background:linear-gradient(135deg,#8B4513,#A0522D);display:block}
-    .terry-speech{flex:1;position:relative}
-    .terry-speech::before{content:'';position:absolute;left:-15px;top:20px;width:0;height:0;border-style:solid;border-width:15px 15px 15px 0;border-color:transparent #FFD700 transparent transparent}
-    .terry-note{background:linear-gradient(135deg,#FFD700 0%,#FFA500 100%);color:#8B4513;padding:16px;border-radius:12px;margin:0;border:3px solid #DAA520;font-weight:500;line-height:1.5;box-shadow:0 5px 15px rgba(255,215,0,.3)}
-    .adventure-status{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;padding:18px;border-radius:18px;margin:18px 0 26px;border:3px solid #8B4513;box-shadow:0 8px 20px rgba(255,140,0,.3)}
-    .adventure-status h3{margin-bottom:6px;font-size:1.15rem;font-weight:700;text-shadow:1px 1px 2px rgba(0,0,0,.2)}
-    .adventure-status p{opacity:.95;line-height:1.5;font-weight:500}
-    .info-section{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-radius:20px;padding:22px;margin-bottom:18px;text-align:left;border:3px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.1)}
-    .info-section h3{color:#8B4513;font-size:1.15rem;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-weight:700}
-    .info-section ul{list-style:none;padding-left:0}
-    .info-section li{color:#654321;padding:8px 0;display:flex;align-items:center;gap:12px;font-weight:500}
-    .info-section li::before{content:"⚔️";font-size:1.1rem}
-    .action-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-    .btn{padding:14px 26px;border:none;border-radius:15px;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all .3s ease;text-decoration:none;display:inline-flex;align-items:center;gap:10px;text-shadow:1px 1px 2px rgba(0,0,0,.2)}
-    .btn-primary{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:3px solid #8B4513}
-    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(255,140,0,.3);background:linear-gradient(135deg,#FFB347,#F0C814)}
-    .btn-secondary{background:linear-gradient(145deg,#FFF8DC 0%,#F5E6D3 100%);color:#8B4513;border:3px solid #DAA520}
-    .btn-secondary:hover{background:linear-gradient(135deg,#FFD700,#FFA500);color:#fff;transform:translateY(-2px);box-shadow:0 8px 20px rgba(218,165,32,.3)}
-    @media (max-width:600px){
-      .container{padding:30px 20px}
-      .title{font-size:2rem}
-      .crew-name{font-size:1.4rem}
-      .action-buttons{flex-direction:column}
-      .btn{width:100%;justify-content:center}
-      .terry-greeting{flex-direction:column;align-items:center;text-align:center}
-      .terry-speech::before{display:none}
-      .terry-character img{width:90px!important;height:90px!important}
+
+    .ok-stamp{
+      display:inline-flex; align-items:center; gap:8px; margin:8px 0 12px;
+      padding:8px 12px; border-radius:999px; font-weight:800; font-size:14px;
+      color:#fff; background:linear-gradient(135deg,#2e7d32,#43a047);
+      border:2px solid rgba(0,0,0,.15);
+    }
+
+    .section{
+      margin:12px 0; text-align:left;
+      border:1px solid var(--color-line); border-left:4px solid var(--color-accent);
+      border-radius:12px; background:#FFFAF1; padding:12px;
+    }
+    .section h2{ margin:0 0 6px; font-size:16px; color:var(--color-deep); }
+    .section p{ margin:0; color:var(--color-ink-muted); line-height:1.55; font-size:14px; }
+
+    .note{
+      margin-top:12px; font-size:13px; color:var(--color-ink-muted);
+    }
+
+    /* subtle celebratory spark */
+    .burst{
+      position:absolute; inset:auto 0 0 0; top:8px; height:80px; pointer-events:none;
+      background:
+        radial-gradient(closest-side, rgba(255,255,255,.35), rgba(255,255,255,0) 70%),
+        radial-gradient(closest-side, rgba(218,165,32,.25), rgba(218,165,32,0) 70%);
+      opacity:.35; animation: floaty 6s var(--ease) infinite;
+    }
+    @keyframes floaty{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(3px)} }
+
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation-duration:0ms !important; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="success-icon">🏴‍☠️</div>
-    <h1 class="title">Crew Registered</h1>
+  <main class="card" role="main">
+    <div class="top-ribbon" aria-hidden="true"></div>
+    <div class="burst" aria-hidden="true"></div>
 
-    <div class="crew-name" id="crew-name-display">Loading…</div>
-    <p class="subtitle">You’re in. Keep this page open — we’ll tell you when the quest begins.</p>
+    <div class="ok-stamp">✅ Crew Registered</div>
+    <div class="crew-chip" id="crew-name-display">Loading…</div>
 
-    <div class="terry-greeting">
-      <div class="terry-character">
-        <img src="/terry-thinking.png" alt="Terry Quest" class="terry-image">
-      </div>
-      <div class="terry-speech">
-        <div class="terry-note">
-          <strong>Nice work!</strong> When the horn sounds, you’ll have limited time to complete challenges and earn points. Return before time’s up.
-        </div>
-      </div>
-    </div>
+    <h1 class="title">Your team is in.</h1>
 
-    <div class="adventure-status" id="statusCard">
-      <h3>⏰ Adventure Status</h3>
-      <p id="statusText">Checking status…</p>
-    </div>
+    <section class="section" aria-labelledby="next-title">
+      <h2 id="next-title">What’s next?</h2>
+      <p>
+        Once the organiser presses <strong>Start</strong> on their admin panel, the fun begins!
+        Get ready to open your pack and see where your adventure takes you.
+      </p>
+    </section>
 
-    <div class="info-section">
-      <h3>🗺️ What’s next</h3>
-      <ul>
-        <li>Wait for the organiser to start the event.</li>
-        <li>Open the challenges hub when we’re live.</li>
-        <li>Watch your score on the leaderboard.</li>
-      </ul>
-    </div>
-
-    <div class="action-buttons">
-      <a href="/leaderboard" class="btn btn-secondary">🏆 Live Leaderboard</a>
-      <a href="/index.html" class="btn btn-primary" id="hubBtn">🚀 Go to Challenges</a>
-    </div>
-  </div>
+    <p class="note">You can close this webpage.</p>
+  </main>
 
   <script>
-    // Crew name from URL or localStorage
+    // Populate crew name from query or localStorage (keeps existing hook #crew-name-display)
     const qs = new URLSearchParams(location.search);
-    const teamFromQS  = qs.get('team');
-    const codeFromQS  = qs.get('code');
-    const teamNameLS  = localStorage.getItem('tq_team_name');
-    const crewEl = document.getElementById('crew-name-display');
-    crewEl.textContent = teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
+    const teamFromQS = qs.get('team');
+    const codeFromQS = qs.get('code');
+    const teamNameLS = localStorage.getItem('tq_team_name');
+    const el = document.getElementById('crew-name-display');
+    el.textContent = teamFromQS || teamNameLS || (codeFromQS ? `Crew ${codeFromQS.toUpperCase()}` : 'Your Crew');
 
-    // Subtle confetti (lighter than before)
-    function confetti() {
+    // Tiny confetti (respect reduced motion)
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReduced){
       const colors = ['#FFD700','#DAA520','#FF8C00','#8B4513','#DEB887'];
-      for (let i=0;i<30;i++){
-        setTimeout(()=> {
-          const c = document.createElement('div');
-          c.style.cssText = `
-            position: fixed; width: 10px; height: 10px; top: -10px; left: ${Math.random()*100}vw;
-            background: ${colors[Math.floor(Math.random()*colors.length)]}; border-radius: 50%;
-            pointer-events:none; animation: fall 2.6s linear forwards; z-index:1000; box-shadow:0 2px 4px rgba(0,0,0,.2);
+      const kf = document.createElement('style');
+      kf.textContent = '@keyframes drop{to{transform:translateY(100vh) rotate(360deg);opacity:0}}';
+      document.head.appendChild(kf);
+      for (let i=0;i<18;i++){
+        setTimeout(()=>{
+          const d=document.createElement('div');
+          d.style.cssText = `
+            position: fixed; width: 8px; height: 8px; top: -12px; left: ${Math.random()*100}vw;
+            background: ${colors[(Math.random()*colors.length)|0]}; border-radius: 50%;
+            pointer-events:none; animation: drop 2.2s linear forwards; z-index: 1000; box-shadow:0 2px 4px rgba(0,0,0,.2);
           `;
-          document.body.appendChild(c);
-          setTimeout(()=>c.remove(), 2600);
+          document.body.appendChild(d);
+          setTimeout(()=>d.remove(), 2300);
         }, i*70);
       }
     }
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fall { 0%{transform:translateY(-100vh) rotate(0);opacity:1} 100%{transform:translateY(100vh) rotate(360deg);opacity:0} }
-    `;
-    document.head.appendChild(style);
-    setTimeout(confetti, 300);
-
-    // Live status
-    async function refreshStatus(){
-      try{
-        const r = await fetch('/.netlify/functions/get_event_state');
-        const j = await r.json();
-        const text = document.getElementById('statusText');
-        const card = document.getElementById('statusCard');
-
-        if (!j.success) throw new Error(j.message || 'Status error');
-
-        if (j.state === 'RUNNING') {
-          text.textContent = 'We’re live! Jump into the challenges.';
-          card.style.background = 'linear-gradient(135deg,#2e7d32,#43a047)'; // green-ish
-        } else if (j.state === 'PUBLISHED') {
-          text.textContent = 'Event finished. You can still view the leaderboard.';
-          card.style.background = 'linear-gradient(135deg,#6d4c41,#8d6e63)';
-        } else {
-          text.textContent = 'Waiting for start.';
-          card.style.background = 'linear-gradient(135deg,#FF8C00,#DAA520)';
-        }
-      } catch(e){
-        document.getElementById('statusText').textContent = 'Status unavailable right now.';
-      }
-    }
-    refreshStatus();
-    // Poll occasionally so the page updates when the organiser starts the event
-    setInterval(refreshStatus, 15000);
   </script>
 </body>
 </html>
