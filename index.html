@@ -25,13 +25,13 @@
 
       --hero-h: 300px;
       --gutter: 22px;
+      --hero-gap: 26px;   /* ⟵ increased space under the hero */
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      /* Body copy in Handlee; headings override to sans-serif */
       font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
       color:var(--ink);
       background:
@@ -47,21 +47,17 @@
     .hero{
       min-height:var(--hero-h);
       display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:28px var(--gutter) 14px;
+      padding:28px var(--gutter) var(--hero-gap);  /* ⟵ more bottom padding for separation */
       text-align:center;
     }
     .brand-logo{
       width:min(260px, 68vw); height:auto; margin-bottom:10px;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
     }
-    /* Cream, bold title over background (no box) */
     .hero-title{
       font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-weight:900;
-      font-size:22px;
-      color:#F7EED8;
-      text-shadow:0 2px 6px rgba(0,0,0,.6);
-      letter-spacing:.2px;
+      font-weight:900; font-size:22px; color:#F7EED8;
+      text-shadow:0 2px 6px rgba(0,0,0,.6); letter-spacing:.2px;
     }
 
     /* Parchment stack */
@@ -89,33 +85,24 @@
 
     /* Crew code: perfectly centered */
     .chip-wrap{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      margin-top:14px;
+      display:flex; justify-content:center; align-items:center; margin-top:14px;
     }
     .chip{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 16px;
-      min-width: 66%;
-      text-align:center;
-      background:#D7C39B; color:var(--ink); font-weight:800;
-      border-radius:14px; font-size:20px;
-      border:3px dashed rgba(0,0,0,.6);
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:10px 16px; min-width:66%;
+      text-align:center; background:#D7C39B; color:var(--ink); font-weight:800;
+      border-radius:14px; font-size:20px; border:3px dashed rgba(0,0,0,.6);
     }
 
     /* Form */
     label{
       display:block; margin:12px 6px 6px; font-size:22px; color:var(--ink); font-weight:800;
-      /* labels can stay in Handlee or uncomment to force sans-serif:
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; */
     }
     .input{
       width:100%; padding:14px 12px; border-radius:var(--radius-input);
       border:3px solid var(--gold); background:#fff; color:var(--ink);
-      font-size:20px; transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+      font-size:20px;
+      transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
     }
     .input::placeholder{ color:rgba(0,0,0,.35) }
     .input:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px); }
@@ -131,8 +118,7 @@
       border-radius:var(--radius-card);
       border:1px solid rgba(0,0,0,.06);
       padding:18px 14px; box-shadow:var(--shadow-soft);
-      margin-top:12px;
-      text-align:left;
+      margin-top:12px; text-align:left;
     }
     .remember h3{
       margin:6px 0 8px; font-size:22px; color:var(--ink);
@@ -173,9 +159,9 @@
     }
 
     @media (min-width:480px){
-      :root{ --hero-h: 340px; --gutter: 26px; }
+      :root{ --hero-h: 340px; --gutter: 26px; --hero-gap: 30px; }
       .brand-logo{ width:min(300px, 62vw); }
-      .chip{ min-width:58%; } /* slightly slimmer on larger devices */
+      .chip{ min-width:58%; }
     }
     @media (prefers-reduced-motion: reduce){
       *{ transition:none !important; animation-duration:0ms !important; }
@@ -185,8 +171,7 @@
 <body>
   <!-- HERO on the background -->
   <header class="hero" role="banner">
-    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480" decoding="async"
-         onerror="this.remove()">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480" decoding="async" onerror="this.remove()">
     <div class="hero-title">Crew Registration</div>
   </header>
 
@@ -273,10 +258,7 @@
       const loading = document.getElementById('loading');
       const errorMessage = document.getElementById('errorMessage');
 
-      function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = 'block';
-      }
+      function showError(message) { errorMessage.textContent = message; errorMessage.style.display = 'block'; }
 
       if (!teamName) return showError('Please enter a crew name.');
       if (!pin || pin.length !== 4) return showError('Please enter exactly 4 digits for your crew code.');
@@ -290,13 +272,9 @@
           body: JSON.stringify({ teamCode, pin, teamName })
         });
         const result = await res.json();
-
-        if (!res.ok || result.success === false) {
-          throw new Error(result.message || 'Crew registration failed. Please try again.');
-        }
+        if (!res.ok || result.success === false) throw new Error(result.message || 'Crew registration failed. Please try again.');
 
         saveAuth({ token: result.token, teamCode: result.teamCode, teamName: result.teamName, eventId: result.eventId });
-
         window.location.href = `team-registration-success.html?team=${encodeURIComponent(result.teamName)}&code=${encodeURIComponent(teamCode)}`;
       } catch (err) {
         showError(err.message || 'Crew registration failed. Please try again.');
