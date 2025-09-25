@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2A1F18">
   <title>The Treasure Quest - Crew Registration</title>
 
-  <!-- Handlee -->
+  <!-- Handlee for body copy only -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
 
   <style>
@@ -23,14 +23,16 @@
       --focus:0 0 0 3px rgba(240,196,51,.45);
       --dur:180ms; --ease:cubic-bezier(.2,.6,.2,1);
 
-      --hero-h: 300px; /* hero height on phones */
-      --gutter: 22px;  /* big side gutter so background shows */
+      --hero-h: 300px;
+      --gutter: 22px;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      margin:0;
+      /* Body copy in Handlee; headings will override to sans-serif */
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
       color:var(--ink);
       background:
         linear-gradient(180deg, rgba(0,0,0,.26), rgba(0,0,0,.45)),
@@ -41,29 +43,31 @@
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
-    /* Full-bleed hero (logo + title sit directly on the background) */
+    /* Full-bleed hero */
     .hero{
       min-height:var(--hero-h);
       display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
       padding:28px var(--gutter) 14px;
+      text-align:center;
     }
     .brand-logo{
-      width:min(210px, 62vw); height:auto; margin-bottom:10px;
+      /* Bigger logo */
+      width:min(260px, 68vw); height:auto; margin-bottom:10px;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
     }
-    .title-pill{
-      color:#2E2114; font-size:22px; letter-spacing:.2px;
-      background:rgba(247,238,216,.88);
-      border:1px solid rgba(0,0,0,.08);
-      border-radius:999px; padding:10px 16px;
-      backdrop-filter:saturate(120%) blur(3px);
-      box-shadow:0 8px 20px rgba(0,0,0,.25);
+    /* Cream, bold title over background (no box) */
+    .hero-title{
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:900;
+      font-size:22px;
+      color:#F7EED8;
+      text-shadow:0 2px 6px rgba(0,0,0,.6);
+      letter-spacing:.2px;
     }
 
-    /* Main parchment stack (visibly inset so background shows) */
-    .stack{
-      padding:0 var(--gutter) 24px;
-    }
+    /* Parchment stack */
+    .stack{ padding:0 var(--gutter) 24px; }
+
     .card{
       background:var(--parchment);
       border-radius:var(--radius-card);
@@ -73,14 +77,18 @@
       margin:0 auto 18px;
       width:100%;
     }
+
+    /* Section headers: switch to sans-serif per designer */
     .card h2{
-      margin:0 0 10px; text-align:center; font-size:26px; color:var(--ink);
+      margin:0 0 10px; text-align:center;
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:900; font-size:24px; color:var(--ink);
     }
     .card p{
       margin:0; line-height:1.6; color:var(--ink); font-size:18px;
     }
 
-    /* Crew code chip */
+    /* Centered crew code chip */
     .chip{
       margin:14px auto 2px; text-align:center; display:inline-block;
       background:#D7C39B; color:var(--ink); font-weight:800;
@@ -91,6 +99,8 @@
     /* Form */
     label{
       display:block; margin:12px 6px 6px; font-size:22px; color:var(--ink); font-weight:800;
+      /* labels can stay in Handlee to keep playful tone, or uncomment next line to force sans-serif */
+      /* font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; */
     }
     .input{
       width:100%; padding:14px 12px; border-radius:var(--radius-input);
@@ -105,18 +115,27 @@
       color:var(--ink-soft); font-size:16px;
     }
 
+    /* Remember card now left-aligned body text */
     .remember{
       background:var(--parchment-2);
       border-radius:var(--radius-card);
       border:1px solid rgba(0,0,0,.06);
-      padding:18px 14px; text-align:center; box-shadow:var(--shadow-soft);
+      padding:18px 14px; box-shadow:var(--shadow-soft);
       margin-top:12px;
+      text-align:left; /* ← left align per designer */
     }
-    .remember h3{ margin:10px 0 6px; font-size:26px; color:var(--ink); }
+    .remember h3{
+      margin:6px 0 8px; font-size:22px; color:var(--ink);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* headers sans-serif */
+      font-weight:900; text-align:left;
+    }
     .remember p{ margin:0; font-size:18px; color:var(--ink); }
-    .remember .icon{ font-size:34px; display:inline-block; }
+    .remember .icon{ font-size:30px; display:inline-block; vertical-align:middle; margin-right:6px; }
 
-    /* CTA */
+    /* Extra gap before CTA button (per designer) */
+    .cta-gap{ height:16px; } /* adjust if you want even more space */
+
+    /* CTA (Register Crew) */
     .submit-btn{
       width:100%;
       background:linear-gradient(90deg, #FDBA2D, #F0C433);
@@ -125,6 +144,7 @@
       padding:16px; cursor:pointer; margin-top:6px;
       box-shadow:0 10px 22px rgba(0,0,0,.25);
       transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* buttons sans-serif */
     }
     .submit-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(0,0,0,.3); }
     .submit-btn:active{ transform:translateY(0); }
@@ -133,15 +153,18 @@
     .loading{
       display:none; text-align:center; margin-top:10px; color:#EEE3CD; font-weight:700; font-size:18px;
       text-shadow:0 1px 2px rgba(0,0,0,.4);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     .error-message{
       display:none; margin-top:12px; padding:10px; border-radius:12px;
       font-weight:700; font-size:16px; text-align:center; color:#fff;
       background:var(--error); border:2px solid #7E1C12;
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     @media (min-width:480px){
       :root{ --hero-h: 340px; --gutter: 26px; }
+      .brand-logo{ width:min(300px, 62vw); } /* scale logo up slightly on larger phones */
     }
     @media (prefers-reduced-motion: reduce){
       *{ transition:none !important; animation-duration:0ms !important; }
@@ -153,7 +176,7 @@
   <header class="hero" role="banner">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480" decoding="async"
          onerror="this.remove()">
-    <div class="title-pill">Crew Registration</div>
+    <div class="hero-title">Crew Registration</div>
   </header>
 
   <!-- PARCHMENT STACK with generous gutters -->
@@ -161,6 +184,7 @@
     <section class="card" aria-labelledby="welcome-title">
       <h2 id="welcome-title">Welcome aboard!</h2>
       <p>Pick a crew name and choose your 4-digit code to join the Quest.</p>
+      <!-- Centered chip -->
       <div class="chip" id="teamCodeDisplay" aria-live="polite">Crew Code: Loading…</div>
     </section>
 
@@ -174,7 +198,6 @@
         <label for="teamName">Crew Name</label>
         <input type="text" id="teamName" name="teamName" maxlength="50"
                placeholder="e.g., The Golden Compass Crew" required autocomplete="off" class="input" aria-describedby="charCount">
-        <!-- counter only, no “Max 50 characters” line -->
         <div class="char-row"><span id="charCount" aria-live="polite">50</span></div>
 
         <label for="teamPin">Crew Code (4-digits)</label>
@@ -182,10 +205,12 @@
                placeholder="1234" required autocomplete="off" class="input" aria-describedby="pinHelp">
 
         <div class="remember" id="pinHelp">
-          <div class="icon">⚠️</div>
-          <h3>Remember your code.</h3>
+          <h3><span class="icon">⚠️</span>Remember your code</h3>
           <p>You’ll use this code to access the activities during the Quest.</p>
         </div>
+
+        <!-- extra spacing before button -->
+        <div class="cta-gap" aria-hidden="true"></div>
 
         <button type="submit" class="submit-btn" id="submitBtn">Register Crew</button>
 
@@ -196,7 +221,7 @@
   </main>
 
   <script>
-    // --- Storage keys (unchanged) ---
+    // --- Simple client storage helpers (unchanged) ---
     const LS = { token:"tq_token", teamCode:"tq_team_code", teamName:"tq_team_name", eventId:"tq_event_id" };
     function saveAuth({ token, teamCode, teamName, eventId }) {
       if (token) localStorage.setItem(LS.token, token);
@@ -210,7 +235,7 @@
     const teamCode = (urlParams.get('team') || 'UNKNOWN').toUpperCase();
     document.getElementById('teamCodeDisplay').textContent = `Crew Code: ${teamCode}`;
 
-    // Character counter (no helper line)
+    // Character counter
     const teamNameInput = document.getElementById('teamName');
     const charCount = document.getElementById('charCount');
     teamNameInput.addEventListener('input', function () {
@@ -219,36 +244,46 @@
       charCount.style.color = remaining < 8 ? '#B42318' : '#6A5A47';
     });
 
-    // 4-digit clamp
+    // 4-digit clamp (keep same #teamPin hook)
     const teamPinInput = document.getElementById('teamPin');
     teamPinInput.addEventListener('input', function () {
       this.value = this.value.replace(/\D/g, '').slice(0, 4);
     });
 
-    // Submit -> Netlify function (unchanged)
+    // Submit -> /.netlify/functions/team_register (unchanged)
     document.getElementById('registrationForm').addEventListener('submit', async function (e) {
       e.preventDefault();
+
       const teamName = teamNameInput.value.trim();
       const pin = (teamPinInput.value || "").trim();
       const submitBtn = document.getElementById('submitBtn');
       const loading = document.getElementById('loading');
       const errorMessage = document.getElementById('errorMessage');
 
-      function showError(message){ errorMessage.textContent = message; errorMessage.style.display='block'; }
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+      }
 
       if (!teamName) return showError('Please enter a crew name.');
       if (!pin || pin.length !== 4) return showError('Please enter exactly 4 digits for your crew code.');
 
       submitBtn.disabled = true; loading.style.display = 'block'; errorMessage.style.display = 'none';
+
       try {
         const res = await fetch('/.netlify/functions/team_register', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ teamCode, pin, teamName })
         });
         const result = await res.json();
-        if (!res.ok || result.success === false) throw new Error(result.message || 'Crew registration failed. Please try again.');
+
+        if (!res.ok || result.success === false) {
+          throw new Error(result.message || 'Crew registration failed. Please try again.');
+        }
 
         saveAuth({ token: result.token, teamCode: result.teamCode, teamName: result.teamName, eventId: result.eventId });
+
         window.location.href = `team-registration-success.html?team=${encodeURIComponent(result.teamName)}&code=${encodeURIComponent(teamCode)}`;
       } catch (err) {
         showError(err.message || 'Crew registration failed. Please try again.');
