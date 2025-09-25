@@ -6,15 +6,13 @@
   <meta name="theme-color" content="#2A1F18">
   <title>Crew Registered - The Treasure Quest</title>
 
-  <!-- Handlee font -->
+  <!-- Handlee for general body (we’ll override where needed) -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg:url("/TQ%20Web%20background-100.jpg"); /* success page background */
-      /* Move the background UP (more negative = higher) */
-      --bg-shift:-96px;
-
+      --bg-shift:-120px;        /* move background UP so dotted line + X show higher */
       --ink:#2E2114;
       --ink-soft:#6A5A47;
       --parchment:#F7EED8;
@@ -30,7 +28,6 @@
       margin:0;
       font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
       color:var(--ink);
-      /* Shift background upward so dotted path & X are visible higher */
       background-image: var(--bg);
       background-repeat: no-repeat;
       background-size: cover;
@@ -72,19 +69,25 @@
     }
     .status-pill svg{ width:16px; height:16px; fill:var(--green); }
 
-    /* Team name – big + bold */
+    /* Team name – bold, sans-serif, perfectly centered inside the box */
     .crew-name{
-      display:inline-block;
-      margin:0 0 12px;
+      display:inline-flex;              /* enable centering */
+      align-items:center;               /* vertical center */
+      justify-content:center;           /* horizontal center */
       padding:12px 18px;
+      min-height:54px;                  /* ensures vertical centering even if short */
       border:3px solid var(--gold);
       border-radius:14px;
       background:var(--parchment-2);
       color:var(--ink);
-      font-weight:900;
+      font-weight:900;                  /* bold */
       font-size:1.45rem;
       line-height:1.1;
       min-width:60%;
+      margin:0 0 12px;
+
+      /* Force sans-serif for this element specifically */
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     /* What's next – left aligned body text */
@@ -101,6 +104,7 @@
       margin:0 0 6px;
       color:var(--ink);
       text-align:left;
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
     .info p{
       margin:0;
@@ -108,12 +112,9 @@
       line-height:1.5;
     }
 
-    /* Optional: slightly different shifts on larger/smaller phones */
+    /* Optional device tweaks */
     @media (max-width:360px){
-      :root{ --bg-shift:-110px; } /* push a tad higher on very small devices */
-    }
-    @media (min-width:480px){
-      :root{ --bg-shift:-120px; } /* a bit more on larger phones if needed */
+      :root{ --bg-shift:-130px; }
     }
   </style>
 </head>
