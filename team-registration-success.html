@@ -12,6 +12,7 @@
   <style>
     :root{
       --bg:url("/TQ%20Web%20background-100.jpg"); /* success page background */
+      --bg-shift:-28px;      /* move the background UP a bit so the dotted line & X sit higher; make more negative to move further up */
       --ink:#2E2114;
       --ink-soft:#6A5A47;
       --parchment:#F7EED8;
@@ -26,19 +27,23 @@
     body{
       margin:0;
       font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
-      background:var(--bg) no-repeat top center/cover;
       color:var(--ink);
-      display:flex; flex-direction:column; align-items:center;
+      /* Shift background upward so the dotted path & X are visible higher on the page */
+      background-image: var(--bg);
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center var(--bg-shift);
       min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
       padding:16px;
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
     }
 
     /* Logo hero (kept high) */
-    .hero{ margin-top:12px; text-align:center; }
+    .hero{ margin-top:10px; text-align:center; }
     .brand-logo{
-      width:220px; max-width:65vw;
-      height:auto; display:block; margin:0 auto 12px;
+      width:220px; max-width:65vw; height:auto;
+      display:block; margin:0 auto 12px;
       filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
     }
 
@@ -53,10 +58,22 @@
       border:1px solid rgba(0,0,0,.06);
     }
 
+    /* Status pill ABOVE the team name */
+    .status-pill{
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      background:#E6F4EA; color:var(--green);
+      border:2px solid var(--green);
+      border-radius:999px;
+      padding:6px 14px;
+      font-weight:800;
+      margin:0 0 12px;
+    }
+    .status-pill svg{ width:16px; height:16px; fill:var(--green); }
+
     /* Team name – big + bold */
     .crew-name{
       display:inline-block;
-      margin:0 0 10px;
+      margin:0 0 12px;
       padding:12px 18px;
       border:3px solid var(--gold);
       border-radius:14px;
@@ -68,34 +85,29 @@
       min-width:60%;
     }
 
-    /* Status pill under team name */
-    .status-pill{
-      display:inline-flex; align-items:center; justify-content:center;
-      gap:6px;
-      background:#E6F4EA; color:var(--green);
-      border:2px solid var(--green);
-      border-radius:999px; padding:6px 14px;
-      font-weight:800; margin:4px 0 12px;
-    }
-    .status-pill svg{ width:16px; height:16px; fill:var(--green); }
-
-    /* What's next block — larger type */
+    /* What's next – left aligned body text */
     .info{
       background:var(--parchment-2);
       border-radius:12px;
       padding:16px 14px;
       color:var(--ink);
+      text-align:left;               /* ← left align per feedback */
     }
     .info-title{
-      font-size:1.4rem;
+      font-size:1.45rem;             /* bumped for readability */
       font-weight:900;
       margin:0 0 6px;
       color:var(--ink);
+      text-align:left;
     }
     .info p{
       margin:0;
-      font-size:1.15rem;   /* increased body size */
+      font-size:1.15rem;
       line-height:1.5;
+    }
+
+    @media (min-width:480px){
+      :root{ --bg-shift:-34px; }     /* nudge a bit more on larger phones if desired */
     }
   </style>
 </head>
@@ -105,12 +117,13 @@
   </header>
 
   <main class="card">
-    <div class="crew-name" id="crew-name-display">Loading…</div>
-
+    <!-- Moved above team name -->
     <div class="status-pill" aria-live="polite">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.285 6.709l-11.025 11.025-5.546-5.546 1.414-1.414 4.132 4.132 9.611-9.611z"/></svg>
       Crew Registered
     </div>
+
+    <div class="crew-name" id="crew-name-display">Loading…</div>
 
     <div class="info" aria-labelledby="next-title">
       <div id="next-title" class="info-title">What’s next?</div>
