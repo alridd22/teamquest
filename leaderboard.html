@@ -3,79 +3,144 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TeamQuest Leaderboard</title>
+  <title>TeamQuest — Leaderboard</title>
   <style>
     :root{
-      --bg:#F3EADB; --card:#F7F0E5; --brown:#8B4513; --gold:#DAA520; --gold2:#FFB347;
+      --bg:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);
+      --card:#F7F0E5; --parch:#fff7ea;
+      --ink:#3a2a17; --ink2:#6e4a24;
+      --brown:#8B4513; --gold:#DAA520; --gold2:#FFB347;
+      --ok:#2ecc71; --warn:#ffd166; --err:#ff6b6b;
+      --br:18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif;
-      background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);color:#3a2a17;}
-    .leaderboard-card{max-width:1050px;margin:42px auto;background:var(--card);
-      border:3px solid var(--brown);border-radius:18px;box-shadow:0 14px 28px rgba(0,0,0,.18);
-      padding:26px 24px 22px;}
-    .leaderboard-title{color:var(--brown);font-weight:800;font-size:2.1rem;margin:0 0 6px;}
-    .leaderboard-sub{color:#7b522a;font-weight:600;margin:0 0 18px;}
-    .cluster{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .badge{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:2px dashed var(--gold);
-      border-radius:14px;background:#fff7e3;font-weight:800;color:#6a3f16;user-select:none;}
-    .badge .dot{width:10px;height:10px;border-radius:999px;background:#2ecc71;
-      box-shadow:0 0 0 3px rgba(46,204,113,.25);display:inline-block;}
-    .badge.time .dot{background:#ffd166;box-shadow:0 0 0 3px rgba(255,209,102,.25);}
-    .btn-refresh{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:12px;
-      border:2px solid var(--brown);background:linear-gradient(135deg,var(--gold2),var(--gold));
-      color:#fff;font-weight:800;cursor:pointer;transition:transform .08s ease,filter .08s ease;}
-    .btn-refresh:hover{filter:brightness(1.03);transform:translateY(-1px);}
-    .banner{margin:14px 0 10px;padding:12px 14px;background:#fff7e3;border:2px solid var(--gold);
-      border-radius:10px;color:#6a3f16;font-weight:700;display:none;}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg); color:var(--ink);
+    }
+
+    /* Shell */
+    .wrap{max-width:1100px;margin:42px auto;padding:0 16px}
+    .card{
+      background:var(--card); border:3px solid var(--brown); border-radius:var(--br);
+      box-shadow:0 14px 28px rgba(0,0,0,.18); padding:22px;
+    }
+    .head{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:10px;
+    }
+    h1{margin:0; color:var(--brown); font-weight:900; letter-spacing:.2px}
+    .sub{margin:2px 0 0; color:var(--ink2); font-weight:600}
+
+    /* Controls row */
+    .controls{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0 16px}
+    .badge{
+      display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border:2px dashed var(--gold);
+      border-radius:14px; background:#fff7e3; font-weight:800; color:#6a3f16; user-select:none;
+    }
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--ok); box-shadow:0 0 0 3px #2ecc7128}
+    .btn{
+      appearance:none; border:2px solid var(--brown); border-radius:12px; padding:10px 14px; cursor:pointer;
+      font-weight:900; color:#fff; background:linear-gradient(135deg,var(--gold2),var(--gold));
+    }
+    .btn:hover{filter:brightness(1.03); transform:translateY(-1px)}
+    .field{
+      border:2px solid #e7d8c4; background:#fff; border-radius:12px; padding:10px 12px; min-width:220px; font-size:14px
+    }
+    .toggles{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{
+      border:2px solid #e7d8c4; background:#fff; border-radius:999px; padding:8px 12px; font-weight:700; cursor:pointer;
+      display:inline-flex; align-items:center; gap:8px;
+    }
+    .chip input{accent-color:#B8860B}
+
+    /* Banners */
+    .banner{display:none; margin:10px 0; padding:12px 14px; background:#fff7e3; border:2px solid var(--gold);
+      border-radius:10px; color:#6a3f16; font-weight:700}
     .banner.show{display:block}
-    table.leaderboard{width:100%;border-collapse:separate;border-spacing:0;background:#fff;
-      border:2px solid #e7d8c4;border-radius:12px;overflow:hidden;}
-    .leaderboard thead th{background:linear-gradient(180deg,#fff8ea,#fdeac7);color:#6a3f16;
-      font-weight:800;padding:14px 12px;text-align:left;border-bottom:2px solid #eddcc4;white-space:nowrap;}
-    .leaderboard tbody td{padding:14px 12px;color:#4a3a26;}
-    .leaderboard tbody tr:nth-child(even){background:#fffaf2;}
-    .leaderboard tbody tr:hover{background:#fff4df;}
-    .leaderboard td.rank{width:52px;color:#7a5a34;font-weight:800;}
-    .leaderboard tbody td:nth-child(n+3){text-align:right;font-variant-numeric:tabular-nums;}
-    .empty{padding:18px 12px;color:#7b522a;font-weight:600;}
-    .updated{margin-top:12px;color:#7b522a;font-weight:600;}
+
+    /* Table */
+    .table-wrap{overflow:auto; border-radius:12px; border:2px solid #e7d8c4}
+    table{width:100%; border-collapse:separate; border-spacing:0; background:#fff}
+    thead th{
+      background:linear-gradient(180deg,#fff8ea,#fdeac7); color:#6a3f16; font-weight:800; padding:12px; text-align:left;
+      border-bottom:2px solid #eddcc4; white-space:nowrap; position:sticky; top:0; z-index:1;
+    }
+    tbody td{padding:12px; color:#4a3a26; vertical-align:middle}
+    tbody tr:nth-child(even){background:#fffaf2}
+    tbody tr:hover{background:#fff4df}
+    td.rank{width:56px; font-weight:900; color:#7a5a34}
+    td.total{font-weight:900}
+    .medal{
+      display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:999px;
+      color:#3a2a17; font-weight:900; margin-right:8px; border:2px solid #b37e00;
+      background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#ffd776,#f0b020);
+    }
+    .silver{border-color:#8f8f8f; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#e7e7e7,#bdbdbd)}
+    .bronze{border-color:#a46e3a; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#e7b07a,#b17032)}
+
+    /* Mobile helpers */
+    @media (max-width:720px){
+      .controls{flex-direction:column; align-items:stretch}
+      .field{min-width:unset}
+    }
+
+    .updated{margin-top:12px; color:#7b522a; font-weight:600}
   </style>
 </head>
 <body>
-  <main class="leaderboard-card" aria-live="polite">
-    <h1 class="leaderboard-title">TeamQuest Leaderboard</h1>
-    <p class="leaderboard-sub">Live standings with activity breakdown</p>
+  <main class="wrap">
+    <section class="card" aria-live="polite">
+      <div class="head">
+        <div>
+          <h1>Leaderboard</h1>
+          <p class="sub">Live standings with activity breakdown.</p>
+        </div>
+      </div>
 
-    <div class="cluster">
-      <span class="badge" id="statusBadge"><span class="dot" aria-hidden="true"></span><span id="statusText">Running</span></span>
-      <span class="badge time"><span class="dot" aria-hidden="true"></span>Time remaining: <span id="timeLeft">00:00</span></span>
-      <button class="btn-refresh" id="refreshBtn">🔄 Refresh</button>
-    </div>
+      <div class="controls">
+        <span class="badge"><span id="stateDot" class="dot" aria-hidden="true"></span><span id="stateText">—</span></span>
+        <span class="badge"><span class="dot" style="background:#ffd166; box-shadow:0 0 0 3px #ffd16633" aria-hidden="true"></span>
+          Time remaining: <span id="timeLeft">—</span></span>
 
-    <div class="banner" id="hideBanner">🔒 Scores hidden for the final push. Keep going!</div>
-    <div class="banner" id="endedBanner">⚠️ Event complete — final results will appear once the host publishes them.</div>
+        <input id="search" class="field" type="search" placeholder="Filter teams…" aria-label="Filter teams" />
 
-    <table class="leaderboard" id="board" role="table" aria-describedby="statusText">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Team</th>
-          <th>Kindness</th>
-          <th>Limerick</th>
-          <th>Scavenger</th>
-          <th>Clue Hunt</th> <!-- NEW -->
-          <th>Quiz</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody id="rows">
-        <tr><td class="empty" colspan="8">Loading…</td></tr> <!-- updated colspan -->
-      </tbody>
-    </table>
+        <div class="toggles" aria-label="Column toggles">
+          <label class="chip"><input type="checkbox" data-col="kindness" checked> Kindness</label>
+          <label class="chip"><input type="checkbox" data-col="limerick" checked> Limerick</label>
+          <label class="chip"><input type="checkbox" data-col="scavenger" checked> Scavenger</label>
+          <label class="chip"><input type="checkbox" data-col="cluehunt" checked> Clue Hunt</label>
+          <label class="chip"><input type="checkbox" data-col="quiz" checked> Quiz</label>
+        </div>
 
-    <div class="updated" id="lastUpdated">Last updated — --:--:--</div>
+        <button id="refreshBtn" class="btn">🔄 Refresh</button>
+      </div>
+
+      <div id="hideBanner" class="banner">🔒 Scores hidden for the final push. Keep going!</div>
+      <div id="endedBanner" class="banner">⚠️ Event complete — final results will appear once the host publishes them.</div>
+
+      <div class="table-wrap">
+        <table id="board" role="table" aria-describedby="stateText">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Team</th>
+              <th data-col="kindness">Kindness</th>
+              <th data-col="limerick">Limerick</th>
+              <th data-col="scavenger">Scavenger</th>
+              <th data-col="cluehunt">Clue Hunt</th>
+              <th data-col="quiz">Quiz</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="8" style="padding:16px">Loading…</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="updated" class="updated">Last updated — --:--:--</div>
+    </section>
   </main>
 
   <script>
@@ -83,131 +148,161 @@
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     const rowsEl = document.getElementById('rows');
-    const timeEl = document.getElementById('timeLeft');
-    const statusText = document.getElementById('statusText');
-    const statusBadge = document.getElementById('statusBadge');
+    const stateText = document.getElementById('stateText');
+    const stateDot  = document.getElementById('stateDot');
+    const timeEl    = document.getElementById('timeLeft');
+    const updatedEl = document.getElementById('updated');
     const hideBanner = document.getElementById('hideBanner');
     const endedBanner = document.getElementById('endedBanner');
-    const lastUpdated = document.getElementById('lastUpdated');
     const refreshBtn = document.getElementById('refreshBtn');
+    const searchInput = document.getElementById('search');
 
+    let fullData = [];
     let countdownTimer = null;
 
+    // ---- utils
+    const num = v => Number.isFinite(+v) ? +v : 0;
+    const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
     function fmtTime(ms){
-      if(ms == null) return '00:00';
+      if(ms == null) return '—';
       ms = Math.max(0, ms);
       const s = Math.floor(ms/1000);
       const h = Math.floor(s/3600);
       const m = Math.floor((s%3600)/60);
       const sec = s%60;
-      return (h>0? String(h).padStart(2,'0')+':':'') +
-             String(m).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+      return (h>0? String(h).padStart(2,'0')+':':'')+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
     }
-    function nowLocalTime(){
-      const d = new Date();
-      return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-    }
-    function num(v){ const n = Number(v); return Number.isFinite(n) ? n : 0; }
 
     function extractMeta(data){
       const meta = data?.event || data || {};
-      const state = (data?.state || meta.state || 'RUNNING').toUpperCase();
-      const endsAtIso = meta.endsAt || meta.endAt || meta.ends || null;
-      const serverNowIso = meta.now || data?.now || null;
+      const state = String(data?.state || meta.state || 'RUNNING').toUpperCase();
       let remainingMs = null;
-      if(data?.timeRemainingMs != null) remainingMs = num(data.timeRemainingMs);
-      else if(data?.timeRemainingSec != null) remainingMs = num(data.timeRemainingSec)*1000;
-      else if(meta.timeRemainingSec != null) remainingMs = num(meta.timeRemainingSec)*1000;
-      else if(endsAtIso){
-        const now = serverNowIso ? new Date(serverNowIso) : new Date();
-        remainingMs = new Date(endsAtIso) - now;
+      if (data?.timeRemainingMs != null) remainingMs = +data.timeRemainingMs;
+      else if (data?.timeRemainingSec != null) remainingMs = +data.timeRemainingSec * 1000;
+      else if (meta?.timeRemainingSec != null) remainingMs = +meta.timeRemainingSec * 1000;
+      else if (meta?.endsAt || meta?.endAt || meta?.ends){
+        const now = meta?.now ? new Date(meta.now) : new Date();
+        remainingMs = (new Date(meta.endsAt || meta.endAt || meta.ends)) - now;
       }
       return { state, remainingMs };
     }
 
     function setStatus(state){
-      const pretty = (state==='RUNNING'?'Running': state==='PAUSED'?'Paused'
-                      : state==='PUBLISHED'?'Published' : 'Ended');
-      statusText.textContent = pretty;
-      statusBadge.querySelector('.dot').style.background =
-        (state==='RUNNING') ? '#2ecc71' : (state==='PAUSED' ? '#ffd166' : '#ff6b6b');
+      const pretty = state==='RUNNING'?'Running' : state==='PAUSED'?'Paused' : state==='PUBLISHED'?'Published' : 'Ended';
+      stateText.textContent = pretty;
+      stateDot.style.background = state==='RUNNING' ? '#2ecc71' : state==='PAUSED' ? '#ffd166' : '#ff6b6b';
     }
 
     function setCountdown(ms){
-      if(countdownTimer) clearInterval(countdownTimer);
-      if(ms == null){ timeEl.textContent = '00:00'; return; }
-      let remaining = ms;
-      timeEl.textContent = fmtTime(remaining);
+      if (countdownTimer) clearInterval(countdownTimer);
+      if (ms == null){ timeEl.textContent = '—'; return; }
+      let t = ms;
+      timeEl.textContent = fmtTime(t);
       countdownTimer = setInterval(()=>{
-        remaining -= 1000;
-        if(remaining <= 0){ timeEl.textContent = '00:00'; clearInterval(countdownTimer); }
-        else timeEl.textContent = fmtTime(remaining);
-      },1000);
+        t -= 1000;
+        if (t <= 0){ timeEl.textContent = '00:00'; clearInterval(countdownTimer); }
+        else timeEl.textContent = fmtTime(t);
+      }, 1000);
     }
 
-    function renderRows(list){
-      if(!Array.isArray(list) || list.length===0){
-        rowsEl.innerHTML = `<tr><td class="empty" colspan="8">No teams yet.</td></tr>`;
-        return;
-      }
-      rowsEl.innerHTML = list.map((t,i)=>{
+    // ---- data handling
+    function coerceRows(data){
+      const list = data.leaderboard || data.rows || data.teams || [];
+      return list.map(t => {
         const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
         const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
         const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
-        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt); // NEW
+        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
         const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
         const total = num(t.total ?? (k+l+s+c+q));
         const name = t.teamName || t.name || t.team || t.teamCode || '—';
-        return `
-          <tr>
-            <td class="rank">${i+1}</td>
-            <td>${name}</td>
-            <td>${k}</td>
-            <td>${l}</td>
-            <td>${s}</td>
-            <td>${c}</td>
-            <td>${q}</td>
-            <td>${total}</td>
-          </tr>`;
-      }).join('');
+        return { name, k, l, s, c, q, total };
+      }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
+    function medalCell(rank){
+      if (rank===1) return '<span class="medal">1</span>';
+      if (rank===2) return '<span class="medal silver">2</span>';
+      if (rank===3) return '<span class="medal bronze">3</span>';
+      return '';
+    }
+
+    function render(filtered){
+      if (!filtered.length){
+        rowsEl.innerHTML = `<tr><td colspan="8" style="padding:16px">No teams yet.</td></tr>`;
+        return;
+      }
+      rowsEl.innerHTML = filtered.map((t, i) => `
+        <tr>
+          <td class="rank">${medalCell(i+1)}${i+1}</td>
+          <td>${t.name}</td>
+          <td data-col="kindness">${t.k}</td>
+          <td data-col="limerick">${t.l}</td>
+          <td data-col="scavenger">${t.s}</td>
+          <td data-col="cluehunt">${t.c}</td>
+          <td data-col="quiz">${t.q}</td>
+          <td class="total">${t.total}</td>
+        </tr>
+      `).join('');
+    }
+
+    function applyFilter(){
+      const q = (searchInput.value || '').toLowerCase().trim();
+      const list = !q ? fullData : fullData.filter(r => r.name.toLowerCase().includes(q));
+      render(list);
+    }
+
+    // ---- column toggles
+    document.querySelectorAll('.chip input').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const col = cb.dataset.col;
+        const show = cb.checked;
+        document.querySelectorAll(`[data-col="${col}"]`).forEach(cell=>{
+          cell.style.display = show ? '' : 'none';
+        });
+      });
+    });
+
+    // ---- load
     async function loadBoard(){
       const url = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
 
       try{
-        const res = await fetch(url, { cache: 'no-store' });
-        if(!res.ok) throw new Error(`HTTP ${res.status}`);
+        const res = await fetch(url, { cache:'no-store' });
         const data = await res.json();
 
         const { state, remainingMs } = extractMeta(data);
         setStatus(state);
         setCountdown(remainingMs);
 
-        const hideForFinalPush = state === 'RUNNING' && remainingMs != null && remainingMs > 0 && remainingMs <= 15*60*1000;
-        hideBanner.classList.toggle('show', hideForFinalPush);
-        endedBanner.classList.toggle('show', (state !== 'RUNNING' && state !== 'PUBLISHED') || (remainingMs != null && remainingMs <=0));
+        const hideForFinal = state==='RUNNING' && remainingMs!=null && remainingMs>0 && remainingMs<=15*60*1000;
+        hideBanner.classList.toggle('show', hideForFinal);
+        endedBanner.classList.toggle('show', (state!=='RUNNING' && state!=='PUBLISHED') || (remainingMs!=null && remainingMs<=0));
 
-        if(hideForFinalPush || (state !== 'RUNNING' && state !== 'PUBLISHED')){
-          rowsEl.innerHTML = `<tr><td class="empty" colspan="8">${hideForFinalPush ? 'Scores are hidden until the finish.' : 'Scores will appear once results are published.'}</td></tr>`;
-        }else{
-          const list = data.leaderboard || data.rows || data.teams || [];
-          renderRows(list);
+        if (hideForFinal || (state!=='RUNNING' && state!=='PUBLISHED')){
+          rowsEl.innerHTML = `<tr><td colspan="8" style="padding:16px">${hideForFinal ? 'Scores are hidden until the finish.' : 'Scores will appear once results are published.'}</td></tr>`;
+          updatedEl.textContent = `Last updated — ${nowClock()}`;
+          return;
         }
 
-        lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
-      }catch(err){
-        console.error('Leaderboard load failed:', err);
-        rowsEl.innerHTML = `<tr><td class="empty" colspan="8">Couldn’t load leaderboard. Please try again.</td></tr>`;
-        lastUpdated.textContent = `Last updated — ${nowLocalTime()}`;
+        fullData = coerceRows(data);
+        applyFilter();
+        updatedEl.textContent = `Last updated — ${nowClock()}`;
+      }catch(e){
+        console.error('loadBoard error', e);
+        rowsEl.innerHTML = `<tr><td colspan="8" style="padding:16px">Couldn’t load leaderboard. Please try again.</td></tr>`;
+        updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
     }
 
+    // events
     refreshBtn.addEventListener('click', loadBoard);
-    document.addEventListener('visibilitychange', () => { if(!document.hidden) loadBoard(); });
+    searchInput.addEventListener('input', applyFilter);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
 
+    // boot
     loadBoard();
     setInterval(loadBoard, 60_000);
   </script>
