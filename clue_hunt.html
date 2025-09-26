@@ -9,26 +9,51 @@
   <meta http-equiv="Expires" content="0">
   <style>
     :root{--brown:#8B4513;--gold:#DAA520;--orange:#FF8C00;--cream:#F5E6D3}
-    *{box-sizing:border-box} body{margin:0;font-family:Segoe UI,Tahoma,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513,#D2691E 35%,#F4A460);padding:20px}
-    .card{max-width:980px;margin:0 auto;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);border:3px solid var(--brown);border-radius:22px;padding:28px;box-shadow:0 14px 36px rgba(0,0,0,.2)}
-    h1{margin:0 0 8px;color:var(--brown)} .sub{color:#754d22;margin:0 0 20px}
-    .rules{background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:2px solid var(--gold);border-left:6px solid var(--orange);border-radius:12px;padding:18px;margin:12px 0 22px}
+    *{box-sizing:border-box}
+    body{
+      margin:0;font-family:Segoe UI,Tahoma,Verdana,sans-serif;
+      background:linear-gradient(135deg,#8B4513,#D2691E 35%,#F4A460);padding:20px
+    }
+    .card{
+      max-width:980px;margin:0 auto;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);
+      border:3px solid var(--brown);border-radius:22px;padding:28px;box-shadow:0 14px 36px rgba(0,0,0,.2)
+    }
+    h1{margin:0 0 8px;color:var(--brown)}
+    .sub{color:#754d22;margin:0 0 20px}
+    .rules{
+      background:linear-gradient(135deg,#FFF8DC,#F5E6D3);border:2px solid var(--gold);
+      border-left:6px solid var(--orange);border-radius:12px;padding:18px;margin:12px 0 22px
+    }
     label{display:block;margin:14px 0 6px;color:var(--brown);font-weight:600}
-    select,input{width:100%;font-size:16px;padding:14px;border:3px solid var(--gold);border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC)}
+    select,input{
+      width:100%;font-size:16px;padding:14px;border:3px solid var(--gold);
+      border-radius:12px;background:linear-gradient(145deg,#fff,#FFF8DC)
+    }
     .pin{text-align:center;letter-spacing:3px;font-weight:700}
-    .btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;border:2px solid var(--brown);color:#fff;cursor:pointer;font-weight:700;
-      background:linear-gradient(135deg,var(--orange),var(--gold))}
+    .btn{
+      display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:12px;
+      border:2px solid var(--brown);color:#fff;cursor:pointer;font-weight:700;
+      background:linear-gradient(135deg,var(--orange),var(--gold))
+    }
     .btn:hover{transform:translateY(-1px);box-shadow:0 10px 18px rgba(255,140,0,.35)}
     .msg{display:none;margin-top:14px;padding:14px;border-radius:10px;border:2px solid}
     .msg.ok{display:block;background:linear-gradient(135deg,#98FB98,#90EE90);border-color:#32CD32;color:#065d06}
     .msg.err{display:block;background:linear-gradient(135deg,#FFB6C1,#FFA0B4);border-color:#DC143C;color:#7a0010}
     .hidden{display:none}
     .bar{background:linear-gradient(135deg,#A0522D,#8B4513);border:3px solid var(--gold);border-radius:14px;padding:6px;margin:18px 0}
-    .fill{height:30px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#5b3a06;font-weight:700}
-    .score{background:linear-gradient(135deg,var(--orange),var(--gold));border:3px solid var(--brown);color:#fff;font-weight:800;border-radius:14px;text-align:center;padding:16px}
+    .fill{
+      height:30px;background:linear-gradient(135deg,#FFD700,#FFA500);border-radius:10px;
+      display:flex;align-items:center;justify-content:center;color:#5b3a06;font-weight:700
+    }
+    .score{
+      background:linear-gradient(135deg,var(--orange),var(--gold));border:3px solid var(--brown);
+      color:#fff;font-weight:800;border-radius:14px;text-align:center;padding:16px
+    }
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin:18px 0}
-    .clue{position:relative;border:3px solid var(--brown);border-radius:14px;padding:18px;color:#fff;font-weight:700;cursor:pointer;text-align:center;
-      background:linear-gradient(135deg,var(--orange),var(--gold))}
+    .clue{
+      position:relative;border:3px solid var(--brown);border-radius:14px;padding:18px;color:#fff;font-weight:700;cursor:pointer;text-align:center;
+      background:linear-gradient(135deg,var(--orange),var(--gold))
+    }
     .clue:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(255,140,0,.35)}
     .clue.completed{background:linear-gradient(135deg,#32CD32,#228B22);border-color:#0e5b0e;cursor:not-allowed}
     .clue.completed::after{content:"✓";position:absolute;right:10px;top:6px;font-size:18px}
@@ -129,7 +154,7 @@
     const completionCelebration = document.getElementById('completionCelebration');
     const finalScoreEl    = document.getElementById('finalScore');
 
-    // --- Helpers (shared style) ---------------------------------------------
+    // --- Helpers -------------------------------------------------------------
     function setMsg(el, text, kind='err'){ el.textContent = text; el.className = 'msg ' + (kind==='error'?'err':'ok'); el.style.display = 'block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
 
@@ -142,7 +167,20 @@
       return res.json();
     }
 
-    // --- Load teams (same pattern as other pages) ---------------------------
+    // Quiet event-state check (no banner)
+    async function isEventRunning(){
+      if(!EVENT_ID) return true; // allow if no event id provided
+      try{
+        const r = await fetch('/.netlify/functions/get_event_state',{
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ eventId: EVENT_ID })
+        });
+        const j = await r.json().catch(()=>({}));
+        return (j && j.state) ? String(j.state).toUpperCase()==='RUNNING' : true;
+      }catch{ return true; }
+    }
+
+    // --- Load teams ----------------------------------------------------------
     function extractTeams(data){
       if(Array.isArray(data?.teams)) return data.teams;
       if(Array.isArray(data?.leaderboard)){
@@ -181,7 +219,7 @@
       }
     }
 
-    // --- Sign in (POST { eventId, teamCode, pin }) --------------------------
+    // --- Sign in -------------------------------------------------------------
     async function signIn(){
       clearMsg(loginMsg);
       const code = teamSelect.value;
@@ -287,7 +325,14 @@
 
     function normalize(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim(); }
 
-    function submitAnswer(){
+    async function submitAnswer(){
+      // Silent event-state gate
+      const running = await isEventRunning();
+      if(!running){
+        showResult('Submissions are closed right now.', false);
+        return;
+      }
+
       const val = answerInput.value.trim();
       if(!val){ showResult('Please enter an answer.', false); return; }
       if(!currentClue){ showResult('No clue selected.', false); return; }
