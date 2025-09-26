@@ -1,117 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest – The Quiz Challenge</title>
+
+  <!-- Handlee for body; system sans for headings/buttons -->
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet"/>
+
   <style>
-    /* ——— your existing styles (trimmed a little for brevity) ——— */
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
-      min-height:100vh;background:linear-gradient(135deg,#8B4513,#D2691E 30%,#F4A460);
-      display:flex;align-items:center;justify-content:center;padding:24px
+    :root{
+      --bg:url("/TQ%20Web%20extended%20background-100.jpg");
+      --ink:#2E2114; --ink-soft:#6A5A47;
+      --parchment:#F7EED8; --parchment-2:#F3E6CF;
+      --gold:#F0C433; --gold-deep:#A7711F;
+      --success:#1F6E38; --error:#B42318;
+
+      --radius-card:22px; --radius-input:16px;
+      --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --focus:0 0 0 3px rgba(240,196,51,.45);
+
+      --gutter:22px; --hero-h:280px; --nav-h:64px;
     }
-    .wrap{max-width:900px;width:100%;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);
-      border:3px solid #8B4513;border-radius:24px;box-shadow:0 18px 36px rgba(0,0,0,.2);padding:28px}
-    h1{font-size:2.2rem;color:#8B4513;text-align:center;margin-bottom:8px}
-    .rules{border:2px solid #DAA520;border-radius:14px;padding:18px;background:#fff9ee;margin:18px 0}
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
+        var(--bg);
+      background-size:cover; background-position:top center; background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      padding-top:var(--nav-h);
+    }
+
+    /* NAV (compact mobile sheet) */
+    .nav{
+      position:fixed; top:0; left:0; right:0; height:var(--nav-h); z-index:1000;
+      backdrop-filter:saturate(120%) blur(6px);
+      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18);
+      display:flex; align-items:center; justify-content:space-between; padding:0 12px;
+    }
+    .brand img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .menu-btn{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
+    .navlinks{
+      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      background:linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.6));
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
+      z-index:999;
+    }
+    .navlinks.active{left:0}
+    .pill{
+      display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
+      color:#F7EED8; font-weight:900; padding:12px 14px; border-radius:14px;
+      background:rgba(247,238,216,.18); border:1px solid rgba(255,255,255,.25);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .pill:hover{ background:rgba(247,238,216,.28) }
+
+    /* HERO */
+    .hero{
+      min-height:var(--hero-h);
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding:24px var(--gutter) 22px; text-align:center;
+    }
+    .brand-logo{
+      width:min(240px,68vw); height:auto; margin-bottom:10px;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
+    }
+    .hero-title{
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px;
+      text-shadow:0 2px 6px rgba(0,0,0,.6);
+    }
+
+    /* SHELL */
+    .wrap{ padding:0 var(--gutter) 28px; max-width:1000px; margin:0 auto; }
+    .card{
+      background:var(--parchment);
+      border-radius:var(--radius-card);
+      box-shadow:var(--shadow-card);
+      padding:18px 16px;
+      border:1px solid rgba(0,0,0,.06);
+      margin:0 auto 18px; width:100%;
+    }
+
+    /* Headings/buttons (sans-serif for punch) */
+    h1,h2,strong,label,.btn,.team-pill,#qCount,#timer{
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Rules/boxes */
+    .rules{background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; margin:0 0 16px;}
+    .rules ul{margin-left:18px; line-height:1.6; color:var(--ink-soft);}
+
     .row{margin:14px 0}
-    label{display:block;font-weight:600;color:#8B4513;margin-bottom:6px}
-    select,input[type="text"]{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;background:linear-gradient(145deg,#fff,#FFF8DC)}
-    .btn{width:100%;padding:16px;border:2px solid #8B4513;border-radius:12px;
-      background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    .msg{margin-top:12px;border:2px solid;border-radius:11px;padding:12px;display:none;text-align:center}
+    label{display:block;font-weight:900;color:var(--ink);margin:0 6px 6px;font-size:18px}
+    select,input[type="text"]{
+      width:100%; padding:14px 12px; border:3px solid var(--gold); border-radius:var(--radius-input);
+      font-size:18px; background:#fff; color:var(--ink);
+      transition:border-color .18s, box-shadow .18s, transform .18s;
+    }
+    select:focus,input[type="text"]:focus{outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
+
+    .btn{
+      width:100%; padding:16px; border:3px solid var(--gold-deep); border-radius:12px;
+      background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812; font-weight:900; cursor:pointer;
+      box-shadow:0 10px 20px rgba(0,0,0,.2);
+    }
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+
+    .msg{margin-top:12px;border:2px solid;border-radius:12px;padding:12px;display:none;text-align:center;font-weight:900}
     .msg.error{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
+
     .section{display:none}
     .section.active{display:block}
-    .team-pill{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;border:2px solid #DAA520;border-radius:12px;padding:10px 14px;margin-bottom:16px;text-align:center;font-weight:700}
-    /* quiz bits */
-    .quiz-head{display:flex;justify-content:space-between;gap:16px;align-items:center;border:2px solid #DAA520;background:#fff9ee;border-radius:14px;padding:16px;margin-bottom:16px}
-    .timer{width:60px;height:60px;border-radius:50%;border:3px solid #8B4513;display:flex;align-items:center;justify-content:center;font-weight:800;color:#8B4513;background:conic-gradient(#DAA520 0deg,#F5E6D3 0deg)}
-    .qcard{border:3px solid #DAA520;background:linear-gradient(145deg,#fff,#FFF8DC);border-radius:18px;padding:22px}
-    .opt{border:3px solid #DAA520;border-radius:14px;padding:14px;background:#fff9ee;cursor:pointer;margin-top:10px}
+
+    .team-pill{
+      background:#D7C39B; color:var(--ink); border:3px dashed rgba(0,0,0,.6);
+      border-radius:14px; padding:10px 14px; margin-bottom:16px; text-align:center; font-weight:900
+    }
+
+    /* Quiz head */
+    .quiz-head{
+      display:flex;justify-content:space-between;gap:16px;align-items:center;
+      border:2px dashed rgba(0,0,0,.45); background:var(--parchment-2);
+      border-radius:14px;padding:14px;margin-bottom:16px
+    }
+    #qCount{font-weight:900;color:var(--ink)}
+    .timer{
+      width:60px;height:60px;border-radius:50%;border:3px solid #00000055;
+      display:flex;align-items:center;justify-content:center;font-weight:900;color:#2D2318;
+      background:conic-gradient(#F0C433 0deg,#F7EED8 0deg)
+    }
+
+    /* Question + options */
+    .qcard{border:3px solid var(--gold);background:linear-gradient(145deg,#fff,#FFF8DC);border-radius:18px;padding:22px}
+    .opt{border:3px solid var(--gold);border-radius:14px;padding:14px;background:#fff9ee;cursor:pointer;margin-top:10px}
     .opt:hover{background:#ffeec9}
     .opt.sel{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border-color:#8B4513}
     .opt.good{background:linear-gradient(135deg,#29c74a,#17983a);color:#fff;border-color:#0b6f27}
     .opt.bad{background:linear-gradient(135deg,#d11,#a00909);color:#fff;border-color:#6b0000}
-    .textAnswer{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:18px;background:#fff}
+
+    .textAnswer{
+      width:100%;padding:14px;border:3px solid var(--gold);border-radius:12px;font-size:18px;background:#fff
+    }
+
+    @media (min-width:480px){
+      :root{ --gutter:26px; --hero-h:320px; }
+      .brand-logo{ width:min(280px,62vw); }
+    }
+    @media (prefers-reduced-motion:reduce){ *{transition:none !important; animation-duration:0ms !important;} }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>The Quiz Challenge</h1>
+  <!-- NAV -->
+  <nav class="nav">
+    <a class="brand" href="/">
+      <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest">
+    </a>
+    <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
+  </nav>
 
-    <!-- SIGN IN -->
-    <section id="secSign" class="section active">
-      <div class="rules">
-        <ul>
-          <li>10 riddles — 15 seconds each</li>
-          <li>Some include audio — check volume</li>
-          <li>Choose once — no changes</li>
-          <li>Up to 100 doubloons for perfection</li>
-        </ul>
-      </div>
-
-      <div class="row">
-        <label for="teamSelect">Select Your Crew</label>
-        <select id="teamSelect">
-          <option value="">Choose your treasure hunting crew…</option>
-        </select>
-      </div>
-
-      <div class="row">
-        <label for="teamPin">Enter Your Crew’s Secret Code</label>
-        <!-- text + pattern (same as other activities) -->
-        <input id="teamPin" type="text" inputmode="numeric" autocomplete="one-time-code"
-               placeholder="1234" pattern="^\d{4}$" maxlength="4" />
-      </div>
-
-      <button class="btn" id="btnSign">🧭 Begin the Knowledge Trial</button>
-      <div id="signMsg" class="msg"></div>
-    </section>
-
-    <!-- READY -->
-    <section id="secReady" class="section">
-      <div class="team-pill" id="readyTeam">Crew: …</div>
-      <div class="rules">
-        <strong>⚡ You’re good to go!</strong>
-        <ul style="margin-top:10px">
-          <li>15 seconds per riddle</li>
-          <li>No going back</li>
-          <li>Volume up for audio prompts</li>
-        </ul>
-      </div>
-      <button class="btn" id="btnAccept">🚀 Accept the challenge</button>
-      <div id="readyMsg" class="msg"></div>
-    </section>
-
-    <!-- QUIZ -->
-    <section id="secQuiz" class="section">
-      <div class="team-pill" id="quizTeam">Crew: …</div>
-      <div class="quiz-head">
-        <div id="qCount">Riddle 1 of 10</div>
-        <div class="timer" id="timer">15</div>
-      </div>
-      <div class="qcard" id="qcard"></div>
-    </section>
-
-    <!-- RESULTS -->
-    <section id="secDone" class="section">
-      <div class="team-pill" id="doneTeam">Crew: …</div>
-      <div class="qcard">
-        <h2 style="margin-bottom:8px">🎉 Trial Complete!</h2>
-        <p id="scoreLine" style="margin-bottom:16px;font-weight:700;color:#8B4513"></p>
-        <div id="breakdown"></div>
-        <div id="submitMsg" class="msg" style="margin-top:16px"></div>
-        <button class="btn" onclick="location.href='/leaderboard'">🏆 View Leaderboard</button>
-      </div>
-    </section>
+  <!-- Updated menu (exclude current page: Quiz) -->
+  <div class="navlinks" id="navlinks" role="menu">
+    <a href="https://theteamquest.netlify.app/clue_hunt" class="pill nav-link" role="menuitem">💎 The Treasure Hunt</a>
+    <a href="https://theteamquest.netlify.app/scavenger" class="pill nav-link" role="menuitem">🔍 The Scavenger Hunt</a>
+    <!-- current page skipped -->
+    <a href="https://theteamquest.netlify.app/limerick" class="pill nav-link" role="menuitem">📝 The Limerick Challenge</a>
+    <a href="/kindness" class="pill nav-link" role="menuitem">💖 Kindness</a>
+    <a href="https://theteamquest.netlify.app/leaderboard" class="pill dropdown-link" role="menuitem">🏆 The Leaderboard</a>
+    <a href="https://theteamquest.netlify.app/gallery" class="pill dropdown-link" role="menuitem">📸 The Gallery</a>
   </div>
 
+  <!-- HERO -->
+  <header class="hero">
+    <img class="brand-logo" src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" width="640" height="480">
+    <div class="hero-title">The Quiz Challenge</div>
+  </header>
+
+  <!-- CONTENT (keeps the same IDs/structure/logic) -->
+  <main class="wrap">
+    <div class="card">
+
+      <!-- SIGN IN -->
+      <section id="secSign" class="section active">
+        <div class="rules">
+          <ul>
+            <li>10 riddles — 15 seconds each</li>
+            <li>Some include audio — check volume</li>
+            <li>Choose once — no changes</li>
+            <li>Up to 100 doubloons for perfection</li>
+          </ul>
+        </div>
+
+        <div class="row">
+          <label for="teamSelect">Select your crew</label>
+          <select id="teamSelect">
+            <option value="">Choose your treasure hunting crew…</option>
+          </select>
+        </div>
+
+        <div class="row">
+          <label for="teamPin">Crew code (4 digits)</label>
+          <input id="teamPin" type="text" inputmode="numeric" autocomplete="one-time-code"
+                 placeholder="1234" pattern="^\d{4}$" maxlength="4"/>
+        </div>
+
+        <button class="btn" id="btnSign">🧭 Begin the Knowledge Trial</button>
+        <div id="signMsg" class="msg"></div>
+      </section>
+
+      <!-- READY -->
+      <section id="secReady" class="section">
+        <div class="team-pill" id="readyTeam">Crew: …</div>
+        <div class="rules">
+          <strong>⚡ You’re good to go!</strong>
+          <ul style="margin-top:10px">
+            <li>15 seconds per riddle</li>
+            <li>No going back</li>
+            <li>Volume up for audio prompts</li>
+          </ul>
+        </div>
+        <button class="btn" id="btnAccept">🚀 Accept the challenge</button>
+        <div id="readyMsg" class="msg"></div>
+      </section>
+
+      <!-- QUIZ -->
+      <section id="secQuiz" class="section">
+        <div class="team-pill" id="quizTeam">Crew: …</div>
+        <div class="quiz-head">
+          <div id="qCount">Riddle 1 of 10</div>
+          <div class="timer" id="timer">15</div>
+        </div>
+        <div class="qcard" id="qcard"></div>
+      </section>
+
+      <!-- RESULTS -->
+      <section id="secDone" class="section">
+        <div class="team-pill" id="doneTeam">Crew: …</div>
+        <div class="qcard">
+          <h2 style="margin-bottom:8px">🎉 Trial Complete!</h2>
+          <p id="scoreLine" style="margin-bottom:16px;font-weight:900;color:#2E2114"></p>
+          <div id="breakdown"></div>
+          <div id="submitMsg" class="msg" style="margin-top:16px"></div>
+          <button class="btn" onclick="location.href='/leaderboard'">🏆 View Leaderboard</button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
   <script>
+    // mobile nav toggle
+    const menuBtn = document.getElementById('menuBtn');
+    const navlinks = document.getElementById('navlinks');
+    menuBtn?.addEventListener('click', ()=>{
+      navlinks.classList.toggle('active');
+      menuBtn.textContent = navlinks.classList.contains('active') ? '✕' : '☰';
+    });
+    document.addEventListener('click', (e)=>{
+      if(!navlinks.contains(e.target) && !menuBtn.contains(e.target)){
+        navlinks.classList.remove('active'); menuBtn.textContent = '☰';
+      }
+    });
+
     // ====== constants / helpers ======
     const EVENT_ID = new URLSearchParams(location.search).get('event') || '';
     const $ = (id) => document.getElementById(id);
@@ -130,7 +288,6 @@
         method, headers: { 'Content-Type':'application/json' },
         body: method==='GET' ? undefined : JSON.stringify(payload)
       });
-      // return JSON either way; throw on !ok so callers can show consistent errors
       let data = {};
       try { data = await res.json(); } catch {}
       if (!res.ok) {
@@ -140,7 +297,7 @@
       return data;
     }
 
-    // ====== TEAM LOADING (same as other activities) ======
+    // ====== TEAM LOADING ======
     function extractTeams(data){
       if (Array.isArray(data?.teams)) return data.teams;
       if (Array.isArray(data?.leaderboard)) {
@@ -178,7 +335,7 @@
       }
     }
 
-    // ====== PIN SIGN-IN (identical contract to other activities) ======
+    // ====== PIN SIGN-IN ======
     async function signin(){
       clearMsg(signMsg);
 
@@ -190,7 +347,6 @@
 
       try{
         const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
-        // expected { success:true, valid:true, token, teamName }
         if (!res.success || !res.valid){ setMsg(signMsg, 'That PIN doesn’t match this crew.', 'error'); return; }
 
         localStorage.setItem('teamToken', res.token);
@@ -198,7 +354,6 @@
         localStorage.setItem('teamName', res.teamName || teamSelect.options[teamSelect.selectedIndex]?.textContent || '');
 
         setMsg(signMsg, 'Signed in. You can start the quiz!', 'ok');
-        // move to ready section
         $('readyTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName') || 'Unknown');
         $('secSign').classList.remove('active');
         $('secReady').classList.add('active');
@@ -212,7 +367,7 @@
 
     $('btnSign').addEventListener('click', signin);
 
-    // ====== QUIZ LOGIC (unchanged except we send eventId to functions) ======
+    // ====== QUIZ (same logic, styled to match) ======
     const quizQuestions = [
       { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[
         {letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',doubloons:10 },
@@ -245,14 +400,12 @@
     async function startQuizFlow(){
       clearMsg(readyMsg);
       try{
-        // record start (includes eventId)
         await callFn('start_quiz_function', {
           eventId: EVENT_ID,
           teamCode: localStorage.getItem('teamCode'),
           teamName: localStorage.getItem('teamName'),
           quizStartTime: new Date().toISOString()
         });
-        // proceed
         $('quizTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName') || '');
         $('secReady').classList.remove('active');
         $('secQuiz').classList.add('active');
@@ -269,13 +422,13 @@
       $('qCount').textContent = `Riddle ${qIndex+1} of ${quizQuestions.length}`;
       timeLeft = 15; updateTimer(); startTimer();
 
-      let html = `<div style="font-weight:700;color:#654321;margin-bottom:12px">${q.question}</div>`;
+      let html = `<div style="font-weight:900;color:#2E2114;margin-bottom:12px">${q.question}</div>`;
       if (q.audioUrl) {
         html += `<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0">
                   <source src="${q.audioUrl}" type="audio/mpeg">
                 </audio>`;
       }
-      if (q.imageUrl) html += `<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`;
+      if (q.imageUrl) html += `<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #F0C433;margin:12px 0">`;
 
       if (q.type==='multiple_choice'){
         q.options.forEach(o=>{
@@ -308,7 +461,7 @@
     function updateTimer(){
       $('timer').textContent = timeLeft;
       const pct = (timeLeft/15)*360;
-      $('timer').style.background = `conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#DAA520'} ${pct}deg, #F5E6D3 ${pct}deg)`;
+      $('timer').style.background = `conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`;
     }
 
     function normalize(s){ return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim(); }
@@ -343,7 +496,7 @@
 
       if (q.explanation){
         $('qcard').insertAdjacentHTML('beforeend',
-          `<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
+          `<div style="margin-top:12px;padding:10px;border:2px solid #F0C433;border-radius:10px;background:#fff9ee;font-weight:900">${q.explanation}</div>`);
       }
 
       setTimeout(()=>{
@@ -363,13 +516,12 @@
 
       $('breakdown').innerHTML = answers.map((a,i)=>{
         const q = quizQuestions[i];
-        return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0">
+        return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #F0C433;padding:8px 0">
                   <div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div>
-                  <div style="font-weight:800;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.doubloons:'✗ 0'}</div>
+                  <div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.doubloons:'✗ 0'}</div>
                 </div>`;
       }).join('');
 
-      // record results
       clearMsg(submitMsg);
       try{
         await callFn('submit_quiz_function', {
@@ -390,7 +542,6 @@
 
     // boot
     loadTeams();
-    // allow Enter in PIN to click sign-in
     teamPin.addEventListener('keydown', e => { if (e.key==='Enter') $('btnSign').click(); });
   </script>
 </body>
