@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>TeamQuest · Scavenger Hunt</title>
+<title>TeamQuest - The Scavenger Hunt</title>
 <style>
   :root{
     --brown:#6f4426; --brown-d:#53321c; --tan:#f5e6d3; --tan-2:#ead7c0;
@@ -415,7 +415,7 @@
       done.add(itemDef.id);
       saveDoneSet(done);
       renderItems();
-      toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
+      toast(formAlert,"🎉 Submitted! The AI judge is reviewing. Check the leaderboard in a few minutes to see your points.",true);
       lockAfterSuccess();
       syncLocksFromServer();
     }catch(e){
