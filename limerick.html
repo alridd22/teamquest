@@ -44,7 +44,7 @@
       padding-top:var(--nav-h);
     }
 
-    /* NAV – simplified like Kindness */
+    /* NAV */
     .nav{
       position:fixed; top:0; left:0; right:0; height:var(--nav-h); z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
@@ -100,28 +100,7 @@
     }
     .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px; }
 
-    /* Banner / badges */
-    .banner{
-      background:#FFFAF1; border:1px solid rgba(0,0,0,.08);
-      border-left:6px solid #FF8C00; border-radius:12px;
-      padding:12px 14px; display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 14px;
-      color:var(--ink-soft); font-weight:800;
-    }
-    .status{
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      background:#FFF0CC; border:2px dashed var(--gold); color:var(--ink);
-      border-radius:999px; padding:8px 12px; font-weight:900;
-    }
-    .btn{
-      appearance:none; border:none; cursor:pointer; font-weight:900;
-      background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812;
-      border-radius:12px; padding:12px 16px; border:3px solid var(--gold-deep);
-      box-shadow:0 8px 18px rgba(0,0,0,.2);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
-    .btn.small{ padding:10px 12px; }
-
-    /* Sign-in */
+    /* Sign-in & form */
     .box{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; margin:0 0 16px; }
     .row{ display:grid; grid-template-columns:1fr 150px; gap:12px; align-items:end; }
     @media (max-width:560px){ .row{ grid-template-columns:1fr } }
@@ -132,8 +111,15 @@
       transition:border-color .18s, box-shadow .18s, transform .18s;
     }
     .field:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px); }
-
     .ctr{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .btn{
+      appearance:none; border:none; cursor:pointer; font-weight:900;
+      background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812;
+      border-radius:12px; padding:12px 16px; border:3px solid var(--gold-deep);
+      box-shadow:0 8px 18px rgba(0,0,0,.2);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .btn.small{ padding:10px 12px; }
 
     /* Crew strip */
     .strip{
@@ -149,7 +135,7 @@
     }
     .rules ul{ margin:8px 0 0 18px; line-height:1.6; color:var(--ink-soft); }
 
-    /* Form help + messages */
+    /* Messages */
     .help{ color:var(--ink-soft); font-weight:800; }
     .message{ display:none; margin:12px 0 8px; padding:12px 14px; border-radius:12px; font-weight:900; text-align:center }
     .message.ok{ display:block; background:var(--success-bg); color:var(--success); border:2px solid #20a45a }
@@ -173,13 +159,15 @@
     </a>
     <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
   </nav>
+
+  <!-- Updated links (exclude current page: Limerick) -->
   <div class="navlinks" id="navlinks" role="menu">
-    <a class="pill" href="/clue_hunt_challenge" role="menuitem">💎 The Treasure Hunt</a>
-    <a class="pill" href="/scavenger_hunt" role="menuitem">🔍 The Scavenger Hunt</a>
-    <a class="pill" href="/quiz_challenge" role="menuitem">⏰ The Timed Quiz</a>
-    <a class="pill" href="/kindness_challenge_page" role="menuitem">💖 Kindness</a>
-    <a class="pill" href="#" role="menuitem" aria-current="page">📜 Limerick</a>
-    <a class="pill" href="/teamquest_gallery" role="menuitem">📸 Gallery</a>
+    <a class="pill nav-link" href="https://theteamquest.netlify.app/clue_hunt" role="menuitem">💎 The Treasure Hunt</a>
+    <a class="pill nav-link" href="https://theteamquest.netlify.app/scavenger" role="menuitem">🔍 The Scavenger Hunt</a>
+    <a class="pill nav-link" href="https://theteamquest.netlify.app/quiz" role="menuitem">⏰ The Timed Quiz</a>
+    <a class="pill nav-link" href="/kindness" role="menuitem">💖 Kindness</a>
+    <a class="pill dropdown-link" href="https://theteamquest.netlify.app/leaderboard" role="menuitem">🏆 The Leaderboard</a>
+    <a class="pill dropdown-link" href="https://theteamquest.netlify.app/gallery" role="menuitem">📸 The Gallery</a>
   </div>
 
   <!-- HERO -->
@@ -188,17 +176,9 @@
     <div class="hero-title">The Limerick Challenge</div>
   </header>
 
-  <!-- CONTENT STACK -->
+  <!-- CONTENT -->
   <main class="wrap">
     <section class="card">
-      <div class="banner">
-        <div id="eventMsg">⛳ Checking event…</div>
-        <div class="ctr">
-          <span id="eventBadge" class="status">—</span>
-          <button id="refreshState" class="btn small" type="button">↻ Refresh</button>
-        </div>
-      </div>
-
       <!-- Sign-in -->
       <div class="box">
         <div class="row">
@@ -258,7 +238,7 @@
 
   <script>
     (function(){
-      // mobile nav toggle (doesn't touch existing activity hooks)
+      // mobile nav toggle
       const menuBtn = document.getElementById('menuBtn');
       const navlinks = document.getElementById('navlinks');
       menuBtn?.addEventListener('click', ()=>{
@@ -287,8 +267,6 @@
         box.style.display = "block";
       }
       function clearMsg(el){ const box=$(el); if(box){ box.style.display="none"; } }
-      function setBadge(text){ const b=$("#eventBadge"); if(b) b.textContent = text; }
-      function setBanner(message){ const m=$("#eventMsg"); if(m) m.textContent = message; }
       function lockForm(disabled=true){
         $("#topic").disabled = disabled;
         $("#limerick").disabled = disabled;
@@ -304,7 +282,7 @@
         }
       }
 
-      // --------- Event state
+      // --------- Event state (no visual banner)
       async function fetchEventState(){
         try{
           const res = await fetch("/.netlify/functions/get_event_state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({eventId:state.eventId})});
@@ -313,10 +291,6 @@
         }catch(e){
           state.eventState = "RUNNING";
         }
-        if(state.eventState === "RUNNING"){ setBanner("Event running — submit your limerick when ready."); setBadge("Running"); }
-        else if(state.eventState === "PAUSED"){ setBanner("Event paused — submissions are closed"); setBadge("Paused"); }
-        else if(state.eventState === "ENDED"){ setBanner("Event ended — submissions are closed"); setBadge("Ended"); }
-        else if(state.eventState === "PUBLISHED"){ setBanner("Results published — submissions closed"); setBadge("Published"); }
         lockForm(state.eventState !== "RUNNING" || !state.signed);
       }
 
@@ -386,7 +360,7 @@
       limerick.addEventListener("input", ()=>{
         const used = (limerick.value||"").length;
         const remaining = Math.max(0, 500 - used);
-        charCount.textContent = remaining;  // show remaining (UI tweak only)
+        charCount.textContent = remaining;
         charCount.style.color = remaining < 50 ? '#B42318' : '#6A5A47';
       });
 
@@ -420,7 +394,6 @@
             return;
           }
           showMsg("#formMsg","🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes.", true);
-          // grey/disable to avoid double-submit
           document.getElementById("topic").classList.add("muted");
           limerick.classList.add("muted");
           lockForm(true);
@@ -446,7 +419,6 @@
         }
       }
 
-      document.getElementById("refreshState").addEventListener("click", fetchEventState);
       document.getElementById("reloadCrews").addEventListener("click", loadCrews);
       document.getElementById("signInBtn").addEventListener("click", signIn);
       boot();
