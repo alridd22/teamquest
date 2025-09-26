@@ -400,7 +400,7 @@
     function setSubmitting(on){
       submitBtn.disabled = on;
       loadingEl.style.display = on ? 'block':'none';
-      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Heart Treasure</span>`;
+      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Kind Act</span>`;
     }
     function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
     function updateCrewLabel(){ teamInfo.textContent = teamName() ? `Crew: ${teamName()}` : (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown'); }
@@ -568,11 +568,11 @@
       modal.className = 'modal-overlay active';
       modal.innerHTML = `<div class="modal-content">
         <button class="close-btn" aria-label="Close">✕</button>
-        <div class="modal-title">💖 Heart Treasure Scoring</div>
+        <div class="modal-title">💖 Kind Act Scoring</div>
         <div class="modal-subtitle">Creativity • Effort • Impact (max 60 doubloons)</div>
         <div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div>
         <div class="scoring-card" style="margin-top:10px"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div>
-        <div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big treasure.</p></div>
+        <div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big points.</p></div>
       </div>`;
       document.body.appendChild(modal);
       modal.addEventListener('click', (e)=>{ if(e.target===modal || e.target.classList.contains('close-btn')) modal.remove(); });
