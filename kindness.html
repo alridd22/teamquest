@@ -1,147 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest – Terry’s Kind Acts</title>
+
+  <!-- Handlee (body), system sans for headings/buttons -->
+  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+
   <style>
-    /* ————— NAV ————— */
-    .treasure-nav{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#8B4513 0%,#654321 50%,#8B4513 100%);border-bottom:3px solid #DAA520;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:1000;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;height:80px}
-    .nav-container{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;padding:0 20px;height:100%}
-    .nav-logo{text-decoration:none;transition:.3s;display:flex;align-items:center}
-    .nav-logo:hover{transform:scale(1.05)}
-    .nav-logo img{height:50px;width:auto;filter:drop-shadow(2px 2px 4px rgba(0,0,0,.5));transition:.3s}
-    .nav-logo:hover img{filter:drop-shadow(2px 2px 8px rgba(255,215,0,.6))}
-    .nav-menu{display:flex;list-style:none;margin:0;padding:0;gap:30px}
-    .nav-item{position:relative}
-    .nav-link{color:#F5DEB3;text-decoration:none;font-size:1rem;font-weight:bold;padding:12px 18px;border-radius:8px;transition:.3s;display:block;text-shadow:1px 1px 2px rgba(0,0,0,.7);background:rgba(101,67,33,.3);border:2px solid rgba(218,165,32,.4);white-space:nowrap}
-    .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);color:#fff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(218,165,32,.4);border-color:#DAA520}
-    .nav-dropdown{position:absolute;top:100%;left:0;background:linear-gradient(135deg,#654321 0%,#8B4513 100%);border:2px solid #DAA520;border-radius:8px;min-width:180px;opacity:0;visibility:hidden;transform:translateY(-10px);transition:.3s;box-shadow:0 8px 20px rgba(0,0,0,.3)}
-    .nav-item:hover .nav-dropdown{opacity:1;visibility:visible;transform:translateY(0)}
-    .dropdown-link{display:block;color:#F5DEB3;text-decoration:none;padding:12px 18px;font-size:.95rem;border-bottom:1px solid rgba(218,165,32,.2);transition:.3s;background:rgba(101,67,33,.2);margin:2px;border-radius:6px;font-weight:600}
-    .dropdown-link:last-child{border-bottom:none}
-    .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;padding-left:25px;transform:translateX(5px);box-shadow:0 2px 8px rgba(255,140,0,.3)}
-    .nav-toggle{display:none;background:none;border:none;color:#DAA520;font-size:1.8rem;cursor:pointer}
-    @media (max-width:768px){
-      .treasure-nav{height:120px}
-      .nav-container{justify-content:center;position:relative}
-      .nav-logo{position:absolute;left:50%;transform:translateX(-50%)}
-      .nav-logo img{height:85px!important}
-      .nav-toggle{position:absolute;right:20px;top:50%;transform:translateY(-50%);display:block}
-      .nav-menu{position:fixed;top:120px;left:-100%;width:100%;height:calc(100vh - 120px);background:linear-gradient(135deg,#8B4513 0%,#654321 100%);flex-direction:column;align-items:center;padding-top:30px;gap:20px;transition:left .3s;overflow-y:auto}
-      .nav-menu.active{left:0}
-      .nav-link{font-size:1.1rem;padding:15px 25px;width:280px;text-align:center;background:linear-gradient(135deg,rgba(101,67,33,.8),rgba(139,69,19,.6));border:2px solid #DAA520;border-radius:12px;box-shadow:0 4px 8px rgba(0,0,0,.3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-      .nav-link:hover{background:linear-gradient(135deg,#DAA520,#FF8C00);transform:translateY(-3px);box-shadow:0 6px 15px rgba(218,165,32,.4)}
-      .nav-dropdown{position:static;opacity:1;visibility:visible;transform:none;background:rgba(101,67,33,.9);border:2px solid #DAA520;border-radius:12px;margin-top:10px;width:280px;box-shadow:0 8px 20px rgba(0,0,0,.4)}
-      .dropdown-link{padding:12px 20px;font-size:1rem;margin:4px;border-radius:8px;text-align:center;background:rgba(139,69,19,.4);border:1px solid rgba(218,165,32,.3)}
-      .dropdown-link:hover{background:linear-gradient(135deg,#FF8C00,#DAA520);padding-left:20px;transform:translateY(-2px)}
+    :root{
+      --bg:url("/TQ%20Web%20extended%20background-100.jpg");  /* activity background */
+      --ink:#2E2114; --ink-soft:#6A5A47;
+      --parchment:#F7EED8; --parchment-2:#F3E6CF;
+      --gold:#F0C433; --gold-deep:#A7711F;
+      --success:#1F6E38; --success-bg:#CFF2DA;
+      --error:#B42318;
+
+      --radius-card:22px; --radius-input:16px;
+      --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --shadow-soft:0 2px 8px rgba(0,0,0,.12);
+      --focus:0 0 0 3px rgba(240,196,51,.45);
+
+      --gutter:22px;
+      --hero-h:280px;
+      --nav-h:64px;         /* compact sticky nav */
     }
 
-    /* ————— PAGE ————— */
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#8B4513 0%,#D2691E 30%,#F4A460 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;padding-top:100px!important;position:relative}
-    @media (max-width:768px){body{padding-top:140px!important}}
-    body::before{content:'';position:fixed;inset:0;background:
-      radial-gradient(circle at 20% 20%,rgba(255,215,0,.1) 0%,transparent 50%),
-      radial-gradient(circle at 80% 80%,rgba(255,140,0,.1) 0%,transparent 50%),
-      radial-gradient(circle at 40% 60%,rgba(255,182,193,.15) 0%,transparent 50%)}
-    .container{background:linear-gradient(145deg,#F5E6D3 0%,#E8D7C3 100%);border-radius:25px;padding:34px;box-shadow:0 20px 40px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.3);max-width:720px;width:100%;position:relative;overflow:hidden;z-index:1;border:3px solid #8B4513}
-    .container::before{content:'';position:absolute;top:0;left:0;right:0;height:8px;background:linear-gradient(90deg,#FFD700,#FF8C00,#FFB6C1,#DAA520,#FFD700)}
-    .container::after{content:'';position:absolute;top:15px;left:15px;right:15px;bottom:15px;border:2px solid #DAA520;border-radius:20px;pointer-events:none}
-    .logo{text-align:center;margin-bottom:16px;position:relative;z-index:2}
-    .heart-icon{font-size:44px;margin-bottom:10px;animation:heartbeat 2s infinite;filter:drop-shadow(2px 2px 4px rgba(139,69,19,.3))}
-    @keyframes heartbeat{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
-    h1{color:#8B4513;text-align:center;margin-bottom:6px;font-size:2.1em;font-weight:800;text-shadow:2px 2px 4px rgba(0,0,0,.1)}
-    .subtitle{text-align:center;color:#A0522D;margin-bottom:16px;font-size:1.05em;font-weight:600}
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
+        var(--bg);
+      background-size:cover;
+      background-position:top center;
+      background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      padding-top:var(--nav-h);
+    }
 
-    .status-banner{display:none;margin:12px 0 18px;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:2px solid #DAA520;border-left:6px solid #FF8C00;border-radius:10px;padding:12px 14px;color:#654321;font-weight:600}
-    .status-banner.paused{border-left-color:#DAA520}
-    .status-banner.ended{border-left-color:#8B0000}
-    .status-banner.published{border-left-color:#32CD32}
+    /* ——— NAV (simplified to match new style) ——— */
+    .treasure-nav{
+      position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
+      backdrop-filter:saturate(120%) blur(6px);
+      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18);
+    }
+    .nav-container{
+      height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between;
+      max-width:1000px; margin:0 auto;
+    }
+    .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
+    .nav-menu{
+      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      background:linear-gradient(180deg, rgba(0,0,0,.7), rgba(0,0,0,.6));
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
+    }
+    .nav-menu.active{left:0}
+    .nav-link,.dropdown-link{
+      display:block; width:92%; max-width:360px; text-align:center;
+      text-decoration:none; color:#F7EED8; font-weight:900;
+      padding:12px 14px; border-radius:14px;
+      background:rgba(247,238,216,.18); border:1px solid rgba(255,255,255,.25);
+    }
+    .nav-link:hover,.dropdown-link:hover{ background:rgba(247,238,216,.28) }
 
-    .team-info{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;padding:14px;border-radius:14px;text-align:center;font-size:1.05em;font-weight:700;margin-bottom:12px;box-shadow:0 5px 15px rgba(139,69,19,.3);border:2px solid #DAA520}
-    .auth-card{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border:3px dashed #DAA520;border-radius:14px;padding:16px;margin:10px 0}
-    .auth-grid{display:grid;grid-template-columns:1fr 160px;gap:10px}
-    @media (max-width:560px){.auth-grid{grid-template-columns:1fr}}
-    .auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .small-btn{background:#8B4513;color:#fff;border:2px solid #DAA520;padding:8px 12px;border-radius:10px;font-weight:800;cursor:pointer}
-    .small-btn:hover{background:#A0522D}
+    /* ——— HERO ——— */
+    .hero{
+      min-height:var(--hero-h);
+      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding:24px var(--gutter) 20px; text-align:center;
+    }
+    .brand-logo{
+      width:min(240px,68vw); height:auto; margin-bottom:10px;
+      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
+    }
+    .hero-title{
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px;
+      text-shadow:0 2px 6px rgba(0,0,0,.6);
+    }
 
-    .terry-greeting{display:flex;gap:16px;margin:12px 0;background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-radius:16px;padding:18px;border:3px solid #DAA520;box-shadow:0 5px 15px rgba(139,69,19,.2)}
-    .terry-character img{width:100px;height:100px;border-radius:12px;border:4px solid #DAA520;box-shadow:0 4px 12px rgba(139,69,19,.3);object-fit:cover;background:linear-gradient(135deg,#8B4513,#A0522D);display:block}
-    .terry-note{background:linear-gradient(135deg,#FFB6C1 0%,#FFC0CB 100%);color:#8B4513;padding:16px;border-radius:12px;border:3px solid #DAA520;font-weight:600;line-height:1.5;box-shadow:0 5px 15px rgba(255,182,193,.3)}
-    .scoring-rules-btn{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:10px 14px;border-radius:10px;font-size:.95em;font-weight:800;cursor:pointer;transition:.2s;margin-top:10px;border:2px solid #8B4513;display:inline-flex;align-items:center;gap:6px}
-    .scoring-rules-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(255,140,0,.3)}
+    /* ——— STACK / CARDS ——— */
+    .stack{ padding:0 var(--gutter) 28px; }
+    .card{
+      background:var(--parchment);
+      border-radius:var(--radius-card);
+      box-shadow:var(--shadow-card);
+      padding:18px 16px;
+      border:1px solid rgba(0,0,0,.06);
+      margin:0 auto 18px; width:100%;
+    }
+    .card h2{
+      margin:0 0 10px; text-align:center;
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-weight:900; font-size:24px; color:var(--ink);
+    }
+    .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px; }
 
-    .instructions{background:linear-gradient(135deg,#FFF8DC 0%,#F5E6D3 100%);border-left:6px solid #DAA520;padding:16px;margin:14px 0 18px;border-radius:0 12px 12px 0;box-shadow:0 4px 12px rgba(139,69,19,.1);border:2px solid #DAA520;border-left:6px solid #FF8C00}
-    .instructions h3{color:#8B4513;margin-bottom:8px;display:flex;align-items:center;gap:8px;font-size:1.1em;font-weight:800}
-    .instructions ul{margin-left:18px;color:#654321;line-height:1.65}
+    /* Team info chip */
+    .team-info{
+      display:flex; align-items:center; justify-content:center;
+      background:#D7C39B; color:var(--ink);
+      border:3px dashed rgba(0,0,0,.6);
+      border-radius:14px; padding:10px 14px; font-weight:900; font-size:18px;
+      box-shadow:var(--shadow-soft);
+    }
 
-    .form-group{margin-bottom:16px}
-    label{display:block;margin-bottom:8px;color:#8B4513;font-weight:700;font-size:1.02em}
-    select,input[type="text"],input[type="number"],textarea{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;transition:.2s;background:linear-gradient(145deg,#fff 0%,#FFF8DC 100%);font-family:inherit}
-    select:focus,input[type="text"]:focus,input[type="number"]:focus,textarea:focus{outline:none;border-color:#FF8C00;background:#fff;box-shadow:0 0 0 3px rgba(255,140,0,.2);transform:translateY(-1px)}
-    .pin{font-weight:800;letter-spacing:2px;text-align:center}
-    textarea{min-height:120px;resize:vertical;line-height:1.5}
-    .char-count{text-align:right;font-size:.9em;color:#8B4513;margin-top:5px;font-weight:600}
+    /* Status banner */
+    .status-banner{
+      display:none; margin:12px 0 18px; padding:12px 14px; border-radius:12px;
+      background:#FFFAF1; border:1px solid rgba(0,0,0,.08); border-left:6px solid #FF8C00;
+      color:var(--ink-soft); font-weight:800;
+    }
+    .status-banner.paused{ border-left-color:#DAA520 }
+    .status-banner.ended{ border-left-color:#8B0000 }
+    .status-banner.published{ border-left-color:#32CD32 }
 
-    .file-upload{position:relative;display:inline-block;width:100%}
-    .file-input{display:none}
-    .file-upload-btn{display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:3px dashed #DAA520;border-radius:12px;background:linear-gradient(145deg,#FFF8DC 0%,#F5E6D3 100%);cursor:pointer;transition:.2s;color:#8B4513;font-weight:800;font-size:1em}
-    .file-upload-btn:hover{background:linear-gradient(145deg,#FFD700 0%,#FFA500 100%);border-color:#FF8C00;transform:translateY(-1px);box-shadow:0 8px 20px rgba(255,140,0,.2)}
-    .file-preview{margin-top:14px;text-align:center;display:none}
-    .file-preview img{max-width:100%;max-height:220px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.2);border:3px solid #32CD32}
-    .file-info{margin-top:12px;padding:12px;background:linear-gradient(135deg,#F0FFF0 0%,#E6FFE6 100%);border-radius:10px;font-size:.95em;color:#654321;border:2px solid #32CD32}
+    /* Auth card (sign in) */
+    .auth-card{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; }
+    .auth-grid{ display:grid; grid-template-columns:1fr 150px; gap:10px }
+    @media (max-width:560px){ .auth-grid{ grid-template-columns:1fr } }
+    label{ display:block; margin:0 6px 6px; font-size:18px; font-weight:800; color:var(--ink) }
+    select,input[type="text"],input[type="number"],textarea{
+      width:100%; padding:14px 12px; border-radius:var(--radius-input);
+      border:3px solid var(--gold); background:#fff; color:var(--ink);
+      font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s;
+    }
+    select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px);}
+    .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
+    .small-btn{
+      background:linear-gradient(90deg, #FDBA2D, #F0C433);
+      color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F;
+      padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2);
+    }
 
-    .submit-btn{width:100%;background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border:none;padding:16px;border-radius:14px;font-size:1.1em;font-weight:900;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:10px;border:3px solid #8B4513;text-shadow:1px 1px 2px rgba(0,0,0,.2)}
-    .submit-btn:hover{transform:translateY(-1px);box-shadow:0 12px 25px rgba(255,140,0,.3);background:linear-gradient(135deg,#FFB347,#F0C814)}
-    .submit-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;background:linear-gradient(135deg,#A0522D,#8B4513)}
-    .spinner{width:16px;height:16px;border:3px solid rgba(255,255,255,.5);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
+    /* Terry intro */
+    .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:var(--shadow-soft); }
+    .terry-character img{ width:84px; height:84px; border-radius:12px; border:3px solid var(--gold); object-fit:cover; display:block }
+    .terry-note{ margin:0; line-height:1.55; font-weight:700; color:var(--ink) }
+    .scoring-rules-btn{
+      display:inline-flex; align-items:center; gap:8px; margin-top:10px;
+      background:linear-gradient(90deg, #FDBA2D, #F0C433);
+      color:#442812; font-weight:900; border:3px solid #A7711F; border-radius:12px; padding:10px 14px; cursor:pointer;
+      box-shadow:0 8px 18px rgba(0,0,0,.2);
+    }
 
-    .message{padding:16px;border-radius:14px;margin:16px 0;text-align:center;display:none;border:3px solid;font-weight:700}
-    .success-message{background:linear-gradient(135deg,#90EE90 0%,#98FB98 100%);border-color:#32CD32;color:#064b06}
-    .error-message{background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%);border-color:#DC143C;color:#8B0000}
-    .loading{display:none;text-align:center;margin-top:12px;color:#8B4513;font-weight:800;font-size:1.02em}
+    /* Instructions */
+    .instructions{ background:#FFFAF1; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; }
+    .instructions h3{
+      margin:0 0 8px; color:var(--ink);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-weight:900; font-size:20px; text-align:center;
+    }
+    .instructions ul{ margin:0; padding-left:18px; color:var(--ink-soft); line-height:1.65; }
+
+    /* Upload */
+    .file-upload{ position:relative; display:inline-block; width:100% }
+    .file-input{ display:none }
+    .file-upload-btn{
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA;
+      cursor:pointer; color:var(--ink); font-weight:900; font-size:16px;
+    }
+    .file-upload-btn:hover{ background:#FFE7A6 }
+    .file-preview{ margin-top:12px; text-align:center; display:none }
+    .file-preview img{ max-width:100%; max-height:220px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); border:3px solid #32CD32 }
+    .file-info{ margin-top:10px; padding:10px; background:#EAF8EF; border-radius:10px; font-size:.95rem; color:var(--ink); border:1px solid #96DEAE }
+
+    textarea{ min-height:120px; resize:vertical }
+    .char-count{ text-align:right; font-size:.9em; color:var(--ink-soft); margin-top:6px; font-weight:700 }
+
+    /* CTA */
+    .submit-btn{
+      width:100%;
+      background:linear-gradient(90deg, #FDBA2D, #F0C433);
+      color:#442812; font-weight:900; font-size:18px; border-radius:16px; border:3px solid #A7711F;
+      padding:16px; cursor:pointer; margin-top:6px; box-shadow:0 10px 22px rgba(0,0,0,.25);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+    .submit-btn:disabled{ opacity:.6; cursor:not-allowed }
+
+    .loading{ display:none; text-align:center; margin-top:12px; color:#EEE3CD; font-weight:800; font-size:16px; text-shadow:0 1px 2px rgba(0,0,0,.4) }
+
+    /* Messages */
+    .message{ padding:14px; border-radius:14px; margin:14px 0; text-align:center; display:none; border:3px solid; font-weight:900 }
+    .success-message{ background:var(--success-bg); border-color:var(--success); color:#064b06 }
+    .error-message{ background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000 }
+
+    /* Modal for Scoring (your JS already creates it) */
+    .modal-overlay{
+      position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:1200;
+      padding:18px;
+    }
+    .modal-content{
+      width:100%; max-width:520px; background:var(--parchment); border-radius:18px 18px 0 0; padding:16px;
+      border:1px solid rgba(0,0,0,.08); box-shadow:0 -10px 30px rgba(0,0,0,.3);
+    }
+    .modal-title{
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-weight:900; font-size:22px; color:var(--ink); text-align:center; margin-bottom:2px;
+    }
+    .modal-subtitle{ text-align:center; color:var(--ink-soft); margin-bottom:10px; font-size:14px; }
+    .scoring-card{ background:var(--parchment-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:12px; }
+    .scoring-card h4{
+      margin:0 0 6px; font-size:18px; color:var(--ink);
+      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900;
+    }
+    .close-btn{
+      float:right; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--ink-soft);
+    }
+
+    @media (min-width:480px){
+      :root{ --gutter:26px; --hero-h:320px }
+      .brand-logo{ width:min(280px, 62vw) }
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{ transition:none !important; animation-duration:0ms !important; }
+    }
   </style>
 </head>
 <body>
-  <!-- NAV -->
+  <!-- NAV (IDs unchanged) -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
       <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
-        <img src="/Team Quest Logo-01.png" alt="TeamQuest Logo">
+        <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </a>
-      <ul class="nav-menu" id="nav-menu">
-        <li class="nav-item">
-          <a href="#" class="nav-link">🎯 Activities ▼</a>
-          <div class="nav-dropdown" role="menu">
-            <a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="dropdown-link" role="menuitem">💎 The Treasure Hunt</a>
-            <a href="https://theteamquest.netlify.app/scavenger_hunt" class="dropdown-link" role="menuitem">🔍 The Scavenger Hunt</a>
-            <a href="https://theteamquest.netlify.app/quiz_challenge" class="dropdown-link" role="menuitem">⏰ The Timed Quiz</a>
-            <a href="https://theteamquest.netlify.app/limerick_challenge_page" class="dropdown-link" role="menuitem">📝 The Limerick Challenge</a>
-          </div>
-        </li>
-        <li class="nav-item"><a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="nav-link">🏆 The Leaderboard</a></li>
-        <li class="nav-item"><a href="https://theteamquest.netlify.app/teamquest_gallery" class="nav-link">📸 The Gallery</a></li>
-      </ul>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
+    <ul class="nav-menu" id="nav-menu" role="menu">
+      <li><a href="https://theteamquest.netlify.app/clue_hunt_challenge" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/scavenger_hunt" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/quiz_challenge" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
+      <li><a href="https://theteamquest.netlify.app/limerick_challenge_page" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
+      <li><a href="https://theteamquest.netlify.app/teamquest_leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
+      <li><a href="https://theteamquest.netlify.app/teamquest_gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+    </ul>
   </nav>
 
-  <div class="container" id="app">
-    <div class="logo">
-      <div class="heart-icon">💖</div>
-      <h1>Terry’s Kind Acts</h1>
-      <p class="subtitle">Do good. Snap it. Tell us. Earn doubloons.</p>
-    </div>
+  <!-- HERO -->
+  <header class="hero">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
+    <div class="hero-title">Terry’s Kind Acts</div>
+  </header>
 
+  <!-- STACK -->
+  <main class="stack" id="app">
+    <!-- Status + Team chip -->
     <div id="stateBanner" class="status-banner" role="status" aria-live="polite"></div>
-
     <div class="team-info" id="teamInfo">Crew: unknown</div>
 
-    <!-- Sign-in block (team dropdown + PIN) -->
-    <div class="auth-card" id="signinCard" aria-live="polite">
+    <!-- Sign-in -->
+    <section class="card auth-card" id="signinCard" aria-live="polite">
+      <h2>Sign in</h2>
       <div class="auth-grid">
         <div>
           <label for="teamSelect">Choose your crew</label>
@@ -151,17 +269,17 @@
         </div>
         <div>
           <label for="teamPin">Crew PIN</label>
-          <input id="teamPin" class="pin" type="number" inputmode="numeric" min="0000" max="9999" placeholder="1234" />
+          <input id="teamPin" class="pin" type="number" inputmode="numeric" min="0000" max="9999" placeholder="1234"/>
         </div>
       </div>
       <div class="auth-actions">
         <button class="small-btn" id="signinBtn">🔓 Sign in</button>
       </div>
       <div class="message" id="signinMsg"></div>
-    </div>
+    </section>
 
     <!-- Terry intro -->
-    <div class="terry-greeting">
+    <section class="card terry-greeting" aria-label="Intro">
       <div class="terry-character">
         <img src="/terry-thinking.png" alt="Terry, your Quest guide">
       </div>
@@ -170,53 +288,52 @@
         <br/>
         <button class="scoring-rules-btn" id="scoringRulesBtn">💖 View scoring</button>
       </p>
-    </div>
+    </section>
 
-    <div class="instructions">
-      <h3>💎 How to submit</h3>
+    <!-- Instructions -->
+    <section class="card instructions" aria-labelledby="instr-title">
+      <h3 id="instr-title">💎 How to submit</h3>
       <ul>
         <li>Do a genuine act of kindness.</li>
         <li>Take a clear photo of the deed or outcome.</li>
         <li>Tell us briefly what you did and the impact.</li>
       </ul>
-    </div>
+    </section>
 
     <!-- Submission form -->
-    <form id="kindnessForm" aria-describedby="formHelp" style="display:none;">
-      <div class="form-group">
-        <label for="photoUpload">📸 Photo of your kind act</label>
-        <div class="file-upload">
-          <input type="file" id="photoUpload" class="file-input" accept="image/*" required aria-required="true">
-          <label for="photoUpload" class="file-upload-btn">📷 Upload photo</label>
+    <section class="card" aria-label="Kindness submission">
+      <form id="kindnessForm" aria-describedby="formHelp" style="display:none;">
+        <div class="form-group">
+          <label for="photoUpload">📸 Photo of your kind act</label>
+          <div class="file-upload">
+            <input type="file" id="photoUpload" class="file-input" accept="image/*" required aria-required="true">
+            <label for="photoUpload" class="file-upload-btn">📷 Upload photo</label>
+          </div>
+          <div class="file-preview" id="filePreview">
+            <img id="previewImage" alt="Selected photo preview">
+            <div class="file-info" id="fileInfo"></div>
+          </div>
         </div>
-        <div class="file-preview" id="filePreview">
-          <img id="previewImage" alt="Selected photo preview">
-          <div class="file-info" id="fileInfo"></div>
+
+        <div class="form-group">
+          <label for="kindnessDescription">✍️ What happened?</label>
+          <textarea id="kindnessDescription" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?" required aria-required="true"></textarea>
+          <div class="char-count"><span id="charCount">500</span> characters remaining</div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="kindnessDescription">✍️ What happened?</label>
-        <textarea id="kindnessDescription" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?" required aria-required="true"></textarea>
-        <div class="char-count"><span id="charCount">500</span> characters remaining</div>
-      </div>
+        <div class="form-group">
+          <label for="location">📍 Where? (optional)</label>
+          <input type="text" id="location" placeholder="e.g., High Street, community centre">
+        </div>
 
-      <div class="form-group">
-        <label for="location">📍 Where? (optional)</label>
-        <input type="text" id="location" placeholder="e.g., High Street, community centre">
-      </div>
+        <button type="submit" class="submit-btn" id="submitBtn"><span class="btn-label">💎 Submit Heart Treasure</span></button>
+        <p id="formHelp" style="margin-top:8px;color:var(--ink-soft);font-weight:800">One submission per team is scored. Be honest and keep it kind.</p>
+      </form>
 
-      <button type="submit" class="submit-btn" id="submitBtn">
-        <span class="btn-label">💎 Submit Heart Treasure</span>
-      </button>
-
-      <p id="formHelp" style="margin-top:8px;color:#654321;font-weight:600">One submission per team is scored. Be honest and keep it kind.</p>
-    </form>
-
-    <div class="loading" id="loading"><span class="spinner" aria-hidden="true"></span> Uploading & submitting…</div>
-
-    <div class="message" id="feedback" role="status" aria-live="polite"></div>
-  </div>
+      <div class="loading" id="loading"><span class="spinner" aria-hidden="true"></span> Uploading & submitting…</div>
+      <div class="message" id="feedback" role="status" aria-live="polite"></div>
+    </section>
+  </main>
 
   <script>
     // ——— URL ———
@@ -232,10 +349,7 @@
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(token() ? {'Authorization':`Bearer ${token()}`} : {})
-        },
+        headers:{ 'Content-Type':'application/json', ...(token() ? {'Authorization':`Bearer ${token()}`} : {}) },
         body: JSON.stringify(payload)
       });
       const data = await res.json().catch(()=>({}));
@@ -251,7 +365,7 @@
         navMenu.classList.toggle('active');
         navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
       });
-      document.addEventListener('click', (e)=>{
+      document.addEventListener('click', (e)=> {
         const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
         if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
       });
@@ -322,7 +436,7 @@
       }
     }
 
-    // ——— Load teams (robust) ———
+    // ——— Load teams ———
     function extractTeams(data){
       if(Array.isArray(data?.teams)) return data.teams;
       if(Array.isArray(data?.leaderboard)) {
@@ -336,21 +450,13 @@
 
     async function loadTeams(){
       try{
-        // Try POST first (preferred)
         let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
         let teams = extractTeams(data);
-
-        // If nothing came back, try GET fallback (in case backend expects GET)
         if(!teams.length){
           const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-          if(res.ok){
-            data = await res.json().catch(()=>({}));
-            teams = extractTeams(data);
-          }
+          if(res.ok){ data = await res.json().catch(()=>({})); teams = extractTeams(data); }
         }
-
         if(!teams.length) throw new Error('No teams returned');
-
         teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
         teamSelect.innerHTML = `<option value="">Choose your crew…</option>` + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
         clearSigninMsg();
@@ -360,7 +466,7 @@
       }
     }
 
-    // ——— Sign in (dropdown + PIN) ———
+    // ——— Sign in ———
     async function signIn(){
       clearSigninMsg(); clearFeedback();
       const code = teamSelect.value;
@@ -370,7 +476,6 @@
 
       try{
         const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
-        // expected: { success:true, valid:true, token?:string, teamName?:string }
         if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
         if(res.token) localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
@@ -387,8 +492,12 @@
       }
     }
 
-    // ——— Character counter ———
-    function updateCharCount(){ const remaining = 500 - (descEl.value?.length || 0); countEl.textContent = remaining; countEl.style.color = remaining < 50 ? '#DC143C' : '#8B4513'; }
+    // ——— Char counter ———
+    function updateCharCount(){
+      const remaining = 500 - (descEl.value?.length || 0);
+      countEl.textContent = remaining;
+      countEl.style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
+    }
     descEl?.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
     locEl?.addEventListener('input', saveDraft);
 
@@ -420,7 +529,6 @@
     // ——— Submit ———
     async function doSubmit(){
       clearFeedback();
-
       if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
       if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
 
@@ -439,15 +547,11 @@
       try{
         const photoUrl = await uploadToUploadcare(photoFile);
         await callFn('submit_kindness_function', {
-          eventId: EVENT_ID,
-          teamCode: teamCode(),
-          token: token(),          // passed if available
-          description,
-          location: locationVal,
-          photoUrl
+          eventId: EVENT_ID, teamCode: teamCode(), token: token(),
+          description, location: locationVal, photoUrl
         });
         setFeedback('🎉 Submitted! Your kindness is in Terry’s vault. Check the leaderboard/gallery soon.', 'success');
-        clearDraft();
+        localStorage.removeItem(`kindnessDraft:${EVENT_ID}:${teamCode()}`);
         [...form.elements].forEach(el=>el.disabled = true);
         form.style.opacity = '0.6';
       }catch(err){
@@ -480,21 +584,22 @@
 
     // ——— Init ———
     (async function init(){
-      // Close mobile menu when clicking links
       const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
       navLinks.forEach(link => link.addEventListener('click', ()=> { navMenu.classList.remove('active'); navToggle.textContent='☰'; }));
-
       updateCrewLabel();
       const state = await refreshEventState();
       await loadTeams();
-      // If already signed in on this device, allow form
       if(teamCode() && state === 'RUNNING'){ document.getElementById('kindnessForm').style.display='block'; }
       updateCharCount();
       loadDraft();
     })();
 
-    // ——— Character counter helper ———
-    function updateCharCount(){ const remaining = 500 - (document.getElementById('kindnessDescription').value?.length || 0); document.getElementById('charCount').textContent = remaining; document.getElementById('charCount').style.color = remaining < 50 ? '#DC143C' : '#8B4513'; }
+    // ——— Char counter helper (keep original ID hooks) ———
+    function updateCharCount(){
+      const remaining = 500 - (document.getElementById('kindnessDescription').value?.length || 0);
+      document.getElementById('charCount').textContent = remaining;
+      document.getElementById('charCount').style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
+    }
   </script>
 </body>
 </html>
