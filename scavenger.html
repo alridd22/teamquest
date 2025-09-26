@@ -10,53 +10,82 @@
     --gold:#daa520; --gold-2:#ffb648; --error:#8b0000; --ok:#0b6b2e;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
-    background:linear-gradient(135deg,#8b5a2b,#a1642f 40%,#f4a460);color:#2a1a10}
+  body{
+    margin:0;font-family:"Segoe UI",Tahoma,Geneva,Verdana,sans-serif;
+    background:linear-gradient(135deg,#8b5a2b,#a1642f 40%,#f4a460);
+    color:#2a1a10
+  }
+
   /* Nav */
-  .nav{position:fixed;inset:0 0 auto 0;height:64px;z-index:50;
+  .nav{
+    position:fixed;inset:0 0 auto 0;height:64px;z-index:50;
     background:linear-gradient(135deg,#8b4513,#5d361d);border-bottom:3px solid var(--gold);
-    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+    display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.35)
+  }
   .nav-inner{width:100%;max-width:1200px;display:flex;align-items:center;gap:16px;padding:0 16px}
   .brand{display:flex;align-items:center;gap:10px;text-decoration:none}
   .brand img{height:40px;width:auto;display:block;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
   .links{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
-  .nav a{color:#f5e6d3;text-decoration:none;font-weight:700;font-size:14px;padding:8px 12px;
-    border:2px solid rgba(218,165,32,.5);border-radius:10px;background:rgba(255,255,255,.06)}
+  .nav a{
+    color:#f5e6d3;text-decoration:none;font-weight:700;font-size:14px;padding:8px 12px;
+    border:2px solid rgba(218,165,32,.5);border-radius:10px;background:rgba(255,255,255,.06)
+  }
   .nav a:hover{background:linear-gradient(135deg,#daa520,#ff8c00);color:#fff;border-color:#daa520}
   .nav .active{background:linear-gradient(135deg,#d2a146,#b78020);color:#fff;border-color:#daa520}
+
   /* Shell */
   .page{max-width:980px;margin:96px auto 24px;padding:16px}
-  .card{background:linear-gradient(145deg,var(--tan),var(--tan-2));border:3px solid var(--brown);
-    border-radius:18px;padding:18px;box-shadow:0 18px 36px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35);position:relative}
-  .card:before{content:"";position:absolute;left:12px;right:12px;top:12px;bottom:12px;border:2px solid #daa520;border-radius:14px;pointer-events:none}
-  /* Banner + buttons */
-  .banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;background:#fff6dd;border:2px dashed #daa520;border-radius:12px;padding:10px 12px;margin-bottom:14px}
-  .state{font-weight:800;color:#5a3b1f;display:flex;align-items:center;gap:8px}
-  .badge{border:2px dashed #daa520;border-radius:999px;padding:4px 10px;font-weight:700;background:#fff;color:#5a3b1f}
-  .btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800;display:inline-flex;align-items:center;gap:8px}
+  .card{
+    background:linear-gradient(145deg,var(--tan),var(--tan-2));border:3px solid var(--brown);
+    border-radius:18px;padding:18px;box-shadow:0 18px 36px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.35);
+    position:relative
+  }
+  .card:before{
+    content:"";position:absolute;left:12px;right:12px;top:12px;bottom:12px;
+    border:2px solid #daa520;border-radius:14px;pointer-events:none
+  }
+
+  /* Buttons */
+  .btn{
+    appearance:none;border:0;border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:800;
+    display:inline-flex;align-items:center;gap:8px
+  }
   .btn:active{transform:translateY(1px)}
   .btn-gold{background:linear-gradient(135deg,var(--gold-2),#daa520);color:#301c0e;border:3px solid #53321c}
   .btn-ghost{background:transparent;border:2px solid #daa520;color:#5a3b1f}
   .btn[disabled]{opacity:.6;cursor:not-allowed}
+
   /* Forms */
   .row{display:grid;gap:12px}
   .grid-2{grid-template-columns:1fr 1fr}
   @media (max-width:780px){.grid-2{grid-template-columns:1fr}}
   label{font-weight:700;color:#6b3f23;margin-bottom:4px;display:block}
-  input,select{width:100%;padding:12px;border-radius:12px;border:3px solid #daa520;background:#fff;font-size:15px;font-family:inherit}
-  .crew-strip{background:linear-gradient(135deg,#8b4513,#a0522d);color:#fff;padding:12px 14px;border:2px solid #daa520;border-radius:12px;font-weight:800;margin-bottom:10px;display:none}
+  input,select{
+    width:100%;padding:12px;border-radius:12px;border:3px solid #daa520;background:#fff;font-size:15px;font-family:inherit
+  }
+
+  .crew-strip{
+    background:linear-gradient(135deg,#8b4513,#a0522d);color:#fff;padding:12px 14px;border:2px solid #daa520;
+    border-radius:12px;font-weight:800;margin-bottom:10px;display:none
+  }
+
   .alert{display:none;padding:12px 14px;border-radius:12px;border:3px solid;font-weight:700;text-align:center}
   .alert-ok{background:#e7f7ea;color:#0b6b2e;border-color:#2f9a4a}
   .alert-err{background:#ffe4e7;color:#8b0000;border-color:#b20a20}
+
   .quick{background:#fffdf6;border:2px dashed #daa520;border-radius:12px;padding:10px 12px;margin:8px 0 12px}
   .checks{display:grid;grid-template-columns:1fr;gap:8px}
-  .checks label{border:2px dashed #daa520;border-radius:12px;padding:10px;background:#fff;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none}
+  .checks label{
+    border:2px dashed #daa520;border-radius:12px;padding:10px;background:#fff;display:flex;align-items:center;gap:10px;
+    cursor:pointer;user-select:none
+  }
   .checks input{width:auto}
-  /* greyed/locked item */
   .checks label.done{opacity:.55;filter:grayscale(.3);background:#f6f1e5}
   .checks label.done .tag{margin-left:auto;font-size:12px;border:2px dashed #daa520;border-radius:999px;padding:2px 8px;background:#fff}
+
   .uploader{border:4px dashed #daa520;border-radius:16px;padding:16px;text-align:center;background:#fffef7}
   .uploader.has-file{border-style:solid;background:#f2ffef;border-color:#2f9a4a}
+
   .dimmed{opacity:.5;pointer-events:none}
   .footer-note{font-size:12px;opacity:.8;text-align:center;margin-top:8px}
 </style>
@@ -66,28 +95,19 @@
   <div class="nav-inner">
     <a class="brand" href="/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
     <div class="links">
-      <a href="/clue_hunt_challenge">Treasure Hunt</a>
+      <a href="https://theteamquest.netlify.app/clue_hunt">Treasure Hunt</a>
       <a class="active" href="#">Scavenger</a>
-      <a href="/quiz_challenge">Timed Quiz</a>
-      <a href="/kindness_challenge_page">Kindness</a>
-      <a href="/limerick_challenge_page">Limerick</a>
-      <a href="/teamquest_gallery">Gallery</a>
+      <a href="https://theteamquest.netlify.app/quiz">Timed Quiz</a>
+      <a href="https://theteamquest.netlify.app/kindness">Kindness</a>
+      <a href="https://theteamquest.netlify.app/limerick">Limerick</a>
+      <a href="https://theteamquest.netlify.app/leaderboard">Leaderboard</a>
+      <a href="https://theteamquest.netlify.app/gallery">Gallery</a>
     </div>
   </div>
 </nav>
 
 <main class="page">
   <section class="card">
-    <!-- Event banner -->
-    <div class="banner" id="eventBanner">
-      <div class="state"><span id="stateEmoji">🧭</span><span id="stateText">Checking event…</span></div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-        <span class="badge" id="runningBadge" style="display:none">Running</span>
-        <span class="badge" id="timeBadge" style="display:none">Time remaining: —</span>
-        <button class="btn btn-gold" id="refreshStateBtn">⟳ Refresh</button>
-      </div>
-    </div>
-
     <!-- Sign-in -->
     <form id="loginForm" class="row" autocomplete="off">
       <div class="row grid-2">
@@ -147,8 +167,6 @@
   const el = id => document.getElementById(id);
 
   // UI refs
-  const stateText = el('stateText'), stateEmoji = el('stateEmoji');
-  const runningBadge = el('runningBadge'), timeBadge = el('timeBadge'), refreshStateBtn = el('refreshStateBtn');
   const loginForm = el('loginForm'), loginAlert = el('loginAlert'), refreshCrewsBtn = el('refreshCrewsBtn');
   const teamSelect = el('teamSelect'), pinInput = el('pin');
   const crewStrip = el('crewStrip'), quickRules = el('quickRules');
@@ -160,11 +178,10 @@
   const STORAGE_TOKEN = keyFor('token');       // tq_<event>_token
   const DONE_KEY = code => `tq_${eventId}_done_${code}`; // submitted item ids per team
 
-  let EVENT_STATE = 'UNKNOWN';
   let TEAMS = [];
   let signedTeam = null;
 
-  // Stable IDs + labels (your latest names)
+  // Stable IDs + labels
   const ITEMS = [
     { id:'british_coin_2023', title:'Any British coin dated 2023' },
     { id:'paperclip',         title:'A Paperclip' },
@@ -179,7 +196,6 @@
   async function init(){
     wireUI();
     renderItems();           // first paint (no team yet → no locks)
-    await refreshState();
     await loadCrews();
     hydrateFromStorage();    // set signedTeam if remembered
     renderItems();           // re-render with possible locks
@@ -188,7 +204,6 @@
   }
 
   function wireUI(){
-    refreshStateBtn.addEventListener('click', refreshState);
     refreshCrewsBtn.addEventListener('click', loadCrews);
     loginForm.addEventListener('submit', onSignIn);
     pickBtn.addEventListener('click', ()=> fileInput.click());
@@ -220,39 +235,6 @@
       checks.appendChild(row);
     });
   }
-
-  // ---------- Event state ----------
-  async function refreshState(){
-    setBanner('🧭','Checking event…',false);
-    runningBadge.style.display='none'; timeBadge.style.display='none';
-    try{
-      const res = await fetch('/.netlify/functions/get_event_state', {
-        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ eventId })
-      });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      EVENT_STATE = (data.state||'').toUpperCase();
-      let text='', emoji='🧭';
-      switch(EVENT_STATE){
-        case 'RUNNING': text="Event running — submit your finds 🧭"; emoji='🏃‍♂️'; runningBadge.style.display='inline-block'; break;
-        case 'PAUSED': text="Event paused — submissions are closed"; emoji='⏸️'; break;
-        case 'ENDED': text="Event ended — submissions are closed"; emoji='🏁'; break;
-        case 'PUBLISHED': text="Results published — submissions closed"; emoji='📣'; break;
-        default: text="Event unavailable — try refresh"; emoji='❓';
-      }
-      setBanner(emoji,text,EVENT_STATE==='RUNNING');
-      if(typeof data.timeRemainingSeconds==='number'){
-        timeBadge.style.display='inline-block';
-        timeBadge.textContent=`Time remaining: ${fmtTime(data.timeRemainingSeconds)}`;
-      }
-      gateForm();
-    }catch(e){
-      setBanner('⚠️','Could not check event. Try again.',false);
-      gateForm();
-    }
-  }
-  function setBanner(e,t,r){ stateEmoji.textContent=e; stateText.textContent=t; runningBadge.style.display=r?'inline-block':'none'; }
-  function gateForm(){ const off = EVENT_STATE!=='RUNNING'; scavForm.classList.toggle('dimmed',off); submitBtn.disabled = off; }
 
   // ---------- Crews ----------
   async function loadCrews(){
@@ -312,9 +294,9 @@
       }
     }catch{}
   }
-  function maybeShowForm(){ if(signedTeam && EVENT_STATE==='RUNNING') showForm(); else loginForm.style.display='grid'; }
+  function maybeShowForm(){ if(signedTeam) showForm(); else loginForm.style.display='grid'; }
   function showCrewStrip(){ crewStrip.style.display='block'; crewStrip.textContent = `Crew: ${signedTeam.name}`; }
-  function showForm(){ loginForm.style.display='none'; quickRules.style.display='block'; scavForm.style.display='grid'; gateForm(); }
+  function showForm(){ loginForm.style.display='none'; quickRules.style.display='block'; scavForm.style.display='grid'; }
 
   // ---------- Cross-device lock sync ----------
   async function syncLocksFromServer(){
@@ -330,13 +312,10 @@
       if(!res.ok) return; // silent if unavailable
       const data = await res.json();
 
-      const union = getDoneSet(); // merge with any local cache
-      // Common shapes:
-      // 1) { success, submissions:[{ itemId, ... }]}
+      const union = getDoneSet();
       if (Array.isArray(data?.submissions)) {
         data.submissions.forEach(s=>{
           if (s.itemId) union.add(String(s.itemId));
-          // handle label arrays if present
           if (Array.isArray(s.items)) {
             s.items.forEach(lbl=>{
               const m = ITEMS.find(it=>it.title===lbl);
@@ -345,7 +324,6 @@
           }
         });
       }
-      // 2) { itemIds:[...] }
       if (Array.isArray(data?.itemIds)) data.itemIds.forEach(id=>union.add(String(id)));
 
       saveDoneSet(union);
@@ -373,11 +351,20 @@
     return `https://ucarecdn.com/${j.file}/`;
   }
 
-  // ---------- Submit ----------
+  // ---------- Submit (checks event state silently) ----------
   async function onSubmit(ev){
     ev.preventDefault(); clearFormAlert();
-    if(EVENT_STATE!=='RUNNING') return toast(formAlert,'Submissions are closed.',false);
-    if(!signedTeam)           return toast(formAlert,'Sign in first.',false);
+    if(!signedTeam) return toast(formAlert,'Sign in first.',false);
+
+    // Live event-state check (no banner)
+    try{
+      const r = await fetch('/.netlify/functions/get_event_state', {
+        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ eventId })
+      });
+      const j = await r.json().catch(()=>({}));
+      const st = (j && j.state || '').toUpperCase();
+      if(st !== 'RUNNING') return toast(formAlert,'Submissions are closed right now.',false);
+    }catch{ /* if unknown, continue to try submit */ }
 
     const file = fileInput.files && fileInput.files[0];
     if(!file) return toast(formAlert,'Add a photo.',false);
@@ -385,22 +372,20 @@
     const checked = Array.from(checks.querySelectorAll('input[type=checkbox]:checked'));
     if(checked.length<1) return toast(formAlert,'Tick at least one item.',false);
 
-    // Primary item = first ticked
     const title = checked[0].value;
     const itemDef = ITEMS.find(x=>x.title===title) || ITEMS[0];
 
     const done = getDoneSet();
     if(done.has(itemDef.id)) return toast(formAlert,'That one is already submitted for this crew.',false);
 
-    const description = buildAutoDescription(checked.map(c=>c.value)); // to satisfy newer backend
+    const description = buildAutoDescription(checked.map(c=>c.value));
 
     disableForm(true);
     try{
       const photoUrl = await uploadToUploadcare(file);
 
-      // Superset payload for both backends
       const payload = {
-        // old function fields:
+        // legacy fields
         teamCode: signedTeam.code,
         teamName: signedTeam.name,
         itemId: itemDef.id,
@@ -408,7 +393,7 @@
         itemDescription: description,
         maxPoints: 15,
         photoUrl,
-        // new function fields:
+        // new fields
         eventId,
         items: checked.map(c=>c.value),
         description
@@ -425,16 +410,13 @@
       const text = await res.text();
       let msg = text;
       try{ const j = JSON.parse(text); msg = j.message || JSON.stringify(j); if(j.success) msg=''; }catch{}
-
       if(!res.ok) throw new Error(`HTTP ${res.status}${msg?` (${msg})`:''}`);
 
-      // Success → lock this item for this team and sync
       done.add(itemDef.id);
       saveDoneSet(done);
       renderItems();
       toast(formAlert,"🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes to see your doubloons.",true);
       lockAfterSuccess();
-      // optional: pull server once more (in case backend aggregates labels → ids differently)
       syncLocksFromServer();
     }catch(e){
       console.error('Submit error:', e);
@@ -455,7 +437,7 @@
   }
   function disableForm(v){
     busyNote.style.display = v ? 'block' : 'none';
-    submitBtn.disabled = v || EVENT_STATE!=='RUNNING';
+    submitBtn.disabled = v;
     document.querySelectorAll('#scavForm input, #scavForm button').forEach(n=>{ if(n!==submitBtn) n.disabled = v; });
   }
 
@@ -467,7 +449,6 @@
   function showLoginError(msg){ loginAlert.className='alert alert-err'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
   function showLoginInfo(msg){ if(!msg){ loginAlert.style.display='none'; return; } loginAlert.className='alert alert-ok'; loginAlert.textContent=msg; loginAlert.style.display='block'; }
   function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
-  function fmtTime(sec){ const s=Math.max(0,Math.floor(sec)); const m=Math.floor(s/60), r=s%60; return `${m}:${String(r).padStart(2,'0')}`; }
 })();
 </script>
 </body>
