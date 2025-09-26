@@ -1,101 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+  <meta name="theme-color" content="#2A1F18"/>
   <title>TeamQuest – The Quiz Challenge</title>
+
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+
   <style>
-    :root{ --nav-h:64px; }
-    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:url("/TQ%20Web%20extended%20background-100.jpg");
+      --ink:#2E2114; --ink-soft:#6A5A47;
+      --parchment:#F7EED8; --parchment-2:#F3E6CF;
+      --gold:#F0C433; --gold-deep:#A7711F;
+      --nav-h:64px; --gutter:22px; --hero-h:280px;
+      --radius-card:22px; --shadow-card:0 18px 40px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box} html,body{height:100%}
     body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;
-      min-height:100vh;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.35)),
-        url("/TQ%20Web%20background-100.jpg") center/cover fixed no-repeat;
-      display:flex;align-items:center;justify-content:center;padding:24px; padding-top:calc(var(--nav-h) + 24px);
+      margin:0; color:var(--ink);
+      font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;
+      background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
+      background-size:cover;background-position:top center;background-attachment:fixed;
+      padding-top:var(--nav-h);
     }
 
-    /* OPAQUE NAV */
-    .nav{
-      position:fixed; top:0; left:0; right:0; height:var(--nav-h); z-index:2000;
+    /* NAV */
+    .treasure-nav{position:fixed;inset:0 0 auto 0;height:var(--nav-h);z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
-      background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
-      border-bottom:1px solid rgba(255,255,255,.18);
-      display:flex; align-items:center; padding:0 12px;
-    }
-    .brand{display:flex; align-items:center; gap:10px; text-decoration:none}
-    .brand img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.6))}
-    .menu-btn{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer;margin-left:auto}
-    .navlinks{
-      position:fixed; top:var(--nav-h); left:-100%; width:100%;
-      height:calc(100vh - var(--nav-h)); z-index:2500;
-      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
-      background:rgba(18,12,8,.90);
-    }
-    .navlinks.active{left:0}
-    .navlinks.active::before{content:""; position:fixed; inset:var(--nav-h) 0 0 0; z-index:-1; background:rgba(0,0,0,.35)}
-    .pill{
-      display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color:#2E2114; font-weight:900; padding:12px 14px; border-radius:16px;
-      background:rgba(247,238,216,.98); border:2px solid #CBA64C;
-      box-shadow:0 8px 18px rgba(0,0,0,.35);
-    }
-    .pill:hover{background:linear-gradient(90deg,#F7E0A2,#F0C433)}
-    .pill.disabled{opacity:.5; pointer-events:none}
+      background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18)}
+    .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
+    .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
+    .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
+      background:linear-gradient(180deg,rgba(0,0,0,.8),rgba(0,0,0,.75));
+      display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 14px;transition:left .25s}
+    .nav-menu.active{left:0}
+    .nav-link,.dropdown-link{display:block;width:92%;max-width:360px;text-align:center;
+      text-decoration:none;color:#F7EED8;font-weight:900;padding:12px 14px;border-radius:14px;
+      background:rgba(247,238,216,.22);border:1px solid rgba(255,255,255,.28)}
+    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.3)}
 
-    .wrap{max-width:900px;width:100%;background:linear-gradient(145deg,#F5E6D3,#E8D7C3);
-      border:3px solid #8B4513;border-radius:24px;box-shadow:0 18px 36px rgba(0,0,0,.2);padding:28px}
-    h1{font-size:2.2rem;color:#8B4513;text-align:center;margin-bottom:8px}
-    .rules{border:2px solid #DAA520;border-radius:14px;padding:18px;background:#fff9ee;margin:18px 0}
-    .row{margin:14px 0}
-    label{display:block;font-weight:600;color:#8B4513;margin-bottom:6px}
-    select,input[type="text"]{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:16px;background:linear-gradient(145deg,#fff,#FFF8DC)}
-    .btn{width:100%;padding:16px;border:2px solid #8B4513;border-radius:12px;
-      background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;font-weight:800;cursor:pointer}
+    /* HERO */
+    .hero{min-height:var(--hero-h);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 20px;text-align:center}
+    .brand-logo{width:min(240px,68vw);height:auto;margin-bottom:10px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+
+    /* LAYOUT */
+    .wrap{max-width:900px;margin:0 auto;padding:0 var(--gutter) 28px}
+    .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);margin:0 auto 18px}
+    h1{margin:0 0 8px;text-align:center;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;color:var(--ink)}
+
+    .rules{border:2px solid var(--gold-deep);border-radius:14px;padding:16px;background:#fff9ee;margin:12px 0}
+    label{display:block;font-weight:800;color:var(--ink);margin:8px 6px 6px}
+    select,input[type="text"]{width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;font-size:16px;background:#fff}
+    .btn{width:100%;padding:16px;border:3px solid var(--gold-deep);border-radius:14px;background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;font-weight:900;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.2)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .msg{margin-top:12px;border:2px solid;border-radius:11px;padding:12px;display:none;text-align:center}
     .msg.error{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
-    .section{display:none}
-    .section.active{display:block}
-    .team-pill{background:linear-gradient(135deg,#8B4513,#A0522D);color:#fff;border:2px solid #DAA520;border-radius:12px;padding:10px 14px;margin-bottom:16px;text-align:center;font-weight:700}
-    .quiz-head{display:flex;justify-content:space-between;gap:16px;align-items:center;border:2px solid #DAA520;background:#fff9ee;border-radius:14px;padding:16px;margin-bottom:16px}
-    .timer{width:60px;height:60px;border-radius:50%;border:3px solid #8B4513;display:flex;align-items:center;justify-content:center;font-weight:800;color:#8B4513;background:conic-gradient(#DAA520 0deg,#F5E6D3 0deg)}
-    .qcard{border:3px solid #DAA520;background:linear-gradient(145deg,#fff,#FFF8DC);border-radius:18px;padding:22px}
-    .opt{border:3px solid #DAA520;border-radius:14px;padding:14px;background:#fff9ee;cursor:pointer;margin-top:10px}
+    .section{display:none}.section.active{display:block}
+    .team-pill{background:#D7C39B;border:3px dashed rgba(0,0,0,.6);border-radius:14px;padding:10px 14px;margin-bottom:12px;text-align:center;font-weight:900}
+
+    .quiz-head{display:flex;justify-content:space-between;gap:16px;align-items:center;border:2px solid var(--gold-deep);background:#fff9ee;border-radius:14px;padding:14px;margin-bottom:14px}
+    .timer{width:60px;height:60px;border-radius:50%;border:3px solid #8B4513;display:flex;align-items:center;justify-content:center;font-weight:800;color:#8B4513;background:conic-gradient(#F0C433 0deg,#F7EED8 0deg)}
+    .qcard{border:3px solid var(--gold);background:#fff;border-radius:18px;padding:18px}
+    .opt{border:3px solid var(--gold);border-radius:14px;padding:14px;background:#fff9ee;cursor:pointer;margin-top:10px}
     .opt:hover{background:#ffeec9}
     .opt.sel{background:linear-gradient(135deg,#FF8C00,#DAA520);color:#fff;border-color:#8B4513}
     .opt.good{background:linear-gradient(135deg,#29c74a,#17983a);color:#fff;border-color:#0b6f27}
     .opt.bad{background:linear-gradient(135deg,#d11,#a00909);color:#fff;border-color:#6b0000}
-    .textAnswer{width:100%;padding:14px;border:3px solid #DAA520;border-radius:12px;font-size:18px;background:#fff}
+    .textAnswer{width:100%;padding:14px;border:3px solid var(--gold);border-radius:12px;font-size:18px;background:#fff}
   </style>
 </head>
 <body>
   <!-- NAV -->
-  <nav class="nav">
-    <a class="brand" href="/"><img src="/Team Quest Logo-01.png" alt="TeamQuest"></a>
-    <button class="menu-btn" id="menu">☰</button>
+  <nav class="treasure-nav" id="treasure-nav">
+    <div class="nav-container">
+      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+        <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+    <ul class="nav-menu" id="nav-menu" role="menu">
+      <!-- All but the current page (Quiz) -->
+      <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
+      <li><a href="/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
+      <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
+      <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+    </ul>
   </nav>
-  <div class="navlinks" id="sheet">
-    <a class="pill" href="/clue_hunt">💎 The Treasure Hunt</a>
-    <a class="pill" href="/scavenger">🔍 The Scavenger Hunt</a>
-    <a class="pill disabled" aria-disabled="true">⏰ The Timed Quiz</a>
-    <a class="pill" href="/limerick">📝 The Limerick Challenge</a>
-    <a class="pill" href="/kindness">💖 Kindness</a>
-    <a class="pill" href="/leaderboard">🏆 The Leaderboard</a>
-    <a class="pill" href="/gallery">📸 The Gallery</a>
-  </div>
+
+  <!-- HERO -->
+  <header class="hero">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
+    <div class="hero-title">The Quiz Challenge</div>
+  </header>
 
   <div class="wrap">
-    <h1>The Quiz Challenge</h1>
-
     <!-- SIGN IN -->
-    <section id="secSign" class="section active">
+    <section id="secSign" class="card section active">
       <div class="rules">
-        <ul>
+        <ul style="line-height:1.6;margin:0">
           <li>10 riddles — 15 seconds each</li>
           <li>Some include audio — check volume</li>
           <li>Choose once — no changes</li>
@@ -105,15 +115,14 @@
 
       <div class="row">
         <label for="teamSelect">Select Your Crew</label>
-        <select id="teamSelect">
+        <select id="teamSelect" class="field">
           <option value="">Choose your treasure hunting crew…</option>
         </select>
       </div>
 
       <div class="row">
         <label for="teamPin">Enter Your Crew’s Secret Code</label>
-        <input id="teamPin" type="text" inputmode="numeric" autocomplete="one-time-code"
-               placeholder="1234" pattern="^\d{4}$" maxlength="4" />
+        <input id="teamPin" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" pattern="^\\d{4}$" maxlength="4"/>
       </div>
 
       <button class="btn" id="btnSign">🧭 Begin the Knowledge Trial</button>
@@ -121,11 +130,11 @@
     </section>
 
     <!-- READY -->
-    <section id="secReady" class="section">
+    <section id="secReady" class="card section">
       <div class="team-pill" id="readyTeam">Crew: …</div>
       <div class="rules">
         <strong>⚡ You’re good to go!</strong>
-        <ul style="margin-top:10px">
+        <ul style="margin-top:10px;line-height:1.6">
           <li>15 seconds per riddle</li>
           <li>No going back</li>
           <li>Volume up for audio prompts</li>
@@ -136,7 +145,7 @@
     </section>
 
     <!-- QUIZ -->
-    <section id="secQuiz" class="section">
+    <section id="secQuiz" class="card section">
       <div class="team-pill" id="quizTeam">Crew: …</div>
       <div class="quiz-head">
         <div id="qCount">Riddle 1 of 10</div>
@@ -146,13 +155,13 @@
     </section>
 
     <!-- RESULTS -->
-    <section id="secDone" class="section">
+    <section id="secDone" class="card section">
       <div class="team-pill" id="doneTeam">Crew: …</div>
       <div class="qcard">
-        <h2 style="margin-bottom:8px">🎉 Trial Complete!</h2>
-        <p id="scoreLine" style="margin-bottom:16px;font-weight:700;color:#8B4513"></p>
+        <h1 style="font-size:22px;margin-bottom:8px">🎉 Trial Complete!</h1>
+        <p id="scoreLine" style="margin-bottom:14px;font-weight:900;color:#8B4513"></p>
         <div id="breakdown"></div>
-        <div id="submitMsg" class="msg" style="margin-top:16px"></div>
+        <div id="submitMsg" class="msg" style="margin-top:14px"></div>
         <button class="btn" onclick="location.href='/leaderboard'">🏆 View Leaderboard</button>
       </div>
     </section>
@@ -160,103 +169,80 @@
 
   <script>
     // NAV toggle
-    const mBtn = document.getElementById('menu');
-    const sheet = document.getElementById('sheet');
-    mBtn?.addEventListener('click', ()=> sheet.classList.toggle('active'));
-    sheet?.addEventListener('click', e => { if(e.target===sheet) sheet.classList.remove('active'); });
+    const navToggle = document.getElementById('nav-toggle');
+    const navMenu = document.getElementById('nav-menu');
+    navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
+    document.addEventListener('click',e=>{
+      const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
+      if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+    });
+    document.querySelectorAll('.nav-link,.dropdown-link').forEach(a=>a.addEventListener('click',()=>{ navMenu.classList.remove('active'); navToggle.textContent='☰'; }));
 
     // ====== constants / helpers ======
     const EVENT_ID = new URLSearchParams(location.search).get('event') || '';
     const $ = (id) => document.getElementById(id);
-    const teamSelect = $('teamSelect');
-    const teamPin    = $('teamPin');
-    const signMsg    = $('signMsg');
-    const readyMsg   = $('readyMsg');
-    const submitMsg  = $('submitMsg');
+    const teamSelect = $('teamSelect'), teamPin = $('teamPin');
+    const signMsg = $('signMsg'), readyMsg = $('readyMsg'), submitMsg = $('submitMsg');
 
     function setMsg(el, text, type){ el.textContent = text; el.className = 'msg ' + (type==='error' ? 'error' : 'ok'); el.style.display = 'block'; }
     function clearMsg(el){ el.textContent=''; el.className='msg'; el.style.display='none'; }
 
     async function callFn(name, payload = {}, method='POST'){
       const url = '/.netlify/functions/'+name + (method==='GET' ? ('?'+new URLSearchParams(payload)) : '');
-      const res = await fetch(url, {
-        method, headers: { 'Content-Type':'application/json' },
-        body: method==='GET' ? undefined : JSON.stringify(payload)
-      });
-      let data = {};
-      try { data = await res.json(); } catch {}
-      if (!res.ok) {
-        const msg = data && (data.error || data.message) ? (data.error || data.message) : ('HTTP '+res.status);
-        throw new Error(msg);
-      }
+      const res = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body: method==='GET'?undefined:JSON.stringify(payload) });
+      let data = {}; try{ data = await res.json(); }catch{}
+      if(!res.ok) throw new Error((data && (data.error||data.message)) || ('HTTP '+res.status));
       return data;
     }
 
+    // ====== TEAM LOADING ======
     function extractTeams(data){
-      if (Array.isArray(data?.teams)) return data.teams;
-      if (Array.isArray(data?.leaderboard)) {
-        return data.leaderboard
-          .map(r => ({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' }))
-          .filter(t => t.teamName);
+      if(Array.isArray(data?.teams)) return data.teams;
+      if(Array.isArray(data?.leaderboard)){
+        return data.leaderboard.map(r=>({teamCode:r.teamCode||r.code||r.teamId||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
       }
-      if (Array.isArray(data?.rows)) {
-        return data.rows
-          .map(r => ({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' }))
-          .filter(t => t.teamName);
+      if(Array.isArray(data?.rows)){
+        return data.rows.map(r=>({teamCode:r.teamCode||r.code||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
       }
       return [];
     }
-
     async function loadTeams(){
       try{
-        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        let data = await callFn('get_leaderboard',{eventId:EVENT_ID});
         let teams = extractTeams(data);
-        if (!teams.length){
-          const r = await fetch('/.netlify/functions/get_leaderboard?eventId=' + encodeURIComponent(EVENT_ID));
-          if (r.ok){
-            data = await r.json();
-            teams = extractTeams(data);
-          }
+        if(!teams.length){
+          const r = await fetch('/.netlify/functions/get_leaderboard?eventId='+encodeURIComponent(EVENT_ID));
+          if(r.ok){ data = await r.json(); teams = extractTeams(data); }
         }
-        if (!teams.length) throw new Error('No teams returned');
-
+        if(!teams.length) throw new Error('No teams');
         teams.sort((a,b)=>a.teamName.localeCompare(b.teamName));
-        teamSelect.innerHTML = '<option value="">Choose your treasure hunting crew…</option>' +
-          teams.map(t => `<option value="${t.teamCode}">${t.teamName}</option>`).join('');
-      }catch(e){
-        console.error('load teams Error:', e);
-        setMsg(signMsg, 'Unable to load crew list. Please refresh.', 'error');
-      }
+        teamSelect.innerHTML = '<option value="">Choose your treasure hunting crew…</option>' + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+      }catch(e){ setMsg(signMsg,'Unable to load crew list. Please refresh.','error'); }
     }
 
+    // ====== SIGN-IN ======
     async function signin(){
       clearMsg(signMsg);
       const code = teamSelect.value;
-      const pin  = (teamPin.value || '').trim();
-      if (!code){ setMsg(signMsg, 'Pick your crew from the list.', 'error'); return; }
-      if (!/^\d{4}$/.test(pin)){ setMsg(signMsg, 'Enter your 4-digit PIN.', 'error'); return; }
-
+      const pin = (teamPin.value||'').trim();
+      if(!code) return setMsg(signMsg,'Pick your crew from the list.','error');
+      if(!/^\d{4}$/.test(pin)) return setMsg(signMsg,'Enter your 4-digit PIN.','error');
       try{
-        const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
-        if (!res.success || !res.valid){ setMsg(signMsg, 'That PIN doesn’t match this crew.', 'error'); return; }
-
+        const res = await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
+        if(!res.success || !res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
         localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
         localStorage.setItem('teamName', res.teamName || teamSelect.options[teamSelect.selectedIndex]?.textContent || '');
-
-        setMsg(signMsg, 'Signed in. You can start the quiz!', 'ok');
+        setMsg(signMsg,'Signed in. You can start the quiz!','ok');
         $('readyTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName') || 'Unknown');
-        $('secSign').classList.remove('active');
-        $('secReady').classList.add('active');
+        $('secSign').classList.remove('active'); $('secReady').classList.add('active');
       }catch(err){
-        const msg = (''+err.message).includes('404')
-          ? 'Sign-in service is off. Ask the host to enable verify_team_pin_function.'
-          : (err.message || 'Could not sign you in. Try again.');
-        setMsg(signMsg, msg, 'error');
+        setMsg(signMsg,((''+err.message).includes('404'))?'Sign-in service is off. Ask the host to enable verify_team_pin_function.':(err.message||'Could not sign you in. Try again.'),'error');
       }
     }
-    $('btnSign').addEventListener('click', signin);
+    $('btnSign').addEventListener('click',signin);
 
+    // ====== QUIZ ======
     const quizQuestions = [
       { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[
         {letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',doubloons:10 },
@@ -289,21 +275,16 @@
     async function startQuizFlow(){
       clearMsg(readyMsg);
       try{
-        await callFn('start_quiz_function', {
-          eventId: EVENT_ID,
-          teamCode: localStorage.getItem('teamCode'),
+        await callFn('start_quiz_function',{
+          eventId: EVENT_ID, teamCode: localStorage.getItem('teamCode'),
           teamName: localStorage.getItem('teamName'),
           quizStartTime: new Date().toISOString()
         });
-        $('quizTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName') || '');
-        document.getElementById('secReady').classList.remove('active');
-        document.getElementById('secQuiz').classList.add('active');
+        $('quizTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName')||'');
+        $('secReady').classList.remove('active'); $('secQuiz').classList.add('active');
         currentTeam = { code: localStorage.getItem('teamCode'), name: localStorage.getItem('teamName') };
-        qIndex = 0; answers.length = 0;
-        showQuestion();
-      }catch(e){
-        setMsg(readyMsg, 'Couldn’t start the quiz. Please try again. ('+ (e.message||'error') +')', 'error');
-      }
+        qIndex = 0; answers.length = 0; showQuestion();
+      }catch(e){ setMsg(readyMsg,'Couldn’t start the quiz. Please try again. ('+(e.message||'error')+')','error'); }
     }
 
     function showQuestion(){
@@ -311,29 +292,26 @@
       $('qCount').textContent = `Riddle ${qIndex+1} of ${quizQuestions.length}`;
       timeLeft = 15; updateTimer(); startTimer();
 
-      let html = `<div style="font-weight:700;color:#654321;margin-bottom:12px">${q.question}</div>`;
-      if (q.audioUrl) {
+      let html = `<div style="font-weight:900;color:#654321;margin-bottom:12px">${q.question}</div>`;
+      if(q.audioUrl){
         html += `<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0">
                   <source src="${q.audioUrl}" type="audio/mpeg">
                 </audio>`;
       }
-      if (q.imageUrl) html += `<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`;
+      if(q.imageUrl) html += `<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`;
 
-      if (q.type==='multiple_choice'){
-        q.options.forEach(o=>{
-          html += `<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`;
-        });
+      if(q.type==='multiple_choice'){
+        q.options.forEach(o=>{ html += `<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`; });
       }else{
-        html += `<input id="textAns" class="textAnswer" placeholder="Type your answer…" maxlength="50" />`;
+        html += `<input id="textAns" class="textAnswer" placeholder="Type your answer…" maxlength="50">`;
         html += `<button class="btn" style="margin-top:12px" onclick="submitAnswer()">Submit</button>`;
       }
       $('qcard').innerHTML = html;
 
       document.querySelectorAll('.opt').forEach(el=>{
-        el.addEventListener('click', () => {
+        el.addEventListener('click',()=>{
           document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
-          el.classList.add('sel');
-          submitAnswer(el.dataset.letter);
+          el.classList.add('sel'); submitAnswer(el.dataset.letter);
         });
       });
       $('qAud')?.play().catch(()=>{});
@@ -341,63 +319,52 @@
 
     function startTimer(){
       clearInterval(timerId);
-      timerId = setInterval(()=>{
-        timeLeft--; updateTimer();
-        if (timeLeft<=0){ submitAnswer(''); }
-      }, 1000);
+      timerId = setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0){ submitAnswer(''); } },1000);
     }
-
     function updateTimer(){
       $('timer').textContent = timeLeft;
       const pct = (timeLeft/15)*360;
-      $('timer').style.background = `conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#DAA520'} ${pct}deg, #F5E6D3 ${pct}deg)`;
+      $('timer').style.background = `conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`;
     }
-
-    function normalize(s){ return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim(); }
+    function normalize(s){ return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
 
     function submitAnswer(choice){
       clearInterval(timerId);
       const q = quizQuestions[qIndex];
-
       let correct = false;
-      if (q.type==='multiple_choice'){
+
+      if(q.type==='multiple_choice'){
         correct = (choice === q.correctAnswer);
         document.querySelectorAll('.opt').forEach(el=>{
           const lett = el.dataset.letter;
-          if (lett===q.correctAnswer) el.classList.add('good');
-          else if (el.classList.contains('sel') && !correct) el.classList.add('bad');
+          if(lett===q.correctAnswer) el.classList.add('good');
+          else if(el.classList.contains('sel') && !correct) el.classList.add('bad');
           el.style.pointerEvents='none';
         });
       }else{
         const user = normalize($('textAns')?.value || '');
-        if (q.acceptableAnswers?.length) correct = q.acceptableAnswers.some(a=>normalize(a)===user);
+        if(q.acceptableAnswers?.length) correct = q.acceptableAnswers.some(a=>normalize(a)===user);
         else correct = normalize(q.correctAnswer)===user;
       }
 
       answers.push({
-        questionId: q.id,
-        userAnswer: choice || ($('textAns')?.value || ''),
-        correctAnswer: q.correctAnswer,
-        isCorrect: correct,
-        doubloons: correct ? q.doubloons : 0,
-        timeLeft
+        questionId:q.id, userAnswer: choice || ($('textAns')?.value || ''),
+        correctAnswer:q.correctAnswer, isCorrect:correct, doubloons:correct?q.doubloons:0, timeLeft
       });
 
-      if (q.explanation){
+      if(q.explanation){
         $('qcard').insertAdjacentHTML('beforeend',
           `<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
       }
 
-      setTimeout(()=>{
-        if (qIndex < quizQuestions.length-1){ qIndex++; showQuestion(); }
-        else finishQuiz();
-      }, 1400);
+      setTimeout(()=>{ (qIndex < quizQuestions.length-1) ? (qIndex++,showQuestion()) : finishQuiz(); }, 1400);
     }
+    window.submitAnswer = submitAnswer;
 
     async function finishQuiz(){
-      document.getElementById('secQuiz').classList.remove('active');
+      $('secQuiz').classList.remove('active');
       $('doneTeam').textContent = 'Crew: ' + (currentTeam.name || '');
-      document.getElementById('secDone').classList.add('active');
+      $('secDone').classList.add('active');
 
       const correct = answers.filter(a=>a.isCorrect).length;
       const doubloons = answers.reduce((s,a)=>s+a.doubloons,0);
@@ -407,31 +374,24 @@
         const q = quizQuestions[i];
         return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0">
                   <div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div>
-                  <div style="font-weight:800;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.doubloons:'✗ 0'}</div>
+                  <div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.doubloons:'✗ 0'}</div>
                 </div>`;
       }).join('');
 
       clearMsg(submitMsg);
       try{
-        await callFn('submit_quiz_function', {
-          eventId: EVENT_ID,
-          teamCode: currentTeam.code,
-          teamName: currentTeam.name,
-          totalScore: doubloons,
-          questionsCorrect: correct,
-          totalQuestions: quizQuestions.length,
-          completionTime: new Date().toISOString(),
-          answers
+        await callFn('submit_quiz_function',{
+          eventId:EVENT_ID, teamCode:currentTeam.code, teamName:currentTeam.name,
+          totalScore:doubloons, questionsCorrect:correct, totalQuestions:quizQuestions.length,
+          completionTime:new Date().toISOString(), answers
         });
-        setMsg(submitMsg, '🎉 Doubloons successfully added to your treasure chest!', 'ok');
-      }catch(e){
-        setMsg(submitMsg, 'Couldn’t record doubloons. (Saved locally.)', 'error');
-      }
+        setMsg(submitMsg,'🎉 Doubloons successfully added to your treasure chest!','ok');
+      }catch(e){ setMsg(submitMsg,'Couldn’t record doubloons. (Saved locally.)','error'); }
     }
 
     // boot
     loadTeams();
-    teamPin.addEventListener('keydown', e => { if (e.key==='Enter') $('btnSign').click(); });
+    teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') $('btnSign').click(); });
   </script>
 </body>
 </html>
