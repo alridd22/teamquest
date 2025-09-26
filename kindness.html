@@ -5,10 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest – Random Act of Kindness</title>
-
-  <!-- Handlee (body), system sans for headings/buttons -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
-
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
@@ -17,237 +14,110 @@
       --gold:#F0C433; --gold-deep:#A7711F;
       --success:#1F6E38; --success-bg:#CFF2DA;
       --error:#B42318;
-
       --radius-card:22px; --radius-input:16px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --shadow-soft:0 2px 8px rgba(0,0,0,.12);
       --focus:0 0 0 3px rgba(240,196,51,.45);
-
-      --gutter:22px;
-      --hero-h:280px;
-      --nav-h:64px;
+      --gutter:22px; --hero-h:280px; --nav-h:64px;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
-      color:var(--ink);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
-        var(--bg);
-      background-size:cover;
-      background-position:top center;
-      background-attachment:fixed;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-      padding-top:var(--nav-h);
+      margin:0; font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink);
+      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
+      background-size:cover; background-position:top center; background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; padding-top:var(--nav-h);
     }
-
-    /* ===== OPAQUE MOBILE NAV ===== */
-    .treasure-nav{
-      position:fixed; top:0; left:0; right:0; z-index:2000; height:var(--nav-h);
-      backdrop-filter:saturate(120%) blur(6px);
-      background:linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.35));
-      border-bottom:1px solid rgba(255,255,255,.18);
-    }
-    .nav-container{
-      height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between;
-      max-width:1000px; margin:0 auto;
-    }
-    .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.6))}
+    /* NAV */
+    .treasure-nav{position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
+      backdrop-filter:saturate(120%) blur(6px); background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18)}
+    .nav-container{height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between; max-width:1000px; margin:0 auto}
+    .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
-
     .nav-menu{
       position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
-      z-index:2500;
-      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
-      background:rgba(18,12,8,0.90);
-    }
+      background:linear-gradient(180deg, rgba(0,0,0,.82), rgba(0,0,0,.7));
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s; overflow-y:auto}
     .nav-menu.active{left:0}
-    .nav-menu.active::before{
-      content:""; position:fixed; inset:var(--nav-h) 0 0 0; z-index:-1; background:rgba(0,0,0,.35);
-    }
-    .nav-link,.dropdown-link{
-      display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color:#2E2114; font-weight:900; padding:12px 14px; border-radius:16px;
-      background:rgba(247,238,216,.98); border:2px solid #CBA64C;
-      box-shadow:0 8px 18px rgba(0,0,0,.35);
-    }
-    .nav-link:hover,.dropdown-link:hover{
-      background:linear-gradient(90deg,#F7E0A2,#F0C433); color:#2E2114;
-    }
-    .nav-link.disabled{opacity:.5; pointer-events:none}
-
-    /* ===== HERO ===== */
-    .hero{
-      min-height:var(--hero-h);
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:24px var(--gutter) 20px; text-align:center;
-    }
-    .brand-logo{
-      width:min(240px,68vw); height:auto; margin-bottom:10px;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
-    }
-    .hero-title{
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px;
-      text-shadow:0 2px 6px rgba(0,0,0,.6);
-    }
-
-    /* ===== STACK / CARDS ===== */
-    .stack{ padding:0 var(--gutter) 28px; }
-    .card{
-      background:var(--parchment);
-      border-radius:var(--radius-card);
-      box-shadow:var(--shadow-card);
-      padding:18px 16px;
-      border:1px solid rgba(0,0,0,.06);
-      margin:0 auto 18px; width:100%;
-    }
-    .card h2{
-      margin:0 0 10px; text-align:center;
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-weight:900; font-size:24px; color:var(--ink);
-    }
-    .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px; }
-
-    .team-info{
-      display:flex; align-items:center; justify-content:center;
-      background:#D7C39B; color:var(--ink);
-      border:3px dashed rgba(0,0,0,.6);
-      border-radius:14px; padding:10px 14px; font-weight:900; font-size:18px;
-      box-shadow:var(--shadow-soft);
-    }
-
-    .status-banner{
-      display:none; margin:12px 0 18px; padding:12px 14px; border-radius:12px;
-      background:#FFFAF1; border:1px solid rgba(0,0,0,.08); border-left:6px solid #FF8C00;
-      color:var(--ink-soft); font-weight:800;
-    }
-    .status-banner.paused{ border-left-color:#DAA520 }
-    .status-banner.ended{ border-left-color:#8B0000 }
-    .status-banner.published{ border-left-color:#32CD32 }
-
-    .auth-card{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; }
-    .auth-grid{ display:grid; grid-template-columns:1fr 150px; gap:10px }
-    @media (max-width:560px){ .auth-grid{ grid-template-columns:1fr } }
+    /* BIG logo inside the overlay menu */
+    .menu-logo{width:100%; display:flex; align-items:center; justify-content:center; padding:10px 0 6px}
+    .menu-logo img{height:96px; width:auto; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35)); pointer-events:none}
+    .nav-link,.dropdown-link{display:block; width:92%; max-width:360px; text-align:center; text-decoration:none; color:#F7EED8; font-weight:900;
+      padding:12px 14px; border-radius:14px; background:rgba(247,238,216,.18); border:1px solid rgba(255,255,255,.25)}
+    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.28)}
+    /* HERO */
+    .hero{min-height:var(--hero-h); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:24px var(--gutter) 20px; text-align:center}
+    .brand-logo{width:min(240px,68vw); height:auto; margin-bottom:10px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    /* STACK / CARDS */
+    .stack{ padding:0 var(--gutter) 28px }
+    .card{ background:var(--parchment); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100%}
+    .card h2{margin:0 0 10px; text-align:center; font-family: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial; font-weight:900; font-size:24px; color:var(--ink)}
+    .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px }
+    .team-info{display:flex; align-items:center; justify-content:center; background:#D7C39B; color:var(--ink); border:3px dashed rgba(0,0,0,.6); border-radius:14px; padding:10px 14px; font-weight:900; font-size:18px; box-shadow:var(--shadow-soft)}
+    .status-banner{display:none; margin:12px 0 18px; padding:12px 14px; border-radius:12px; background:#FFFAF1; border:1px solid rgba(0,0,0,.08); border-left:6px solid #FF8C00; color:var(--ink-soft); font-weight:800}
+    .status-banner.paused{ border-left-color:#DAA520 } .status-banner.ended{ border-left-color:#8B0000 } .status-banner.published{ border-left-color:#32CD32 }
+    .auth-card{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
+    .auth-grid{ display:grid; grid-template-columns:1fr 150px; gap:10px } @media (max-width:560px){ .auth-grid{ grid-template-columns:1fr } }
     label{ display:block; margin:0 6px 6px; font-size:18px; font-weight:800; color:var(--ink) }
-    select,input[type="text"],input[type="number"],textarea{
-      width:100%; padding:14px 12px; border-radius:var(--radius-input);
-      border:3px solid var(--gold); background:#fff; color:var(--ink);
-      font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s;
-    }
-    select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px);}
+    select,input[type="text"],input[type="number"],textarea{ width:100%; padding:14px 12px; border-radius:16px; border:3px solid var(--gold); background:#fff; color:var(--ink); font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s}
+    select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
     .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
-    .small-btn{
-      background:linear-gradient(90deg, #FDBA2D, #F0C433);
-      color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F;
-      padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2);
-    }
-
-    .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:var(--shadow-soft); }
+    .small-btn{ background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2)}
+    .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:var(--shadow-soft)}
     .terry-character img{ width:84px; height:84px; border-radius:12px; border:3px solid var(--gold); object-fit:cover; display:block }
     .terry-note{ margin:0; line-height:1.55; font-weight:700; color:var(--ink) }
-    .scoring-rules-btn{
-      display:inline-flex; align-items:center; gap:8px; margin-top:10px;
-      background:linear-gradient(90deg, #FDBA2D, #F0C433);
-      color:#442812; font-weight:900; border:3px solid #A7711F; border-radius:12px; padding:10px 14px; cursor:pointer;
-      box-shadow:0 8px 18px rgba(0,0,0,.2);
-    }
-
-    .instructions{ background:#FFFAF1; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px; }
-    .instructions h3{
-      margin:0 0 8px; color:var(--ink);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      font-weight:900; font-size:20px; text-align:center;
-    }
-    .instructions ul{ margin:0; padding-left:18px; color:var(--ink-soft); line-height:1.65; }
-
-    .file-upload{ position:relative; display:inline-block; width:100% }
-    .file-input{ display:none }
-    .file-upload-btn{
-      display:flex; align-items:center; justify-content:center; gap:10px;
-      padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA;
-      cursor:pointer; color:var(--ink); font-weight:900; font-size:16px;
-    }
+    .scoring-rules-btn{ display:inline-flex; align-items:center; gap:8px; margin-top:10px; background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812; font-weight:900; border:3px solid #A7711F; border-radius:12px; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2)}
+    .instructions{ background:#FFFAF1; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
+    .instructions h3{ margin:0 0 8px; color:var(--ink); font-family: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial; font-weight:900; font-size:20px; text-align:center }
+    .instructions ul{ margin:0; padding-left:18px; color:var(--ink-soft); line-height:1.65 }
+    .file-upload{ position:relative; display:inline-block; width:100% } .file-input{ display:none }
+    .file-upload-btn{ display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA; cursor:pointer; color:var(--ink); font-weight:900; font-size:16px }
     .file-upload-btn:hover{ background:#FFE7A6 }
-    .file-preview{ margin-top:12px; text-align:center; display:none }
-    .file-preview img{ max-width:100%; max-height:220px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); border:3px solid #32CD32 }
+    .file-preview{ margin-top:12px; text-align:center; display:none } .file-preview img{ max-width:100%; max-height:220px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); border:3px solid #32CD32 }
     .file-info{ margin-top:10px; padding:10px; background:#EAF8EF; border-radius:10px; font-size:.95rem; color:var(--ink); border:1px solid #96DEAE }
-
-    textarea{ min-height:120px; resize:vertical }
-    .char-count{ text-align:right; font-size:.9em; color:var(--ink-soft); margin-top:6px; font-weight:700 }
-
-    .submit-btn{
-      width:100%;
-      background:linear-gradient(90deg, #FDBA2D, #F0C433);
-      color:#442812; font-weight:900; font-size:18px; border-radius:16px; border:3px solid #A7711F;
-      padding:16px; cursor:pointer; margin-top:6px; box-shadow:0 10px 22px rgba(0,0,0,.25);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    }
+    textarea{ min-height:120px; resize:vertical } .char-count{ text-align:right; font-size:.9em; color:var(--ink-soft); margin-top:6px; font-weight:700 }
+    .submit-btn{ width:100%; background:linear-gradient(90deg, #FDBA2D, #F0C433); color:#442812; font-weight:900; font-size:18px; border-radius:16px; border:3px solid #A7711F; padding:16px; cursor:pointer; margin-top:6px; box-shadow:0 10px 22px rgba(0,0,0,.25); font-family: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial}
     .submit-btn:disabled{ opacity:.6; cursor:not-allowed }
-
     .loading{ display:none; text-align:center; margin-top:12px; color:#EEE3CD; font-weight:800; font-size:16px; text-shadow:0 1px 2px rgba(0,0,0,.4) }
-
     .message{ padding:14px; border-radius:14px; margin:14px 0; text-align:center; display:none; border:3px solid; font-weight:900 }
     .success-message{ background:var(--success-bg); border-color:var(--success); color:#064b06 }
     .error-message{ background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000 }
-
-    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:1200; padding:18px; }
-    .modal-content{
-      width:100%; max-width:520px; background:var(--parchment); border-radius:18px 18px 0 0; padding:16px;
-      border:1px solid rgba(0,0,0,.08); box-shadow:0 -10px 30px rgba(0,0,0,.3);
-    }
-    .modal-title{
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      font-weight:900; font-size:22px; color:var(--ink); text-align:center; margin-bottom:2px;
-    }
-    .modal-subtitle{ text-align:center; color:var(--ink-soft); margin-bottom:10px; font-size:14px; }
-    .scoring-card{ background:var(--parchment-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:12px; }
-    .scoring-card h4{
-      margin:0 0 6px; font-size:18px; color:var(--ink);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900;
-    }
-    .close-btn{ float:right; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--ink-soft); }
-
-    @media (min-width:480px){
-      :root{ --gutter:26px; --hero-h:320px }
-      .brand-logo{ width:min(280px, 62vw) }
-    }
-    @media (prefers-reduced-motion: reduce){
-      *{ transition:none !important; animation-duration:0ms !important; }
-    }
+    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:1200; padding:18px }
+    .modal-content{ width:100%; max-width:520px; background:var(--parchment); border-radius:18px 18px 0 0; padding:16px; border:1px solid rgba(0,0,0,.08); box-shadow:0 -10px 30px rgba(0,0,0,.3) }
+    .modal-title{ font-family: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial; font-weight:900; font-size:22px; color:var(--ink); text-align:center; margin-bottom:2px }
+    .modal-subtitle{ text-align:center; color:var(--ink-soft); margin-bottom:10px; font-size:14px }
+    .scoring-card{ background:var(--parchment-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:12px }
+    .scoring-card h4{ margin:0 0 6px; font-size:18px; color:var(--ink); font-family: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial; font-weight:900 }
+    .close-btn{ float:right; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--ink-soft) }
+    @media (min-width:480px){ :root{ --gutter:26px; --hero-h:320px } .brand-logo{ width:min(280px, 62vw) } }
+    @media (prefers-reduced-motion: reduce){ *{ transition:none !important; animation-duration:0ms !important } }
   </style>
 </head>
 <body>
-  <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
-        <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
-      </a>
+      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home"><img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo"></a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
+      <div class="menu-logo"><img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest"></div>
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
-      <li><a class="nav-link disabled" aria-disabled="true">💖 Kindness</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
       <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
       <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+      <li><a href="/kindness" class="dropdown-link" role="menuitem">💖 Kindness</a></li>
     </ul>
   </nav>
 
-  <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
     <div class="hero-title">Random Act of Kindness</div>
   </header>
 
-  <!-- STACK -->
   <main class="stack" id="app">
     <div id="stateBanner" class="status-banner" role="status" aria-live="polite"></div>
     <div class="team-info" id="teamInfo">Crew: unknown</div>
@@ -257,29 +127,23 @@
       <div class="auth-grid">
         <div>
           <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect" aria-label="Team list">
-            <option value="">Loading teams…</option>
-          </select>
+          <select id="teamSelect" aria-label="Team list"><option value="">Loading teams…</option></select>
         </div>
         <div>
           <label for="teamPin">Crew PIN</label>
           <input id="teamPin" class="pin" type="number" inputmode="numeric" min="0000" max="9999" placeholder="1234"/>
         </div>
       </div>
-      <div class="auth-actions">
-        <button class="small-btn" id="signinBtn">🔓 Sign in</button>
-      </div>
+      <div class="auth-actions"><button class="small-btn" id="signinBtn">🔓 Sign in</button></div>
       <div class="message" id="signinMsg"></div>
     </section>
 
     <section class="card terry-greeting" aria-label="Intro">
-      <div class="terry-character">
-        <img src="/terry-thinking.png" alt="Terry, your Quest guide">
-      </div>
+      <div class="terry-character"><img src="/terry-thinking.png" alt="Terry, your Quest guide"></div>
       <p class="terry-note">
-        Earn points by completing kind acts! Think of something you can do as a team that is kind, helpful, thoughtful, or just makes people happy. Take a picture and upload it and our AI judge will award your points. 💛
-        <br/>
-        <button class="scoring-rules-btn" id="scoringRulesBtn">💖 View scoring</button>
+        Earn points by completing kind acts! Think of something you can do as a team that is kind, helpful, thoughtful, or just makes people happy.
+        Take a picture and upload it and our AI judge will award your points. 💛
+        <br/><button class="scoring-rules-btn" id="scoringRulesBtn">💖 View scoring</button>
       </p>
     </section>
 
@@ -305,289 +169,136 @@
             <div class="file-info" id="fileInfo"></div>
           </div>
         </div>
-
         <div class="form-group">
           <label for="kindnessDescription">✍️ What happened?</label>
           <textarea id="kindnessDescription" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?" required aria-required="true"></textarea>
           <div class="char-count"><span id="charCount">500</span> characters remaining</div>
         </div>
-
         <div class="form-group">
           <label for="location">📍 Where? (optional)</label>
           <input type="text" id="location" placeholder="e.g., High Street, community centre">
         </div>
-
         <button type="submit" class="submit-btn" id="submitBtn"><span class="btn-label">💎 Submit Kind Act</span></button>
         <p id="formHelp" style="margin-top:8px;color:var(--ink-soft);font-weight:800">One submission per team is scored. Be honest and keep it kind.</p>
       </form>
-
       <div class="loading" id="loading"><span class="spinner" aria-hidden="true"></span> Uploading & submitting…</div>
       <div class="message" id="feedback" role="status" aria-live="polite"></div>
     </section>
   </main>
 
   <script>
-    // URL
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-
-    // Local getters
     const token    = () => localStorage.getItem('teamToken') || '';
     const teamCode = () => localStorage.getItem('teamCode') || '';
     const teamName = () => localStorage.getItem('teamName') || '';
-
-    // Fetch helper
     async function callFn(path, payload){
       const res = await fetch(`/.netlify/functions/${path}`,{
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', ...(token() ? {'Authorization':`Bearer ${token()}`} : {}) },
+        method:'POST', headers:{ 'Content-Type':'application/json', ...(token()?{'Authorization':`Bearer ${token()}`}:{}) },
         body: JSON.stringify(payload)
       });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok || data.success === false) throw new Error(data.message || `Request failed (${res.status})`);
-      return data;
+      const data = await res.json().catch(()=>({})); if(!res.ok || data.success===false) throw new Error(data.message||`Request failed (${res.status})`); return data;
     }
-
-    // Nav
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu   = document.getElementById('nav-menu');
+    const navToggle=document.getElementById('nav-toggle'); const navMenu=document.getElementById('nav-menu');
     if(navToggle && navMenu){
-      navToggle.addEventListener('click', ()=> {
-        navMenu.classList.toggle('active');
-        navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-      });
-      document.addEventListener('click', (e)=> {
-        const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-      });
+      navToggle.addEventListener('click', ()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
+      document.addEventListener('click', (e)=>{ const inside = navToggle.contains(e.target)||navMenu.contains(e.target); if(!inside && navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';} });
     }
-
-    const stateBanner = document.getElementById('stateBanner');
-    const teamInfo    = document.getElementById('teamInfo');
-    const signinBtn   = document.getElementById('signinBtn');
-    const signinMsg   = document.getElementById('signinMsg');
-    const teamSelect  = document.getElementById('teamSelect');
-    const teamPin     = document.getElementById('teamPin');
-
-    const form        = document.getElementById('kindnessForm');
-    const submitBtn   = document.getElementById('submitBtn');
-    const loadingEl   = document.getElementById('loading');
-    const feedbackEl  = document.getElementById('feedback');
-    const descEl      = document.getElementById('kindnessDescription');
-    const countEl     = document.getElementById('charCount');
-    const locEl       = document.getElementById('location');
-    const fileInput   = document.getElementById('photoUpload');
-    const filePreview = document.getElementById('filePreview');
-    const previewImage= document.getElementById('previewImage');
-    const fileInfo    = document.getElementById('fileInfo');
-
-    const setFeedback = (msg,type) => { feedbackEl.innerHTML = msg; feedbackEl.className = `message ${type==='error'?'error-message':'success-message'}`; feedbackEl.style.display='block'; };
-    const clearFeedback = () => { feedbackEl.textContent=''; feedbackEl.style.display='none'; };
-    const setSigninMsg = (msg,type='error') => { signinMsg.textContent = msg; signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; };
-    const clearSigninMsg = () => { signinMsg.textContent=''; signinMsg.style.display='none'; };
-
-    function setSubmitting(on){
-      submitBtn.disabled = on;
-      loadingEl.style.display = on ? 'block':'none';
-      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Kind Act</span>`;
-    }
-    function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
-    function updateCrewLabel(){ teamInfo.textContent = teamName() ? `Crew: ${teamName()}` : (teamCode() ? `Crew code: ${teamCode()}` : 'Crew: unknown'); }
-
-    // Draft
-    const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
+    const stateBanner=document.getElementById('stateBanner'); const teamInfo=document.getElementById('teamInfo');
+    const signinBtn=document.getElementById('signinBtn'); const signinMsg=document.getElementById('signinMsg');
+    const teamSelect=document.getElementById('teamSelect'); const teamPin=document.getElementById('teamPin');
+    const form=document.getElementById('kindnessForm'); const submitBtn=document.getElementById('submitBtn');
+    const loadingEl=document.getElementById('loading'); const feedbackEl=document.getElementById('feedback');
+    const descEl=document.getElementById('kindnessDescription'); const countEl=document.getElementById('charCount');
+    const locEl=document.getElementById('location'); const fileInput=document.getElementById('photoUpload');
+    const filePreview=document.getElementById('filePreview'); const previewImage=document.getElementById('previewImage'); const fileInfo=document.getElementById('fileInfo');
+    const setFeedback=(msg,type)=>{ feedbackEl.innerHTML=msg; feedbackEl.className=`message ${type==='error'?'error-message':'success-message'}`; feedbackEl.style.display='block'; };
+    const clearFeedback=()=>{ feedbackEl.textContent=''; feedbackEl.style.display='none'; };
+    const setSigninMsg=(msg,type='error')=>{ signinMsg.textContent=msg; signinMsg.className=`message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; };
+    const clearSigninMsg=()=>{ signinMsg.textContent=''; signinMsg.style.display='none'; };
+    function setSubmitting(on){ submitBtn.disabled=on; loadingEl.style.display=on?'block':'none'; submitBtn.innerHTML=on?`<span class="spinner" aria-hidden="true"></span> Submitting…`:`<span class="btn-label">💎 Submit Kind Act</span>`; }
+    function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled=disabled); }
+    function updateCrewLabel(){ teamInfo.textContent = teamName()?`Crew: ${teamName()}`:(teamCode()?`Crew code: ${teamCode()}`:'Crew: unknown'); }
+    const draftKey=()=>`kindnessDraft:${EVENT_ID}:${teamCode()}`;
     function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
-    function loadDraft(){ try{ const raw = localStorage.getItem(draftKey()); if(raw){ const d=JSON.parse(raw); if(d.description) descEl.value=d.description; if(d.location) locEl.value=d.location; updateCharCount(); } }catch{} }
-
-    // State
+    function loadDraft(){ try{ const raw=localStorage.getItem(draftKey()); if(raw){const d=JSON.parse(raw); if(d.description)descEl.value=d.description; if(d.location)locEl.value=d.location; updateCharCount(); }}catch{} }
+    function clearDraft(){ localStorage.removeItem(draftKey()); }
     async function refreshEventState(){
-      if(!EVENT_ID){
-        stateBanner.textContent = 'Missing eventId in the URL (?event=...).';
-        stateBanner.className = 'status-banner ended';
-        stateBanner.style.display='block';
-        disableForm(true);
-        return 'UNKNOWN';
-      }
+      if(!EVENT_ID){ stateBanner.textContent='Missing eventId in the URL (?event=...).'; stateBanner.className='status-banner ended'; stateBanner.style.display='block'; disableForm(true); return 'UNKNOWN'; }
       try{
-        const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        let text = '', cls = 'status-banner', lock = false;
-        if(state === 'NOT_STARTED'){ text='Event not started yet.'; cls+=' paused'; lock=true; }
-        if(state === 'PAUSED'){ text='Event paused — submissions temporarily closed.'; cls+=' paused'; lock=true; }
-        if(state === 'RUNNING'){ text='Event running — submit your kindness when ready.'; cls='status-banner'; lock=false; }
-        if(state === 'ENDED'){ text='Event ended — submissions are closed.'; cls+=' ended'; lock=true; }
-        if(state === 'PUBLISHED'){ text='Results published! Check the Gallery.'; cls+=' published'; lock=true; }
-        stateBanner.textContent = text; stateBanner.className = cls; stateBanner.style.display = text ? 'block':'none';
-        disableForm(lock);
-        return state;
-      }catch{
-        stateBanner.textContent = 'Could not verify event state.'; stateBanner.className='status-banner'; stateBanner.style.display='block'; return 'UNKNOWN';
-      }
+        const {state} = await callFn('get_event_state',{eventId:EVENT_ID}); let text='',cls='status-banner',lock=false;
+        if(state==='NOT_STARTED'){text='Event not started yet.';cls+=' paused';lock=true;}
+        if(state==='PAUSED'){text='Event paused — submissions temporarily closed.';cls+=' paused';lock=true;}
+        if(state==='RUNNING'){text='Event running — submit your kindness when ready.';cls='status-banner';lock=false;}
+        if(state==='ENDED'){text='Event ended — submissions are closed.';cls+=' ended';lock=true;}
+        if(state==='PUBLISHED'){text='Results published! Check the Gallery.';cls+=' published';lock=true;}
+        stateBanner.textContent=text; stateBanner.className=cls; stateBanner.style.display=text?'block':'none'; disableForm(lock); return state;
+      }catch{ stateBanner.textContent='Could not verify event state.'; stateBanner.className='status-banner'; stateBanner.style.display='block'; return 'UNKNOWN'; }
     }
-
-    // Teams
     function extractTeams(data){
       if(Array.isArray(data?.teams)) return data.teams;
-      if(Array.isArray(data?.leaderboard)) {
-        return data.leaderboard.map(r=>({ teamCode: r.teamCode || r.code || r.teamId || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
-      }
-      if(Array.isArray(data?.rows)) {
-        return data.rows.map(r=>({ teamCode: r.teamCode || r.code || '', teamName: r.teamName || r.name || '' })).filter(t=>t.teamName);
-      }
+      if(Array.isArray(data?.leaderboard)) return data.leaderboard.map(r=>({teamCode:r.teamCode||r.code||r.teamId||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
+      if(Array.isArray(data?.rows)) return data.rows.map(r=>({teamCode:r.teamCode||r.code||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
       return [];
     }
-
     async function loadTeams(){
       try{
-        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        let teams = extractTeams(data);
-        if(!teams.length){
-          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-          if(res.ok){ data = await res.json().catch(()=>({})); teams = extractTeams(data); }
-        }
+        let data = await callFn('get_leaderboard',{eventId:EVENT_ID}); let teams=extractTeams(data);
+        if(!teams.length){ const res=await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`); if(res.ok){data=await res.json().catch(()=>({})); teams=extractTeams(data);} }
         if(!teams.length) throw new Error('No teams returned');
-        teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
-        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
-        clearSigninMsg();
-      }catch(e){
-        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
-        setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
-      }
+        teams.sort((a,b)=>(a.teamName||'').localeCompare(b.teamName||'')); teamSelect.innerHTML=`<option value="">Choose your crew…</option>`+teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join(''); clearSigninMsg();
+      }catch(e){ teamSelect.innerHTML=`<option value="">Couldn’t load teams</option>`; setSigninMsg('Couldn’t load team list. Refresh the page or try again.','error'); }
     }
-
-    // Sign in
     async function signIn(){
       clearSigninMsg(); clearFeedback();
-      const code = teamSelect.value;
-      const pin  = (teamPin.value || '').trim();
-      if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
-      if(!/^\d{4}$/.test(pin)){ setSigninMsg('Enter your 4-digit PIN.'); return; }
-
+      const code=teamSelect.value; const pin=(teamPin.value||'').trim();
+      if(!code){setSigninMsg('Pick your crew from the list.');return;}
+      if(!/^\d{4}$/.test(pin)){setSigninMsg('Enter your 4-digit PIN.');return;}
       try{
-        const res = await callFn('verify_team_pin_function', { eventId: EVENT_ID, teamCode: code, pin });
+        const res=await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
         if(!res.valid){ setSigninMsg('That PIN doesn’t match this crew.'); return; }
-        if(res.token) localStorage.setItem('teamToken', res.token);
-        localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
-        updateCrewLabel();
-        setSigninMsg('Signed in. You can submit now!', 'success');
-        form.style.display = 'block';
+        if(res.token) localStorage.setItem('teamToken',res.token);
+        localStorage.setItem('teamCode',code); localStorage.setItem('teamName',res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
+        updateCrewLabel(); setSigninMsg('Signed in. You can submit now!','success'); form.style.display='block';
       }catch(err){
-        if(String(err.message).includes('404')){
-          setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
-        }else{
-          setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
-        }
+        if(String(err.message).includes('404')) setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.','error');
+        else setSigninMsg(err.message || 'Could not sign you in. Try again.','error');
       }
     }
-
-    // Char counter
-    function updateCharCount(){
-      const remaining = 500 - (descEl.value?.length || 0);
-      countEl.textContent = remaining;
-      countEl.style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
-    }
-    descEl?.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
-    locEl?.addEventListener('input', saveDraft);
-
-    // File preview
-    fileInput?.addEventListener('change', (e)=>{
-      clearFeedback(); const file = e.target.files[0];
-      if(!file){ filePreview.style.display='none'; return; }
-      if(file.size > 5*1024*1024){ setFeedback('Image must be under 5MB.','error'); fileInput.value=''; filePreview.style.display='none'; return;}
+    function updateCharCount(){ const remaining=500-(descEl.value?.length||0); countEl.textContent=remaining; countEl.style.color = remaining<50 ? '#DC143C' : '#6A5A47'; }
+    descEl?.addEventListener('input', ()=>{updateCharCount();saveDraft();}); locEl?.addEventListener('input', saveDraft);
+    fileInput?.addEventListener('change',(e)=>{ clearFeedback(); const file=e.target.files[0]; if(!file){filePreview.style.display='none';return;}
+      if(file.size>5*1024*1024){ setFeedback('Image must be under 5MB.','error'); fileInput.value=''; filePreview.style.display='none'; return;}
       if(!file.type.startsWith('image/')){ setFeedback('Please upload an image file.','error'); fileInput.value=''; filePreview.style.display='none'; return;}
-      const reader = new FileReader();
-      reader.onload = ev => { previewImage.src = ev.target.result; filePreview.style.display='block'; };
-      reader.readAsDataURL(file);
-      fileInfo.innerHTML = `<strong>File:</strong> ${file.name}<br><strong>Size:</strong> ${(file.size/1024/1024).toFixed(2)} MB<br><strong>Type:</strong> ${file.type}`;
-    });
-
-    // Uploadcare
-    async function uploadToUploadcare(file){
-      const uploadcarePublicKey = 'e060d7b73e9b8e15de28';
-      const fd = new FormData();
-      fd.append('UPLOADCARE_PUB_KEY', uploadcarePublicKey);
-      fd.append('file', file);
-      const res = await fetch('https://upload.uploadcare.com/base/', { method:'POST', body: fd });
-      if(!res.ok) throw new Error(`Upload failed (${res.status})`);
-      const json = await res.json();
-      if(!json.file) throw new Error('No file ID returned.');
-      return `https://ucarecdn.com/${json.file}/`;
-    }
-
-    // Submit
+      const reader=new FileReader(); reader.onload=ev=>{previewImage.src=ev.target.result; filePreview.style.display='block';}; reader.readAsDataURL(file);
+      fileInfo.innerHTML=`<strong>File:</strong> ${file.name}<br><strong>Size:</strong> ${(file.size/1024/1024).toFixed(2)} MB<br><strong>Type:</strong> ${file.type}`; });
+    async function uploadToUploadcare(file){ const key='e060d7b73e9b8e15de28'; const fd=new FormData(); fd.append('UPLOADCARE_PUB_KEY',key); fd.append('file',file);
+      const res=await fetch('https://upload.uploadcare.com/base/',{method:'POST',body:fd}); if(!res.ok) throw new Error(`Upload failed (${res.status})`);
+      const j=await res.json(); if(!j.file) throw new Error('No file ID returned.'); return `https://ucarecdn.com/${j.file}/`; }
     async function doSubmit(){
-      clearFeedback();
-      if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
-      if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
-
-      try{
-        const { state } = await callFn('get_event_state', { eventId: EVENT_ID });
-        if(state !== 'RUNNING'){ setFeedback(`Submissions are closed (state: ${state}).`,'error'); return; }
-      }catch{ /* allow attempt if unknown */ }
-
-      const photoFile   = fileInput.files[0];
-      const description = (descEl.value||'').trim();
-      const locationVal = (locEl.value||'').trim();
-      if(!photoFile){ setFeedback('Please upload a photo of your kindness.','error'); return; }
-      if(description.length < 20){ setFeedback('Tell us a little more (min 20 characters).','error'); return; }
-
+      clearFeedback(); if(!teamCode()){setFeedback('Sign in with your crew and PIN first.','error');return;} if(!EVENT_ID){setFeedback('Missing eventId in the URL.','error');return;}
+      try{ const {state}=await callFn('get_event_state',{eventId:EVENT_ID}); if(state!=='RUNNING'){setFeedback(`Submissions are closed (state: ${state}).`,'error'); return;} }catch{}
+      const photoFile=fileInput.files[0]; const description=(descEl.value||'').trim(); const locationVal=(locEl.value||'').trim();
+      if(!photoFile){setFeedback('Please upload a photo of your kindness.','error');return;} if(description.length<20){setFeedback('Tell us a little more (min 20 characters).','error');return;}
       setSubmitting(true);
       try{
-        const photoUrl = await uploadToUploadcare(photoFile);
-        await callFn('submit_kindness_function', {
-          eventId: EVENT_ID, teamCode: teamCode(), token: token(),
-          description, location: locationVal, photoUrl
-        });
-        setFeedback('🎉 Submitted! Your kindness is in Terry’s vault. Check the leaderboard/gallery soon.', 'success');
-        localStorage.removeItem(`kindnessDraft:${EVENT_ID}:${teamCode()}`);
-        [...form.elements].forEach(el=>el.disabled = true);
-        form.style.opacity = '0.6';
-      }catch(err){
-        setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`, 'error');
-        document.getElementById('retryBtn')?.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
-      }finally{
-        setSubmitting(false);
-      }
+        const photoUrl=await uploadToUploadcare(photoFile);
+        await callFn('submit_kindness_function',{eventId:EVENT_ID,teamCode:teamCode(),token:token(),description,location:locationVal,photoUrl});
+        setFeedback('🎉 Submitted! Your kindness is in Terry’s vault. Check the leaderboard/gallery soon.','success'); clearDraft(); [...form.elements].forEach(el=>el.disabled=true); form.style.opacity='0.6';
+      }catch(err){ setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`,'error');
+        document.getElementById('retryBtn')?.addEventListener('click',(e)=>{e.preventDefault();doSubmit();}); }
+      finally{ setSubmitting(false); }
     }
-
-    // Modal
-    document.getElementById('scoringRulesBtn')?.addEventListener('click', ()=>{
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay active';
-      modal.innerHTML = `<div class="modal-content">
-        <button class="close-btn" aria-label="Close">✕</button>
-        <div class="modal-title">💖 Kind Act Scoring</div>
-        <div class="modal-subtitle">Creativity • Effort • Impact (max 60 doubloons)</div>
-        <div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div>
-        <div class="scoring-card" style="margin-top:10px"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div>
-        <div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big points.</p></div>
-      </div>`;
-      document.body.appendChild(modal);
-      modal.addEventListener('click', (e)=>{ if(e.target===modal || e.target.classList.contains('close-btn')) modal.remove(); });
-    });
-
-    // Wire up
-    document.getElementById('kindnessForm')?.addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
+    document.getElementById('scoringRulesBtn')?.addEventListener('click', ()=>{ const modal=document.createElement('div'); modal.className='modal-overlay active';
+      modal.innerHTML=`<div class="modal-content"><button class="close-btn" aria-label="Close">✕</button><div class="modal-title">💖 Kind Act Scoring</div><div class="modal-subtitle">Creativity • Effort • Impact (max 60 doubloons)</div><div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div><div class="scoring-card" style="margin-top:10px"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div><div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big points.</p></div></div>`;
+      document.body.appendChild(modal); modal.addEventListener('click',(e)=>{ if(e.target===modal || e.target.classList.contains('close-btn')) modal.remove(); });});
+    document.getElementById('kindnessForm')?.addEventListener('submit',(e)=>{e.preventDefault();doSubmit();});
     signinBtn?.addEventListener('click', signIn);
-
-    // Init
     (async function init(){
-      const navLinks = document.querySelectorAll('.nav-link, .dropdown-link');
-      navLinks.forEach(link => link.addEventListener('click', ()=> { navMenu.classList.remove('active'); navToggle.textContent='☰'; }));
-      updateCrewLabel();
-      const state = await refreshEventState();
-      await loadTeams();
-      if(teamCode() && state === 'RUNNING'){ document.getElementById('kindnessForm').style.display='block'; }
-      updateCharCount();
-      loadDraft();
+      const navLinks=document.querySelectorAll('.nav-link, .dropdown-link'); navLinks.forEach(l=>l.addEventListener('click',()=>{navMenu.classList.remove('active'); navToggle.textContent='☰';}));
+      updateCrewLabel(); const state=await refreshEventState(); await loadTeams(); if(teamCode() && state==='RUNNING'){ document.getElementById('kindnessForm').style.display='block'; } updateCharCount(); loadDraft();
     })();
-
-    // Char counter helper
-    function updateCharCount(){
-      const remaining = 500 - (document.getElementById('kindnessDescription').value?.length || 0);
-      document.getElementById('charCount').textContent = remaining;
-      document.getElementById('charCount').style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
-    }
+    function updateCharCount(){ const remaining=500-(document.getElementById('kindnessDescription').value?.length||0); document.getElementById('charCount').textContent=remaining; document.getElementById('charCount').style.color = remaining<50 ? '#DC143C' : '#6A5A47'; }
   </script>
 </body>
 </html>
