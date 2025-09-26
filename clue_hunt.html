@@ -75,7 +75,7 @@
     <!-- Login -->
     <section id="loginSection">
       <h1>Clue Hunt</h1>
-      <p class="sub">Solve clues in any order. Each correct answer earns hidden doubloons.</p>
+      <p class="sub">Solve clues in any order. Each correct answer earns hidden points.</p>
 
       <div class="rules">
         <ul style="margin:0 0 8px 18px;line-height:1.7;color:#61431f">
@@ -100,7 +100,7 @@
     <!-- Hunt -->
     <section id="huntSection" class="hidden">
       <div id="teamInfo" class="score">Crew: —</div>
-      <div id="scoreDisplay" class="score" style="margin-top:10px">💰 Treasure Collected: 0 doubloons</div>
+      <div id="scoreDisplay" class="score" style="margin-top:10px">💰 Treasure Collected: 0 points</div>
 
       <div class="bar"><div id="progressFill" class="fill" style="width:15%">0/20 Solved • 0 Explored</div></div>
 
@@ -111,7 +111,7 @@
       <div id="clueSection" class="panel hidden">
         <div class="row">
           <div id="clueNumber" style="color:var(--orange);font-weight:800">Clue #</div>
-          <button class="back" onclick="showClueGrid()">← Back to map</button>
+          <button class="back" onclick="showClueGrid()">← Back to clues</button>
         </div>
         <div id="clueText" style="font-size:18px;color:#5b3a12;margin-bottom:10px"></div>
         <input id="answerInput" class="answer" placeholder="Enter your answer…">
@@ -122,7 +122,7 @@
 
       <div id="completionCelebration" class="cele">
         <h3 style="margin:0 0 6px;color:#623c11">Treasure map complete!</h3>
-        <div id="finalScore" style="font-size:22px;font-weight:800;margin:6px 0">Final Treasure: 0 doubloons</div>
+        <div id="finalScore" style="font-size:22px;font-weight:800;margin:6px 0">Final Treasure: 0 points</div>
         <p style="margin:0;color:#623c11">Check the leaderboard to see how you rank!</p>
       </div>
     </section>
