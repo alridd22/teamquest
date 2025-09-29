@@ -175,7 +175,7 @@
   </main>
 
   <script>
-    // Mobile nav toggle (same behaviour as activities)
+    // Mobile nav toggle + PRESERVE ?event= on same-origin links (including logo)
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
@@ -189,6 +189,42 @@
           if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
         });
       }
+
+      const EVENT_ID = new URLSearchParams(location.search).get('event') || new URLSearchParams(location.search).get('eventId') || '';
+      if (!EVENT_ID) return;
+
+      const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, a.nav-logo');
+      anchors.forEach(a=>{
+        const href = a.getAttribute('href');
+        if (!href) return;
+
+        // Only touch same-origin or root-relative links
+        let u;
+        try { u = new URL(href, location.origin); } catch { return; }
+        if (u.origin !== location.origin) return;
+
+        // If the link already has event/eventId, leave it
+        if (u.searchParams.has('event') || u.searchParams.has('eventId')) return;
+
+        // Add event param, preserve other params and hash
+        u.searchParams.set('event', EVENT_ID);
+        // Keep absolute for external consistency if original was absolute; otherwise use pathname relative
+        const absolute = /^https?:\/\//i.test(href);
+        a.setAttribute('href', absolute ? u.toString() : `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+      });
+
+      // Extra safety: if any nav link is clicked without event, inject it on-the-fly
+      document.getElementById('nav-menu')?.addEventListener('click', (e)=>{
+        const a = e.target.closest('a');
+        if (!a) return;
+        try{
+          const u = new URL(a.href);
+          if (u.origin === location.origin && !(u.searchParams.has('event')||u.searchParams.has('eventId'))){
+            u.searchParams.set('event', EVENT_ID);
+            a.href = u.toString();
+          }
+        }catch{}
+      });
     })();
 
     // Gallery logic (unchanged contract)
