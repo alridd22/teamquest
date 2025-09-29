@@ -178,7 +178,10 @@
   </main>
 
   <script>
-    // mobile menu
+    // ===== Config =====
+    const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
+
+    // mobile menu + preserve ?event= on links
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
@@ -192,10 +195,27 @@
           if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
         });
       }
+      // persist event param
+      const EVENT_ID = new URLSearchParams(location.search).get('event') || new URLSearchParams(location.search).get('eventId') || '';
+      if (EVENT_ID){
+        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
+        anchors.forEach(a=>{
+          try{
+            const u = new URL(a.getAttribute('href'), location.origin);
+            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
+            if (!u.searchParams.get('event')){
+              u.searchParams.set('event', EVENT_ID);
+              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+            }
+          }catch{}
+        });
+      }
     })();
 
     // --- Config / refs
-    const EVENT_ID = new URLSearchParams(location.search).get('event') || '';
+    const qs = new URLSearchParams(location.search);
+    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
     const teamSelect = document.getElementById('teamSelect');
     const teamPin    = document.getElementById('teamPin');
     const signinBtn  = document.getElementById('signinBtn');
@@ -219,52 +239,85 @@
     const completionCelebration = document.getElementById('completionCelebration');
     const finalScoreEl    = document.getElementById('finalScore');
 
-    function setMsg(el, text, kind='err'){ el.textContent = text; el.className = 'msg ' + (kind==='error'?'err':'ok'); el.style.display = 'block'; }
+    function setMsg(el, text, kind='error'){ el.textContent = text; el.className = 'msg ' + (kind==='error'?'err':'ok'); el.style.display = 'block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
+
+    const token = ()=> localStorage.getItem('teamToken') || '';
+    function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
 
     async function callFn(name, payload){
       const res = await fetch(`/.netlify/functions/${name}`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload||{})
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
+          'Idempotency-Key': uuidv4()
+        },
+        body: JSON.stringify(payload||{}),
+        keepalive:true
       });
-      if(!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
+      let data={}; try{ data = await res.json(); }catch{}
+      if(!res.ok || data.success===false){
+        const err = new Error(data.message || `HTTP ${res.status}`);
+        err.code = data.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
+        throw err;
+      }
+      return data;
     }
 
-    // Teams
-    function extractTeams(data){
-      if(Array.isArray(data?.teams)) return data.teams;
-      if(Array.isArray(data?.leaderboard)){
-        return data.leaderboard.map(r=>({
-          teamCode:r.teamCode||r.code||r.teamId||'',
-          teamName:r.teamName||r.name||''
-        })).filter(t=>t.teamName);
+    // ===== Teams from published CSV =====
+    function parseCsv(text){
+      const rows=[]; let i=0,cur='',row=[],inQ=false;
+      while(i<text.length){
+        const c=text[i];
+        if(c==='\"'){ if(inQ && text[i+1]==='\"'){ cur+='\"'; i+=2; continue; } inQ=!inQ; i++; continue; }
+        if(!inQ && (c===','||c==='\n'||c==='\r')){ row.push(cur); cur=''; if(c!==','){ if(row.length) rows.push(row); row=[]; } i++; continue; }
+        cur+=c; i++;
       }
-      if(Array.isArray(data?.rows)){
-        return data.rows.map(r=>({teamCode:r.teamCode||r.code||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
-      }
-      return [];
+      if(cur.length||row.length){ row.push(cur); rows.push(row); }
+      return rows;
     }
+
     async function loadTeams(){
+      if (!EVENT_ID){
+        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        setMsg(loginMsg,'This page needs an event link (with ?event=...).','error');
+        signinBtn.disabled = true; return;
+      }
+      teamSelect.innerHTML = `<option value="">Loading crews…</option>`;
       try{
-        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        let teams = extractTeams(data);
-        if(!teams.length){
-          const r = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-          if(r.ok){ data = await r.json().catch(()=>({})); teams = extractTeams(data); }
-        }
-        if(!teams.length) throw new Error('No teams');
-        teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
-        teamSelect.innerHTML = `<option value="">Choose your crew…</option>` +
-          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
+        if(!res.ok) throw new Error('Could not fetch teams CSV');
+        const rows = parseCsv(await res.text());
+        if(!rows.length) throw new Error('Empty CSV');
+
+        const header = rows[0].map(h=>String(h||'').trim().toLowerCase());
+        const idx = (n)=> header.indexOf(n.toLowerCase());
+        const iCode = idx('team code'), iName = idx('team name'), iEvent = idx('event id');
+        if(iCode===-1 || iEvent===-1) throw new Error('CSV missing required headers');
+
+        const wanted = String(EVENT_ID).toUpperCase();
+        const teams = rows.slice(1).map(r=>({
+          teamCode: String(r[iCode]||'').trim(),
+          teamName: String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
+          eventId:  String(r[iEvent]||'').trim().toUpperCase()
+        })).filter(t=>t.teamCode && t.eventId===wanted)
+          .sort((a,b)=> a.teamName.localeCompare(b.teamName));
+
+        if(!teams.length) throw new Error('No crews for this event');
+
+        teamSelect.innerHTML = '<option value="">Choose your crew…</option>' +
+          teams.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
         clearMsg(loginMsg);
-      }catch(e){
-        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
-        setMsg(loginMsg, 'Unable to load crew list. Please refresh or try again.', 'error');
+        signinBtn.disabled = false;
+      }catch(err){
+        console.debug('[Clue] loadTeams error:', err);
+        teamSelect.innerHTML = `<option value="">—</option>`;
+        setMsg(loginMsg,'Unable to load crew list. Please refresh.','error');
       }
     }
 
-    // Sign in
+    // ===== Sign in
     async function signIn(){
       clearMsg(loginMsg);
       const code = teamSelect.value;
@@ -273,17 +326,12 @@
       if(!/^\d{4}$/.test(pin)){ setMsg(loginMsg,'Enter your 4-digit PIN.','error'); return; }
 
       try{
-        const res = await fetch('/.netlify/functions/verify_team_pin_function',{
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ eventId: EVENT_ID, teamCode: code, pin })
-        });
-        if(!res.ok){ const t = await res.text(); throw new Error(`HTTP ${res.status} – ${t||'verify_team_pin_function'}`); }
-        const data = await res.json();
-        if(!data.valid){ setMsg(loginMsg,'That PIN doesn’t match this crew.','error'); return; }
+        const res = await callFn('verify_team_pin_function',{ eventId: EVENT_ID, teamCode: code, pin });
+        if(!res.success || !res.valid) return setMsg(loginMsg,'That PIN doesn’t match this crew.','error');
 
-        if(data.token) localStorage.setItem('teamToken', data.token);
+        if(res.token) localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', data.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
+        localStorage.setItem('teamName', teamSelect.options[teamSelect.selectedIndex]?.textContent || res.teamName || '');
 
         teamInfo.textContent = 'Crew: ' + (localStorage.getItem('teamName') || '—');
         loginSection.style.display = 'none';
@@ -296,6 +344,7 @@
       }
     }
     signinBtn.addEventListener('click', signIn);
+    teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
     // Clue engine
     let currentClue = null;
@@ -366,13 +415,16 @@
 
     function normalize(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'').trim(); }
 
-    function submitAnswer(){
-      const val = answerInput.value.trim();
+    async function submitAnswer(){
+      const val = (answerInput.value||'').trim();
       if(!val){ showResult('Please enter an answer.', false); return; }
       if(!currentClue){ showResult('No clue selected.', false); return; }
 
       const user = normalize(val);
       const correct = currentClue.acceptableAnswers.some(a => user === normalize(a));
+
+      // optimistic UI lock to prevent repeat attempts
+      submitAnswerBtn.disabled = true;
 
       if(correct){
         completedClues[currentClue.id] = {
@@ -385,7 +437,6 @@
         currentScore += currentClue.points;
         showResult(`🎉 Treasure claimed! +${currentClue.points} doubloons`, true);
         updateScore(); updateProgress();
-        submitClueToBackend(currentClue, val, currentClue.points, true);
       }else{
         completedClues[currentClue.id] = {
           points: 0,
@@ -396,13 +447,33 @@
         };
         showResult(`❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, false);
         updateProgress();
-        submitClueToBackend(currentClue, val, 0, false);
+      }
+
+      // send to backend (server enforces one attempt per clue)
+      try{
+        await callFn('submit_cluehunt_function', {
+          eventId: EVENT_ID,
+          teamCode: localStorage.getItem('teamCode'),
+          teamName: localStorage.getItem('teamName'),
+          clueId: currentClue.id, clueText: currentClue.clue,
+          userAnswer: val, correctAnswer: currentClue.answer,
+          points: completedClues[currentClue.id].points,
+          currentScore, wasCorrect: completedClues[currentClue.id].wasCorrect
+        });
+      }catch(e){
+        if (e.code === 'DUPLICATE'){
+          // Server says this clue was already attempted: reflect as locked
+          // (don’t overwrite local state if already set)
+        } else if (e.code === 'UNAUTHORIZED'){
+          showResult('Session expired — sign in again before continuing.', false);
+        } else if (e.code === 'CLOSED'){
+          showResult('Submissions are closed for this event.', false);
+        }
       }
 
       continueBtn.style.display = 'block';
-      submitAnswerBtn.disabled = true;
-      if(returnTimeout) clearTimeout(returnTimeout);
-      returnTimeout = setTimeout(continueToMap, 5000);
+      // auto-return after 5s
+      setTimeout(continueToMap, 5000);
     }
     document.getElementById('submitAnswerBtn').addEventListener('click', submitAnswer);
     answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitAnswer(); });
@@ -414,7 +485,6 @@
     }
 
     function continueToMap(){
-      if(returnTimeout){ clearTimeout(returnTimeout); returnTimeout=null; }
       continueBtn.style.display = 'none';
       showClueGrid();
 
@@ -436,20 +506,25 @@
       progressFill.textContent = `${correct}/20 Solved • ${attempted} Explored`;
     }
 
-    // Persistence / backend
+    // ===== Persistence / backend
     async function loadPreviousAttempts(){
       completedClues = {}; currentScore = 0;
       const code = localStorage.getItem('teamCode');
-      const name = localStorage.getItem('teamName');
       if(!code) return;
 
       try{
         const res = await fetch('/.netlify/functions/get_cluehunt_submissions_function', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ eventId: EVENT_ID, teamCode: code })
+          method:'POST',
+          headers:{
+            'Content-Type':'application/json',
+            ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
+            'Idempotency-Key': uuidv4()
+          },
+          body: JSON.stringify({ eventId: EVENT_ID, teamCode: code }),
+          keepalive:true
         });
         if(res.ok){
-          const data = await res.json();
+          const data = await res.json().catch(()=>({}));
           if(data.success && Array.isArray(data.submissions)){
             data.submissions.forEach(s=>{
               completedClues[s.clueId] = {
@@ -460,33 +535,17 @@
                 wasCorrect: s.points > 0
               };
             });
-            currentScore = data.totalScore || 0;
+            currentScore = data.totalScore || Object.values(completedClues).reduce((a,b)=>a+(b.points||0),0);
           }
         }
       }catch(e){}
     }
 
-    function submitClueToBackend(clue, userAnswer, points, wasCorrect){
-      const code = localStorage.getItem('teamCode');
-      const name = localStorage.getItem('teamName');
-      if(!code) return;
-
-      const payload = {
-        eventId: EVENT_ID,
-        teamCode: code, teamName: name,
-        clueId: clue.id, clueText: clue.clue,
-        userAnswer, correctAnswer: clue.answer,
-        points, currentScore, wasCorrect
-      };
-
-      fetch('/.netlify/functions/submit_cluehunt_function', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(payload)
-      }).catch(()=>{});
-    }
-
     // boot
     loadTeams();
+
+    // Helpers
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   </script>
 </body>
 </html>
