@@ -65,7 +65,7 @@
     label{ display:block; margin:0 6px 6px; font-size:18px; font-weight:800; color:var(--ink) }
     select,input[type="text"],input[type="number"],textarea{
       width:100%; padding:14px 12px; border-radius:var(--radius-input);
-      border:3px solid var(--gold); background:#fff; color:var(--ink); font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s;
+      border:3px solid var(--gold); background:#fff; color:#2E2114; font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s;
     }
     select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
     .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
@@ -124,14 +124,13 @@
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
       <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
       <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
-      <!-- Kindness is current page, so excluded -->
     </ul>
   </nav>
 
   <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
-    <div class="hero-title">Random Act of Kindness</div>
+    <div class="hero-title" id="heroTitle">Random Act of Kindness</div>
   </header>
 
   <!-- CONTENT -->
@@ -222,15 +221,17 @@
     const teamCode = () => localStorage.getItem('teamCode') || '';
     const teamName = () => localStorage.getItem('teamName') || '';
 
+    // Optional: expose eventId in tooltip for sanity
+    const heroTitle = document.getElementById('heroTitle');
+    if (EVENT_ID) heroTitle.title = `eventId: ${EVENT_ID}`;
+
     // Optional: abort in-flight on double nav/clicks
     let inflightController = null;
-
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
 
     async function callFn(path, payload){
       if (inflightController) inflightController.abort();
       inflightController = new AbortController();
-
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
         headers:{
@@ -303,7 +304,7 @@
     }
     function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
 
-    // === NEW: local lock helpers ===
+    // === Local lock helpers ===
     const KINDNESS_LOCK_KEY = () => `kindness:locked:${EVENT_ID}:${teamCode()}`;
     function applyKindnessLockUI(){
       if (!form) return;
@@ -324,14 +325,19 @@
       if(Array.isArray(data?.rows)) return data.rows.map(r=>({ teamCode:r.teamCode||r.code||'', teamName:r.teamName||r.name||'' })).filter(t=>t.teamName);
       return [];
     }
+
     async function loadTeams(){
+      // HARD GATE: require eventId to load teams
+      if (!EVENT_ID) {
+        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        setSigninMsg('This page needs an event link. Ask your host for the correct URL (with ?event=...).', 'error');
+        signinBtn?.setAttribute('disabled','disabled');
+        return;
+      }
       try{
-        let data = await callFn('get_leaderboard', { eventId: EVENT_ID });
-        let teams = extractTeams(data);
-        if(!teams.length){
-          const res = await fetch(`/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`);
-          if(res.ok){ data = await res.json().catch(()=>({})); teams = extractTeams(data); }
-        }
+        // POST only (no GET fallback)
+        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        const teams = extractTeams(data);
         if(!teams.length) throw new Error('No teams returned');
         teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
         teamSelect.innerHTML = `<option value="">Choose your crew…</option>` + teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
@@ -345,6 +351,9 @@
     // Sign in (show chip + form only after success)
     async function signIn(){
       clearSigninMsg(); clearFeedback();
+
+      if (!EVENT_ID) { setSigninMsg('Missing event in the URL. Please use the link with ?event=...', 'error'); return; }
+
       const code = teamSelect.value;
       const pin  = (teamPin.value || '').trim();
       if(!code){ setSigninMsg('Pick your crew from the list.'); return; }
@@ -361,7 +370,7 @@
         setSigninMsg('Signed in. You can submit now!', 'success');
         form.style.display = 'block';
 
-        // NEW: if a local lock exists, apply it immediately
+        // If a local lock exists, apply it immediately
         if (localStorage.getItem(KINDNESS_LOCK_KEY())) applyKindnessLockUI();
       }catch(err){
         if(String(err.message).includes('404')) setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
@@ -375,7 +384,8 @@
       countEl.textContent = remaining;
       countEl.style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
     }
-    descEl?.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
+    const descElRef = document.getElementById('kindnessDescription');
+    descElRef?.addEventListener('input', ()=>{ updateCharCount(); saveDraft(); });
     locEl?.addEventListener('input', saveDraft);
 
     // File preview
@@ -408,7 +418,7 @@
       if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
       if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
 
-      // NEW: short-circuit if locally locked
+      // Short-circuit if locally locked
       if (localStorage.getItem(KINDNESS_LOCK_KEY())) { applyKindnessLockUI(); return; }
 
       const photoFile   = fileInput.files[0];
@@ -425,17 +435,11 @@
           description, location: locationVal, photoUrl
         });
 
-        // NEW: lock on success
         localStorage.setItem(KINDNESS_LOCK_KEY(), '1');
         localStorage.removeItem(`kindnessDraft:${EVENT_ID}:${teamCode()}`);
         applyKindnessLockUI();
       }catch(err){
-        // NEW: structured handling
-        if (err.code === 'DUPLICATE') {
-          localStorage.setItem(KINDNESS_LOCK_KEY(), '1');
-          applyKindnessLockUI();
-          return;
-        }
+        if (err.code === 'DUPLICATE') { localStorage.setItem(KINDNESS_LOCK_KEY(), '1'); applyKindnessLockUI(); return; }
         if (err.code === 'CLOSED') { setFeedback('Submissions are closed for this event.', 'error'); return; }
         if (err.code === 'UNAUTHORIZED') { setFeedback('Your sign-in expired. Please sign in again.', 'error'); return; }
         if (err.code === 'RATE_LIMITED') { setFeedback('Too many attempts—please wait a moment and try again.', 'error'); return; }
@@ -469,12 +473,14 @@
     signinBtn?.addEventListener('click', signIn);
 
     (async function init(){
-      await loadTeams();
       updateCharCount();
       loadDraft(); // safe even if form is hidden
-      // IMPORTANT: do NOT auto-show crew chip or form based on old localStorage
+      // Do NOT auto-show crew chip or form based on old localStorage
       document.getElementById('teamInfo').style.display = 'none';
       document.getElementById('kindnessForm').style.display = 'none';
+
+      // Load teams ONLY if eventId present (prevents fallback/ghost teams)
+      await loadTeams();
     })();
   </script>
 </body>
