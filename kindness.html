@@ -318,44 +318,13 @@
     function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
     function loadDraft(){ try{ const raw = localStorage.getItem(draftKey()); if(raw){ const d=JSON.parse(raw); if(d.description) descEl.value=d.description; if(d.location) locEl.value=d.location; updateCharCount(); } }catch{} }
 
-    // TEAM NORMALIZATION + LOADING (updated to show all)
-    function normalizeTeamObj(obj = {}) {
-      const code =
-        obj.teamCode ?? obj.code ?? obj.team_code ?? obj.teamcode ??
-        obj.teamId ?? obj.team_id ?? obj.id ?? obj.slug ?? '';
-      const name =
-        obj.teamName ?? obj.team_name ?? obj.name ?? obj.team ??
-        obj.displayName ?? obj.display_name ?? obj.label ?? '';
-      const teamCode = String(code || '').trim();
-      const teamName = String(name || '').trim();
-      const displayName = teamName || teamCode;
-      const derivedCode =
-        teamCode ||
-        (displayName
-          ? displayName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 32)
-          : '');
-      return { teamCode: derivedCode, teamName: displayName };
-    }
-
-    function extractTeams(data) {
-      const pools = [];
-      if (Array.isArray(data?.teams)) pools.push(...data.teams);
-      if (Array.isArray(data?.leaderboard)) pools.push(...data.leaderboard);
-      if (Array.isArray(data?.rows)) pools.push(...data.rows);
-      if (Array.isArray(data?.items)) pools.push(...data.items);
-      if (Array.isArray(data?.data)) pools.push(...data.data);
-      if (Array.isArray(data?.result)) pools.push(...data.result);
-      if (Array.isArray(data?.payload)) pools.push(...data.payload);
-
-      const mapped = pools.map(normalizeTeamObj).filter(t => t.teamCode || t.teamName);
-
-      const seen = new Set();
-      const deduped = [];
-      for (const t of mapped) {
-        const key = t.teamCode || `n:${t.teamName.toLowerCase()}`;
-        if (!seen.has(key)) { seen.add(key); deduped.push(t); }
-      }
-      return deduped;
+    // ==== TEAMS: pull from Teams sheet via server endpoint ====
+    function extractTeams(data){
+      const arr = Array.isArray(data?.teams) ? data.teams : [];
+      return arr.map(t => ({
+        teamCode: String(t.teamCode || t.code || '').trim(),
+        teamName: String(t.teamName || t.name || t.teamCode || '').trim()
+      })).filter(t => t.teamCode && t.teamName);
     }
 
     async function loadTeams(){
@@ -366,11 +335,10 @@
         return;
       }
       try{
-        const data = await callFn('get_leaderboard', { eventId: EVENT_ID });
+        // 🔁 NEW: call dedicated endpoint that reads the Teams sheet
+        const data = await callFn('get_teams_for_event', { eventId: EVENT_ID });
         const teams = extractTeams(data);
-
         if(!teams.length) throw new Error('No teams returned');
-
         teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
 
         teamSelect.innerHTML =
@@ -378,7 +346,7 @@
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
 
         clearSigninMsg();
-        console.debug('[TeamQuest] teams parsed:', teams.length, teams);
+        console.debug('[TeamQuest] teams from sheet:', teams.length, teams);
       }catch(e){
         teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
         setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
@@ -508,11 +476,18 @@
     signinBtn?.addEventListener('click', signIn);
 
     (async function init(){
-      updateCharCount();
-      loadDraft();
+      // Don’t auto-show chip/form; require sign-in on this page
       document.getElementById('teamInfo').style.display = 'none';
       document.getElementById('kindnessForm').style.display = 'none';
-      await loadTeams(); // only loads when eventId present
+      // Normal init
+      const descElRef = document.getElementById('kindnessDescription');
+      if (descElRef) { /* ensure counter accurate on load */ }
+      loadDraft();
+      // Load teams from Teams sheet (server endpoint)
+      await loadTeams();
+      // Counter after potential draft restore
+      const remaining = 500 - (descEl.value?.length || 0);
+      countEl.textContent = remaining;
     })();
   </script>
 </body>
