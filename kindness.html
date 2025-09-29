@@ -29,7 +29,6 @@
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
-    /* Nav */
     .treasure-nav{position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
@@ -43,22 +42,14 @@
     .nav-menu.active{left:0}
     .nav-link,.dropdown-link{display:block; width:92%; max-width:360px; text-align:center; text-decoration:none; color:#F7EED8; font-weight:900; padding:12px 14px; border-radius:14px; background:rgba(247,238,216,.18); border:1px solid rgba(255,255,255,.25)}
     .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.28)}
-
-    /* Hero */
     .hero{min-height:var(--hero-h); display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:24px var(--gutter) 20px; text-align:center}
     .brand-logo{width:min(240px,68vw); height:auto; margin-bottom:10px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:22px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
-
-    /* Stack / cards */
     .stack{ padding:0 var(--gutter) 28px }
     .card{ background:var(--parchment); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100%; max-width:980px }
     .card h2{ margin:0 0 10px; text-align:center; font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:24px; color:var(--ink)}
     .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px }
-
-    /* Team chip — hidden until this page's sign-in succeeds */
     .team-info{display:none; align-items:center; justify-content:center; background:#D7C39B; color:var(--ink); border:3px dashed rgba(0,0,0,.6); border-radius:14px; padding:10px 14px; font-weight:900}
-
-    /* Auth */
     .auth-card{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
     .auth-grid{ display:grid; grid-template-columns:1fr 150px; gap:10px }
     @media (max-width:560px){ .auth-grid{ grid-template-columns:1fr } }
@@ -70,8 +61,6 @@
     select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
     .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
     .small-btn{ background:linear-gradient(90deg,#FDBA2D,#F0C433); color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2) }
-
-    /* Intro / instructions */
     .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:0 2px 8px rgba(0,0,0,.12) }
     .terry-character img{ width:84px; height:84px; border-radius:12px; border:3px solid var(--gold); object-fit:cover; display:block }
     .terry-note{ margin:0; line-height:1.55; font-weight:700; color:var(--ink) }
@@ -79,8 +68,6 @@
     .instructions{ background:#FFFAF1; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
     .instructions h3{ margin:0 0 8px; color:var(--ink); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:20px; text-align:center }
     .instructions ul{ margin:0; padding-left:18px; color:var(--ink-soft); line-height:1.65 }
-
-    /* Form */
     .file-upload{ position:relative; display:inline-block; width:100% }
     .file-input{ display:none }
     .file-upload-btn{ display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA; cursor:pointer; color:var(--ink); font-weight:900; font-size:16px }
@@ -96,8 +83,6 @@
     .message{ padding:14px; border-radius:14px; margin:14px 0; text-align:center; display:none; border:3px solid; font-weight:900 }
     .success-message{ background:var(--success-bg); border-color:var(--success); color:#064b06 }
     .error-message{ background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000 }
-
-    /* Modal */
     .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:1200; padding:18px }
     .modal-content{ width:100%; max-width:520px; background:var(--parchment); border-radius:18px 18px 0 0; padding:16px; border:1px solid rgba(0,0,0,.08); box-shadow:0 -10px 30px rgba(0,0,0,.3) }
     .modal-title{ font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:22px; color:var(--ink); text-align:center; margin-bottom:2px }
@@ -109,7 +94,6 @@
   </style>
 </head>
 <body>
-  <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
       <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
@@ -127,18 +111,14 @@
     </ul>
   </nav>
 
-  <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
     <div class="hero-title" id="heroTitle">Random Act of Kindness</div>
   </header>
 
-  <!-- CONTENT -->
   <main class="stack" id="app">
-    <!-- Hidden until sign-in on THIS page -->
     <div class="team-info" id="teamInfo">Crew: —</div>
 
-    <!-- Sign-in -->
     <section class="card auth-card" id="signinCard" aria-live="polite">
       <h2>Sign in</h2>
       <div class="auth-grid">
@@ -159,7 +139,6 @@
       <div class="message" id="signinMsg"></div>
     </section>
 
-    <!-- Intro -->
     <section class="card terry-greeting" aria-label="Intro">
       <div class="terry-character"><img src="/terry-thinking.png" alt="Terry, your Quest guide"></div>
       <p class="terry-note">
@@ -168,7 +147,6 @@
       </p>
     </section>
 
-    <!-- Instructions -->
     <section class="card instructions" aria-labelledby="instr-title">
       <h3 id="instr-title">💎 How to submit</h3>
       <ul>
@@ -178,7 +156,6 @@
       </ul>
     </section>
 
-    <!-- Submission form (hidden until sign-in) -->
     <section class="card" aria-label="Kindness submission">
       <form id="kindnessForm" aria-describedby="formHelp" style="display:none;">
         <div class="form-group">
@@ -214,6 +191,9 @@
   </main>
 
   <script>
+    // ===== Config =====
+    const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
+
     // URL / storage helpers
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
@@ -221,14 +201,9 @@
     const teamCode = () => localStorage.getItem('teamCode') || '';
     const teamName = () => localStorage.getItem('teamName') || '';
 
-    // Optional: expose eventId in tooltip for sanity
-    const heroTitle = document.getElementById('heroTitle');
-    if (EVENT_ID) heroTitle.title = `eventId: ${EVENT_ID}`;
-
-    // Optional: abort in-flight on double nav/clicks
+    // Headers + idempotency for server calls (used only for submit & auth)
     let inflightController = null;
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
-
     async function callFn(path, payload){
       if (inflightController) inflightController.abort();
       inflightController = new AbortController();
@@ -255,23 +230,6 @@
       return data;
     }
     window.addEventListener('beforeunload', ()=> inflightController?.abort());
-
-    // Nav toggle
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu   = document.getElementById('nav-menu');
-    if(navToggle && navMenu){
-      navToggle.addEventListener('click', ()=> {
-        navMenu.classList.toggle('active');
-        navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-      });
-      document.querySelectorAll('.nav-link, .dropdown-link').forEach(link=>{
-        link.addEventListener('click', ()=>{ navMenu.classList.remove('active'); navToggle.textContent='☰'; });
-      });
-      document.addEventListener('click', (e)=> {
-        const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-      });
-    }
 
     // Elements
     const teamInfo    = document.getElementById('teamInfo');
@@ -304,7 +262,7 @@
     }
     function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
 
-    // === Local lock helpers ===
+    // Local lock so UI greys out after successful submit
     const KINDNESS_LOCK_KEY = () => `kindness:locked:${EVENT_ID}:${teamCode()}`;
     function applyKindnessLockUI(){
       if (!form) return;
@@ -313,20 +271,33 @@
       setFeedback('✅ Already submitted for this event. Thanks for spreading kindness!', 'success');
     }
 
-    // Draft
+    // Draft cache
     const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
     function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
     function loadDraft(){ try{ const raw = localStorage.getItem(draftKey()); if(raw){ const d=JSON.parse(raw); if(d.description) descEl.value=d.description; if(d.location) locEl.value=d.location; updateCharCount(); } }catch{} }
 
-    // ==== TEAMS: pull from Teams sheet via server endpoint ====
-    function extractTeams(data){
-      const arr = Array.isArray(data?.teams) ? data.teams : [];
-      return arr.map(t => ({
-        teamCode: String(t.teamCode || t.code || '').trim(),
-        teamName: String(t.teamName || t.name || t.teamCode || '').trim()
-      })).filter(t => t.teamCode && t.teamName);
+    // CSV parser (handles quotes / commas)
+    function parseCsv(text){
+      const rows = [];
+      let i=0, cur='', row=[], inQ=false;
+      while(i<text.length){
+        const c=text[i];
+        if(c==='\"'){
+          if(inQ && text[i+1]==='\"'){ cur+='\"'; i+=2; continue; }
+          inQ=!inQ; i++; continue;
+        }
+        if(!inQ && (c===',' || c==='\n' || c==='\r')){
+          row.push(cur); cur='';
+          if(c!==','){ if(row.length) rows.push(row); row=[]; }
+          i++; continue;
+        }
+        cur+=c; i++;
+      }
+      if(cur.length||row.length){ row.push(cur); rows.push(row); }
+      return rows;
     }
 
+    // Load teams from the published CSV (no secrets, live updates)
     async function loadTeams(){
       if (!EVENT_ID) {
         teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
@@ -335,18 +306,37 @@
         return;
       }
       try{
-        // 🔁 NEW: call dedicated endpoint that reads the Teams sheet
-        const data = await callFn('get_teams_for_event', { eventId: EVENT_ID });
-        const teams = extractTeams(data);
-        if(!teams.length) throw new Error('No teams returned');
-        teams.sort((a,b)=> (a.teamName||'').localeCompare(b.teamName||''));
+        const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
+        if(!res.ok) throw new Error('Could not fetch teams CSV');
+        const csv = await res.text();
+        const rows = parseCsv(csv);
+        if(!rows.length) throw new Error('Empty teams CSV');
+
+        const header = rows[0].map(h => String(h||'').trim().toLowerCase());
+        const idx = (name) => header.indexOf(name.toLowerCase());
+        const iCode  = idx('team code');
+        const iName  = idx('team name');
+        const iEvent = idx('event id');
+        if(iCode===-1 || iEvent===-1) throw new Error('CSV missing required headers');
+
+        const wanted = String(EVENT_ID).toUpperCase();
+        const teams = rows.slice(1)
+          .map(r => ({
+            teamCode: String(r[iCode]||'').trim(),
+            teamName: String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
+            eventId:  String(r[iEvent]||'').trim().toUpperCase()
+          }))
+          .filter(t => t.teamCode && t.eventId === wanted)
+          .sort((a,b)=> a.teamName.localeCompare(b.teamName));
+
+        if(!teams.length) throw new Error('No teams for this event');
 
         teamSelect.innerHTML =
           `<option value="">Choose your crew… (${teams.length} found)</option>` +
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
 
         clearSigninMsg();
-        console.debug('[TeamQuest] teams from sheet:', teams.length, teams);
+        console.debug('[TeamQuest] teams from published CSV:', teams.length);
       }catch(e){
         teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
         setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
@@ -354,7 +344,7 @@
       }
     }
 
-    // Sign in (show chip + form only after success)
+    // Sign in
     async function signIn(){
       clearSigninMsg(); clearFeedback();
 
@@ -383,7 +373,7 @@
       }
     }
 
-    // Char counter
+    // Character counter
     function updateCharCount(){
       const remaining = 500 - (descEl.value?.length || 0);
       countEl.textContent = remaining;
@@ -421,7 +411,6 @@
       clearFeedback();
       if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
       if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
-
       if (localStorage.getItem(KINDNESS_LOCK_KEY())) { applyKindnessLockUI(); return; }
 
       const photoFile   = fileInput.files[0];
@@ -473,19 +462,18 @@
 
     // Wire up + init
     document.getElementById('kindnessForm')?.addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
+    document.getElementById('nav-toggle')?.addEventListener('click', ()=>{
+      const navMenu = document.getElementById('nav-menu');
+      navMenu.classList.toggle('active');
+      document.getElementById('nav-toggle').textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+    });
     signinBtn?.addEventListener('click', signIn);
 
     (async function init(){
-      // Don’t auto-show chip/form; require sign-in on this page
       document.getElementById('teamInfo').style.display = 'none';
       document.getElementById('kindnessForm').style.display = 'none';
-      // Normal init
-      const descElRef = document.getElementById('kindnessDescription');
-      if (descElRef) { /* ensure counter accurate on load */ }
       loadDraft();
-      // Load teams from Teams sheet (server endpoint)
       await loadTeams();
-      // Counter after potential draft restore
       const remaining = 500 - (descEl.value?.length || 0);
       countEl.textContent = remaining;
     })();
