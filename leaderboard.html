@@ -179,7 +179,7 @@
   </main>
 
   <script>
-    // Mobile nav toggle (same behaviour as activities)
+    // Mobile nav toggle
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
@@ -193,9 +193,28 @@
           if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
         });
       }
+
+      // Preserve ?event= across all nav links (and logo)
+      const EVENT_ID = new URLSearchParams(location.search).get('event') || new URLSearchParams(location.search).get('eventId') || '';
+      if (EVENT_ID){
+        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
+        anchors.forEach(a=>{
+          try{
+            const href = a.getAttribute('href');
+            if(!href) return;
+            const u = new URL(href, location.origin);
+            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
+            if (!u.searchParams.get('event')){
+              u.searchParams.set('event', EVENT_ID);
+              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+            }
+          }catch{}
+        });
+      }
     })();
 
-    // Leaderboard logic (no filters, simple render)
+    // Leaderboard logic
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
