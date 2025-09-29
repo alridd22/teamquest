@@ -222,16 +222,38 @@
     const teamCode = () => localStorage.getItem('teamCode') || '';
     const teamName = () => localStorage.getItem('teamName') || '';
 
+    // Optional: abort in-flight on double nav/clicks
+    let inflightController = null;
+
+    function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
+
     async function callFn(path, payload){
+      if (inflightController) inflightController.abort();
+      inflightController = new AbortController();
+
       const res = await fetch(`/.netlify/functions/${path}`,{
         method:'POST',
-        headers:{ 'Content-Type':'application/json', ...(token() ? {'Authorization':`Bearer ${token()}`} : {}) },
-        body: JSON.stringify(payload)
+        headers:{
+          'Content-Type':'application/json',
+          ...(token() ? {'Authorization':`Bearer ${token()}`} : {}),
+          'Idempotency-Key': uuidv4()
+        },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        signal: inflightController.signal
       });
-      const data = await res.json().catch(()=>({}));
-      if(!res.ok || data.success === false) throw new Error(data.message || `Request failed (${res.status})`);
+      let data = {};
+      try { data = await res.json(); } catch {}
+      if(!res.ok || data.success === false){
+        const err = new Error(data.message || `Request failed (${res.status})`);
+        err.code = data.code || (res.status === 401 ? 'UNAUTHORIZED' : res.status === 429 ? 'RATE_LIMITED' : 'ERROR');
+        err.status = res.status;
+        err.payload = data;
+        throw err;
+      }
       return data;
     }
+    window.addEventListener('beforeunload', ()=> inflightController?.abort());
 
     // Nav toggle
     const navToggle = document.getElementById('nav-toggle');
@@ -281,6 +303,15 @@
     }
     function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
 
+    // === NEW: local lock helpers ===
+    const KINDNESS_LOCK_KEY = () => `kindness:locked:${EVENT_ID}:${teamCode()}`;
+    function applyKindnessLockUI(){
+      if (!form) return;
+      [...form.elements].forEach(el => el.disabled = true);
+      form.style.opacity = '0.6';
+      setFeedback('✅ Already submitted for this event. Thanks for spreading kindness!', 'success');
+    }
+
     // Draft
     const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
     function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
@@ -329,6 +360,9 @@
         document.getElementById('teamInfo').style.display = 'flex';  // <- show AFTER sign-in
         setSigninMsg('Signed in. You can submit now!', 'success');
         form.style.display = 'block';
+
+        // NEW: if a local lock exists, apply it immediately
+        if (localStorage.getItem(KINDNESS_LOCK_KEY())) applyKindnessLockUI();
       }catch(err){
         if(String(err.message).includes('404')) setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
         else setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
@@ -374,6 +408,9 @@
       if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
       if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
 
+      // NEW: short-circuit if locally locked
+      if (localStorage.getItem(KINDNESS_LOCK_KEY())) { applyKindnessLockUI(); return; }
+
       const photoFile   = fileInput.files[0];
       const description = (descEl.value||'').trim();
       const locationVal = (locEl.value||'').trim();
@@ -384,18 +421,30 @@
       try{
         const photoUrl = await uploadToUploadcare(photoFile);
         await callFn('submit_kindness_function', {
-          eventId: EVENT_ID, teamCode: teamCode(), token: token(),
+          eventId: EVENT_ID, teamCode: teamCode(),
           description, location: locationVal, photoUrl
         });
-        setFeedback('🎉 Submitted! Your kindness is in. Check the leaderboard/gallery soon!', 'success');
+
+        // NEW: lock on success
+        localStorage.setItem(KINDNESS_LOCK_KEY(), '1');
         localStorage.removeItem(`kindnessDraft:${EVENT_ID}:${teamCode()}`);
-        [...form.elements].forEach(el=>el.disabled = true);
-        form.style.opacity = '0.6';
+        applyKindnessLockUI();
       }catch(err){
+        // NEW: structured handling
+        if (err.code === 'DUPLICATE') {
+          localStorage.setItem(KINDNESS_LOCK_KEY(), '1');
+          applyKindnessLockUI();
+          return;
+        }
+        if (err.code === 'CLOSED') { setFeedback('Submissions are closed for this event.', 'error'); return; }
+        if (err.code === 'UNAUTHORIZED') { setFeedback('Your sign-in expired. Please sign in again.', 'error'); return; }
+        if (err.code === 'RATE_LIMITED') { setFeedback('Too many attempts—please wait a moment and try again.', 'error'); return; }
         setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`, 'error');
         document.getElementById('retryBtn')?.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
       }finally{
+        const locked = !!localStorage.getItem(KINDNESS_LOCK_KEY());
         setSubmitting(false);
+        if (locked) disableForm(true);
       }
     }
 
