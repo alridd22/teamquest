@@ -1,3 +1,5 @@
+<!-- SUMMARY: Fixes iOS blue text / native styling on the crew <select>. Adds .tq-select with appearance reset, Safari text color via -webkit-text-fill-color, placeholder :required:invalid state, custom chevron, and focus ring. Updates placeholder options to use disabled+selected. No functional changes. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +20,7 @@
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --focus:0 0 0 3px rgba(240,196,51,.45);
       --nav-h:64px; --gutter:22px; --hero-h:260px;
+      --accent:#1594d2;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
@@ -76,6 +79,33 @@
 
     .help{color:var(--ink-soft);font-size:.9rem}
     @media (min-width:480px){.brand-logo{width:min(280px,62vw)}}
+
+    /* ===== Unified <select> styling (fix iOS blue text) ===== */
+    .tq-select{
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+
+      padding:14px 44px 14px 12px; /* space for chevron */
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-fill-color:var(--ink); /* force Safari text color */
+      font:inherit; line-height:1.2;
+
+      border-radius:var(--radius-input);
+      border:3px solid var(--gold);
+
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat;
+      background-position:right 12px center;
+      background-size:18px 18px;
+    }
+    .tq-select:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+    .tq-select:required:invalid{
+      color:rgba(0,0,0,.5);
+      -webkit-text-fill-color:rgba(0,0,0,.5);
+    }
+    .tq-select::-ms-expand{display:none;}
   </style>
 </head>
 <body>
@@ -113,8 +143,8 @@
       <div class="row" style="align-items:end">
         <div>
           <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect" class="field">
-            <option value="">Loading crews…</option>
+          <select id="teamSelect" class="field tq-select" required>
+            <option value="" disabled selected>Loading crews…</option>
           </select>
         </div>
         <div>
@@ -212,7 +242,7 @@
       function lockForm(disabled=true){ $("#topic").disabled=disabled; $("#limerick").disabled=disabled; $("#submitBtn").disabled=disabled; }
       function setCrewStrip(){ if(state.teamName){ $("#crewName").textContent=state.teamName; $("#crewStrip").style.display='block'; } }
 
-      // ===== CSV parser (same minimalist one) =====
+      // ===== CSV parser =====
       function parseCsv(text){
         const rows=[]; let i=0,cur='',row=[],inQ=false;
         while(i<text.length){
@@ -226,13 +256,13 @@
       }
       function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
 
-      // ===== Team loading (EXACT SAME FLOW) =====
+      // ===== Team loading =====
       async function loadCrews(){
-        teamSelect.innerHTML = '<option value="">Loading crews…</option>';
+        teamSelect.innerHTML = '<option value="" disabled selected>Loading crews…</option>';
         clearMsg(signMsg);
 
         if(!EVENT_ID){
-          teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+          teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
           showMsg(signMsg,'This page needs an event link (with ?event=...).'); signBtn.disabled=true; return;
         }
 
@@ -257,11 +287,11 @@
 
           if(!state.crews.length) throw new Error('No crews for this event');
 
-          teamSelect.innerHTML = '<option value="">Choose your crew…</option>' +
+          teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
             state.crews.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
           signBtn.disabled=false;
         }catch(e){
-          teamSelect.innerHTML = '<option value="">—</option>';
+          teamSelect.innerHTML = '<option value="" disabled selected>—</option>';
           showMsg(signMsg,'Couldn’t load crews. Refresh and try again.');
           signBtn.disabled=true;
         }
@@ -304,7 +334,7 @@
       // Character counter
       $('#limerick').addEventListener('input',()=>{ $('#charCount').textContent = ($('#limerick').value||'').length; });
 
-      // Submit limerick
+      // Submit limerick (unchanged)
       $('#limerickForm').addEventListener('submit', async (e)=>{
         e.preventDefault(); clearMsg($('#formMsg'));
         if(!state.signed) return showMsg('#formMsg','Please sign in first.');
