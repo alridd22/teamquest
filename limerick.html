@@ -17,7 +17,7 @@
       --radius-card:22px; --radius-input:16px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --focus:0 0 0 3px rgba(240,196,51,.45);
-      --nav-h:64px; --gutter:22px; --hero-h:280px;
+      --nav-h:64px; --gutter:22px; --hero-h:260px;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
@@ -51,7 +51,7 @@
     .brand-logo{width:min(240px,68vw);height:auto;margin-bottom:10px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* STACK / CARDS */
+    /* LAYOUT / CARDS */
     .stack{padding:0 var(--gutter) 28px}
     .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);margin:0 auto 18px;max-width:980px}
     .card h2{margin:0 0 10px;text-align:center;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:24px;color:var(--ink)}
@@ -88,7 +88,6 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <!-- All but the current page (Limerick) -->
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
@@ -105,11 +104,11 @@
   </header>
 
   <main class="stack">
-    <!-- Crew strip (shown after sign-in) -->
+    <!-- Crew strip (only after sign-in) -->
     <div id="crewStrip" class="card strip" style="display:none">Crew: <span id="crewName">—</span></div>
 
     <!-- Sign-in -->
-    <section class="card">
+    <section class="card" aria-live="polite">
       <h2>Sign in</h2>
       <div class="row" style="align-items:end">
         <div>
@@ -125,7 +124,7 @@
       </div>
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button id="signInBtn" class="btn">🔐 Sign in</button>
-        <button id="reloadCrews" class="btn small">↻ Reload crews</button>
+        <button id="reloadCrews" class="btn small" type="button">↻ Reload crews</button>
       </div>
       <div id="signMsg" class="message"></div>
     </section>
@@ -163,177 +162,174 @@
   </main>
 
   <script>
-  (function(){
-    // ---------- basics
-    const $ = s => document.querySelector(s);
-    const state = { eventId:"", crews:[], teamCode:"", teamName:"", signed:false };
+    // ===== Config (EXACTLY like Kindness/Scavenger) =====
+    const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
-    // Preserve event id on nav links
-    const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-    state.eventId = EVENT_ID;
-    if(EVENT_ID){
-      document.querySelectorAll('.nav-menu a').forEach(a=>{
-        try{ const u = new URL(a.href, location.origin); u.searchParams.set('event', EVENT_ID); a.href = u.toString(); }catch{}
+    (function(){
+      // Basic refs
+      const $ = s => document.querySelector(s);
+      const teamSelect = $('#teamSelect');
+      const pinInput   = $('#pinInput');
+      const signBtn    = $('#signInBtn');
+      const reloadBtn  = $('#reloadCrews');
+      const signMsg    = $('#signMsg');
+
+      const qs = new URLSearchParams(location.search);
+      const EVENT_ID = (qs.get('event') || qs.get('eventId') || '').trim();
+
+      // Keep ?event= on all menu links (same pattern used elsewhere)
+      (function persistEventOnLinks(){
+        if (!EVENT_ID) return;
+        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
+        anchors.forEach(a=>{
+          try{
+            const u = new URL(a.getAttribute('href'), location.origin);
+            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
+            if (!u.searchParams.get('event')){
+              u.searchParams.set('event', EVENT_ID);
+              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+            }
+          }catch{}
+        });
+      })();
+
+      // Mobile nav toggle
+      const navToggle = document.getElementById('nav-toggle');
+      const navMenu   = document.getElementById('nav-menu');
+      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
+      document.addEventListener('click',e=>{
+        const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
+        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
       });
-    }
 
-    // NAV toggle
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu   = document.getElementById('nav-menu');
-    navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
-    document.addEventListener('click',e=>{
-      const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
-      if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-    });
+      // State
+      const state = { crews:[], signed:false, teamCode:'', teamName:'' };
 
-    // helpers
-    function showMsg(sel, text, ok=false){ const el=$(sel); if(!el) return; el.textContent=text; el.className='message '+(ok?'ok':'err'); el.style.display='block'; }
-    function clearMsg(sel){ const el=$(sel); if(!el) return; el.style.display='none'; }
-    function lockForm(disabled=true){ $("#topic").disabled=disabled; $("#limerick").disabled=disabled; $("#submitBtn").disabled=disabled; }
-    function setCrewStrip(){ if(state.teamName){ $("#crewName").textContent=state.teamName; $("#crewStrip").style.display='block'; } }
+      // Small helpers
+      function showMsg(node, text, ok=false){ node.textContent=text; node.className='message ' + (ok?'ok':'err'); node.style.display='block'; }
+      function clearMsg(node){ node.style.display='none'; }
+      function lockForm(disabled=true){ $("#topic").disabled=disabled; $("#limerick").disabled=disabled; $("#submitBtn").disabled=disabled; }
+      function setCrewStrip(){ if(state.teamName){ $("#crewName").textContent=state.teamName; $("#crewStrip").style.display='block'; } }
 
-    // shared helpers
-    async function callFn(name, payload={}, method='POST'){
-      const url='/.netlify/functions/'+name+(method==='GET'?'?'+new URLSearchParams(payload):'');
-      const res = await fetch(url,{method,headers:{'Content-Type':'application/json'},body:method==='GET'?undefined:JSON.stringify(payload)});
-      let data={}; try{ data=await res.json(); }catch{}
-      if(!res.ok) throw new Error((data && (data.error||data.message)) || ('HTTP '+res.status));
-      return data;
-    }
-    function extractTeams(data){
-      if(Array.isArray(data?.teams)) return data.teams;
-      if(Array.isArray(data?.leaderboard)){
-        return data.leaderboard.map(r=>({teamCode:r.teamCode||r.code||r.teamId||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
+      // ===== CSV parser (same minimalist one) =====
+      function parseCsv(text){
+        const rows=[]; let i=0,cur='',row=[],inQ=false;
+        while(i<text.length){
+          const c=text[i];
+          if(c==='\"'){ if(inQ && text[i+1]==='\"'){ cur+='\"'; i+=2; continue; } inQ=!inQ; i++; continue; }
+          if(!inQ && (c===','||c==='\n'||c==='\r')){ row.push(cur); cur=''; if(c!==','){ if(row.length) rows.push(row); row=[]; } i++; continue; }
+          cur+=c; i++;
+        }
+        if(cur.length||row.length){ row.push(cur); rows.push(row); }
+        return rows;
       }
-      if(Array.isArray(data?.rows)){
-        return data.rows.map(r=>({teamCode:r.teamCode||r.code||'',teamName:r.teamName||r.name||''})).filter(t=>t.teamName);
-      }
-      return [];
-    }
+      function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
 
-    // Fallback CSV (published web link)
-    const CSV_PUB_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
-    function parseCSV(text){
-      // light CSV parser (handles quoted commas)
-      const rows=[]; let i=0, cur='', inQ=false; const line=[];
-      function pushCell(){ line.push(cur); cur=''; }
-      function pushRow(){ rows.push(line.slice()); line.length=0; }
-      while(i<text.length){
-        const c=text[i++];
-        if(inQ){
-          if(c==='"' && text[i]==='"'){ cur+='"'; i++; }
-          else if(c==='"'){ inQ=false; }
-          else cur+=c;
-        }else{
-          if(c===','){ pushCell(); }
-          else if(c==='\n' || c==='\r'){ if(c==='\r' && text[i]==='\n') i++; pushCell(); pushRow(); }
-          else if(c==='"'){ inQ=true; }
-          else cur+=c;
+      // ===== Team loading (EXACT SAME FLOW) =====
+      async function loadCrews(){
+        teamSelect.innerHTML = '<option value="">Loading crews…</option>';
+        clearMsg(signMsg);
+
+        if(!EVENT_ID){
+          teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+          showMsg(signMsg,'This page needs an event link (with ?event=...).'); signBtn.disabled=true; return;
+        }
+
+        try{
+          const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
+          if(!res.ok) throw new Error('Could not fetch teams CSV');
+          const rows = parseCsv(await res.text());
+          if(!rows.length) throw new Error('Empty CSV');
+
+          const header = rows[0].map(h=>String(h||'').trim().toLowerCase());
+          const idx = (n)=> header.indexOf(n.toLowerCase());
+          const iCode = idx('team code'), iName = idx('team name'), iEvent = idx('event id');
+          if(iCode===-1 || iEvent===-1) throw new Error('CSV missing required headers');
+
+          const wanted = String(EVENT_ID).toUpperCase();
+          state.crews = rows.slice(1).map(r=>({
+            teamCode: String(r[iCode]||'').trim(),
+            teamName: String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
+            eventId:  String(r[iEvent]||'').trim().toUpperCase()
+          })).filter(t=>t.teamCode && t.eventId===wanted)
+            .sort((a,b)=> a.teamName.localeCompare(b.teamName));
+
+          if(!state.crews.length) throw new Error('No crews for this event');
+
+          teamSelect.innerHTML = '<option value="">Choose your crew…</option>' +
+            state.crews.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
+          signBtn.disabled=false;
+        }catch(e){
+          teamSelect.innerHTML = '<option value="">—</option>';
+          showMsg(signMsg,'Couldn’t load crews. Refresh and try again.');
+          signBtn.disabled=true;
         }
       }
-      if(cur.length||line.length){ pushCell(); pushRow(); }
-      return rows;
-    }
-    function teamsFromCSV(text){
-      const rows=parseCSV(text).filter(r=>r.some(x=>x&&x.trim()!==''));
-      if(!rows.length) return [];
-      const hdr = rows[0].map(h=>h.trim().toLowerCase());
-      const idx = (names)=> names.map(n=>hdr.indexOf(n)).find(i=>i>=0);
-      const iCode = idx(['teamcode','code','id','team_id']);
-      const iName = idx(['teamname','name','team','team_name']);
-      if(iCode==null || iName==null) return [];
-      return rows.slice(1).map(r=>({teamCode:String(r[iCode]||'').trim(), teamName:String(r[iName]||'').trim()}))
-                 .filter(t=>t.teamCode && t.teamName);
-    }
 
-    // Load crews (function first, CSV fallback)
-    async function loadCrews(){
-      const sel = $("#teamSelect");
-      sel.innerHTML = '<option value="">Loading crews…</option>';
-      try{
-        let data = await callFn('get_leaderboard',{eventId:EVENT_ID});
-        let list = extractTeams(data);
-        if(!list.length){
-          const r = await fetch('/.netlify/functions/get_leaderboard?eventId='+encodeURIComponent(EVENT_ID));
-          if(r.ok){ data = await r.json(); list = extractTeams(data); }
-        }
-        if(!list.length){
-          const r = await fetch(CSV_PUB_URL,{cache:'no-store'});
-          const txt = await r.text();
-          list = teamsFromCSV(txt);
-        }
-        if(!list.length) throw new Error('no teams');
+      // ===== Sign in (same endpoint you use elsewhere)
+      async function signIn(){
+        clearMsg(signMsg);
+        const teamCode = teamSelect.value.trim();
+        const pin = (pinInput.value||'').trim();
+        if(!teamCode) return showMsg(signMsg,'Pick your crew first.');
+        if(!/^\d{4}$/.test(pin)) return showMsg(signMsg,'Enter a 4-digit PIN.');
 
-        state.crews = list.map(t=>({teamCode:String(t.teamCode), teamName:String(t.teamName)}))
-                          .filter(t=>t.teamCode && t.teamName)
-                          .sort((a,b)=>a.teamName.localeCompare(b.teamName));
-        sel.innerHTML = '<option value="">Choose your crew…</option>' +
-          state.crews.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
-        clearMsg('#signMsg');
-      }catch{
-        showMsg('#signMsg','Couldn’t load crews. Refresh and try again.');
-        sel.innerHTML = '<option value="">—</option>';
-      }
-    }
+        signBtn.disabled = true;
+        try{
+          const res = await fetch('/.netlify/functions/verify_team_pin_function', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ eventId: EVENT_ID, teamCode, pin })
+          });
+          const data = await res.json().catch(()=>({}));
+          if(!res.ok || data.success===false || data.valid===false){ showMsg(signMsg,'PIN doesn’t match this crew.'); return; }
 
-    // sign in
-    async function signIn(){
-      clearMsg('#signMsg');
-      const teamCode = $("#teamSelect").value;
-      const pin = ($("#pinInput").value||'').replace(/\D/g,'').slice(0,4);
-      if(!teamCode) return showMsg('#signMsg','Pick your crew from the list.');
-      if(pin.length!==4) return showMsg('#signMsg','Enter a 4-digit PIN.');
-      $("#signInBtn").disabled = true;
-      try{
-        const res = await callFn('verify_team_pin_function',{eventId:EVENT_ID, teamCode, pin});
-        if(res?.success && res.valid){
-          const t = state.crews.find(c=>c.teamCode===teamCode);
-          state.teamCode = teamCode; state.teamName = t?.teamName || ''; state.signed = true;
-          if(res.token) localStorage.setItem('tq.token',res.token);
+          const t = state.crews.find(x=>x.teamCode===teamCode);
+          state.teamCode = teamCode;
+          state.teamName = t ? t.teamName : (data.teamName || '');
+          state.signed = true;
+
+          if(data.token) localStorage.setItem('tq.token',data.token);
           localStorage.setItem('tq.teamCode',state.teamCode);
           localStorage.setItem('tq.teamName',state.teamName);
-          setCrewStrip(); lockForm(false); clearMsg('#signMsg');
-        }else{
-          showMsg('#signMsg','PIN doesn’t match this crew.');
+
+          setCrewStrip(); lockForm(false);
+        }catch(e){
+          showMsg(signMsg,'Sign-in service unavailable. Try again later.');
+        }finally{
+          signBtn.disabled = false;
         }
-      }catch{
-        showMsg('#signMsg','Sign-in service unavailable. Try again later.');
-      }finally{
-        $("#signInBtn").disabled = false;
       }
-    }
 
-    // counter
-    $("#limerick").addEventListener('input',()=>{ const len = ($("#limerick").value||'').length; $("#charCount").textContent = len; });
+      // Character counter
+      $('#limerick').addEventListener('input',()=>{ $('#charCount').textContent = ($('#limerick').value||'').length; });
 
-    // submit
-    $("#limerickForm").addEventListener('submit', async (e)=>{
-      e.preventDefault(); clearMsg('#formMsg');
-      if(!state.signed) return showMsg('#formMsg','Please sign in first.');
-      const text = ($("#limerick").value||'').trim();
-      if(text.length<20) return showMsg('#formMsg','Write at least 20 characters.');
-      const payload = { eventId:EVENT_ID, teamCode:state.teamCode, teamName:state.teamName, limerick:text, topic:($("#topic").value||'').trim() };
-      $("#submitBtn").disabled=true; $("#busy").style.display='inline';
-      try{
-        const r = await fetch('/.netlify/functions/submit_limerick_function',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-        if(!r.ok) throw new Error('Request failed');
-        showMsg('#formMsg','🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes.',true);
-        lockForm(true);
-      }catch{
-        showMsg('#formMsg','Network error. Try again.'); $("#submitBtn").disabled=false;
-      }finally{
-        $("#busy").style.display='none';
-      }
-    });
+      // Submit limerick
+      $('#limerickForm').addEventListener('submit', async (e)=>{
+        e.preventDefault(); clearMsg($('#formMsg'));
+        if(!state.signed) return showMsg('#formMsg','Please sign in first.');
+        const text = ($('#limerick').value||'').trim();
+        if(text.length<20) return showMsg('#formMsg','Write at least 20 characters.');
 
-    // boot
-    $("#signInBtn").addEventListener('click',signIn);
-    $("#reloadCrews").addEventListener('click',loadCrews);
-    loadCrews();
+        const payload = { eventId:EVENT_ID, teamCode:state.teamCode, teamName:state.teamName, limerick:text, topic:($('#topic').value||'').trim() };
+        $('#submitBtn').disabled=true; $('#busy').style.display='inline';
+        try{
+          const r = await fetch('/.netlify/functions/submit_limerick_function',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+          if(!r.ok) throw new Error('Request failed');
+          showMsg('#formMsg','🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes.',true);
+          lockForm(true);
+        }catch{
+          showMsg('#formMsg','Network error. Try again.'); $('#submitBtn').disabled=false;
+        }finally{ $('#busy').style.display='none'; }
+      });
 
-    // No auto-restore sign-in on load.
-  })();
+      // Wire buttons + load
+      signBtn.addEventListener('click', signIn);
+      reloadBtn.addEventListener('click', loadCrews);
+      pinInput.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
+
+      loadCrews(); // initial
+    })();
   </script>
 </body>
 </html>
