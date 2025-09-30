@@ -1,3 +1,5 @@
+<!-- SUMMARY: Normalizes <select> styling across iOS/Android. Adds .tq-select class with appearance reset, forces text color via -webkit-text-fill-color, placeholder :required:invalid state, custom chevron, and focus styles. Preserves all existing hooks/logic. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,6 +19,7 @@
     --radius-card:22px; --radius-input:16px;
     --shadow-card:0 18px 40px rgba(0,0,0,.35);
     --gutter:22px; --nav-h:64px; --hero-h:260px;
+    --accent:#1594d2;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -96,6 +99,37 @@
     border-radius:16px; border:3px solid #A7711F; padding:16px; cursor:pointer; margin-top:6px; box-shadow:0 10px 22px rgba(0,0,0,.25) }
   .submit-btn:disabled{opacity:.6; cursor:not-allowed}
   .muted{font-size:12px; color:#6A5A47}
+
+  /* ===== Unified <select> styling (fix iOS blue text) ===== */
+  .tq-select{
+    -webkit-appearance:none;
+    -moz-appearance:none;
+    appearance:none;
+
+    padding:14px 44px 14px 12px; /* space for chevron */
+    background: #fff;
+    color: var(--ink);
+    -webkit-text-fill-color: var(--ink); /* force Safari text color */
+    font: inherit;
+    line-height: 1.2;
+
+    border-radius: var(--radius-input);
+    border: 3px solid var(--gold);
+
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat:no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+  }
+  .tq-select:focus{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  .tq-select:required:invalid{
+    color: rgba(0,0,0,.5);
+    -webkit-text-fill-color: rgba(0,0,0,.5);
+  }
+  .tq-select::-ms-expand{ display:none; } /* legacy IE/Edge arrow */
 </style>
 </head>
 <body>
@@ -125,7 +159,7 @@
   </header>
 
   <main class="stack">
-    <!-- NEW: Intro / Rules -->
+    <!-- Intro / Rules -->
     <section class="card" aria-labelledby="how-title">
       <h2 id="how-title">How it works</h2>
       <div style="color:var(--ink-soft);font-weight:700;margin-bottom:10px">
@@ -148,8 +182,8 @@
       <div class="auth-grid">
         <div>
           <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect">
-            <option value="">Loading crews…</option>
+          <select id="teamSelect" class="tq-select" required>
+            <option value="" disabled selected>Loading crews…</option>
           </select>
         </div>
         <div>
@@ -257,7 +291,7 @@
       // Boot
       wireUI();
       renderItems();
-      renderIntroList();           // NEW: show item names in intro card
+      renderIntroList();           // show item names in intro card
       loadCrews();
       hydrateFromStorage();
       maybeShowForm();
@@ -293,11 +327,11 @@
 
       async function loadCrews(){
         if (!eventId){
-          teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+          teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
           showLoginError('This page needs an event link (with ?event=...).');
           signinBtn.disabled = true; return;
         }
-        teamSelect.innerHTML = '<option value="">Loading crews…</option>';
+        teamSelect.innerHTML = '<option value="" disabled selected>Loading crews…</option>';
         try{
           const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
           if(!res.ok) throw new Error('Could not fetch teams CSV');
@@ -319,13 +353,13 @@
 
           if(!TEAMS.length) throw new Error('No crews for this event');
 
-          teamSelect.innerHTML = '<option value="">Choose your crew…</option>' +
+          teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
             TEAMS.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
           showLoginInfo('');
           signinBtn.disabled = false;
         }catch(e){
           TEAMS = [];
-          teamSelect.innerHTML = '<option value="">—</option>';
+          teamSelect.innerHTML = '<option value="" disabled selected>—</option>';
           showLoginError('Couldn’t load crews. Refresh and try again.');
         }
       }
