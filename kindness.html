@@ -383,7 +383,7 @@
         if(!teams.length) throw new Error('No teams for this event');
 
         teamSelect.innerHTML =
-          `<option value="">Choose your crew… (${teams.length} found)</option>` +
+          `<option value="">Choose your crew… </option>` +
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
 
         clearSigninMsg();
