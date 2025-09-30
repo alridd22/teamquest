@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<!-- SUMMARY: iOS <select> fix only. Adds .tq-select class (appearance reset, Safari text color via -webkit-text-fill-color, custom chevron, placeholder :required:invalid). Updates placeholders in JS to use disabled+selected. No functionality changes. -->
+
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -16,6 +18,7 @@
       --gold:#F0C433; --gold-deep:#A7711F;
       --nav-h:64px; --gutter:22px; --hero-h:280px;
       --radius-card:22px; --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --accent:#1594d2;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
@@ -73,6 +76,33 @@
     .opt.good{background:linear-gradient(135deg,#29c74a,#17983a);color:#fff;border-color:#0b6f27}
     .opt.bad{background:linear-gradient(135deg,#d11,#a00909);color:#fff;border-color:#6b0000}
     .textAnswer{width:100%;padding:14px;border:3px solid var(--gold);border-radius:12px;font-size:18px;background:#fff}
+
+    /* ===== Unified <select> styling (fix iOS blue text) ===== */
+    .tq-select{
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+
+      padding:14px 44px 14px 12px; /* leave room for chevron */
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-fill-color:var(--ink); /* force Safari text color */
+      font:inherit; line-height:1.2;
+
+      border-radius:16px;
+      border:3px solid var(--gold);
+
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat;
+      background-position:right 12px center;
+      background-size:18px 18px;
+    }
+    .tq-select:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+    .tq-select:required:invalid{
+      color:rgba(0,0,0,.5);
+      -webkit-text-fill-color:rgba(0,0,0,.5);
+    }
+    .tq-select::-ms-expand{display:none;}
   </style>
 </head>
 <body>
@@ -115,8 +145,9 @@
 
       <div class="row">
         <label for="teamSelect">Select Your Crew</label>
-        <select id="teamSelect" class="field">
-          <option value="">Choose your treasure hunting crew…</option>
+        <!-- add tq-select + required for placeholder styling -->
+        <select id="teamSelect" class="tq-select" required>
+          <option value="" disabled selected>Loading crews…</option>
         </select>
       </div>
 
@@ -252,11 +283,11 @@
 
     async function loadTeams(){
       if (!EVENT_ID){
-        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
         setMsg(signMsg,'This page needs an event link (with ?event=...).','error');
         $('btnSign').disabled = true; return;
       }
-      teamSelect.innerHTML = '<option value="">Loading crews…</option>';
+      teamSelect.innerHTML = '<option value="" disabled selected>Loading crews…</option>';
       try{
         const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error('Could not fetch teams CSV');
@@ -278,12 +309,12 @@
 
         if(!teams.length) throw new Error('No teams for this event');
 
-        teamSelect.innerHTML = '<option value="">Choose your treasure hunting crew…</option>' +
+        teamSelect.innerHTML = '<option value="" disabled selected>Choose your treasure hunting crew…</option>' +
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
         clearMsg(signMsg);
       }catch(err){
         console.debug('[Quiz] loadTeams error:', err);
-        teamSelect.innerHTML = '<option value="">Couldn’t load crews</option>';
+        teamSelect.innerHTML = '<option value="" disabled selected>Couldn’t load crews</option>';
         setMsg(signMsg,'Unable to load crew list. Please refresh.','error');
       }
     }
@@ -368,7 +399,7 @@
         currentTeam = { code: localStorage.getItem('teamCode'), name: localStorage.getItem('teamName') };
         qIndex = 0; answers.length = 0; showQuestion();
       }catch(e){
-        if (e.code==='DUPLICATE'){ // already started elsewhere
+        if (e.code==='DUPLICATE'){
           setMsg(readyMsg,'Your crew has already started the quiz on another device. You can’t start again.','error');
         } else if (e.code==='CLOSED'){
           setMsg(readyMsg,'Quiz is closed for this event.','error');
