@@ -1,3 +1,5 @@
+<!-- SUMMARY: Fixes iOS blue text / native styling on the crew <select>. Adds .tq-select (appearance reset, Safari text color via -webkit-text-fill-color, placeholder :required:invalid, custom chevron, focus ring). Updates placeholder options in HTML/JS to use disabled+selected. No functionality changes. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,6 +20,7 @@
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --focus:0 0 0 3px rgba(240,196,51,.45);
       --gutter:22px; --hero-h:280px; --nav-h:64px;
+      --accent:#1594d2;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -70,6 +73,33 @@
     select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
     .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
     .small-btn{ background:linear-gradient(90deg,#FDBA2D,#F0C433); color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2) }
+
+    /* ===== Unified <select> styling (fix iOS blue text) ===== */
+    .tq-select{
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+
+      padding:14px 44px 14px 12px; /* space for chevron */
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-fill-color:var(--ink); /* force Safari text color */
+      font:inherit; line-height:1.2;
+
+      border-radius:var(--radius-input);
+      border:3px solid var(--gold);
+
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat;
+      background-position:right 12px center;
+      background-size:18px 18px;
+    }
+    .tq-select:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+    .tq-select:required:invalid{
+      color:rgba(0,0,0,.5);
+      -webkit-text-fill-color:rgba(0,0,0,.5);
+    }
+    .tq-select::-ms-expand{display:none;}
 
     /* Intro / instructions */
     .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:0 2px 8px rgba(0,0,0,.12) }
@@ -145,8 +175,8 @@
       <div class="auth-grid">
         <div>
           <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect" aria-label="Team list">
-            <option value="">Loading teams…</option>
+          <select id="teamSelect" class="tq-select" aria-label="Team list" required>
+            <option value="" disabled selected>Loading teams…</option>
           </select>
         </div>
         <div>
@@ -351,12 +381,13 @@
     // Load teams from published CSV
     async function loadTeams(){
       if (!EVENT_ID) {
-        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
         setSigninMsg('This page needs an event link. Ask your host for the correct URL (with ?event=...).', 'error');
         signinBtn?.setAttribute('disabled','disabled');
         return;
       }
       try{
+        teamSelect.innerHTML = `<option value="" disabled selected>Loading teams…</option>`;
         const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error('Could not fetch teams CSV');
         const csv = await res.text();
@@ -383,12 +414,12 @@
         if(!teams.length) throw new Error('No teams for this event');
 
         teamSelect.innerHTML =
-          `<option value="">Choose your crew… </option>` +
+          `<option value="" disabled selected>Choose your crew…</option>` +
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
 
         clearSigninMsg();
       }catch(e){
-        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
+        teamSelect.innerHTML = `<option value="" disabled selected>Couldn’t load teams</option>`;
         setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
         console.debug('[TeamQuest] loadTeams error:', e);
       }
