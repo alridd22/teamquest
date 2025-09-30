@@ -1,4 +1,4 @@
-<!-- SUMMARY: Normalizes <select> styling across iOS/Android. Adds .tq-select class with appearance reset, forces text color via -webkit-text-fill-color, placeholder :required:invalid state, custom chevron, and focus styles. Preserves all existing hooks/logic. -->
+<!-- SUMMARY: Removes the "Reload crews" button and its JS. Keeps unified <select> styling and existing logic intact. -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -194,7 +194,6 @@
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
         <button id="signinBtn" class="small-btn">🔓 Sign in</button>
-        <button id="refreshCrewsBtn" class="small-btn" style="background:#fff;border-color:#F0C433" type="button">⟳ Reload crews</button>
       </div>
       <div id="loginAlert" class="alert"></div>
     </section>
@@ -263,7 +262,7 @@
       })();
 
       const el = id => document.getElementById(id);
-      const loginAlert = el('loginAlert'), refreshCrewsBtn = el('refreshCrewsBtn');
+      const loginAlert = el('loginAlert');
       const teamSelect = el('teamSelect'), pinInput = el('pin'), signinBtn = el('signinBtn');
       const signedCard = el('signedCard'), crewStrip = el('crewStrip');
       const formCard = el('formCard'), formAlert = el('formAlert'), submitBtn = el('submitBtn');
@@ -297,7 +296,6 @@
       maybeShowForm();
 
       function wireUI(){
-        refreshCrewsBtn.addEventListener('click', loadCrews);
         signinBtn.addEventListener('click', onSignIn);
         pinInput.addEventListener('keydown', e=>{ if(e.key==='Enter') onSignIn(); });
         pickBtn.addEventListener('click', ()=> fileInput.click());
