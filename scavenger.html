@@ -125,6 +125,24 @@
   </header>
 
   <main class="stack">
+    <!-- NEW: Intro / Rules -->
+    <section class="card" aria-labelledby="how-title">
+      <h2 id="how-title">How it works</h2>
+      <div style="color:var(--ink-soft);font-weight:700;margin-bottom:10px">
+        Find items from the list below. Upload one photo per submit, tick what’s in the photo, and ship it!
+      </div>
+      <ul style="margin:0 0 10px 20px;line-height:1.6">
+        <li>Sign in with your crew + 4-digit PIN.</li>
+        <li>One submission per item per crew (duplicates won’t count).</li>
+        <li>Be kind to nature: no picking plants or disturbing wildlife.</li>
+        <li>Points are awarded after review. Check the leaderboard for updates.</li>
+      </ul>
+      <div style="margin-top:12px">
+        <div style="font-weight:900;margin-bottom:6px">Today’s list</div>
+        <ul id="itemsList" style="margin:0 0 0 20px;line-height:1.6"></ul>
+      </div>
+    </section>
+
     <!-- Sign in -->
     <section class="card auth-card" aria-live="polite">
       <h2>Sign in</h2>
@@ -227,7 +245,7 @@
 
       let TEAMS = [], signedTeam = null;
 
-      // Items (example items — keep your list)
+      // Items
       const ITEMS = [
         { id:'british_coin_2023', title:'Any British coin dated 2023' },
         { id:'paperclip',         title:'A Paperclip' },
@@ -240,6 +258,7 @@
       // Boot
       wireUI();
       renderItems();
+      renderIntroList();           // NEW: show item names in intro card
       loadCrews();
       hydrateFromStorage();
       maybeShowForm();
@@ -251,6 +270,13 @@
         pickBtn.addEventListener('click', ()=> fileInput.click());
         fileInput.addEventListener('change', onFilePicked);
         submitBtn.addEventListener('click', onSubmit);
+      }
+
+      // Intro list renderer (keeps intro in sync with ITEMS)
+      function renderIntroList(){
+        const ul = document.getElementById('itemsList');
+        if(!ul) return;
+        ul.innerHTML = ITEMS.map(i=>`<li>${escapeHtml(i.title)}</li>`).join('');
       }
 
       // ===== Teams from published CSV =====
