@@ -1,3 +1,5 @@
+<!-- SUMMARY: Fixes iOS blue text / native styling on the crew <select>. Adds .tq-select (appearance reset, Safari text color via -webkit-text-fill-color, placeholder :required:invalid, custom chevron, focus ring). Updates JS to render placeholder options with disabled+selected. No functionality changes. -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +18,7 @@
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --shadow-soft:0 6px 18px rgba(0,0,0,.12);
       --gutter:22px;
+      --accent:#1594d2;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -93,6 +96,33 @@
     .result.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .result.bad{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
     .cele{display:none;margin-top:18px;background:linear-gradient(135deg,#FFD700,#FFA500);border:4px solid var(--gold);border-radius:16px;padding:22px;text-align:center}
+
+    /* ===== Unified <select> styling (fix iOS blue text) ===== */
+    .tq-select{
+      -webkit-appearance:none;
+      -moz-appearance:none;
+      appearance:none;
+
+      padding:14px 44px 14px 14px; /* room for chevron */
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-fill-color:var(--ink); /* force Safari text color */
+      font:inherit; line-height:1.2;
+
+      border-radius:12px;
+      border:3px solid var(--gold);
+
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat;
+      background-position:right 12px center;
+      background-size:18px 18px;
+    }
+    .tq-select:focus{ outline:2px solid var(--accent); outline-offset:2px; }
+    .tq-select:required:invalid{
+      color:rgba(0,0,0,.5);
+      -webkit-text-fill-color:rgba(0,0,0,.5);
+    }
+    .tq-select::-ms-expand{display:none;}
   </style>
 </head>
 <body>
@@ -136,8 +166,8 @@
       </div>
 
       <label for="teamSelect">Select your crew</label>
-      <select id="teamSelect">
-        <option value="">Loading crews…</option>
+      <select id="teamSelect" class="tq-select" required>
+        <option value="" disabled selected>Loading crews…</option>
       </select>
 
       <label for="teamPin">Crew PIN</label>
@@ -280,11 +310,11 @@
 
     async function loadTeams(){
       if (!EVENT_ID){
-        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
         setMsg(loginMsg,'This page needs an event link (with ?event=...).','error');
         signinBtn.disabled = true; return;
       }
-      teamSelect.innerHTML = `<option value="">Loading crews…</option>`;
+      teamSelect.innerHTML = `<option value="" disabled selected>Loading crews…</option>`;
       try{
         const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error('Could not fetch teams CSV');
@@ -306,13 +336,13 @@
 
         if(!teams.length) throw new Error('No crews for this event');
 
-        teamSelect.innerHTML = '<option value="">Choose your crew…</option>' +
+        teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
           teams.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
         clearMsg(loginMsg);
         signinBtn.disabled = false;
       }catch(err){
         console.debug('[Clue] loadTeams error:', err);
-        teamSelect.innerHTML = `<option value="">—</option>`;
+        teamSelect.innerHTML = `<option value="" disabled selected>—</option>`;
         setMsg(loginMsg,'Unable to load crew list. Please refresh.','error');
       }
     }
@@ -463,7 +493,6 @@
       }catch(e){
         if (e.code === 'DUPLICATE'){
           // Server says this clue was already attempted: reflect as locked
-          // (don’t overwrite local state if already set)
         } else if (e.code === 'UNAUTHORIZED'){
           showResult('Session expired — sign in again before continuing.', false);
         } else if (e.code === 'CLOSED'){
