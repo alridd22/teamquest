@@ -1,5 +1,3 @@
-<!-- SUMMARY: Fixes iOS blue text / native styling on the crew <select>. Adds .tq-select with appearance reset, Safari text color via -webkit-text-fill-color, placeholder :required:invalid state, custom chevron, and focus ring. Updates placeholder options to use disabled+selected. No functional changes. -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -80,21 +78,18 @@
     .help{color:var(--ink-soft);font-size:.9rem}
     @media (min-width:480px){.brand-logo{width:min(280px,62vw)}}
 
-    /* ===== Unified <select> styling (fix iOS blue text) ===== */
+    /* Unified select styling (iOS text color fix) */
     .tq-select{
       -webkit-appearance:none;
       -moz-appearance:none;
       appearance:none;
-
-      padding:14px 44px 14px 12px; /* space for chevron */
+      padding:14px 44px 14px 12px;
       background:#fff;
       color:var(--ink);
-      -webkit-text-fill-color:var(--ink); /* force Safari text color */
+      -webkit-text-fill-color:var(--ink);
       font:inherit; line-height:1.2;
-
       border-radius:var(--radius-input);
       border:3px solid var(--gold);
-
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
       background-repeat:no-repeat;
       background-position:right 12px center;
@@ -154,7 +149,6 @@
       </div>
       <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
         <button id="signInBtn" class="btn">🔐 Sign in</button>
-        <button id="reloadCrews" class="btn small" type="button">↻ Reload crews</button>
       </div>
       <div id="signMsg" class="message"></div>
     </section>
@@ -192,22 +186,19 @@
   </main>
 
   <script>
-    // ===== Config (EXACTLY like Kindness/Scavenger) =====
     const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
     (function(){
-      // Basic refs
       const $ = s => document.querySelector(s);
       const teamSelect = $('#teamSelect');
       const pinInput   = $('#pinInput');
       const signBtn    = $('#signInBtn');
-      const reloadBtn  = $('#reloadCrews');
       const signMsg    = $('#signMsg');
 
       const qs = new URLSearchParams(location.search);
       const EVENT_ID = (qs.get('event') || qs.get('eventId') || '').trim();
 
-      // Keep ?event= on all menu links (same pattern used elsewhere)
+      // Persist ?event= across nav links
       (function persistEventOnLinks(){
         if (!EVENT_ID) return;
         const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
@@ -224,7 +215,7 @@
         });
       })();
 
-      // Mobile nav toggle
+      // Mobile nav
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
       navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
@@ -233,16 +224,17 @@
         if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
       });
 
-      // State
       const state = { crews:[], signed:false, teamCode:'', teamName:'' };
 
-      // Small helpers
-      function showMsg(node, text, ok=false){ node.textContent=text; node.className='message ' + (ok?'ok':'err'); node.style.display='block'; }
-      function clearMsg(node){ node.style.display='none'; }
+      function showMsg(node, text, ok=false){ 
+        const el = typeof node === 'string' ? document.querySelector(node) : node;
+        el.textContent=text; el.className='message ' + (ok?'ok':'err'); el.style.display='block'; 
+      }
+      function clearMsg(node){ const el = typeof node === 'string' ? document.querySelector(node) : node; el.style.display='none'; }
       function lockForm(disabled=true){ $("#topic").disabled=disabled; $("#limerick").disabled=disabled; $("#submitBtn").disabled=disabled; }
       function setCrewStrip(){ if(state.teamName){ $("#crewName").textContent=state.teamName; $("#crewStrip").style.display='block'; } }
 
-      // ===== CSV parser =====
+      // CSV parser
       function parseCsv(text){
         const rows=[]; let i=0,cur='',row=[],inQ=false;
         while(i<text.length){
@@ -256,14 +248,16 @@
       }
       function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
 
-      // ===== Team loading =====
+      // Team loading
       async function loadCrews(){
         teamSelect.innerHTML = '<option value="" disabled selected>Loading crews…</option>';
         clearMsg(signMsg);
 
         if(!EVENT_ID){
           teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
-          showMsg(signMsg,'This page needs an event link (with ?event=...).'); signBtn.disabled=true; return;
+          showMsg(signMsg,'This page needs an event link (with ?event=...).'); 
+          signBtn.disabled=true; 
+          return;
         }
 
         try{
@@ -297,10 +291,10 @@
         }
       }
 
-      // ===== Sign in (same endpoint you use elsewhere)
+      // Sign in
       async function signIn(){
         clearMsg(signMsg);
-        const teamCode = teamSelect.value.trim();
+        const teamCode = (teamSelect.value || '').trim();
         const pin = (pinInput.value||'').trim();
         if(!teamCode) return showMsg(signMsg,'Pick your crew first.');
         if(!/^\d{4}$/.test(pin)) return showMsg(signMsg,'Enter a 4-digit PIN.');
@@ -334,9 +328,9 @@
       // Character counter
       $('#limerick').addEventListener('input',()=>{ $('#charCount').textContent = ($('#limerick').value||'').length; });
 
-      // Submit limerick (unchanged)
+      // Submit limerick
       $('#limerickForm').addEventListener('submit', async (e)=>{
-        e.preventDefault(); clearMsg($('#formMsg'));
+        e.preventDefault(); clearMsg('#formMsg');
         if(!state.signed) return showMsg('#formMsg','Please sign in first.');
         const text = ($('#limerick').value||'').trim();
         if(text.length<20) return showMsg('#formMsg','Write at least 20 characters.');
@@ -353,12 +347,11 @@
         }finally{ $('#busy').style.display='none'; }
       });
 
-      // Wire buttons + load
+      // Wire + load
       signBtn.addEventListener('click', signIn);
-      reloadBtn.addEventListener('click', loadCrews);
       pinInput.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
-      loadCrews(); // initial
+      loadCrews();
     })();
   </script>
 </body>
