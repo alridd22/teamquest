@@ -103,11 +103,28 @@
     .fill{position:absolute;inset:0 0 0 0;transform-origin:left center;background:linear-gradient(135deg,#FFD700,#FFA500)}
     .progress-text{margin-top:8px;text-align:center;font-family:var(--font-handlee);font-weight:700;color:#6A5A47}
 
-    /* Clue grid — always 1 column (iOS + Android) */
+    /* Clue grid — ALWAYS 1 column */
     .grid{display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0}
-    .clue{position:relative;border:4px solid #5b3512;border-radius:20px;padding:18px 18px 18px 58px;background:linear-gradient(135deg,#FF7B47,#D12A2A);
-      color:#fff;font-weight:900;text-align:center;cursor:pointer;box-shadow:var(--shadow-soft);font-family:var(--font-handlee);font-size:20px}
-    .clue::before{content:"";position:absolute;left:14px;top:50%;transform:translateY(-50%);width:28px;height:28px;background:url("/Red%20Diamond.png") center/contain no-repeat}
+
+    /* CLUE BUTTONS
+       - Untried: orange
+       - Completed: green
+       - Incorrect: red
+       Text is truly centered; diamond no longer shifts it. */
+    .clue{
+      position:relative; min-height:64px;
+      display:flex; align-items:center; justify-content:center;
+      border:4px solid #5b3512; border-radius:20px;
+      padding:18px; /* no left-bias padding */
+      background:linear-gradient(135deg,#FFAB2E,#DAA520); /* ORANGE for untried */
+      color:#fff; font-weight:900; text-align:center; cursor:pointer;
+      box-shadow:var(--shadow-soft); font-family:var(--font-handlee); font-size:20px;
+    }
+    .clue::before{
+      content:""; position:absolute; left:14px; top:50%; transform:translateY(-50%);
+      width:28px; height:28px; background:url("/Red%20Diamond.png") center/contain no-repeat;
+      pointer-events:none;
+    }
     .clue:hover{transform:translateY(-1px)}
     .clue.completed{background:linear-gradient(135deg,#29c74a,#17983a);border-color:#0b6f27;cursor:not-allowed}
     .clue.incorrect{background:linear-gradient(135deg,#d11,#a00909);border-color:#6b0000;cursor:not-allowed}
@@ -133,7 +150,6 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <!-- exclude current page -->
       <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
@@ -151,7 +167,7 @@
 
   <!-- CONTENT -->
   <main class="stack">
-    <!-- Sign-in card (title removed per designer) -->
+    <!-- Sign-in card -->
     <section class="card" id="loginSection">
       <div class="intro">
         <p>Solve clues in any order. Each correct answer earns hidden points.</p>
@@ -191,7 +207,6 @@
       <div id="clueSection" class="panel" style="display:none">
         <div class="row">
           <div id="clueNumber" class="clue-title">Clue #</div>
-          <!-- Back button is only shown BEFORE answering; hidden after submit -->
           <button id="btnBackToMap" class="btn btn-secondary" type="button" onclick="showClueGrid()">← Back to clues</button>
         </div>
 
@@ -200,8 +215,6 @@
         <button id="submitAnswerBtn" class="btn" type="button">Claim treasure</button>
 
         <div id="resultMessage" class="result"></div>
-
-        <!-- After answering, this is the only navigation button -->
         <button id="continueBtn" class="btn btn-secondary" type="button" style="display:none">Back to clues</button>
       </div>
 
@@ -214,7 +227,6 @@
   </main>
 
   <script>
-    // ===== Config =====
     const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
     // nav + persist event
@@ -438,7 +450,7 @@
       answerInput.value = '';
       resultMessage.className = 'result'; resultMessage.style.display = 'none';
       continueBtn.style.display = 'none';
-      submitAnswerBtn.style.display = 'flex'; // ensure visible when entering
+      submitAnswerBtn.style.display = 'flex';
       btnBackToMap.style.display = 'inline-flex';
 
       clueGridSection.style.display = 'none';
@@ -459,10 +471,10 @@
       if(!val){ showResult('Please enter an answer.', false); return; }
       if(!currentClue){ showResult('No clue selected.', false); return; }
 
-      // lock claim button immediately (and hide it per designer)
+      // lock claim button immediately (and hide it)
       submitAnswerBtn.disabled = true;
       submitAnswerBtn.style.display = 'none';
-      btnBackToMap.style.display = 'none';      // remove the “Back to map” after answering
+      btnBackToMap.style.display = 'none';
       continueBtn.style.display = 'inline-flex';
 
       const user = normalize(val);
@@ -491,7 +503,6 @@
         updateProgress();
       }
 
-      // send to backend (server enforces one attempt per clue)
       try{
         await callFn('submit_cluehunt_function', {
           eventId: EVENT_ID,
@@ -502,9 +513,7 @@
           points: completedClues[currentClue.id].points,
           currentScore, wasCorrect: completedClues[currentClue.id].wasCorrect
         });
-      }catch(e){
-        // keep UI state; messaging handled already
-      }
+      }catch(e){}
     }
     submitAnswerBtn.addEventListener('click', submitAnswer);
     answerInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') submitAnswer(); });
@@ -537,7 +546,6 @@
       progressText.textContent = `${correct}/20 Solved • ${attempted} Explored`;
     }
 
-    // ===== Persistence / backend
     async function loadPreviousAttempts(){
       completedClues = {}; currentScore = 0;
       const code = localStorage.getItem('teamCode');
@@ -575,7 +583,6 @@
     // boot
     loadTeams();
 
-    // Helpers
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   </script>
 </body>
