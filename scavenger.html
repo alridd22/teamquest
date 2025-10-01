@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18"/>
   <title>TeamQuest – The Scavenger Hunt</title>
-
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
-
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
@@ -21,7 +19,6 @@
       --shadow-soft:0 8px 18px rgba(0,0,0,.18);
       --gutter:22px; --accent:#1594d2;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -99,7 +96,7 @@
     .uploadBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:12px;border:2px solid var(--brown-2);background:linear-gradient(135deg,#6b4a3a,#7a5241);color:#fff;font-weight:900;box-shadow:var(--shadow-soft)}
     .items-title{font-family:"Handlee";font-size:22px;font-weight:900;text-align:center;margin:6px 0 10px;color:#402a12}
 
-    /* GRID – ONE clear way to select */
+    /* GRID – clear selection */
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     @media (min-width:880px){ .grid{grid-template-columns:repeat(3,1fr)} }
 
@@ -249,7 +246,7 @@
         body: method==='GET'?undefined:JSON.stringify(payload), keepalive:true
       });
       let data={}; try{ data=await res.json(); }catch{}
-      if(!res.ok || data.success===false){ const err=new Error(data.message||('HTTP '+res.status)); err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR'); throw err; }
+      if(!res.ok || data.success===false){ const err=new Error(data.message||('HTTP '+res.status)); err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR'); err.data=data; throw err; }
       return data;
     }
 
@@ -359,26 +356,52 @@
       reader.readAsDataURL(file);
     });
 
-    // ===== Submit
+    // ===== Submit (compat-safe)
     async function submitFind(){
       submitBtn.disabled=true; submitNote.style.display='none';
+
       if(!photoData){ submitBtn.disabled=false; alert('Please upload a photo.'); return; }
       if(!selected.size){ submitBtn.disabled=false; alert('Tap the item tiles to select.'); return; }
+
+      const arr = Array.from(selected);
+      const first = arr[0] || '';
+
+      const payload = {
+        eventId: EVENT_ID,
+        teamCode: localStorage.getItem('teamCode'),
+        teamName: localStorage.getItem('teamName'),
+
+        // arrays (multiple names for compatibility)
+        items: arr,
+        selectedItems: arr,
+        selections: arr,
+        answers: arr,
+        itemIds: arr,
+
+        // single aliases (in case backend expects exactly one)
+        item: first,
+        itemId: first,
+        firstItem: first,
+
+        // photo under several common names
+        photoPreview: photoData.slice(0, 200000),
+        photoData: photoData,
+        photo: photoData,
+        imageData: photoData,
+        base64: photoData
+      };
+
       try{
-        await callFn('submit_scavenger_function',{
-          eventId:EVENT_ID,
-          teamCode:localStorage.getItem('teamCode'),
-          teamName:localStorage.getItem('teamName'),
-          items:Array.from(selected),
-          photoPreview:photoData.slice(0,200000)
-        });
+        const res = await callFn('submit_scavenger_function', payload);
+        // if your function returns success, show note
         submitNote.style.display='block';
         selected.clear(); renderItems();
       }catch(e){
-        if(e.code==='UNAUTHORIZED') alert('Session expired — sign in again.');
-        else if(e.code==='RATE_LIMITED') alert('Too many attempts — please wait and try again.');
-        else alert('Couldn’t submit right now.');
-      }finally{ submitBtn.disabled=false; }
+        const msg = (e && (e.data?.message || e.message)) || 'Couldn’t submit right now.';
+        alert(msg);
+      }finally{
+        submitBtn.disabled=false;
+      }
     }
     $('submitBtn').addEventListener('click', submitFind);
 
