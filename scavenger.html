@@ -6,30 +6,26 @@
   <meta name="theme-color" content="#2A1F18"/>
   <title>TeamQuest – The Scavenger Hunt</title>
 
-  <!-- Handlee for headings + inputs + iOS; Interop stack for body -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
 
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
-      --parchment:#F7EED8; --parchment-2:#F3E6CF;
-      --cream:#FBF3E1;
-      --gold:#F0C433; --gold-deep:#A7711F;
-      --amber:#FFB62E; --amber-2:#F3A621;
-      --green:#26A866; --green-2:#13884F;
+      --parchment:#F7EED8; --parchment-2:#F3E6CF; --cream:#FBF3E1;
+      --gold:#F0C433; --amber:#FFB62E;
+      --green:#2ba05f; --green-2:#13884F;
       --brown:#8B4513; --brown-2:#5b3512;
-      --nav-h:64px; --radius-card:22px; --radius-sm:14px;
+      --nav-h:64px; --radius-card:22px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --shadow-soft:0 8px 18px rgba(0,0,0,.18);
-      --gutter:22px;
-      --accent:#1594d2;
+      --gutter:22px; --accent:#1594d2;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; color:var(--ink);
+      margin:0;color:var(--ink);
       font-family:ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover;background-position:top center;background-attachment:fixed;
@@ -44,7 +40,7 @@
       background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
-    .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .nav-logo img{height:40px;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
@@ -69,77 +65,65 @@
       max-width:980px;margin:0 auto 18px;
     }
 
-    /* Sign-in slice (first screen only) */
-    .sign-title{margin:0 0 10px;font-weight:900;color:var(--ink)}
+    /* Sign in */
     .label{display:block;margin:12px 0 6px;font-weight:900;color:var(--ink)}
-    .input, .tq-select{
-      width:100%;padding:14px;border:3px solid var(--gold);
-      border-radius:16px;background:#fff;font-size:18px;
+    .input,.tq-select{
+      width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;background:#fff;font-size:18px;
       font-family:"Handlee",ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       color:var(--ink);-webkit-text-fill-color:var(--ink);
     }
     .tq-select{
-      -webkit-appearance:none;-moz-appearance:none;appearance:none;
-      padding-right:44px;
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;padding-right:44px;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
       background-repeat:no-repeat;background-position:right 12px center;background-size:18px 18px;
     }
     .tq-select:required:invalid{color:rgba(0,0,0,.5);-webkit-text-fill-color:rgba(0,0,0,.5)}
     .pin{text-align:center;letter-spacing:3px}
     .btn{
-      display:flex;align-items:center;justify-content:center;gap:10px;
-      width:100%;padding:16px;border-radius:16px;border:2px solid var(--brown-2);
-      background:linear-gradient(135deg,#FF8C00,#DAA520);color:#442812;font-weight:900;cursor:pointer;
-      box-shadow:var(--shadow-soft);font-size:20px
+      display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:16px;border-radius:16px;border:2px solid var(--brown-2);
+      background:linear-gradient(135deg,#FF8C00,#DAA520);color:#442812;font-weight:900;cursor:pointer;box-shadow:var(--shadow-soft);font-size:20px
     }
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .msg{display:none;margin-top:12px;padding:12px;border-radius:12px;border:2px solid}
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .msg.err{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
 
-    /* AFTER SIGN-IN (main hunt UI) */
-    .pill{
-      background:linear-gradient(135deg,#FFB62E,#F0C433);
-      border:3px solid var(--brown);
-      color:#fff; font-weight:900; border-radius:16px;text-align:center;padding:14px;
-      box-shadow:var(--shadow-soft);
-    }
-    .rules-card{
-      background:linear-gradient(145deg,#FFF5DE,#F2E6CF);
-      border:1px solid rgba(0,0,0,.06);
-      border-radius:18px;padding:16px;
-    }
+    /* After sign in */
+    .pill{background:linear-gradient(135deg,#FFB62E,#F0C433);border:3px solid var(--brown);color:#fff;font-weight:900;border-radius:16px;text-align:center;padding:14px;box-shadow:var(--shadow-soft)}
+    .rules-card{background:linear-gradient(145deg,#FFF5DE,#F2E6CF);border:1px solid rgba(0,0,0,.06);border-radius:18px;padding:16px}
     .rule{background:#F2E4C8;border:2px solid #E4C27A;border-radius:14px;padding:14px 16px;margin:10px 0;font-weight:700}
-    .uploadWrap{
-      background:linear-gradient(145deg,#FBF3E1,#F6E9D2);
-      border-radius:18px;padding:16px;border:1px solid rgba(0,0,0,.08);
-    }
-    .drop{
-      border:3px dashed #a7740b;border-radius:16px;padding:18px;text-align:center;
-      background:#fffaf0;
-    }
+    .uploadWrap{background:linear-gradient(145deg,#FBF3E1,#F6E9D2);border-radius:18px;padding:16px;border:1px solid rgba(0,0,0,.08)}
+    .drop{border:3px dashed #a7740b;border-radius:16px;padding:18px;text-align:center;background:#fffaf0}
     .drop.ok{border-color:#2d9a57;background:#eefaf3}
     .drop small{display:block;margin-top:8px;color:#7a6a54}
-    .uploadBtn{
-      display:inline-flex;align-items:center;justify-content:center;gap:8px;
-      padding:12px 18px;border-radius:12px;border:2px solid var(--brown-2);
-      background:linear-gradient(135deg,#6b4a3a,#7a5241);color:#fff;font-weight:900;box-shadow:var(--shadow-soft)
-    }
-    .items-title{font-family:"Handlee",ui-rounded,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:22px;font-weight:900;text-align:center;margin:6px 0 10px;color:#402a12}
+    .uploadBtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 18px;border-radius:12px;border:2px solid var(--brown-2);background:linear-gradient(135deg,#6b4a3a,#7a5241);color:#fff;font-weight:900;box-shadow:var(--shadow-soft)}
+    .items-title{font-family:"Handlee";font-size:22px;font-weight:900;text-align:center;margin:6px 0 10px;color:#402a12}
+
+    /* GRID – ONE clear way to select */
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    @media (min-width:880px){ .grid{grid-template-columns:repeat(3,1fr)} } /* still feels single-column on phones */
+    @media (min-width:880px){ .grid{grid-template-columns:repeat(3,1fr)} }
+
     .tile{
-      background:#fff;border:2px solid #CFA44D;border-radius:16px;padding:12px;position:relative;display:flex;flex-direction:column;align-items:center;gap:8px
+      position:relative;background:#fff;border:2px solid #CFA44D;border-radius:16px;padding:12px;
+      display:flex;flex-direction:column;align-items:center;gap:8px;
+      transition:border-color .15s, box-shadow .15s, background .15s;
     }
     .tile img{width:120px;height:auto;display:block;filter:drop-shadow(0 2px 6px rgba(0,0,0,.15))}
-    .tile label{display:flex;align-items:center;gap:8px;position:absolute;left:10px;top:10px;font-weight:800;color:#5b3a12}
-    .tile input[type="checkbox"]{width:22px;height:22px;border:2px solid #6f4b17;border-radius:6px;appearance:none;background:#fff}
-    .tile input[type="checkbox"]:checked{background:#2ba05f;border-color:#2ba05f;box-shadow:0 0 0 2px #eaf7f0 inset}
     .tile .cap{font-weight:900;text-align:center;color:#442f14}
+    .tile:focus{outline:3px solid var(--accent);outline-offset:3px}
+    .tile .tick{
+      position:absolute;left:10px;top:10px;width:28px;height:28px;border:2px solid #6f4b17;border-radius:8px;background:#fff;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .tile.selected{border-color:var(--green);box-shadow:inset 0 0 0 2px rgba(43,160,95,.15)}
+    .tile.selected .tick{border-color:var(--green);background:var(--green)}
+    .tile.selected .tick::after{
+      content:"";width:14px;height:8px;border-left:3px solid #fff;border-bottom:3px solid #fff;transform:rotate(-45deg);margin-top:-2px;
+    }
+    .tile[role="checkbox"]{cursor:pointer}
     .submitRow{display:flex;justify-content:center;margin-top:12px}
     .note{margin-top:12px;padding:12px;border-radius:12px;border:2px solid #2ba05f;background:#e9f9ef;color:#136b3f;text-align:center;font-weight:800;display:none}
 
-    /* a11y focus */
     .tq-select:focus,.input:focus,.btn:focus{outline:3px solid var(--accent);outline-offset:2px}
   </style>
 </head>
@@ -153,7 +137,6 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <!-- list other pages, current excluded -->
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
@@ -170,9 +153,9 @@
   </header>
 
   <main class="stack">
-    <!-- SIGN IN (first screen only) -->
+    <!-- SIGN IN -->
     <section class="card" id="secSign">
-      <h1 class="sign-title handlee" style="font-size:22px">Sign in</h1>
+      <h1 class="handlee" style="margin:0 0 10px;font-size:22px">Sign in</h1>
 
       <label class="label handlee" for="teamSelect">Crew Name</label>
       <select id="teamSelect" class="tq-select handlee" required>
@@ -187,7 +170,7 @@
       <div id="signMsg" class="msg" role="status" aria-live="polite"></div>
     </section>
 
-    <!-- HUNT (revealed after sign-in) -->
+    <!-- HUNT -->
     <section class="card" id="secHunt" style="display:none">
       <div id="signedBanner" class="msg ok handlee" style="display:block;margin-top:0">
         ✅ Signed in. You can submit now!
@@ -216,9 +199,7 @@
       <div style="height:14px"></div>
       <div class="items-title">Pick what applies</div>
 
-      <div class="grid" id="itemsGrid">
-        <!-- tiles injected -->
-      </div>
+      <div class="grid" id="itemsGrid"></div>
 
       <div class="submitRow">
         <button id="submitBtn" class="btn handlee" style="max-width:320px">Submit find</button>
@@ -229,76 +210,50 @@
   </main>
 
   <script>
-    // ===== Config =====
+    // ===== Config
     const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
     // ===== Nav + keep ?event=
     (function(){
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu   = document.getElementById('nav-menu');
-      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
-      document.addEventListener('click',e=>{
-        const inside = navToggle?.contains(e.target)||navMenu?.contains(e.target);
-        if(!inside && navMenu?.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-      });
-
-      const qs = new URLSearchParams(location.search);
-      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+      const navToggle=document.getElementById('nav-toggle'); const navMenu=document.getElementById('nav-menu');
+      navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
+      document.addEventListener('click',e=>{ const inside=navToggle?.contains(e.target)||navMenu?.contains(e.target); if(!inside&&navMenu?.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}});
+      const qs=new URLSearchParams(location.search); const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
       if(EVENT_ID){
-        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
-        anchors.forEach(a=>{
-          try{
-            const u = new URL(a.getAttribute('href'), location.origin);
-            if(!needsEvent.some(p=>u.pathname.endsWith(p))) return;
-            if(!u.searchParams.get('event')){
-              u.searchParams.set('event', EVENT_ID);
-              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
-            }
-          }catch{}
+        const needs=['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+        document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
+          try{const u=new URL(a.getAttribute('href'),location.origin); if(!needs.some(p=>u.pathname.endsWith(p))) return; if(!u.searchParams.get('event')){u.searchParams.set('event',EVENT_ID); a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);} }catch{}
         });
       }
     })();
 
-    // ===== Helpers =====
+    // ===== Helpers
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-
     const $ = (id)=>document.getElementById(id);
-    const teamSelect = $('teamSelect'), teamPin = $('teamPin'), btnSign = $('btnSign');
-    const secSign = $('secSign'), secHunt = $('secHunt');
-    const signMsg = $('signMsg'), crewPill=$('crewPill');
-    const fileInput=$('fileInput'), pickBtn=$('pickBtn'), fileStatus=$('fileStatus'), drop=$('drop');
+
+    const teamSelect=$('teamSelect'), teamPin=$('teamPin'), btnSign=$('btnSign'), signMsg=$('signMsg');
+    const secSign=$('secSign'), secHunt=$('secHunt'), crewPill=$('crewPill');
+    const pickBtn=$('pickBtn'), fileInput=$('fileInput'), fileStatus=$('fileStatus'), drop=$('drop');
     const submitBtn=$('submitBtn'), submitNote=$('submitNote');
 
     function setMsg(el, text, kind='error'){ el.textContent=text; el.className='msg ' + (kind==='error'?'err':'ok'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
-
     const token = ()=> localStorage.getItem('teamToken') || '';
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
-
-    async function callFn(name, payload = {}, method='POST'){
-      const url='/.netlify/functions/'+name + (method==='GET' ? ('?'+new URLSearchParams(payload)) : '');
+    async function callFn(name, payload={}, method='POST'){
+      const url='/.netlify/functions/'+name + (method==='GET'?('?'+new URLSearchParams(payload)):'');
       const res = await fetch(url,{
         method,
-        headers:{
-          'Content-Type':'application/json',
-          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
-          'Idempotency-Key': uuidv4()
-        },
-        body: method==='GET'?undefined:JSON.stringify(payload),
-        keepalive:true
+        headers:{'Content-Type':'application/json',...(token()? {'Authorization':`Bearer ${token()}`} : {}), 'Idempotency-Key':uuidv4()},
+        body: method==='GET'?undefined:JSON.stringify(payload), keepalive:true
       });
-      let data={}; try{ data = await res.json(); }catch{}
-      if(!res.ok || data.success===false){
-        const err = new Error(data.message || ('HTTP '+res.status));
-        err.code = data.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
-        throw err;
-      }
+      let data={}; try{ data=await res.json(); }catch{}
+      if(!res.ok || data.success===false){ const err=new Error(data.message||('HTTP '+res.status)); err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR'); throw err; }
       return data;
     }
 
-    // ===== CSV teams loader (same as other pages)
+    // ===== CSV teams
     function parseCsv(text){
       const rows=[]; let i=0,cur='',row=[],inQ=false;
       while(i<text.length){
@@ -310,151 +265,128 @@
       if(cur.length||row.length){ row.push(cur); rows.push(row); }
       return rows;
     }
-
     async function loadTeams(){
       if(!EVENT_ID){
-        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
-        setMsg(signMsg,'This page needs an event link (with ?event=...).','error');
-        btnSign.disabled = true; return;
+        teamSelect.innerHTML=`<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        setMsg(signMsg,'This page needs an event link (with ?event=...).','error'); btnSign.disabled=true; return;
       }
-      teamSelect.innerHTML = `<option value="" disabled selected>Loading crews…</option>`;
+      teamSelect.innerHTML=`<option value="" disabled selected>Loading crews…</option>`;
       try{
-        const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`,{cache:'no-store'});
+        const res=await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`,{cache:'no-store'});
         if(!res.ok) throw new Error('Could not fetch teams CSV');
-        const rows = parseCsv(await res.text());
-        if(!rows.length) throw new Error('Empty CSV');
-
-        const header = rows[0].map(h=>String(h||'').trim().toLowerCase());
-        const idx=(n)=> header.indexOf(n.toLowerCase());
+        const rows=parseCsv(await res.text()); if(!rows.length) throw new Error('Empty CSV');
+        const header=rows[0].map(h=>String(h||'').trim().toLowerCase());
+        const idx=n=>header.indexOf(n.toLowerCase());
         const iCode=idx('team code'), iName=idx('team name'), iEvent=idx('event id');
         if(iCode===-1||iEvent===-1) throw new Error('CSV missing required headers');
-
-        const wanted = String(EVENT_ID).toUpperCase();
-        const teams = rows.slice(1).map(r=>({
-          teamCode:String(r[iCode]||'').trim(),
-          teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
-          eventId:String(r[iEvent]||'').trim().toUpperCase()
-        })).filter(t=>t.teamCode&&t.eventId===wanted)
-          .sort((a,b)=>a.teamName.localeCompare(b.teamName));
+        const wanted=String(EVENT_ID).toUpperCase();
+        const teams=rows.slice(1).map(r=>({teamCode:String(r[iCode]||'').trim(), teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(), eventId:String(r[iEvent]||'').trim().toUpperCase()}))
+          .filter(t=>t.teamCode&&t.eventId===wanted).sort((a,b)=>a.teamName.localeCompare(b.teamName));
         if(!teams.length) throw new Error('No crews for this event');
-
-        teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
-          teams.map(t=>`<option value="${esc(t.teamCode)}">${esc(t.teamName)}</option>`).join('');
+        teamSelect.innerHTML='<option value="" disabled selected>Choose your crew…</option>'+teams.map(t=>`<option value="${esc(t.teamCode)}">${esc(t.teamName)}</option>`).join('');
         clearMsg(signMsg); btnSign.disabled=false;
       }catch(err){
         console.debug('[Scavenger] loadTeams error:',err);
-        teamSelect.innerHTML = `<option value="" disabled selected>—</option>`;
+        teamSelect.innerHTML=`<option value="" disabled selected>—</option>`;
         setMsg(signMsg,'Unable to load crew list. Please refresh.','error');
       }
     }
 
-    // ===== Sign-in flow
+    // ===== Sign in
     async function signIn(){
       clearMsg(signMsg);
-      const code = teamSelect.value;
-      const pin  = (teamPin.value||'').trim();
+      const code=teamSelect.value; const pin=(teamPin.value||'').trim();
       if(!code) return setMsg(signMsg,'Pick your crew from the list.','error');
       if(!/^\d{4}$/.test(pin)) return setMsg(signMsg,'Enter your 4-digit PIN.','error');
-
       try{
-        const res = await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
-        if(!res.success || !res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
-        if(res.token) localStorage.setItem('teamToken', res.token);
-        localStorage.setItem('teamCode', code);
+        const res=await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
+        if(!res.success||!res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
+        if(res.token) localStorage.setItem('teamToken',res.token);
+        localStorage.setItem('teamCode',code);
         localStorage.setItem('teamName', teamSelect.options[teamSelect.selectedIndex]?.textContent || res.teamName || '');
-        crewPill.textContent = localStorage.getItem('teamName') || '—';
-
-        // reveal main UI
-        secSign.style.display='none';
-        secHunt.style.display='block';
-      }catch(err){
-        setMsg(signMsg, err.message||'Could not sign you in. Try again.','error');
-      }
+        crewPill.textContent=localStorage.getItem('teamName')||'—';
+        secSign.style.display='none'; secHunt.style.display='block';
+      }catch(err){ setMsg(signMsg, err.message||'Could not sign you in. Try again.','error'); }
     }
-    btnSign.addEventListener('click', signIn);
-    teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
+    $('btnSign').addEventListener('click',signIn);
+    $('teamPin').addEventListener('keydown',e=>{ if(e.key==='Enter') signIn(); });
 
-    // ===== Items grid
+    // ===== Items grid (custom selectable tiles)
     const items = [
-      { id:'coin',       label:'Any British coin\ndated 2023', img:'/Coin-100.jpg' },
-      { id:'paperclip',  label:'A Paperclip',                  img:'/Paperclip-100.jpg' },
-      { id:'snail',      label:'A Snail Shell',                img:'/Snail Shell-100.jpg' },
-      { id:'feather',    label:'A Feather',                    img:'/Feather-100.jpg' },
-      { id:'band',       label:'An Elastic Band',              img:'/Elastic Band-100.jpg' },
-      { id:'tee',        label:'A Golf Tee',                   img:'/Tee-100.jpg' },
+      { id:'coin',      label:'Any British coin\ndated 2023', img:'/Coin-100.jpg' },
+      { id:'paperclip', label:'A Paperclip',                  img:'/Paperclip-100.jpg' },
+      { id:'snail',     label:'A Snail Shell',                img:'/Snail Shell-100.jpg' },
+      { id:'feather',   label:'A Feather',                    img:'/Feather-100.jpg' },
+      { id:'band',      label:'An Elastic Band',              img:'/Elastic Band-100.jpg' },
+      { id:'tee',       label:'A Golf Tee',                   img:'/Tee-100.jpg' },
     ];
     const selected = new Set();
 
     function renderItems(){
-      const grid = $('itemsGrid');
-      grid.innerHTML = '';
-      items.forEach((it, idx)=>{
-        const id = 'cb_'+it.id;
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.innerHTML = `
-          <label for="${id}" class="handlee"><input id="${id}" type="checkbox" ${selected.has(it.id)?'checked':''}/> </label>
+      const grid=$('itemsGrid'); grid.innerHTML='';
+      items.forEach(it=>{
+        const tile=document.createElement('div');
+        tile.className='tile';
+        tile.setAttribute('tabindex','0');
+        tile.setAttribute('role','checkbox');
+        tile.setAttribute('aria-checked','false');
+        tile.dataset.id = it.id;
+        tile.innerHTML=`
+          <div class="tick" aria-hidden="true"></div>
           <img alt="" src="${it.img}">
           <div class="cap handlee" style="white-space:pre-line">${it.label}</div>
         `;
-        tile.querySelector('input').addEventListener('change', (e)=>{
-          if(e.target.checked) selected.add(it.id); else selected.delete(it.id);
-        });
+        function toggle(){
+          const on = !selected.has(it.id);
+          if(on){ selected.add(it.id); tile.classList.add('selected'); }
+          else  { selected.delete(it.id); tile.classList.remove('selected'); }
+          tile.setAttribute('aria-checked', on ? 'true' : 'false');
+        }
+        tile.addEventListener('click', toggle);
+        tile.addEventListener('keydown', e=>{ if(e.key===' '||e.key==='Enter'){ e.preventDefault(); toggle(); }});
         grid.appendChild(tile);
       });
     }
 
-    // ===== File picker (simple preview tag only)
-    let photoData = '';
-    pickBtn.addEventListener('click', ()=> fileInput.click());
-    fileInput.addEventListener('change', ()=>{
-      const file = fileInput.files?.[0];
-      if(!file){ fileStatus.textContent='Upload Photo'; drop.classList.remove('ok'); photoData=''; return; }
-      // small data URL preview (limit ~200KB to avoid huge payloads)
-      const reader = new FileReader();
-      reader.onload = ()=> {
-        photoData = String(reader.result || '');
-        fileStatus.textContent = '✅ ' + (file.name || 'Image');
-        drop.classList.add('ok');
-      };
+    // ===== File picker
+    let photoData='';
+    $('pickBtn').addEventListener('click',()=> $('fileInput').click());
+    $('fileInput').addEventListener('change', ()=>{
+      const file=$('fileInput').files?.[0];
+      if(!file){ $('fileStatus').textContent='Upload Photo'; $('drop').classList.remove('ok'); photoData=''; return; }
+      const reader=new FileReader();
+      reader.onload=()=>{ photoData=String(reader.result||''); $('fileStatus').textContent='✅ '+(file.name||'Image'); $('drop').classList.add('ok'); };
       reader.readAsDataURL(file);
     });
 
     // ===== Submit
     async function submitFind(){
-      submitBtn.disabled = true;
-      submitNote.style.display='none';
-
+      submitBtn.disabled=true; submitNote.style.display='none';
       if(!photoData){ submitBtn.disabled=false; alert('Please upload a photo.'); return; }
-      if(!selected.size){ submitBtn.disabled=false; alert('Tick at least one item.'); return; }
-
+      if(!selected.size){ submitBtn.disabled=false; alert('Tap the item tiles to select.'); return; }
       try{
-        await callFn('submit_scavenger_function', {
-          eventId: EVENT_ID,
-          teamCode: localStorage.getItem('teamCode'),
-          teamName: localStorage.getItem('teamName'),
-          items: Array.from(selected),
-          photoPreview: photoData.slice(0, 200000)  // small data URL (server may ignore or replace)
+        await callFn('submit_scavenger_function',{
+          eventId:EVENT_ID,
+          teamCode:localStorage.getItem('teamCode'),
+          teamName:localStorage.getItem('teamName'),
+          items:Array.from(selected),
+          photoPreview:photoData.slice(0,200000)
         });
         submitNote.style.display='block';
-        // soft reset selection (leave photo so they can tick another combo if needed)
         selected.clear(); renderItems();
       }catch(e){
-        if (e.code==='UNAUTHORIZED') alert('Session expired — sign in again.');
-        else if (e.code==='RATE_LIMITED') alert('Too many attempts — please wait and try again.');
+        if(e.code==='UNAUTHORIZED') alert('Session expired — sign in again.');
+        else if(e.code==='RATE_LIMITED') alert('Too many attempts — please wait and try again.');
         else alert('Couldn’t submit right now.');
-      }finally{
-        submitBtn.disabled=false;
-      }
+      }finally{ submitBtn.disabled=false; }
     }
-    submitBtn.addEventListener('click', submitFind);
+    $('submitBtn').addEventListener('click', submitFind);
 
     // boot
-    renderItems();
-    loadTeams();
+    renderItems(); loadTeams();
 
-    // Helpers
-    function esc(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
+    // helpers
+    function esc(s){ return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
   </script>
 </body>
 </html>
