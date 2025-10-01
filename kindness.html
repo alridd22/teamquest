@@ -1,5 +1,3 @@
-<!-- SUMMARY: Fixes iOS blue text / native styling on the crew <select>. Adds .tq-select (appearance reset, Safari text color via -webkit-text-fill-color, placeholder :required:invalid, custom chevron, focus ring). Updates placeholder options in HTML/JS to use disabled+selected. No functionality changes. -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,7 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest - Random Act of Kindness</title>
-  <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
+
+  <!-- Handlee everywhere (including inside selects on iOS) -->
+  <link href="https://fonts.googleapis.com/css2?family=Handlee:wght@400;700&display=swap" rel="stylesheet">
+
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
@@ -20,7 +21,9 @@
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --focus:0 0 0 3px rgba(240,196,51,.45);
       --gutter:22px; --hero-h:280px; --nav-h:64px;
-      --accent:#1594d2;
+      --grad-btn: linear-gradient(90deg,#FDBA2D,#F0C433);
+      --grad-cta: linear-gradient(135deg,#FDBA2D,#E9B02B);
+      --panel: #FFF7E4;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -32,6 +35,7 @@
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
+
     /* Nav */
     .treasure-nav{position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
       backdrop-filter:saturate(120%) blur(6px);
@@ -54,88 +58,78 @@
 
     /* Stack / cards */
     .stack{ padding:0 var(--gutter) 28px; max-width:980px; margin:0 auto }
-    .card{ background:var(--parchment); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100% }
+    .card{ background:linear-gradient(145deg,var(--parchment),var(--parchment-2)); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100% }
     .card h2{ margin:0 0 10px; text-align:center; font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:24px; color:var(--ink)}
     .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px }
 
-    /* Team chip — hidden until this page's sign-in succeeds */
-    .team-info{display:none; align-items:center; justify-content:center; background:#D7C39B; color:var(--ink); border:3px dashed rgba(0,0,0,.6); border-radius:14px; padding:10px 14px; font-weight:900}
+    /* Team chip / sign-in state */
+    .signed-chip{display:none; align-items:center; justify-content:center; gap:10px; background:#E7F7EE; color:#064b06; border:3px solid #2da86a; border-radius:999px; padding:12px 14px; font-weight:900; margin-bottom:12px}
+    .signed-chip.active{display:flex}
 
-    /* Auth */
-    .auth-card{ background:var(--parchment-2); border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
-    .auth-grid{ display:grid; grid-template-columns:1fr 150px; gap:10px }
+    /* Sign-in */
+    .auth-card{ background:#FFF9EE; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
+    .auth-grid{ display:grid; grid-template-columns:1fr 160px; gap:12px }
     @media (max-width:560px){ .auth-grid{ grid-template-columns:1fr } }
     label{ display:block; margin:0 6px 6px; font-size:18px; font-weight:800; color:var(--ink) }
     select,input[type="text"],input[type="number"],textarea{
       width:100%; padding:14px 12px; border-radius:var(--radius-input);
       border:3px solid var(--gold); background:#fff; color:var(--ink); font-size:18px; transition:border-color .18s, box-shadow .18s, transform .18s;
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif; /* Handlee inside inputs/selects */
+      -webkit-text-fill-color:var(--ink); /* iOS consistent text color */
     }
     select:focus,input:focus,textarea:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px)}
-    .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:8px }
-    .small-btn{ background:linear-gradient(90deg,#FDBA2D,#F0C433); color:#442812; font-weight:900; font-size:16px; border-radius:12px; border:3px solid #A7711F; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2) }
+    .auth-actions{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px }
+    .small-btn{ background:var(--grad-btn); color:#442812; font-weight:900; font-size:18px; border-radius:14px; border:3px solid #A7711F; padding:12px 16px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2) }
 
-    /* ===== Unified <select> styling (fix iOS blue text) ===== */
-    .tq-select{
-      -webkit-appearance:none;
-      -moz-appearance:none;
-      appearance:none;
+    .message{ padding:14px; border-radius:14px; margin:14px 0 0; text-align:center; display:none; border:3px solid; font-weight:900 }
+    .success-message{ background:var(--success-bg); border-color:var(--success); color:#064b06 }
+    .error-message{ background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000 }
 
-      padding:14px 44px 14px 12px; /* space for chevron */
-      background:#fff;
-      color:var(--ink);
-      -webkit-text-fill-color:var(--ink); /* force Safari text color */
-      font:inherit; line-height:1.2;
+    /* Info panel + scoring */
+    .intro{ background:#FFF3DB; border:3px solid #E9C57A; border-radius:18px; padding:16px; }
+    .scoring{ display:grid; gap:12px; margin-top:12px }
+    .score-card{ background:#F9ECD3; border-radius:12px; border:2px solid #E0C08B; padding:12px }
+    .score-card h4{ margin:0 0 6px; font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; color:#2E2114 }
 
-      border-radius:var(--radius-input);
-      border:3px solid var(--gold);
-
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-      background-repeat:no-repeat;
-      background-position:right 12px center;
-      background-size:18px 18px;
-    }
-    .tq-select:focus{ outline:2px solid var(--accent); outline-offset:2px; }
-    .tq-select:required:invalid{
-      color:rgba(0,0,0,.5);
-      -webkit-text-fill-color:rgba(0,0,0,.5);
-    }
-    .tq-select::-ms-expand{display:none;}
-
-    /* Intro / instructions */
-    .terry-greeting{ display:flex; gap:14px; padding:16px; border-radius:16px; border:1px solid rgba(0,0,0,.08); background:#FFF9EA; box-shadow:0 2px 8px rgba(0,0,0,.12) }
-    .terry-character img{ width:84px; height:84px; border-radius:12px; border:3px solid var(--gold); object-fit:cover; display:block }
-    .terry-note{ margin:0; line-height:1.55; font-weight:700; color:var(--ink) }
-    .scoring-rules-btn{ display:inline-flex; align-items:center; gap:8px; margin-top:10px; background:linear-gradient(90deg,#FDBA2D,#F0C433); color:#442812; font-weight:900; border:3px solid #A7711F; border-radius:12px; padding:10px 14px; cursor:pointer; box-shadow:0 8px 18px rgba(0,0,0,.2) }
+    /* Instructions bullets */
     .instructions{ background:#FFFAF1; border-radius:16px; border:1px solid rgba(0,0,0,.08); padding:16px }
     .instructions h3{ margin:0 0 8px; color:var(--ink); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:20px; text-align:center }
     .instructions ul{ margin:0; padding-left:18px; color:var(--ink-soft); line-height:1.65 }
 
-    /* Form */
-    .file-upload{ position:relative; display:inline-block; width:100% }
+    /* Form block (only visible after sign-in) */
+    .kindness-form{ background:#FFF7E6; border:3px solid #E9C57A; border-radius:18px; padding:16px; display:none }
+    .file-upload{ position:relative; display:block; width:100% }
     .file-input{ display:none }
-    .file-upload-btn{ display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA; cursor:pointer; color:var(--ink); font-weight:900; font-size:16px }
+    .file-upload-btn{ display:flex; align-items:center; justify-content:center; gap:10px; padding:16px; border:3px dashed var(--gold); border-radius:12px; background:#FFF9EA; cursor:pointer; color:var(--ink); font-weight:900; font-size:18px }
     .file-upload-btn:hover{ background:#FFE7A6 }
     .file-preview{ margin-top:12px; text-align:center; display:none }
     .file-preview img{ max-width:100%; max-height:220px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,.2); border:3px solid #32CD32 }
-    .file-info{ margin-top:10px; padding:10px; background:#EAF8EF; border-radius:10px; font-size:.95rem; color:var(--ink); border:1px solid #96DEAE }
-    textarea{ min-height:120px; resize:vertical }
-    .char-count{ text-align:right; font-size:.9em; color:var(--ink-soft); margin-top:6px; font-weight:700 }
-    .submit-btn{ width:100%; background:linear-gradient(90deg,#FDBA2D,#F0C433); color:#442812; font-weight:900; font-size:18px; border-radius:16px; border:3px solid #A7711F; padding:16px; cursor:pointer; margin-top:6px; box-shadow:0 10px 22px rgba(0,0,0,.25); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif }
+    .file-info{ margin-top:10px; padding:10px; background:#EAF8EF; border-radius:10px; font-size:1rem; color:var(--ink); border:1px solid #96DEAE }
+    textarea{ min-height:140px; resize:vertical }
+    .char-count{ text-align:right; font-size:1rem; color:var(--ink-soft); margin-top:6px; font-weight:700 }
+    .submit-btn{ width:100%; background:var(--grad-cta); color:#442812; font-weight:900; font-size:20px; border-radius:16px; border:3px solid #A7711F; padding:16px; cursor:pointer; margin-top:12px; box-shadow:0 10px 22px rgba(0,0,0,.25); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif }
     .submit-btn:disabled{ opacity:.6; cursor:not-allowed }
     .loading{ display:none; text-align:center; margin-top:12px; color:#EEE3CD; font-weight:800; font-size:16px; text-shadow:0 1px 2px rgba(0,0,0,.4) }
-    .message{ padding:14px; border-radius:14px; margin:14px 0; text-align:center; display:none; border:3px solid; font-weight:900 }
-    .success-message{ background:var(--success-bg); border-color:var(--success); color:#064b06 }
-    .error-message{ background:linear-gradient(135deg,#FFB6C1 0%,#FFA0B4 100%); border-color:#DC143C; color:#8B0000 }
 
-    /* Modal */
-    .modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center; z-index:1200; padding:18px }
-    .modal-content{ width:100%; max-width:520px; background:var(--parchment); border-radius:18px 18px 0 0; padding:16px; border:1px solid rgba(0,0,0,.08); box-shadow:0 -10px 30px rgba(0,0,0,.3) }
-    .modal-title{ font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900; font-size:22px; color:var(--ink); text-align:center; margin-bottom:2px }
-    .modal-subtitle{ text-align:center; color:var(--ink-soft); margin-bottom:10px; font-size:14px }
-    .scoring-card{ background:var(--parchment-2); border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:12px }
-    .scoring-card h4{ margin:0 0 6px; font-size:18px; color:var(--ink); font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight:900 }
-    .close-btn{ float:right; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--ink-soft) }
-    @media (min-width:480px){ :root{ --gutter:26px; --hero-h:320px } .brand-logo{ width:min(280px, 62vw) } }
+    /* iOS select polish (unified) */
+    .tq-select{
+      appearance:none; -webkit-appearance:none; -moz-appearance:none;
+      padding:14px 44px 14px 12px;
+      background:#fff;
+      color:var(--ink);
+      -webkit-text-fill-color:var(--ink);
+      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      border-radius:var(--radius-input);
+      border:3px solid var(--gold);
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%236B4B25' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat; background-position:right 12px center; background-size:18px 18px;
+    }
+    .tq-select:focus{ outline:none; box-shadow:var(--focus) }
+
+    @media (min-width:480px){
+      :root{ --gutter:26px; --hero-h:320px }
+      .brand-logo{ width:min(280px, 62vw) }
+    }
   </style>
 </head>
 <body>
@@ -166,42 +160,57 @@
 
   <!-- CONTENT -->
   <main class="stack" id="app">
-    <!-- Hidden until sign-in on THIS page -->
-    <div class="team-info" id="teamInfo">Crew: —</div>
+    <!-- Signed-in chip -->
+    <div id="signedChip" class="signed-chip">
+      ✅ Signed in. You can submit now!
+    </div>
 
     <!-- Sign-in -->
     <section class="card auth-card" id="signinCard" aria-live="polite">
-      <h2>Sign in</h2>
       <div class="auth-grid">
         <div>
-          <label for="teamSelect">Choose your crew</label>
-          <select id="teamSelect" class="tq-select" aria-label="Team list" required>
-            <option value="" disabled selected>Loading teams…</option>
+          <label for="teamSelect">Crew Name</label>
+          <select id="teamSelect" class="tq-select" required>
+            <option value="">Loading crews…</option>
           </select>
         </div>
         <div>
-          <label for="teamPin">Crew PIN</label>
-          <input id="teamPin" class="pin" type="number" inputmode="numeric" min="0000" max="9999" placeholder="1234"/>
+          <label for="teamPin">Crew Pin</label>
+          <input id="teamPin" class="pin" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" pattern="^\\d{4}$" maxlength="4"/>
         </div>
       </div>
       <div class="auth-actions">
-        <button class="small-btn" id="signinBtn">🔓 Sign in</button>
+        <button class="small-btn" id="signinBtn">Sign In</button>
       </div>
       <div class="message" id="signinMsg"></div>
     </section>
 
-    <!-- Intro -->
-    <section class="card terry-greeting" aria-label="Intro">
-      <div class="terry-character"><img src="/terry-thinking.png" alt="Terry, your Quest guide"></div>
-      <p class="terry-note">
-        Earn points by completing kind acts! Think of something you can do as a team that is kind, helpful, thoughtful, or just makes people happy. Take a picture and upload it and our AI judge will award your points. 💛
-        <br/><button class="scoring-rules-btn" id="scoringRulesBtn">💖 View scoring</button>
-      </p>
+    <!-- Intro / scoring -->
+    <section class="card intro">
+      <p>Earn points by completing kind acts! Think of something you can do as a team that is kind, helpful, thoughtful, or just makes people happy. Take a picture and upload it and our AI judge will award your points. 💛</p>
+
+      <h2 style="margin-top:10px">Kind Act Scoring</h2>
+      <p style="text-align:center; margin-bottom:10px; color:#6A5A47; font-weight:700">Creativity • Effort • Impact (max 60 points)</p>
+
+      <div class="scoring">
+        <div class="score-card">
+          <h4>✨ Creativity (20 points)</h4>
+          <p style="margin:0">Original, thoughtful, personalised acts beat ordinary gestures.</p>
+        </div>
+        <div class="score-card">
+          <h4>💪 Effort (20 points)</h4>
+          <p style="margin:0">Prep, time, and going the extra mile show commitment.</p>
+        </div>
+        <div class="score-card">
+          <h4>💝 Impact (20 points)</h4>
+          <p style="margin:0">Clear benefit to someone or your community = big points.</p>
+        </div>
+      </div>
     </section>
 
     <!-- Instructions -->
     <section class="card instructions" aria-labelledby="instr-title">
-      <h3 id="instr-title">💎 How to submit</h3>
+      <h3 id="instr-title">How to submit</h3>
       <ul>
         <li>Do a genuine act of kindness.</li>
         <li>Take a clear photo of the deed or outcome.</li>
@@ -210,8 +219,8 @@
     </section>
 
     <!-- Submission form (hidden until sign-in) -->
-    <section class="card" aria-label="Kindness submission">
-      <form id="kindnessForm" aria-describedby="formHelp" style="display:none;">
+    <section class="card kindness-form" id="kindnessBlock" aria-label="Kindness submission">
+      <form id="kindnessForm" aria-describedby="formHelp">
         <div class="form-group">
           <label for="photoUpload">📸 Photo of your kind act</label>
           <div class="file-upload">
@@ -224,19 +233,19 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" style="margin-top:10px">
           <label for="kindnessDescription">✍️ What happened?</label>
           <textarea id="kindnessDescription" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?" required aria-required="true"></textarea>
           <div class="char-count"><span id="charCount">500</span> characters remaining</div>
         </div>
 
         <div class="form-group">
-          <label for="location">📍 Where? (optional)</label>
-          <input type="text" id="location" placeholder="e.g., High Street, community centre">
+          <label for="location">📍 Where? <span style="color:#6A5A47">(optional)</span></label>
+          <input type="text" id="location" placeholder="e.g., High Street, Community Centre…">
         </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn"><span class="btn-label">💎 Submit Kind Act</span></button>
-        <p id="formHelp" style="margin-top:8px;color:var(--ink-soft);font-weight:800">One submission per team is scored. Be honest and keep it kind.</p>
+        <button type="submit" class="submit-btn" id="submitBtn"><span class="btn-label">Submit Kind Act</span></button>
+        <p id="formHelp" style="margin-top:8px;color:var(--ink-soft);font-weight:800;text-align:center">One submission per team is scored. Be honest and keep it kind.</p>
       </form>
 
       <div class="loading" id="loading"><span class="spinner" aria-hidden="true"></span> Uploading & submitting…</div>
@@ -313,11 +322,13 @@
     }
 
     // Elements
-    const teamInfo    = document.getElementById('teamInfo');
+    const signedChip  = document.getElementById('signedChip');
     const signinBtn   = document.getElementById('signinBtn');
     const signinMsg   = document.getElementById('signinMsg');
     const teamSelect  = document.getElementById('teamSelect');
     const teamPin     = document.getElementById('teamPin');
+
+    const formBlock   = document.getElementById('kindnessBlock');
     const form        = document.getElementById('kindnessForm');
     const submitBtn   = document.getElementById('submitBtn');
     const loadingEl   = document.getElementById('loading');
@@ -334,30 +345,20 @@
     const clearFeedback = () => { feedbackEl.textContent=''; feedbackEl.style.display='none'; };
     const setSigninMsg = (msg,type='error') => { signinMsg.textContent = msg; signinMsg.className = `message ${type==='error'?'error-message':'success-message'}`; signinMsg.style.display='block'; };
     const clearSigninMsg = () => { signinMsg.textContent=''; signinMsg.style.display='none'; };
-    const updateCrewLabel = () => { teamInfo.textContent = `Crew: ${teamName() || '—'}`; };
 
     function setSubmitting(on){
       submitBtn.disabled = on;
       loadingEl.style.display = on ? 'block':'none';
-      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">💎 Submit Kind Act</span>`;
+      submitBtn.innerHTML = on ? `<span class="spinner" aria-hidden="true"></span> Submitting…` : `<span class="btn-label">Submit Kind Act</span>`;
     }
-    function disableForm(disabled){ [...form.elements].forEach(el=>el.disabled = disabled); }
-
-    // Local lock
-    const KINDNESS_LOCK_KEY = () => `kindness:locked:${EVENT_ID}:${teamCode()}`;
-    function applyKindnessLockUI(){
-      if (!form) return;
-      [...form.elements].forEach(el => el.disabled = true);
-      form.style.opacity = '0.6';
-      setFeedback('✅ Already submitted for this event. Thanks for spreading kindness!', 'success');
-    }
+    function disableForm(disabled){ if(!form) return; [...form.elements].forEach(el=>el.disabled = disabled); }
 
     // Draft
     const draftKey = ()=> `kindnessDraft:${EVENT_ID}:${teamCode()}`;
     function saveDraft(){ localStorage.setItem(draftKey(), JSON.stringify({ description: descEl.value||'', location: locEl.value||'' })); }
     function loadDraft(){ try{ const raw = localStorage.getItem(draftKey()); if(raw){ const d=JSON.parse(raw); if(d.description) descEl.value=d.description; if(d.location) locEl.value=d.location; updateCharCount(); } }catch{} }
 
-    // CSV parser (handles quotes / commas)
+    // CSV parser
     function parseCsv(text){
       const rows = [];
       let i=0, cur='', row=[], inQ=false;
@@ -381,13 +382,12 @@
     // Load teams from published CSV
     async function loadTeams(){
       if (!EVENT_ID) {
-        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        teamSelect.innerHTML = `<option value="">Add ?event=YOUR_EVENT_ID to the URL</option>`;
         setSigninMsg('This page needs an event link. Ask your host for the correct URL (with ?event=...).', 'error');
         signinBtn?.setAttribute('disabled','disabled');
         return;
       }
       try{
-        teamSelect.innerHTML = `<option value="" disabled selected>Loading teams…</option>`;
         const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error('Could not fetch teams CSV');
         const csv = await res.text();
@@ -414,12 +414,12 @@
         if(!teams.length) throw new Error('No teams for this event');
 
         teamSelect.innerHTML =
-          `<option value="" disabled selected>Choose your crew…</option>` +
+          `<option value="">Choose your crew…</option>` +
           teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
 
         clearSigninMsg();
       }catch(e){
-        teamSelect.innerHTML = `<option value="" disabled selected>Couldn’t load teams</option>`;
+        teamSelect.innerHTML = `<option value="">Couldn’t load teams</option>`;
         setSigninMsg('Couldn’t load team list. Refresh the page or try again.', 'error');
         console.debug('[TeamQuest] loadTeams error:', e);
       }
@@ -439,17 +439,19 @@
         if(res.token) localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
         localStorage.setItem('teamName', res.teamName || (teamSelect.options[teamSelect.selectedIndex]?.textContent || ''));
-        updateCrewLabel();
-        document.getElementById('teamInfo').style.display = 'flex';
-        setSigninMsg('Signed in. You can submit now!', 'success');
-        form.style.display = 'block';
 
-        if (localStorage.getItem(KINDNESS_LOCK_KEY())) applyKindnessLockUI();
+        // Reveal submit area + chip
+        signedChip.classList.add('active');
+        formBlock.style.display = 'block';
+        setSigninMsg('Signed in. You can submit now!', 'success');
+
+        loadDraft();
       }catch(err){
         if(String(err.message).includes('404')) setSigninMsg('Sign-in service is off. Ask the host to enable verify_team_pin_function.', 'error');
         else setSigninMsg(err.message || 'Could not sign you in. Try again.', 'error');
       }
     }
+    document.getElementById('signinBtn')?.addEventListener('click', signIn);
 
     // Char counter
     function updateCharCount(){
@@ -489,7 +491,6 @@
       clearFeedback();
       if(!teamCode()){ setFeedback('Sign in with your crew and PIN first.','error'); return; }
       if(!EVENT_ID){ setFeedback('Missing eventId in the URL.','error'); return; }
-      if (localStorage.getItem(KINDNESS_LOCK_KEY())) { applyKindnessLockUI(); return; }
 
       const photoFile   = fileInput.files[0];
       const description = (descEl.value||'').trim();
@@ -505,56 +506,29 @@
           description, location: locationVal, photoUrl
         });
 
-        localStorage.setItem(KINDNESS_LOCK_KEY(), '1');
+        // lock UI
+        disableForm(true);
+        setFeedback('✅ Submitted! Thank you for spreading kindness.','success');
         localStorage.removeItem(`kindnessDraft:${EVENT_ID}:${teamCode()}`);
-        applyKindnessLockUI();
       }catch(err){
-        if (err.code === 'DUPLICATE') { localStorage.setItem(KINDNESS_LOCK_KEY(), '1'); applyKindnessLockUI(); return; }
+        if (err.code === 'DUPLICATE') { disableForm(true); setFeedback('Already submitted for this event. Thanks!','success'); return; }
         if (err.code === 'CLOSED') { setFeedback('Submissions are closed for this event.', 'error'); return; }
         if (err.code === 'UNAUTHORIZED') { setFeedback('Your sign-in expired. Please sign in again.', 'error'); return; }
         if (err.code === 'RATE_LIMITED') { setFeedback('Too many attempts—please wait a moment and try again.', 'error'); return; }
-        setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'} <br><br><button class="small-btn" id="retryBtn">🔁 Retry</button>`, 'error');
-        document.getElementById('retryBtn')?.addEventListener('click', (e)=>{ e.preventDefault(); doSubmit(); });
+        setFeedback(`Couldn’t submit. ${err.message || 'Please try again.'}`, 'error');
       }finally{
-        const locked = !!localStorage.getItem(KINDNESS_LOCK_KEY());
         setSubmitting(false);
-        if (locked) disableForm(true);
       }
     }
-
-    // Modal
-    document.getElementById('scoringRulesBtn')?.addEventListener('click', ()=>{
-      const modal = document.createElement('div');
-      modal.className = 'modal-overlay active';
-      modal.innerHTML = `<div class="modal-content">
-        <button class="close-btn" aria-label="Close">✕</button>
-        <div class="modal-title">💖 Kind Act Scoring</div>
-        <div class="modal-subtitle">Creativity • Effort • Impact (max 60 points)</div>
-        <div class="scoring-card"><h4>✨ Creativity (20)</h4><p>Original, thoughtful, personalised acts beat ordinary gestures.</p></div>
-        <div class="scoring-card" style="margin-top:10px"><h4>💪 Effort (20)</h4><p>Prep, time, and going the extra mile show commitment.</p></div>
-        <div class="scoring-card" style="margin-top:10px"><h4>💝 Impact (20)</h4><p>Clear benefit to someone or your community = big points.</p></div>
-      </div>`;
-      document.body.appendChild(modal);
-      modal.addEventListener('click', (e)=>{ if(e.target===modal || e.target.classList.contains('close-btn')) modal.remove(); });
-    });
-
-    // Wire up + init
     document.getElementById('kindnessForm')?.addEventListener('submit', (e)=>{ e.preventDefault(); doSubmit(); });
-    signinBtn?.addEventListener('click', signIn);
 
-    (async function init(){
-      document.getElementById('teamInfo').style.display = 'none';
-      document.getElementById('kindnessForm').style.display = 'none';
-      loadDraft();
-      await loadTeams();
+    // Init
+    (function init(){
+      signedChip.classList.remove('active');
+      formBlock.style.display = 'none';
       updateCharCount();
+      loadTeams();
     })();
-
-    function updateCharCount(){
-      const remaining = 500 - (descEl.value?.length || 0);
-      countEl.textContent = remaining;
-      countEl.style.color = remaining < 50 ? '#DC143C' : '#6A5A47';
-    }
   </script>
 </body>
 </html>
