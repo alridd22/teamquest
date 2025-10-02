@@ -48,6 +48,8 @@
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
     .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    /* Make header logo non-clickable */
+    .nav-logo{pointer-events:none;cursor:default;}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
@@ -236,8 +238,7 @@
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
       if(EVENT_ID){
         const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
-        anchors.forEach(a=>{
+        document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
           try{
             const u = new URL(a.getAttribute('href'), location.origin);
             if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
@@ -443,6 +444,17 @@
 
     // Helper
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  </script>
+
+  <!-- Safeguard: neutralize any link behavior on the logo element -->
+  <script>
+    (function(){
+      document.querySelectorAll('.nav-logo[href]').forEach(a=>{
+        a.removeAttribute('href');
+        a.setAttribute('aria-disabled','true');
+        a.setAttribute('tabindex','-1');
+      });
+    })();
   </script>
 </body>
 </html>
