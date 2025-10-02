@@ -75,7 +75,6 @@
     .opt.bad{background:linear-gradient(135deg,#d11,#a00909);color:#fff;border-color:#6b0000}
     .textAnswer{width:100%;padding:14px;border:3px solid var(--gold);border-radius:12px;font-size:18px;background:#fff}
 
-    /* Feedback pill for text answers */
     .fb{margin-top:12px;padding:10px;border:2px solid;border-radius:10px;font-weight:900}
     .fb.ok{background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .fb.bad{background:#ffd6db;border-color:#b00020;color:#7a0010}
@@ -121,17 +120,8 @@
   </header>
 
   <div class="wrap">
-    <!-- SIGN IN (first view) -->
+    <!-- SIGN IN (first screen ONLY) -->
     <section id="secSign" class="card section active">
-      <div class="rules">
-        <ul style="line-height:1.6;margin:0">
-          <li>10 questions — 15 seconds each</li>
-          <li>Some include audio — make sure your volume is turned up ready</li>
-          <li>Choose once — no changes</li>
-          <li>Up to 100 points for perfection</li>
-        </ul>
-      </div>
-
       <div class="row">
         <label for="teamSelect">Select Your Crew</label>
         <select id="teamSelect" class="tq-select" required>
@@ -144,22 +134,23 @@
         <input id="teamPin" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" pattern="^\\d{4}$" maxlength="4"/>
       </div>
 
-      <button class="btn" id="btnSign">🧭 Begin the Quiz!</button>
+      <button class="btn" id="btnSign">🔓 Sign in</button>
       <div id="signMsg" class="msg"></div>
     </section>
 
-    <!-- READY -->
+    <!-- READY (rules + start button) -->
     <section id="secReady" class="card section">
       <div class="team-pill" id="readyTeam">Crew: …</div>
       <div class="rules">
-        <strong>⚡ You’re good to go!</strong>
-        <ul style="margin-top:10px;line-height:1.6">
-          <li>15 seconds per riddle</li>
-          <li>No going back</li>
-          <li>Volume up for audio prompts</li>
+        <h1 style="font-size:20px;margin-bottom:10px">Get ready…</h1>
+        <ul style="margin:0;line-height:1.6">
+          <li>10 questions — 15 seconds each</li>
+          <li>Some include audio — make sure your volume is up</li>
+          <li>Choose once — no changes</li>
+          <li>Up to 100 points for perfection</li>
         </ul>
       </div>
-      <button class="btn" id="btnAccept">🚀 Accept the challenge</button>
+      <button class="btn" id="btnAccept">🚀 Begin the Quiz</button>
       <div id="readyMsg" class="msg"></div>
     </section>
 
@@ -171,14 +162,14 @@
         <div class="timer" id="timer">15</div>
       </div>
       <div class="qcard" id="qcard"></div>
-      <button id="btnNextQ" class="btn" style="display:none;margin-top:12px">Next Question</button>
+      <button id="btnNextQ" class="btn" style="display:none;margin-top:12px">Next question</button>
     </section>
 
     <!-- RESULTS -->
     <section id="secDone" class="card section">
       <div class="team-pill" id="doneTeam">Crew: …</div>
       <div class="qcard">
-        <h1 style="font-size:22px;margin-bottom:8px">🎉 Quiz Complete!</h1>
+        <h1 style="font-size:22px;margin-bottom:8px">🎉 Trial Complete!</h1>
         <p id="scoreLine" style="margin-bottom:14px;font-weight:900;color:#8B4513"></p>
         <div id="breakdown"></div>
         <div id="submitMsg" class="msg" style="margin-top:14px"></div>
@@ -188,336 +179,222 @@
   </div>
 
   <script>
-    /* ===== NAV: working hamburger + click-outside close ===== */
-    const navToggle = document.getElementById('nav-toggle');
-    const navMenu   = document.getElementById('nav-menu');
-    navToggle?.addEventListener('click', ()=> {
-      navMenu.classList.toggle('active');
-      navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-    });
-    document.addEventListener('click', (e)=>{
-      const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-      if(!inside && navMenu.classList.contains('active')){
-        navMenu.classList.remove('active'); navToggle.textContent='☰';
-      }
-    });
-    document.querySelectorAll('.nav-link,.dropdown-link').forEach(a=>{
-      a.addEventListener('click', ()=>{ navMenu.classList.remove('active'); navToggle.textContent='☰'; });
-    });
+    /* NAV */
+    const navToggle=document.getElementById('nav-toggle');
+    const navMenu=document.getElementById('nav-menu');
+    navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
+    document.addEventListener('click',e=>{const inside=navToggle.contains(e.target)||navMenu.contains(e.target);if(!inside&&navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}});
+    document.querySelectorAll('.nav-link,.dropdown-link').forEach(a=>a.addEventListener('click',()=>{navMenu.classList.remove('active');navToggle.textContent='☰';}));
 
-    /* ===== Core config / helpers ===== */
+    /* Helpers / config */
     const TEAMS_PUBLIC_CSV='https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
-    const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-
-    const $ = id => document.getElementById(id);
+    const qs=new URLSearchParams(location.search);
+    const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
+    const $=id=>document.getElementById(id);
     const teamSelect=$('teamSelect'), teamPin=$('teamPin');
     const signMsg=$('signMsg'), readyMsg=$('readyMsg'), submitMsg=$('submitMsg');
 
-    // keep ?event on links + leaderboard button
     (function persistEventOnLinks(){
-      if (!EVENT_ID) return;
-      const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-      const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link');
-      anchors.forEach(a=>{
-        try{
-          const u = new URL(a.getAttribute('href'), location.origin);
-          if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
-          if (!u.searchParams.get('event')){
-            u.searchParams.set('event', EVENT_ID);
-            a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
-          }
+      if(!EVENT_ID) return;
+      const needs=['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+      document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
+        try{const u=new URL(a.getAttribute('href'),location.origin);
+          if(!needs.some(p=>u.pathname.endsWith(p))) return;
+          if(!u.searchParams.get('event')){u.searchParams.set('event',EVENT_ID);a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);}
         }catch{}
       });
-      const lb=$('btnLeaderboard'); if(lb){ const u=new URL('/leaderboard',location.origin); u.searchParams.set('event',EVENT_ID); lb.addEventListener('click',()=>location.href=`${u.pathname}?${u.searchParams.toString()}`); }
+      const lb=$('btnLeaderboard'); if(lb){const u=new URL('/leaderboard',location.origin);u.searchParams.set('event',EVENT_ID);lb.addEventListener('click',()=>location.href=`${u.pathname}?${u.searchParams.toString()}`);}
     })();
 
-    function setMsg(el, text, type){ el.textContent = text; el.className = 'msg ' + (type==='error' ? 'error' : 'ok'); el.style.display = 'block'; }
-    function clearMsg(el){ el.textContent=''; el.className='msg'; el.style.display='none'; }
-
-    const token = ()=> localStorage.getItem('teamToken') || '';
-    function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
-    async function callFn(name, payload = {}, method='POST'){
+    function setMsg(el,t,type){el.textContent=t;el.className='msg '+(type==='error'?'error':'ok');el.style.display='block'}
+    function clearMsg(el){el.textContent='';el.className='msg';el.style.display='none'}
+    const token=()=>localStorage.getItem('teamToken')||'';
+    function uuidv4(){return URL.createObjectURL(new Blob()).split('/').pop();}
+    async function callFn(name,payload={},method='POST'){
       const url='/.netlify/functions/'+name+(method==='GET'?('?'+new URLSearchParams(payload)):'');
-      const res=await fetch(url,{
-        method,
-        headers:{
-          'Content-Type':'application/json',
-          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
-          'Idempotency-Key': uuidv4()
-        },
-        body:method==='GET'?undefined:JSON.stringify(payload),
-        keepalive:true
-      });
-      let data={}; try{ data=await res.json(); }catch{}
-      if(!res.ok || data.success===false){
-        const err=new Error((data&&(data.error||data.message))||('HTTP '+res.status));
-        err.code=data.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
-        throw err;
-      }
+      const res=await fetch(url,{method,headers:{'Content-Type':'application/json',...(token()?{'Authorization':`Bearer ${token()}`}:{}),'Idempotency-Key':uuidv4()},body:method==='GET'?undefined:JSON.stringify(payload),keepalive:true});
+      let data={};try{data=await res.json();}catch{}
+      if(!res.ok||data.success===false){const err=new Error((data&&(data.error||data.message))||('HTTP '+res.status));err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');throw err;}
       return data;
     }
 
-    /* ===== Teams (CSV) ===== */
+    /* Teams CSV */
     function parseCsv(text){
-      const rows=[]; let i=0,cur='',row=[],inQ=false;
+      const rows=[];let i=0,cur='',row=[],inQ=false;
       while(i<text.length){
         const c=text[i];
-        if(c==='\"'){ if(inQ && text[i+1]==='\"'){ cur+='\"'; i+=2; continue; } inQ=!inQ; i++; continue; }
-        if(!inQ && (c===','||c==='\n'||c==='\r')){ row.push(cur); cur=''; if(c!==','){ if(row.length) rows.push(row); row=[]; } i++; continue; }
-        cur+=c; i++;
+        if(c==='\"'){if(inQ&&text[i+1]==='\"'){cur+='\"';i+=2;continue;}inQ=!inQ;i++;continue;}
+        if(!inQ&&(c===','||c==='\n'||c==='\r')){row.push(cur);cur='';if(c!==','){if(row.length)rows.push(row);row=[];}i++;continue;}
+        cur+=c;i++;
       }
-      if(cur.length||row.length){ row.push(cur); rows.push(row); }
-      return rows;
+      if(cur.length||row.length){row.push(cur);rows.push(row);} return rows;
     }
     async function loadTeams(){
-      if (!EVENT_ID){
-        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
-        setMsg(signMsg,'This page needs an event link (with ?event=...).','error');
-        $('btnSign').disabled = true; return;
-      }
-      teamSelect.innerHTML = '<option value="" disabled selected>Loading crews…</option>';
+      if(!EVENT_ID){teamSelect.innerHTML=`<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;setMsg(signMsg,'This page needs an event link (with ?event=...).','error');$('btnSign').disabled=true;return;}
+      teamSelect.innerHTML='<option value="" disabled selected>Loading crews…</option>';
       try{
-        const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
+        const res=await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`,{cache:'no-store'});
         if(!res.ok) throw new Error('Could not fetch teams CSV');
-        const rows = parseCsv(await res.text());
-        if(!rows.length) throw new Error('Empty teams CSV');
-
-        const header = rows[0].map(h => String(h||'').trim().toLowerCase());
-        const idx = (n)=> header.indexOf(n.toLowerCase());
-        const iCode = idx('team code'), iName = idx('team name'), iEvent = idx('event id');
-        if(iCode===-1 || iEvent===-1) throw new Error('CSV missing required headers');
-
-        const wanted = String(EVENT_ID).toUpperCase();
-        const teams = rows.slice(1).map(r=>({
-          teamCode: String(r[iCode]||'').trim(),
-          teamName: String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
-          eventId:  String(r[iEvent]||'').trim().toUpperCase()
-        })).filter(t=>t.teamCode && t.eventId===wanted)
-          .sort((a,b)=> a.teamName.localeCompare(b.teamName));
-
+        const rows=parseCsv(await res.text()); if(!rows.length) throw new Error('Empty teams CSV');
+        const header=rows[0].map(h=>String(h||'').trim().toLowerCase());
+        const idx=n=>header.indexOf(n.toLowerCase());
+        const iCode=idx('team code'), iName=idx('team name'), iEvent=idx('event id');
+        if(iCode===-1||iEvent===-1) throw new Error('CSV missing required headers');
+        const wanted=String(EVENT_ID).toUpperCase();
+        const teams=rows.slice(1).map(r=>({teamCode:String(r[iCode]||'').trim(),teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),eventId:String(r[iEvent]||'').trim().toUpperCase()})).filter(t=>t.teamCode&&t.eventId===wanted).sort((a,b)=>a.teamName.localeCompare(b.teamName));
         if(!teams.length) throw new Error('No teams for this event');
-
-        teamSelect.innerHTML = '<option value="" disabled selected>Choose your treasure hunting crew…</option>' +
-          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        teamSelect.innerHTML='<option value="" disabled selected>Choose your crew…</option>'+teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
         clearMsg(signMsg);
       }catch(err){
-        teamSelect.innerHTML = '<option value="" disabled selected>Couldn’t load crews</option>';
+        teamSelect.innerHTML='<option value="" disabled selected>Couldn’t load crews</option>';
         setMsg(signMsg,'Unable to load crew list. Please refresh.','error');
       }
     }
 
-    /* ===== Sign-in ===== */
+    /* Sign-in -> Ready */
     async function signin(){
       clearMsg(signMsg);
-      const code = teamSelect.value;
-      const pin  = (teamPin.value||'').trim();
+      const code=teamSelect.value; const pin=(teamPin.value||'').trim();
       if(!code) return setMsg(signMsg,'Pick your crew from the list.','error');
       if(!/^\d{4}$/.test(pin)) return setMsg(signMsg,'Enter your 4-digit PIN.','error');
       try{
-        const res = await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
-        if(!res.success || !res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
-        if(res.token) localStorage.setItem('teamToken', res.token);
-        localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', teamSelect.options[teamSelect.selectedIndex]?.textContent || res.teamName || '');
-        setMsg(signMsg,'Signed in. You can start the quiz!','ok');
-        $('readyTeam').textContent = 'Crew: ' + (localStorage.getItem('teamName') || 'Unknown');
+        const res=await callFn('verify_team_pin_function',{eventId:EVENT_ID,teamCode:code,pin});
+        if(!res.success||!res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
+        if(res.token) localStorage.setItem('teamToken',res.token);
+        localStorage.setItem('teamCode',code);
+        localStorage.setItem('teamName',teamSelect.options[teamSelect.selectedIndex]?.textContent||res.teamName||'');
+        setMsg(signMsg,'Signed in.','ok');
+        $('readyTeam').textContent='Crew: '+(localStorage.getItem('teamName')||'Unknown');
         $('secSign').classList.remove('active'); $('secReady').classList.add('active');
-
-        if (localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); $('btnAccept').disabled = true; }
-      }catch(err){
-        setMsg(signMsg,((''+err.message).includes('404'))?'Sign-in service is off. Ask the host to enable verify_team_pin_function.':(err.message||'Could not sign you in. Try again.'),'error');
-      }
+        if(localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); $('btnAccept').disabled=true; }
+      }catch(err){ setMsg(signMsg,((''+err.message).includes('404'))?'Sign-in service is off. Ask the host to enable verify_team_pin_function.':(err.message||'Could not sign you in. Try again.'),'error'); }
     }
     $('btnSign').addEventListener('click',signin);
-    teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') $('btnSign').click(); });
+    teamPin.addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSign').click();});
 
-    /* ===== Quiz (original questions) ===== */
-    const quizQuestions = [
-      { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[
-        {letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',points:10 },
-      { id:2,type:'multiple_choice',question:'What is the meaning of the word: Gambado?',options:[
-        {letter:'A',text:'Colourful Hat'},{letter:'B',text:'Native of Gambia'},{letter:'C',text:'Prank'},{letter:'D',text:'Foolish bet'}],correctAnswer:'C',points:10 },
-      { id:3,type:'multiple_choice',question:'Which UK island has its own railway, currency, and parliament, but is not part of the United Kingdom?',options:[
-        {letter:'A',text:'Isle of Man'},{letter:'B',text:'Isle of Skye'},{letter:'C',text:'Isle of Wight'},{letter:'D',text:'Isles of Scilly'}],correctAnswer:'A',points:10 },
-      { id:4,type:'multiple_choice',question:'Answer this riddle: What gets wetter the more it dries?',options:[
-        {letter:'A',text:'___s_'},{letter:'B',text:'__w__'},{letter:'C',text:'___t'},{letter:'D',text:'_a__'}],correctAnswer:'B',explanation:'Answer: Towel',points:10 },
-      { id:5,type:'text_input',question:'Name the one-word sport depicted in this image?',imageUrl:'/tennis-sport.png',
-        correctAnswer:'tennis',acceptableAnswers:['tennis','Tennis','TENNIS'],points:10 },
-      { id:6,type:'multiple_choice',question:'Who is this talking in this clip?',audioUrl:'/voice-clip.mp3',options:[
-        {letter:'A',text:'Ed Sheeran'},{letter:'B',text:'Harry Styles'},{letter:'C',text:'Tom Holland'},{letter:'D',text:'Taron Egerton'}],correctAnswer:'C',points:10 },
-      { id:7,type:'text_input',question:'What is the number of the only other month, after August (8), named after a mortal man?',
-        correctAnswer:'7',acceptableAnswers:['7','seven','Seven','SEVEN','july','July','JULY','Jul','jul','JUL'],explanation:'Answer: 7 (July)',points:10 },
-      { id:8,type:'text_input',question:'Which one-word car manufacturer uses this logo?',imageUrl:'/smart-logo.png',
-        correctAnswer:'smart',acceptableAnswers:['smart','Smart','SMART','SmArt','sMaRt'],points:10 },
-      { id:9,type:'multiple_choice',question:'Listen to this intro. Which band had a huge hit with this song?',audioUrl:'/song-intro.mp3',options:[
-        {letter:'A',text:'Red Hot Chili Peppers'},{letter:'B',text:'The Killers'},{letter:'C',text:'The Foo Fighters'},{letter:'D',text:'Kings of Leon'}],correctAnswer:'B',points:10 },
-      { id:10,type:'multiple_choice',question:'Five friends are waiting in line to get coffee… Who is at the front of the line?',options:[
-        {letter:'A',text:'Ross'},{letter:'B',text:'Joey'},{letter:'C',text:'Chandler'},{letter:'D',text:'Monica'},{letter:'E',text:'Rachel'}],correctAnswer:'D',points:10 }
+    /* Quiz (original questions) */
+    const quizQuestions=[
+      { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[{letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',points:10 },
+      { id:2,type:'multiple_choice',question:'What is the meaning of the word: Gambado?',options:[{letter:'A',text:'Colourful Hat'},{letter:'B',text:'Native of Gambia'},{letter:'C',text:'Prank'},{letter:'D',text:'Foolish bet'}],correctAnswer:'C',points:10 },
+      { id:3,type:'multiple_choice',question:'Which UK island has its own railway, currency, and parliament, but is not part of the United Kingdom?',options:[{letter:'A',text:'Isle of Man'},{letter:'B',text:'Isle of Skye'},{letter:'C',text:'Isle of Wight'},{letter:'D',text:'Isles of Scilly'}],correctAnswer:'A',points:10 },
+      { id:4,type:'multiple_choice',question:'Answer this riddle: What gets wetter the more it dries?',options:[{letter:'A',text:'___s_'},{letter:'B',text:'__w__'},{letter:'C',text:'___t'},{letter:'D',text:'_a__'}],correctAnswer:'B',explanation:'Answer: Towel',points:10 },
+      { id:5,type:'text_input',question:'Name the one-word sport depicted in this image?',imageUrl:'/tennis-sport.png',correctAnswer:'tennis',acceptableAnswers:['tennis','Tennis','TENNIS'],points:10 },
+      { id:6,type:'multiple_choice',question:'Who is this talking in this clip?',audioUrl:'/voice-clip.mp3',options:[{letter:'A',text:'Ed Sheeran'},{letter:'B',text:'Harry Styles'},{letter:'C',text:'Tom Holland'},{letter:'D',text:'Taron Egerton'}],correctAnswer:'C',points:10 },
+      { id:7,type:'text_input',question:'What is the number of the only other month, after August (8), named after a mortal man?',correctAnswer:'7',acceptableAnswers:['7','seven','Seven','SEVEN','july','July','JULY','Jul','jul','JUL'],explanation:'Answer: 7 (July)',points:10 },
+      { id:8,type:'text_input',question:'Which one-word car manufacturer uses this logo?',imageUrl:'/smart-logo.png',correctAnswer:'smart',acceptableAnswers:['smart','Smart','SMART','SmArt','sMaRt'],points:10 },
+      { id:9,type:'multiple_choice',question:'Listen to this intro. Which band had a huge hit with this song?',audioUrl:'/song-intro.mp3',options:[{letter:'A',text:'Red Hot Chili Peppers'},{letter:'B',text:'The Killers'},{letter:'C',text:'The Foo Fighters'},{letter:'D',text:'Kings of Leon'}],correctAnswer:'B',points:10 },
+      { id:10,type:'multiple_choice',question:'Five friends are waiting in line to get coffee… Who is at the front of the line?',options:[{letter:'A',text:'Ross'},{letter:'B',text:'Joey'},{letter:'C',text:'Chandler'},{letter:'D',text:'Monica'},{letter:'E',text:'Rachel'}],correctAnswer:'D',points:10 }
     ];
 
-    const quizStartKey = ()=> `quiz:started:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
-    const quizDoneKey  = ()=> `quiz:done:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
+    const quizStartKey=()=>`quiz:started:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
+    const quizDoneKey =()=>`quiz:done:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
 
-    let currentTeam={code:'',name:''};
-    let qIndex=0, timeLeft=15, timerId=null;
-    const answers=[];
+    let currentTeam={code:'',name:''}; let qIndex=0, timeLeft=15, timerId=null; const answers=[];
 
     $('btnAccept').addEventListener('click', startQuizFlow);
-    $('btnNextQ').addEventListener('click', ()=> {
-      $('btnNextQ').style.display='none';
-      if(qIndex < quizQuestions.length-1){ qIndex++; showQuestion(); }
-      else { finishQuiz(); }
-    });
+    $('btnNextQ').addEventListener('click', ()=>{ $('btnNextQ').style.display='none'; if(qIndex<quizQuestions.length-1){ qIndex++; showQuestion(); } else { finishQuiz(); } });
 
     async function startQuizFlow(){
       clearMsg(readyMsg);
-      if (localStorage.getItem(quizDoneKey())) { setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); return; }
+      if(localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); return; }
       try{
-        await callFn('start_quiz_function',{
-          eventId:EVENT_ID, teamCode:localStorage.getItem('teamCode'),
-          teamName:localStorage.getItem('teamName'), quizStartTime:new Date().toISOString()
-        });
+        await callFn('start_quiz_function',{eventId:EVENT_ID,teamCode:localStorage.getItem('teamCode'),teamName:localStorage.getItem('teamName'),quizStartTime:new Date().toISOString()});
         localStorage.setItem(quizStartKey(),'1');
-        $('quizTeam').textContent='Crew: ' + (localStorage.getItem('teamName')||'');
+        $('quizTeam').textContent='Crew: '+(localStorage.getItem('teamName')||'');
         $('secReady').classList.remove('active'); $('secQuiz').classList.add('active');
-        currentTeam={code:localStorage.getItem('teamCode'), name:localStorage.getItem('teamName')};
+        currentTeam={code:localStorage.getItem('teamCode'),name:localStorage.getItem('teamName')};
         qIndex=0; answers.length=0; showQuestion();
       }catch(e){
-        if (e.code==='DUPLICATE') setMsg(readyMsg,'Your crew has already started the quiz on another device. You can’t start again.','error');
-        else if (e.code==='CLOSED') setMsg(readyMsg,'Quiz is closed for this event.','error');
+        if(e.code==='DUPLICATE') setMsg(readyMsg,'Your crew has already started the quiz on another device. You can’t start again.','error');
+        else if(e.code==='CLOSED') setMsg(readyMsg,'Quiz is closed for this event.','error');
         else setMsg(readyMsg,'Couldn’t start the quiz. Please try again.','error');
       }
     }
 
     function showQuestion(){
-      const q = quizQuestions[qIndex];
-      $('qCount').textContent = `Riddle ${qIndex+1} of ${quizQuestions.length}`;
-      timeLeft = 15; updateTimer(); startTimer();
+      const q=quizQuestions[qIndex];
+      $('qCount').textContent=`Riddle ${qIndex+1} of ${quizQuestions.length}`;
+      timeLeft=15; updateTimer(); startTimer();
       $('btnNextQ').style.display='none';
 
-      let html = `<div style="font-weight:900;color:#654321;margin-bottom:12px">${q.question}</div>`;
-      if(q.audioUrl){
-        html += `<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0">
-                  <source src="${q.audioUrl}" type="audio/mpeg">
-                </audio>`;
-      }
-      if(q.imageUrl) html += `<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`;
+      let html=`<div style="font-weight:900;color:#654321;margin-bottom:12px">${q.question}</div>`;
+      if(q.audioUrl){ html+=`<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0"><source src="${q.audioUrl}" type="audio/mpeg"></audio>`; }
+      if(q.imageUrl){ html+=`<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`; }
 
       if(q.type==='multiple_choice'){
-        q.options.forEach(o=>{ html += `<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`; });
+        q.options.forEach(o=>{ html+=`<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`; });
       }else{
-        html += `<input id="textAns" class="textAnswer" placeholder="Type your answer…" maxlength="50">`;
-        html += `<button id="btnSubmitText" class="btn" style="margin-top:12px" type="button">Submit</button>`;
+        html+=`<input id="textAns" class="textAnswer" placeholder="Type your answer…" maxlength="50">`;
+        html+=`<button id="btnSubmitText" class="btn" style="margin-top:12px" type="button">Submit</button>`;
       }
-      $('qcard').innerHTML = html;
+      $('qcard').innerHTML=html;
 
       if(q.type==='multiple_choice'){
         document.querySelectorAll('.opt').forEach(el=>{
-          el.addEventListener('click',()=>{
-            document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
-            el.classList.add('sel'); submitAnswer(el.dataset.letter);
-          });
+          el.addEventListener('click',()=>{ document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); submitAnswer(el.dataset.letter); });
         });
       }else{
         $('btnSubmitText').addEventListener('click', ()=> submitAnswer());
       }
-
       $('qAud')?.play().catch(()=>{});
     }
 
-    function startTimer(){
-      clearInterval(timerId);
-      timerId = setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0){ submitAnswer(''); } },1000);
-    }
-    function updateTimer(){
-      $('timer').textContent = timeLeft;
-      const pct = (timeLeft/15)*360;
-      $('timer').style.background = `conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`;
-    }
+    function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0){ submitAnswer(''); } },1000); }
+    function updateTimer(){ $('timer').textContent=timeLeft; const pct=(timeLeft/15)*360; $('timer').style.background=`conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`; }
     function normalize(s){ return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
 
     function submitAnswer(choice){
       clearInterval(timerId);
-      const q = quizQuestions[qIndex];
-      let correct = false;
+      const q=quizQuestions[qIndex]; let correct=false;
 
       if(q.type==='multiple_choice'){
-        correct = (choice === q.correctAnswer);
+        correct=(choice===q.correctAnswer);
         document.querySelectorAll('.opt').forEach(el=>{
-          const lett = el.dataset.letter;
+          const lett=el.dataset.letter;
           if(lett===q.correctAnswer) el.classList.add('good');
           else if(el.classList.contains('sel') && !correct) el.classList.add('bad');
           el.style.pointerEvents='none';
         });
       }else{
-        const user = normalize($('textAns')?.value || '');
-        if(q.acceptableAnswers?.length) correct = q.acceptableAnswers.some(a=>normalize(a)===user);
-        else correct = normalize(q.correctAnswer)===user;
-
-        // lock inputs
-        const ta=$('textAns'); if(ta){ ta.disabled=true; }
-        const sb=$('btnSubmitText'); if(sb){ sb.disabled=true; }
-
-        // feedback pill
-        const prettyAnswer = (q.explanation && q.explanation.replace(/^Answer:\s*/i,'').trim()) || q.correctAnswer;
-        $('qcard').insertAdjacentHTML(
-          'beforeend',
-          `<div class="fb ${correct?'ok':'bad'}">${correct ? '✅ Correct!' : 'Unlucky! The correct answer is: ' + prettyAnswer}</div>`
-        );
+        const user=normalize($('textAns')?.value||'');
+        if(q.acceptableAnswers?.length) correct=q.acceptableAnswers.some(a=>normalize(a)===user);
+        else correct=normalize(q.correctAnswer)===user;
+        $('textAns').disabled=true; $('btnSubmitText').disabled=true;
+        const pretty=(q.explanation && q.explanation.replace(/^Answer:\s*/i,'').trim())||q.correctAnswer;
+        $('qcard').insertAdjacentHTML('beforeend',`<div class="fb ${correct?'ok':'bad'}">${correct?'✅ Correct!':'Unlucky! The correct answer is: '+pretty}</div>`);
       }
 
-      answers.push({
-        questionId:q.id, userAnswer: choice || ($('textAns')?.value || ''),
-        correctAnswer:q.correctAnswer, isCorrect:correct, points:correct?q.points:0, timeLeft
-      });
+      answers.push({questionId:q.id,userAnswer:choice||($('textAns')?.value||''),correctAnswer:q.correctAnswer,isCorrect:correct,points:correct?q.points:0,timeLeft});
 
       if(q.explanation && q.type==='multiple_choice'){
-        $('qcard').insertAdjacentHTML('beforeend',
-          `<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
+        $('qcard').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
       }
 
-      $('btnNextQ').textContent = (qIndex < quizQuestions.length-1) ? 'Next question' : 'See results';
+      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next question':'See results';
       $('btnNextQ').style.display='block';
     }
-    window.submitAnswer = submitAnswer;
+    window.submitAnswer=submitAnswer;
 
     async function finishQuiz(){
-      $('secQuiz').classList.remove('active');
-      $('doneTeam').textContent = 'Crew: ' + (currentTeam.name || '');
-      $('secDone').classList.add('active');
-
-      const correct = answers.filter(a=>a.isCorrect).length;
-      const points = answers.reduce((s,a)=>s+a.points,0);
-      $('scoreLine').textContent = `Score: ${correct}/${quizQuestions.length} — Points earned: ${points}`;
-
-      $('breakdown').innerHTML = answers.map((a,i)=>{
-        const q = quizQuestions[i];
-        return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0">
-                  <div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div>
-                  <div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.points:'✗ 0'}</div>
-                </div>`;
-      }).join('');
+      $('secQuiz').classList.remove('active'); $('doneTeam').textContent='Crew: '+(currentTeam.name||''); $('secDone').classList.add('active');
+      const correct=answers.filter(a=>a.isCorrect).length; const points=answers.reduce((s,a)=>s+a.points,0);
+      $('scoreLine').textContent=`Score: ${correct}/${quizQuestions.length} — Points earned: ${points}`;
+      $('breakdown').innerHTML=answers.map((a,i)=>{const q=quizQuestions[i];return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0"><div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div><div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.points:'✗ 0'}</div></div>`;}).join('');
 
       clearMsg(submitMsg);
       try{
-        await callFn('submit_quiz_function',{
-          eventId:EVENT_ID, teamCode:currentTeam.code, teamName:currentTeam.name,
-          totalScore:points, questionsCorrect:correct, totalQuestions:quizQuestions.length,
-          completionTime:new Date().toISOString(), answers
-        });
-        localStorage.setItem(quizDoneKey(),'1');
-        setMsg(submitMsg,'🎉 Points successfully added to your score!','ok');
+        await callFn('submit_quiz_function',{eventId:EVENT_ID,teamCode:currentTeam.code,teamName:currentTeam.name,totalScore:points,questionsCorrect:correct,totalQuestions:quizQuestions.length,completionTime:new Date().toISOString(),answers});
+        localStorage.setItem(quizDoneKey(),'1'); setMsg(submitMsg,'🎉 Points successfully added to your score!','ok');
       }catch(e){
-        if (e.code==='DUPLICATE'){ localStorage.setItem(quizDoneKey(),'1'); setMsg(submitMsg,'Already recorded for this crew/event.','ok'); }
-        else if (e.code==='CLOSED'){ setMsg(submitMsg,'Quiz submissions are closed for this event.','error'); }
-        else if (e.code==='UNAUTHORIZED'){ setMsg(submitMsg,'Your sign-in expired. Please sign in again.','error'); }
-        else if (e.code==='RATE_LIMITED'){ setMsg(submitMsg,'Too many attempts—please wait and try again.','error'); }
-        else { setMsg(submitMsg,'Couldn’t record points. (Saved locally.)','error'); }
+        if(e.code==='DUPLICATE'){localStorage.setItem(quizDoneKey(),'1');setMsg(submitMsg,'Already recorded for this crew/event.','ok');}
+        else if(e.code==='CLOSED'){setMsg(submitMsg,'Quiz submissions are closed for this event.','error');}
+        else if(e.code==='UNAUTHORIZED'){setMsg(submitMsg,'Your sign-in expired. Please sign in again.','error');}
+        else if(e.code==='RATE_LIMITED'){setMsg(submitMsg,'Too many attempts—please wait and try again.','error');}
+        else{setMsg(submitMsg,'Couldn’t record points. (Saved locally.)','error');}
       }
     }
 
-    // boot
+    /* boot */
     loadTeams();
   </script>
 </body>
