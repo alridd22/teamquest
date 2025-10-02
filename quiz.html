@@ -169,7 +169,7 @@
     <section id="secDone" class="card section">
       <div class="team-pill" id="doneTeam">Crew: …</div>
       <div class="qcard">
-        <h1 style="font-size:22px;margin-bottom:8px">🎉 Trial Complete!</h1>
+        <h1 style="font-size:22px;margin-bottom:8px">🎉 Quiz Complete!</h1>
         <p id="scoreLine" style="margin-bottom:14px;font-weight:900;color:#8B4513"></p>
         <div id="breakdown"></div>
         <div id="submitMsg" class="msg" style="margin-top:14px"></div>
@@ -370,7 +370,7 @@
         $('qcard').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
       }
 
-      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next question':'See results';
+      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next Question':'See results';
       $('btnNextQ').style.display='block';
     }
     window.submitAnswer=submitAnswer;
