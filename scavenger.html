@@ -42,6 +42,8 @@
     border-bottom:1px solid rgba(255,255,255,.18)}
   .nav-container{height:100%;max-width:1000px;margin:0 auto;padding:0 12px;display:flex;align-items:center;justify-content:space-between}
   .nav-logo img{height:40px;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+  /* MAKE LOGO NON-CLICKABLE */
+  .nav-logo{pointer-events:none;cursor:default;}
   .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
   .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
     background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
@@ -498,6 +500,17 @@
         }
       }catch{}
       loadCrews().then(()=>{ if(signedTeam) syncLocksFromServer().then(renderTiles); else renderTiles(); });
+    })();
+  </script>
+
+  <!-- Neutralize any link behavior on the logo element -->
+  <script>
+    (function(){
+      document.querySelectorAll('.nav-logo[href]').forEach(a=>{
+        a.removeAttribute('href');
+        a.setAttribute('aria-disabled','true');
+        a.setAttribute('tabindex','-1');
+      });
     })();
   </script>
 </body>
