@@ -1,3 +1,16 @@
+<!--
+TeamQuest • Leaderboard (polished, responsive, a11y)
+WHAT CHANGED (brief):
+1) Layout polish: reduced global paddings/margins and oversized type; increased usable width while keeping max-width for readability. Removed excess inner “boxes”.
+2) Row grid: grid-template-areas for clean mobile reflow. On <520px the points pill drops under the name; chevron remains right; nothing overflows.
+3) Team name clamping: CSS line-clamp (2 lines) with ellipsis. Long names never push UI off-screen.
+4) Rank badges: sensible sizes (84/70px desktop/mobile). Gold/Silver/Bronze styles match mockups.
+5) Breakdown panel: CSS-only smooth expand/collapse (max-height transition, no layout jump). Independent state per row.
+6) Accessibility: chevron is a real <button> with aria-expanded and toggles a <div> with aria-hidden. Focus-visible styles added; touch targets ≥44px.
+7) Data + nav: Still fetches from /.netlify/functions/get_leaderboard[?eventId=…]. Preserves ?event= across nav. Keeps logo non-clickable, refresh button, and “Last updated” label.
+8) Empty/error states styled; contrast tuned. No libraries.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +24,10 @@
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF;
+      --panel:#22170E; --panel-ink:#FFF3D9;
       --gold:#F0C433; --gold-deep:#A7711F;
       --nav-h:64px; --radius:22px; --shadow:0 18px 40px rgba(0,0,0,.35);
+      --focus:#1594d2;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -33,16 +48,16 @@
       border-bottom:1px solid rgba(255,255,255,.18);
     }
     .nav-container{
-      height:100%; max-width:1000px; margin:0 auto; padding:0 12px;
+      height:100%; max-width:1120px; margin:0 auto; padding:0 12px;
       display:flex; align-items:center; justify-content:space-between;
     }
-    /* NOT clickable */
     .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
+    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer;line-height:1; padding:8px}
+    .nav-toggle:focus-visible{outline:3px solid var(--focus); border-radius:10px}
     .nav-menu{
       position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
-      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
+      display:flex; flex-direction:column; align-items:center; gap:12px; padding:18px 14px; transition:left .25s;
     }
     .nav-menu.active{left:0}
     .nav-link,.dropdown-link{
@@ -51,43 +66,48 @@
       background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
     }
     .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
+    .nav-link:focus-visible,.dropdown-link:focus-visible{outline:3px solid var(--focus)}
 
     /* HERO */
     .hero{
       min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:24px 22px 18px; text-align:center;
+      padding:18px 16px 14px; text-align:center;
     }
-    .brand-logo{width:min(220px,68vw); height:auto; margin-bottom:8px;
+    .brand-logo{width:min(220px,68vw); height:auto; margin-bottom:6px;
       filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-weight:900; font-size:28px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero-title{font-weight:900; font-size:26px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* CONTENT */
-    .stack{padding:0 22px 28px}
+    /* CONTENT WRAP (less side padding, more usable width) */
+    .stack{padding:0 16px 24px}
     .card{
       background:var(--parchment); border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100%; max-width:1060px;
+      padding:14px 12px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100%; max-width:1120px;
     }
-    .refreshWrap{display:flex; justify-content:center; margin-bottom:12px}
+
+    .refreshWrap{display:flex; justify-content:center; margin:0 0 10px}
     .btn{
-      appearance:none; border:3px solid #7a521c; border-radius:18px; padding:12px 20px; cursor:pointer;
+      appearance:none; border:3px solid #7a521c; border-radius:16px; padding:10px 18px; cursor:pointer;
       font-weight:900; color:#442812; background:linear-gradient(90deg,#FDBA2D,#F0C433); box-shadow:0 8px 18px rgba(0,0,0,.22);
+      min-height:44px;
     }
+    .btn:focus-visible{outline:3px solid var(--focus)}
 
     /* BOARD */
     .board{
-      background:#23160d; color:#fff; border-radius:26px; padding:14px; position:relative; overflow:hidden;
+      background:var(--panel); color:#fff; border-radius:24px; padding:10px; position:relative; overflow:hidden;
     }
     .boardHead{
-      display:grid; grid-template-columns:84px 1fr 130px 64px; gap:10px; align-items:center;
-      color:#fff4dc; font-weight:900; padding:0 10px 12px; border-bottom:1px solid rgba(255,255,255,.12);
+      display:grid; grid-template-columns:84px 1fr 130px 64px; gap:8px; align-items:center;
+      color:var(--panel-ink); font-weight:900; padding:0 8px 10px; border-bottom:1px solid rgba(255,255,255,.12);
+      font-size:14px; letter-spacing:.2px;
     }
     .hdr-c{opacity:.95}
 
-    .rows{padding:12px 6px 6px}
+    .rows{padding:10px 4px 4px}
 
     .row{
-      border-radius:24px; margin:12px 8px; padding:14px 16px;
-      background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.15);
+      border-radius:22px; margin:10px 6px; padding:12px 12px;
+      background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.14);
       overflow:hidden;
     }
     .row.gold{background:#fff3cf}
@@ -99,10 +119,11 @@
       display:grid;
       grid-template-columns:84px 1fr 130px 64px;
       grid-template-areas:"rank name points toggle";
-      gap:10px; align-items:center;
+      gap:8px; align-items:center;
     }
 
-    .rank{grid-area:rank; width:84px; height:72px;
+    .rank{
+      grid-area:rank; width:84px; height:72px;
       display:flex; align-items:center; justify-content:center;
       border-radius:18px; font-weight:900; font-size:28px; color:#3b2a16; border:2px solid #cfb06d;
       background:linear-gradient(180deg,#ffe39b,#e7b844);
@@ -112,52 +133,65 @@
 
     .team{
       grid-area:name;
-      font-weight:900; color:#2f2216; font-size:24px; line-height:1.05;
+      font-weight:900; color:#2f2216; font-size:22px; line-height:1.1;
       display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-      padding-right:6px;
+      padding-right:4px;
     }
 
     .points{
       grid-area:points;
-      justify-self:end; min-width:112px; height:52px; padding:0 14px; border-radius:16px;
+      justify-self:end; min-width:112px; height:48px; padding:0 14px; border-radius:16px;
       display:inline-flex; align-items:center; justify-content:center; gap:10px;
       font-weight:900; color:#3b2a16; border:2px solid #b37e00;
       background:linear-gradient(135deg,#f8d27b,#d5a243);
     }
     .star{
-      display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:999px;
+      display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:999px;
       background:radial-gradient(circle at 30% 30%,#fff8,#0000), linear-gradient(135deg,#ffd776,#f0b020);
       border:2px solid #b37e00; font-weight:900;
     }
-    .points .num{font-size:22px; line-height:1}
+    .points .num{font-size:20px; line-height:1}
 
     .toggle{
       grid-area:toggle;
-      width:52px; height:52px; border-radius:999px; border:2px solid #cdbb9c;
+      width:52px; height:52px; min-width:52px; border-radius:999px; border:2px solid #cdbb9c;
       background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
       justify-self:end;
     }
     .toggle:after{content:"▾"; font-size:20px; color:#3b2a16}
     .row.open .toggle:after{content:"▴"}
+    .toggle:focus-visible{outline:3px solid var(--focus)}
 
+    /* Breakdown – smooth expand/collapse without layout jump */
     .break{
-      display:none; margin:12px 2px 4px; padding:12px; border-radius:14px;
-      background:#fff; border:2px solid #ead7b9;
+      overflow:hidden;
+      max-height:0;
+      transition:max-height .28s ease;
+      margin:0 2px;
+      border-radius:14px;
+      border:2px solid #ead7b9;
+      background:#fff;
     }
-    .row.open .break{display:block}
+    .row.open .break{max-height:420px} /* large enough to reveal all lines */
 
     .detail{
       display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
-      padding:10px 12px; border-radius:12px; background:#fff7e6; border:2px solid #e8c97c; margin:6px 0;
+      padding:10px 12px; border-bottom:1px solid #f0e3cc;
       font-weight:800; color:#4a341e;
+      background:#fff7e6;
     }
-    .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .detail:last-child{border-bottom:0; border-radius:0 0 12px 12px}
+    .detail:first-child{border-radius:12px 12px 0 0}
+    .detail .label{
+      overflow:hidden; text-overflow:ellipsis; white-space:nowrap
+    }
     .detail .val{font-weight:900}
 
-    .updated{margin:10px 6px 0; color:#7b522a; font-weight:700; text-align:center}
+    .updated{margin:10px 6px 0; color:#7b522a; font-weight:700; text-align:center; font-size:14px}
 
-    /* —— Mobile layout: make it like the mockup (points drop below) —— */
+    /* —— Mobile layout: like the mockup (points drop below) —— */
     @media (max-width: 520px){
+      .hero-title{font-size:24px}
       .boardHead{grid-template-columns:70px 1fr 96px 56px}
       .row-inner{
         grid-template-columns:70px 1fr 56px;
@@ -167,9 +201,15 @@
         align-items:center;
       }
       .rank{width:70px; height:64px; font-size:26px}
-      .team{font-size:22px}
-      .points{justify-self:start; min-width:96px; height:48px; margin-left:4px}
+      .team{font-size:20px}
+      .points{justify-self:start; min-width:96px; height:46px; margin-left:2px}
       .toggle{width:48px; height:48px}
+    }
+
+    /* Empty/error state */
+    .state{
+      color:var(--panel-ink); background:rgba(255,255,255,.06);
+      border:1px dashed rgba(255,255,255,.25); border-radius:14px; padding:16px; text-align:center
     }
   </style>
 </head>
@@ -180,7 +220,7 @@
       <div class="nav-logo" aria-label="TeamQuest">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </div>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
@@ -204,14 +244,14 @@
       <div class="refreshWrap"><button id="refreshBtn" class="btn">Refresh</button></div>
 
       <div class="board">
-        <div class="boardHead">
+        <div class="boardHead" aria-hidden="true">
           <div class="hdr-c">Rank</div>
           <div class="hdr-c">Name</div>
           <div class="hdr-c" style="text-align:right">Points</div>
           <div class="hdr-c" style="text-align:center">Detail</div>
         </div>
         <div id="rows" class="rows">
-          <div style="padding:16px;color:#fff4dc">Loading…</div>
+          <div class="state">Loading…</div>
         </div>
       </div>
 
@@ -226,12 +266,18 @@
       const navMenu   = document.getElementById('nav-menu');
       if(navToggle && navMenu){
         navToggle.addEventListener('click', ()=> {
+          const open = !navMenu.classList.contains('active');
           navMenu.classList.toggle('active');
-          navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+          navToggle.textContent = open ? '✕' : '☰';
+          navToggle.setAttribute('aria-expanded', String(open));
         });
         document.addEventListener('click', (e)=> {
           const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-          if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+          if(!inside && navMenu.classList.contains('active')){
+            navMenu.classList.remove('active');
+            navToggle.textContent='☰';
+            navToggle.setAttribute('aria-expanded', 'false');
+          }
         });
       }
       const qs = new URLSearchParams(location.search);
@@ -281,10 +327,10 @@
       return `
         <div class="row ${rankClass}">
           <div class="row-inner">
-            <div class="rank">${i+1}</div>
-            <div class="team">${escapeHtml(t.name)}</div>
-            <div class="points"><span class="star">★</span><span class="num">${t.total}</span></div>
-            <button class="toggle" aria-label="Toggle details"></button>
+            <div class="rank" aria-hidden="true">${i+1}</div>
+            <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
+            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}"><span class="star" aria-hidden="true">★</span><span class="num">${t.total}</span></div>
+            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false"></button>
           </div>
           <div class="break" aria-hidden="true">
             ${detailLine('The Clue Hunt', t.c)}
@@ -304,16 +350,18 @@
 
     function render(list){
       if (!Array.isArray(list) || list.length===0){
-        rowsEl.innerHTML = `<div style="padding:16px;color:#fff4dc">No teams yet.</div>`;
+        rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
         return;
       }
       rowsEl.innerHTML = list.map(rowTemplate).join('');
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
+        const br  = row.querySelector('.break');
         btn?.addEventListener('click', ()=>{
+          const nowOpen = !row.classList.contains('open');
           row.classList.toggle('open');
-          const br = row.querySelector('.break');
-          if (br) br.setAttribute('aria-hidden', row.classList.contains('open') ? 'false' : 'true');
+          btn.setAttribute('aria-expanded', String(nowOpen));
+          if (br) br.setAttribute('aria-hidden', String(!nowOpen));
         });
       });
     }
@@ -329,12 +377,13 @@
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         console.error('loadBoard error', e);
-        rowsEl.innerHTML = `<div style="padding:16px;color:#fff4dc">Couldn’t load leaderboard. Please try again.</div>`;
+        rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
     }
 
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
     refreshBtn.addEventListener('click', loadBoard);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
