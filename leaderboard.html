@@ -12,7 +12,7 @@
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8;
       --gold:#F0C433; --gold-deep:#A7711F;
-      --brown:#3a2a17; --amber:#ffb428;
+      --brown:#3a2a17;
       --nav-h:64px;
       --radius:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
@@ -37,7 +37,6 @@
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{height:100%; max-width:1000px; margin:0 auto; padding:0 12px;
       display:flex; align-items:center; justify-content:space-between}
-    /* Logo is NOT a link */
     .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
@@ -62,23 +61,44 @@
     .btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
 
     /* TABLE SHELL */
-    .shell{background:#1b110a;border-radius:24px;padding:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
-    .head{display:grid;grid-template-columns:72px 1fr 120px 92px;gap:10px;color:#f5e8d0;font-weight:900;opacity:.85;padding:0 10px 10px}
+    .shell{background:#1b110a;border-radius:24px;padding:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);overflow:hidden}
+    .head{
+      display:grid;
+      grid-template-columns:minmax(44px,64px) 1fr minmax(92px,120px) minmax(52px,72px);
+      gap:10px;color:#f5e8d0;font-weight:900;opacity:.85;padding:0 10px 10px;align-items:center
+    }
+    .head div{white-space:nowrap}
+
     .rows{display:flex;flex-direction:column;gap:12px}
 
     /* ROW */
-    .row{background:#fff;border-radius:18px;padding:0;border:0;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.18);position:relative}
-    .row-head{display:grid;grid-template-columns:72px 1fr 120px 92px;gap:10px;align-items:center;padding:14px 10px}
-    .rank-badge{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#fff;text-shadow:0 1px 0 #0003}
+    .row{background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.18);position:relative;border:1px solid #e9d2a5}
+    .row-head{
+      display:grid;
+      grid-template-columns:minmax(44px,64px) 1fr minmax(92px,120px) minmax(52px,72px);
+      gap:10px;align-items:center;padding:12px 10px;
+    }
+    .rank-badge{
+      width:clamp(44px,10vw,64px); height:clamp(44px,10vw,64px);
+      border-radius:14px; display:flex; align-items:center; justify-content:center;
+      font-weight:900; font-size:clamp(18px,5vw,28px); color:#fff; text-shadow:0 1px 0 #0003
+    }
     .rank-1{background:linear-gradient(135deg,#ffd776,#e4aa2e);box-shadow:inset 0 0 0 3px #d39a15}
     .rank-2{background:linear-gradient(135deg,#e7e7e7,#bdbdbd);box-shadow:inset 0 0 0 3px #9c9c9c}
     .rank-3{background:linear-gradient(135deg,#e7b07a,#b17032);box-shadow:inset 0 0 0 3px #a46e3a}
-    .name{font-weight:900;color:#2f2416;font-size:22px;line-height:1.15}
+
+    .name{font-weight:900;color:#2f2416;font-size:clamp(18px,4.8vw,22px);line-height:1.15;min-width:0}
+    .name span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
     .total{justify-self:end}
-    .star-pill{display:inline-flex;align-items:center;gap:10px;padding:6px 14px;border-radius:12px;background:#cfa24d;color:#3b2b15;font-weight:900;border:2px solid #8d6a2b}
-    .star-pill:before{content:"⭐";font-size:18px}
-    .chev{justify-self:center;width:40px;height:40px;border-radius:999px;border:2px solid #c8b48d;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .chev span{display:inline-block;transition:transform .18s}
+    .star-pill{
+      display:inline-flex;align-items:center;gap:10px;padding:6px 12px;border-radius:12px;background:#cfa24d;color:#3b2b15;font-weight:900;border:2px solid #8d6a2b;
+      font-size:clamp(14px,4.2vw,18px)
+    }
+    .star-pill:before{content:"⭐";font-size:clamp(16px,4.5vw,18px)}
+
+    .chev{justify-self:center;width:clamp(36px,9vw,40px);height:clamp(36px,9vw,40px);border-radius:999px;border:2px solid #c8b48d;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .chev span{display:inline-block;transition:transform .18s; font-size:clamp(16px,5vw,18px)}
     .row.open .chev span{transform:rotate(180deg)}
 
     /* #1 highlight */
@@ -86,13 +106,21 @@
 
     /* BREAKDOWN (accordion) */
     .break{max-height:0;overflow:hidden;transition:max-height .25s ease}
-    .row.open .break{max-height:420px} /* enough for few items */
-    .break-inner{padding:0 14px 14px}
-    .line{background:#fff8ea;border:2px solid #e9d2a5;border-radius:12px;padding:12px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;font-weight:800;color:#4a351e}
-    .line .label{display:flex;align-items:center;gap:10px}
-    .line .dots{flex:1;height:1px;border-bottom:2px dotted #d3b070;margin:0 10px}
+    .row.open .break{max-height:420px}
+    .break-inner{padding:0 12px 12px}
+    .line{background:#fff8ea;border:2px solid #e9d2a5;border-radius:12px;padding:10px 12px;margin-top:10px;display:flex;align-items:center;gap:10px;font-weight:800;color:#4a351e}
+    .line .label{white-space:nowrap}
+    .line .dots{flex:1;border-bottom:2px dotted #d3b070}
 
     .updated{margin-top:12px;color:#7b522a;font-weight:700;text-align:center}
+
+    /* MOBILE TWEAKS */
+    @media (max-width:520px){
+      .head{grid-template-columns:minmax(44px,56px) 1fr minmax(82px,96px) minmax(48px,56px)}
+      .head div:last-child{display:none} /* hide "Detail" word */
+      .row-head{grid-template-columns:minmax(44px,56px) 1fr minmax(82px,96px) minmax(48px,56px)}
+      .toolbar .btn{padding:12px 18px}
+    }
   </style>
 </head>
 <body>
@@ -134,9 +162,7 @@
           <div style="text-align:right">Points</div>
           <div style="text-align:center">Detail</div>
         </div>
-        <div id="rows" class="rows">
-          <!-- rows injected -->
-        </div>
+        <div id="rows" class="rows"></div>
       </div>
 
       <div id="updated" class="updated">Last updated — --:--:--</div>
@@ -144,12 +170,13 @@
   </main>
 
   <script>
-    // NAV + keep ?event= across links (logo is a span so it's ignored)
+    // NAV + keep ?event= across links
     (function(){
       const navToggle=document.getElementById('nav-toggle');
       const navMenu=document.getElementById('nav-menu');
       navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
       document.addEventListener('click',(e)=>{const inside=navToggle.contains(e.target)||navMenu.contains(e.target); if(!inside&&navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}});
+
       const EVENT_ID=new URLSearchParams(location.search).get('event')||new URLSearchParams(location.search).get('eventId')||'';
       if(!EVENT_ID) return;
       const needs=['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
@@ -173,7 +200,6 @@
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
     function shapeTeam(t){
-      // Accept several shapes; produce a uniform object with breakdown
       const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
       const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
       const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
@@ -184,17 +210,10 @@
       return { name, total, breakdown:{ clue_hunt:c, quiz:q, scavenger:s, kindness:k, limerick:l } };
     }
 
-    function medalClass(rank){
-      if(rank===1) return 'rank-1'; if(rank===2) return 'rank-2'; if(rank===3) return 'rank-3'; return '';
-    }
+    function medalClass(rank){ if(rank===1) return 'rank-1'; if(rank===2) return 'rank-2'; if(rank===3) return 'rank-3'; return ''; }
 
     function line(label, value){
-      return `
-        <div class="line">
-          <div class="label">${label}</div>
-          <div class="dots"></div>
-          <div>${value}</div>
-        </div>`;
+      return `<div class="line"><div class="label">${label}</div><div class="dots"></div><div>${value}</div></div>`;
     }
 
     function rowHtml(team, i){
@@ -212,17 +231,14 @@
         <div class="row ${i===0?'rank1':''}" data-i="${i}">
           <div class="row-head">
             ${rankBadge}
-            <div class="name">${team.name}</div>
+            <div class="name"><span>${team.name}</span></div>
             <div class="total"><span class="star-pill">${team.total}</span></div>
             <button class="chev" aria-expanded="false" aria-controls="bd-${i}" title="Show details"><span>▾</span></button>
           </div>
           <div class="break" id="bd-${i}">
-            <div class="break-inner">
-              ${lines}
-            </div>
+            <div class="break-inner">${lines}</div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     function attachRowHandlers(){
@@ -244,19 +260,17 @@
         const res = await fetch(url, { cache:'no-store' });
         const data = await res.json();
         const listRaw = data.leaderboard || data.rows || data.teams || [];
-        const shaped = listRaw.map(shapeTeam)
-                              .sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
+        const shaped = listRaw.map(shapeTeam).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
 
-        if(!shaped.length){
-          rowsEl.innerHTML = `<div class="row"><div class="row-head"><div class="name" style="grid-column:1/-1;text-align:center">No teams yet.</div></div></div>`;
-        }else{
-          rowsEl.innerHTML = shaped.map(rowHtml).join('');
-          attachRowHandlers();
-        }
+        rowsEl.innerHTML = shaped.length
+          ? shaped.map(rowHtml).join('')
+          : `<div class="row"><div class="row-head" style="grid-template-columns:1fr"><div class="name"><span>No teams yet.</span></div></div></div>`;
+
+        attachRowHandlers();
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         console.error('loadBoard error', e);
-        rowsEl.innerHTML = `<div class="row"><div class="row-head"><div class="name" style="grid-column:1/-1;text-align:center">Couldn’t load leaderboard. Please try again.</div></div></div>`;
+        rowsEl.innerHTML = `<div class="row"><div class="row-head" style="grid-template-columns:1fr"><div class="name"><span>Couldn’t load leaderboard. Please try again.</span></div></div></div>`;
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
     }
