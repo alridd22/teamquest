@@ -8,124 +8,101 @@
 
   <style>
     :root{
-      --bg:url("/TQ%20Web%20extended%20background-100.jpg");  /* same scenic background as activities */
+      --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
-      --parchment:#F7EED8; --parchment-2:#F3E6CF;
+      --parchment:#F7EED8;
       --gold:#F0C433; --gold-deep:#A7711F;
+      --brown:#3a2a17; --amber:#ffb428;
       --nav-h:64px;
-      --radius-card:22px;
+      --radius:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --shadow-soft:0 10px 24px rgba(0,0,0,.25);
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
+      margin:0; color:var(--ink);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--ink);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
-        var(--bg);
-      background-size:cover;
-      background-position:top center;
-      background-attachment:fixed;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
+      background-size:cover;background-position:top center;background-attachment:fixed;
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
 
-    /* ——— NAV (matches activities) ——— */
-    .treasure-nav{
-      position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
+    /* NAV */
+    .treasure-nav{position:fixed; inset:0 0 auto 0; height:var(--nav-h); z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
-      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
-      border-bottom:1px solid rgba(255,255,255,.18);
-    }
-    .nav-container{
-      height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between;
-      max-width:1000px; margin:0 auto;
-    }
-    .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    /* make the header logo non-clickable */
-    .nav-logo{pointer-events:none; cursor:default;}
+      background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18)}
+    .nav-container{height:100%; max-width:1000px; margin:0 auto; padding:0 12px;
+      display:flex; align-items:center; justify-content:space-between}
+    /* Logo is NOT a link */
+    .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
-    .nav-menu{
-      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
-      background:linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.72));
-      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
-    }
+    .nav-menu{position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s}
     .nav-menu.active{left:0}
-    .nav-link,.dropdown-link{
-      display:block; width:92%; max-width:360px; text-align:center;
-      text-decoration:none; color:#F7EED8; font-weight:900;
-      padding:12px 14px; border-radius:14px;
-      background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
-    }
-    .nav-link:hover,.dropdown-link:hover{ background:rgba(247,238,216,.32) }
+    .nav-link,.dropdown-link{display:block;width:92%;max-width:360px;text-align:center;
+      text-decoration:none;color:#F7EED8;font-weight:900;padding:12px 14px;border-radius:14px;
+      background:rgba(247,238,216,.22);border:1px solid rgba(255,255,255,.3)}
+    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
 
-    /* ——— HERO ——— */
-    .hero{
-      min-height:220px;
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:24px 22px 18px; text-align:center;
-    }
-    .brand-logo{
-      width:min(220px,68vw); height:auto; margin-bottom:8px;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
-    }
-    .hero-title{
-      font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px;
-      text-shadow:0 2px 6px rgba(0,0,0,.6);
-    }
+    /* HERO */
+    .hero{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px 22px 18px;text-align:center}
+    .brand-logo{width:min(220px,68vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-weight:900;font-size:24px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* ——— CARD + TABLE ——— */
-    .stack{ padding:0 22px 28px; }
-    .card{
-      background:var(--parchment);
-      border-radius:var(--radius-card);
-      box-shadow:var(--shadow-card);
-      padding:18px 16px;
-      border:1px solid rgba(0,0,0,.06);
-      margin:0 auto 18px; width:100%; max-width:1050px;
-    }
-    .card h2{ margin:0 0 6px; color:var(--ink); font-weight:900 }
-    .card p{ margin:0 0 12px; color:var(--ink-soft); font-weight:700 }
+    /* WRAP + BUTTON */
+    .stack{padding:0 22px 28px}
+    .card{background:var(--parchment);border-radius:var(--radius);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);margin:0 auto 18px; width:100%; max-width:1050px}
+    .toolbar{display:flex;align-items:center;justify-content:center;margin:0 0 10px}
+    .btn{appearance:none;border:2px solid #5b3a12;border-radius:14px;padding:14px 24px;cursor:pointer;font-weight:900;color:#442812;background:linear-gradient(90deg,#FDBA2D,#F0C433);box-shadow:0 10px 22px rgba(0,0,0,.25)}
+    .btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
 
-    .table-wrap{overflow:auto; border-radius:12px; border:2px solid #e7d8c4; background:#fff}
-    table{width:100%; border-collapse:separate; border-spacing:0}
-    thead th{
-      background:linear-gradient(180deg,#fff8ea,#fdeac7);
-      color:#6a3f16; font-weight:800; padding:12px; text-align:left;
-      border-bottom:2px solid #eddcc4; white-space:nowrap; position:sticky; top:0; z-index:1;
-    }
-    tbody td{padding:12px; color:#4a3a26; vertical-align:middle}
-    tbody tr:nth-child(even){background:#fffaf2}
-    tbody tr:hover{background:#fff4df}
-    td.rank{width:56px; font-weight:900; color:#7a5a34}
-    td.total{font-weight:900}
+    /* TABLE SHELL */
+    .shell{background:#1b110a;border-radius:24px;padding:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+    .head{display:grid;grid-template-columns:72px 1fr 120px 92px;gap:10px;color:#f5e8d0;font-weight:900;opacity:.85;padding:0 10px 10px}
+    .rows{display:flex;flex-direction:column;gap:12px}
 
-    .medal{
-      display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:999px;
-      color:#3a2a17; font-weight:900; margin-right:8px; border:2px solid #b37e00;
-      background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#ffd776,#f0b020);
-    }
-    .silver{border-color:#8f8f8f; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#e7e7e7,#bdbdbd)}
-    .bronze{border-color:#a46e3a; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#e7b07a,#b17032)}
+    /* ROW */
+    .row{background:#fff;border-radius:18px;padding:0;border:0;overflow:hidden;box-shadow:0 12px 28px rgba(0,0,0,.18);position:relative}
+    .row-head{display:grid;grid-template-columns:72px 1fr 120px 92px;gap:10px;align-items:center;padding:14px 10px}
+    .rank-badge{width:64px;height:64px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#fff;text-shadow:0 1px 0 #0003}
+    .rank-1{background:linear-gradient(135deg,#ffd776,#e4aa2e);box-shadow:inset 0 0 0 3px #d39a15}
+    .rank-2{background:linear-gradient(135deg,#e7e7e7,#bdbdbd);box-shadow:inset 0 0 0 3px #9c9c9c}
+    .rank-3{background:linear-gradient(135deg,#e7b07a,#b17032);box-shadow:inset 0 0 0 3px #a46e3a}
+    .name{font-weight:900;color:#2f2416;font-size:22px;line-height:1.15}
+    .total{justify-self:end}
+    .star-pill{display:inline-flex;align-items:center;gap:10px;padding:6px 14px;border-radius:12px;background:#cfa24d;color:#3b2b15;font-weight:900;border:2px solid #8d6a2b}
+    .star-pill:before{content:"⭐";font-size:18px}
+    .chev{justify-self:center;width:40px;height:40px;border-radius:999px;border:2px solid #c8b48d;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+    .chev span{display:inline-block;transition:transform .18s}
+    .row.open .chev span{transform:rotate(180deg)}
 
-    .updated{margin-top:10px; color:#7b522a; font-weight:600}
-    .btn{
-      appearance:none; border:2px solid #5b3a12; border-radius:12px; padding:10px 14px; cursor:pointer;
-      font-weight:900; color:#442812; background:linear-gradient(90deg, #FDBA2D, #F0C433);
-    }
-    .btn:hover{filter:brightness(1.03); transform:translateY(-1px)}
+    /* #1 highlight */
+    .row.rank1{background:#fff7d9;border:2px solid #ffe08a}
+
+    /* BREAKDOWN (accordion) */
+    .break{max-height:0;overflow:hidden;transition:max-height .25s ease}
+    .row.open .break{max-height:420px} /* enough for few items */
+    .break-inner{padding:0 14px 14px}
+    .line{background:#fff8ea;border:2px solid #e9d2a5;border-radius:12px;padding:12px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;font-weight:800;color:#4a351e}
+    .line .label{display:flex;align-items:center;gap:10px}
+    .line .dots{flex:1;height:1px;border-bottom:2px dotted #d3b070;margin:0 10px}
+
+    .updated{margin-top:12px;color:#7b522a;font-weight:700;text-align:center}
   </style>
 </head>
 <body>
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+      <!-- not clickable -->
+      <span class="nav-logo" aria-label="TeamQuest">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
-      </a>
+      </span>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
@@ -134,46 +111,32 @@
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
       <li><a href="https://theteamquest.netlify.app/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
-      <!-- Leaderboard intentionally omitted on this page -->
       <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
     </ul>
   </nav>
 
-  <!-- HERO with logo (matches activities) -->
+  <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
-    <div class="hero-title">Live Leaderboard</div>
+    <div class="hero-title">Leaderboard</div>
   </header>
 
-  <!-- LEADERBOARD CARD -->
   <main class="stack">
     <section class="card" aria-live="polite">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
-        <div>
-          <h2>Leaderboard</h2>
-          <p>Standings with activity breakdown</p>
-        </div>
-        <button id="refreshBtn" class="btn">🔄 Refresh</button>
+      <div class="toolbar">
+        <button id="refreshBtn" class="btn">Refresh</button>
       </div>
 
-      <div class="table-wrap">
-        <table id="board" role="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Team</th>
-              <th>Kindness</th>
-              <th>Limerick</th>
-              <th>Scavenger</th>
-              <th>Clue Hunt</th>
-              <th>Quiz</th>
-              <th>Total</th>
-            </tr>
-          </thead>
-          <tbody id="rows">
-            <tr><td colspan="8" style="padding:16px">Loading…</td></tr>
-          </tbody>
-        </table>
+      <div class="shell">
+        <div class="head">
+          <div>Rank</div>
+          <div>Name</div>
+          <div style="text-align:right">Points</div>
+          <div style="text-align:center">Detail</div>
+        </div>
+        <div id="rows" class="rows">
+          <!-- rows injected -->
+        </div>
       </div>
 
       <div id="updated" class="updated">Last updated — --:--:--</div>
@@ -181,90 +144,95 @@
   </main>
 
   <script>
-    // Mobile nav toggle
+    // NAV + keep ?event= across links (logo is a span so it's ignored)
     (function(){
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu   = document.getElementById('nav-menu');
-      if(navToggle && navMenu){
-        navToggle.addEventListener('click', ()=> {
-          navMenu.classList.toggle('active');
-          navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-        });
-        document.addEventListener('click', (e)=> {
-          const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-          if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-        });
-      }
-
-      // Preserve ?event= across all nav links (and logo)
-      const EVENT_ID = new URLSearchParams(location.search).get('event') || new URLSearchParams(location.search).get('eventId') || '';
-      if (EVENT_ID){
-        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
-        anchors.forEach(a=>{
-          try{
-            const href = a.getAttribute('href');
-            if(!href) return;
-            const u = new URL(href, location.origin);
-            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
-            if (!u.searchParams.get('event')){
-              u.searchParams.set('event', EVENT_ID);
-              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
-            }
-          }catch{}
-        });
-      }
+      const navToggle=document.getElementById('nav-toggle');
+      const navMenu=document.getElementById('nav-menu');
+      navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
+      document.addEventListener('click',(e)=>{const inside=navToggle.contains(e.target)||navMenu.contains(e.target); if(!inside&&navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}});
+      const EVENT_ID=new URLSearchParams(location.search).get('event')||new URLSearchParams(location.search).get('eventId')||'';
+      if(!EVENT_ID) return;
+      const needs=['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+      document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
+        try{
+          const u=new URL(a.getAttribute('href'),location.origin);
+          if(!needs.some(p=>u.pathname.endsWith(p))) return;
+          if(!u.searchParams.get('event')){u.searchParams.set('event',EVENT_ID); a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);}
+        }catch{}
+      });
     })();
 
-    // Leaderboard logic
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     const rowsEl = document.getElementById('rows');
-    theUpdatedEl = document.getElementById('updated');
+    const updatedEl = document.getElementById('updated');
     const refreshBtn = document.getElementById('refreshBtn');
 
     const num = v => Number.isFinite(+v) ? +v : 0;
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
-    function coerceRows(data){
-      const list = data.leaderboard || data.rows || data.teams || [];
-      return list.map(t => {
-        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
-        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
-        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
-        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
-        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
-        const total = num(t.total ?? (k+l+s+c+q));
-        const name = t.teamName || t.name || t.team || t.teamCode || '—';
-        return { name, k, l, s, c, q, total };
-      }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
+    function shapeTeam(t){
+      // Accept several shapes; produce a uniform object with breakdown
+      const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
+      const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
+      const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
+      const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
+      const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
+      const total = num(t.total ?? (k+l+s+c+q));
+      const name = t.teamName || t.name || t.team || t.teamCode || '—';
+      return { name, total, breakdown:{ clue_hunt:c, quiz:q, scavenger:s, kindness:k, limerick:l } };
     }
 
-    function medal(rank){
-      if (rank===1) return '<span class="medal">1</span>';
-      if (rank===2) return '<span class="medal silver">2</span>';
-      if (rank===3) return '<span class="medal bronze">3</span>';
-      return '';
+    function medalClass(rank){
+      if(rank===1) return 'rank-1'; if(rank===2) return 'rank-2'; if(rank===3) return 'rank-3'; return '';
     }
 
-    function render(list){
-      if (!Array.isArray(list) || list.length===0){
-        rowsEl.innerHTML = `<tr><td colspan="8" style="padding:16px">No teams yet.</td></tr>`;
-        return;
-      }
-      rowsEl.innerHTML = list.map((t,i)=>`
-        <tr>
-          <td class="rank">${medal(i+1)}${i+1}</td>
-          <td>${t.name}</td>
-          <td>${t.k}</td>
-          <td>${t.l}</td>
-          <td>${t.s}</td>
-          <td>${t.c}</td>
-          <td>${t.q}</td>
-          <td class="total">${t.total}</td>
-        </tr>
-      `).join('');
+    function line(label, value){
+      return `
+        <div class="line">
+          <div class="label">${label}</div>
+          <div class="dots"></div>
+          <div>${value}</div>
+        </div>`;
+    }
+
+    function rowHtml(team, i){
+      const b = team.breakdown;
+      const rankBadge = `<div class="rank-badge ${medalClass(i+1)}">${i+1}</div>`;
+      const lines = [
+        line('The Clue Hunt', b.clue_hunt ?? 0),
+        line('The Quiz', b.quiz ?? 0),
+        line('The Scavenger Hunt', b.scavenger ?? 0),
+        line('The Kindness Challenge', b.kindness ?? 0),
+        line('The Limerick Challenge', b.limerick ?? 0),
+      ].join('');
+
+      return `
+        <div class="row ${i===0?'rank1':''}" data-i="${i}">
+          <div class="row-head">
+            ${rankBadge}
+            <div class="name">${team.name}</div>
+            <div class="total"><span class="star-pill">${team.total}</span></div>
+            <button class="chev" aria-expanded="false" aria-controls="bd-${i}" title="Show details"><span>▾</span></button>
+          </div>
+          <div class="break" id="bd-${i}">
+            <div class="break-inner">
+              ${lines}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function attachRowHandlers(){
+      rowsEl.querySelectorAll('.row .chev').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const row = btn.closest('.row');
+          const open = row.classList.toggle('open');
+          btn.setAttribute('aria-expanded', open? 'true':'false');
+        });
+      });
     }
 
     async function loadBoard(){
@@ -275,31 +243,28 @@
       try{
         const res = await fetch(url, { cache:'no-store' });
         const data = await res.json();
-        render(coerceRows(data));
-        theUpdatedEl.textContent = `Last updated — ${nowClock()}`;
+        const listRaw = data.leaderboard || data.rows || data.teams || [];
+        const shaped = listRaw.map(shapeTeam)
+                              .sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
+
+        if(!shaped.length){
+          rowsEl.innerHTML = `<div class="row"><div class="row-head"><div class="name" style="grid-column:1/-1;text-align:center">No teams yet.</div></div></div>`;
+        }else{
+          rowsEl.innerHTML = shaped.map(rowHtml).join('');
+          attachRowHandlers();
+        }
+        updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         console.error('loadBoard error', e);
-        rowsEl.innerHTML = `<tr><td colspan="8" style="padding:16px">Couldn’t load leaderboard. Please try again.</td></tr>`;
-        theUpdatedEl.textContent = `Last updated — ${nowClock()}`;
+        rowsEl.innerHTML = `<div class="row"><div class="row-head"><div class="name" style="grid-column:1/-1;text-align:center">Couldn’t load leaderboard. Please try again.</div></div></div>`;
+        updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
     }
 
     refreshBtn.addEventListener('click', loadBoard);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
-
-    loadBoard();
     setInterval(loadBoard, 60_000);
-  </script>
-
-  <!-- Safeguard: neutralize any link behavior on the logo element -->
-  <script>
-    (function(){
-      document.querySelectorAll('.nav-logo[href]').forEach(a=>{
-        a.removeAttribute('href');
-        a.setAttribute('aria-disabled','true');
-        a.setAttribute('tabindex','-1');
-      });
-    })();
+    loadBoard();
   </script>
 </body>
 </html>
