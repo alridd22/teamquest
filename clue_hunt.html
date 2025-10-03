@@ -1,10 +1,7 @@
-<!-- TeamQuest • Clue Hunt (Sign-in first; rules + clues after)
-     - Initial screen: title + sign in only
-     - After sign-in: show rules, team/score, one-column clue list, progress, clue view
-     - Handlee everywhere (incl. iOS <select> fix)
-     - Untried clues = orange, Correct = green, Incorrect = red
-     - Diamond shown on each clue; text perfectly centered
-     - Back to Clues (no top back button), Claim button hides after submit
+<!--
+TeamQuest — Clue Hunt (updated)
+Change: Removed auto-return after submitting an answer. Now players must press “Back to Clues”.
+Also sets keyboard focus to the Back button for clarity/a11y.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -485,17 +482,14 @@
           currentScore, wasCorrect: completedClues[currentClue.id].wasCorrect
         });
       }catch(e){
-        // surface auth/closed errors only
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
         if (e.code==='CLOSED') showResult('Submissions are closed for this event.', false);
       }
 
-      // Hide claim button now; show Back to Clues
+      // Show explicit Back-to-Clues button (no auto-return)
       $('submitAnswerBtn').style.display='none';
       $('continueBtn').style.display='block';
-
-      // Auto-return after 5s
-      setTimeout(continueToMap, 5000);
+      $('continueBtn').focus();
     }
     $('submitAnswerBtn').addEventListener('click', submitAnswer);
     $('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submitAnswer(); });
