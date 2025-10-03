@@ -12,159 +12,157 @@
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF;
       --gold:#F0C433; --gold-deep:#A7711F;
-      --amber:#ffcc4d;
-      --nav-h:64px;
-      --radius-card:22px;
-      --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --brown:#3b2a16; --amber:#FDBA2D;
+      --nav-h:64px; --radius:22px; --shadow:0 18px 40px rgba(0,0,0,.35);
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
-      background-size:cover; background-position:top center; background-attachment:fixed;
-      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
+      background-size:cover;background-position:top center;background-attachment:fixed;
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
 
     /* NAV */
     .treasure-nav{
-      position:fixed; inset:0 0 auto 0; z-index:1000; height:var(--nav-h);
+      position:fixed; inset:0 0 auto 0; height:var(--nav-h); z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
-      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
+      background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
       border-bottom:1px solid rgba(255,255,255,.18);
     }
-    .nav-container{height:100%; max-width:1000px; margin:0 auto; padding:0 12px; display:flex; align-items:center; justify-content:space-between}
-    /* logo is NOT a link */
+    .nav-container{
+      height:100%; max-width:1000px; margin:0 auto; padding:0 12px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    /* NOTE: logo is NOT a link */
     .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{
       position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
-      background:linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.72));
+      background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
       display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
     }
     .nav-menu.active{left:0}
     .nav-link,.dropdown-link{
-      display:block; width:92%; max-width:360px; text-align:center;
-      text-decoration:none; color:#F7EED8; font-weight:900;
-      padding:12px 14px; border-radius:14px;
+      display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
+      color:#F7EED8; font-weight:900; padding:12px 14px; border-radius:14px;
       background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
     }
-    .nav-link:hover,.dropdown-link:hover{ background:rgba(247,238,216,.32) }
+    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
 
     /* HERO */
-    .hero{ min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:24px 22px 18px; text-align:center }
-    .brand-logo{ width:min(220px,68vw); height:auto; margin-bottom:8px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35)) }
-    .hero-title{ font-weight:900; font-size:22px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6) }
+    .hero{
+      min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+      padding:24px 22px 18px; text-align:center;
+    }
+    .brand-logo{width:min(220px,68vw); height:auto; margin-bottom:8px;
+      filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-weight:900; font-size:28px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* CARD */
-    .stack{ padding:0 22px 28px; }
+    /* WRAP + CARD */
+    .stack{padding:0 22px 28px}
     .card{
-      background:var(--parchment);
-      border-radius:var(--radius-card);
-      box-shadow:var(--shadow-card);
-      padding:18px 16px;
-      border:1px solid rgba(0,0,0,.06);
-      margin:0 auto 18px; width:100%; max-width:1050px;
+      background:var(--parchment); border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto 18px; width:100%; max-width:1060px;
     }
 
-    .refresh-wrap{ display:flex; align-items:center; justify-content:center; margin-bottom:12px }
+    .refreshWrap{display:flex; justify-content:center; margin-bottom:12px}
     .btn{
-      appearance:none; border:3px solid #5b3a12; border-radius:16px; padding:14px 22px; cursor:pointer;
-      font-weight:900; color:#442812; background:linear-gradient(90deg, #FDBA2D, #F0C433);
-      box-shadow:0 10px 20px rgba(0,0,0,.18);
+      appearance:none; border:3px solid #7a521c; border-radius:18px; padding:12px 20px; cursor:pointer;
+      font-weight:900; color:#442812; background:linear-gradient(90deg,#FDBA2D,#F0C433); box-shadow:0 8px 18px rgba(0,0,0,.22);
     }
-    .btn:hover{ filter:brightness(1.03); transform:translateY(-1px) }
 
-    /* TABLE HEAD */
+    /* TABLE HEADER BAR */
     .board{
-      background:#23180f; border-radius:20px; padding:14px; color:#fff;
+      background:#23160d; color:#fff; border-radius:26px; padding:14px; position:relative;
     }
-    .head{
-      display:grid;
-      grid-template-columns: minmax(56px,80px) 1fr minmax(100px,140px) minmax(70px,90px);
-      gap:10px; align-items:center; padding:6px 10px 12px; color:#f5e7d1; font-weight:900; letter-spacing:.3px;
+    .boardHead{
+      display:grid; grid-template-columns:84px 1fr 130px 64px; gap:10px; align-items:center;
+      color:#fff4dc; font-weight:900; padding:0 10px 12px; border-bottom:1px solid rgba(255,255,255,.12);
     }
+    .hdr-c{opacity:.92}
 
-    /* ROW SHELL */
+    /* ROWS */
+    .rows{padding:12px 6px 6px}
     .row{
-      background:#fff; border-radius:18px; margin:10px 0; overflow:hidden; border:2px solid #e7d8c4;
-      box-shadow:0 6px 16px rgba(0,0,0,.1);
+      border-radius:24px; margin:12px 8px; padding:14px 16px;
+      background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.15);
     }
-    .row.gold{ background:#fff7da; border-color:#e8c776 }
-    .row.silver{ background:#f6f6f7; border-color:#d7d7db }
-    .row.bronze{ background:#fdebdc; border-color:#e9c0a2 }
+    .row.gold{background:#fff3cf}
+    .row.silver{background:#f6f6f6}
+    .row.bronze{background:#ffe2c9}
 
-    /* BADGES / TOTAL PILL */
-    .rank-badge{
-      width:64px; height:64px; border-radius:18px; display:flex; align-items:center; justify-content:center; font-weight:900;
-      color:#3a2a17; border:2px solid #b37e00; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#ffd776,#f0b020);
-    }
-    .rank-badge.silver{ border-color:#9a9a9a; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#f0f0f0,#c9c9c9) }
-    .rank-badge.bronze{ border-color:#a46e3a; background:radial-gradient(circle at 30% 30%,#fff6,#0000), linear-gradient(135deg,#efc39a,#ca8749) }
-
-    .star-pill{
-      display:inline-flex; align-items:center; gap:8px; padding:8px 14px; border-radius:12px; border:2px solid #b99146;
-      background:linear-gradient(180deg,#ffe39c,#e6b75e); color:#442812; font-weight:900;
-    }
-    .star-pill:before{
-      content:"⭐"; display:inline-block;
+    .row-inner{
+      display:grid; grid-template-columns:84px 1fr 130px 64px; gap:10px; align-items:center;
     }
 
-    /* CHEVRON BUTTON */
-    .chev{ width:40px; height:40px; border-radius:999px; border:2px solid #c8b48d; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer }
-    .chev span{ display:inline-block; transition:transform .18s; font-size:18px }
-    .row.open .chev span{ transform:rotate(180deg) }
-
-    /* ROW LAYOUT (NEW) */
-    .row-head{
-      display:grid;
-      grid-template-columns: minmax(44px,64px) 1fr minmax(92px,120px) minmax(52px,72px);
-      grid-template-areas: "rank name total chev";
-      gap:10px; align-items:center; padding:12px 10px;
+    /* Rank pill */
+    .rank{
+      width:84px; height:72px; display:flex; align-items:center; justify-content:center;
+      border-radius:18px; font-weight:900; font-size:28px; color:#3b2a16; border:2px solid #cfb06d;
+      background:linear-gradient(180deg,#ffe39b,#e7b844);
     }
-    .rank-badge{ grid-area: rank; }
-    .name{ grid-area: name; font-weight:900; color:#2f2416; font-size:clamp(18px,4.8vw,22px); line-height:1.15; min-width:0; }
-    .name span{
-      display:block;
-      white-space:normal;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      display:-webkit-box;
-      -webkit-line-clamp:2;
-      -webkit-box-orient:vertical;
+    .silver .rank{background:linear-gradient(180deg,#eeeeee,#cfcfd0); border-color:#bfbfc0; color:#3b3b3b}
+    .bronze .rank{background:linear-gradient(180deg,#f4c097,#d18a54); border-color:#b2703d; color:#3b2a16}
+
+    /* Team name (2 lines allowed) */
+    .team{
+      font-weight:900; color:#2f2216; font-size:24px; line-height:1.05;
+      display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+      padding-right:6px;
     }
-    .total{ grid-area: total; justify-self:end; }
-    .chev{ grid-area: chev; justify-self:center; }
 
-    /* DETAILS */
-    .row-body{ display:none; background:#fffdf7; border-top:2px dashed #ead7b7; padding:12px 12px 14px }
-    .row.open .row-body{ display:block }
-    .detail{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 12px; margin:8px 0; border-radius:12px; border:2px solid #eddcc4; background:#fff }
-    .detail-name{ font-weight:800; color:#4a351e }
+    /* Points badge */
+    .points{
+      justify-self:end; min-width:112px; height:52px; padding:0 14px; border-radius:16px;
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      font-weight:900; color:#3b2a16; border:2px solid #b37e00;
+      background:linear-gradient(135deg,#f8d27b,#d5a243);
+    }
+    .star{
+      display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:999px;
+      background:radial-gradient(circle at 30% 30%,#fff8,#0000), linear-gradient(135deg,#ffd776,#f0b020);
+      border:2px solid #b37e00; font-weight:900;
+    }
+    .points .num{font-size:22px; line-height:1}
 
-    /* FOOTER */
-    .updated{margin-top:12px; color:#7b522a; font-weight:800; text-align:center}
+    /* Toggle */
+    .toggle{
+      width:52px; height:52px; border-radius:999px; border:2px solid #cdbb9c;
+      background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+      justify-self:end;
+    }
+    .toggle:after{content:"▾"; font-size:20px; color:#3b2a16}
+    .row.open .toggle:after{content:"▴"}
 
-    /* MOBILE TWEAKS: name gets full width; points drop under it */
-    @media (max-width:520px){
-      .head{
-        grid-template-columns: minmax(44px,56px) 1fr minmax(48px,56px);
-        grid-template-areas: "rank name chev";
-      }
-      .head div:last-child{ display:none } /* hide 'Detail' header text */
+    /* Breakdown panel */
+    .break{
+      display:none; margin:12px 2px 4px; padding:12px; border-radius:14px;
+      background:#fff; border:2px solid #ead7b9;
+    }
+    .row.open .break{display:block}
 
-      .row-head{
-        grid-template-columns: minmax(44px,56px) 1fr minmax(48px,56px);
-        grid-template-areas:
-          "rank name chev"
-          ".    total chev";
-        align-items:center;
-      }
-      .name span{ -webkit-line-clamp:2; line-height:1.2; }
-      .total{ justify-self:start; }
+    .detail{
+      display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
+      padding:10px 12px; border-radius:12px; background:#fff7e6; border:2px solid #e8c97c; margin:6px 0;
+      font-weight:800; color:#4a341e;
+    }
+    .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .detail .val{font-weight:900}
+
+    .updated{margin:10px 6px 0; color:#7b522a; font-weight:700; text-align:center}
+
+    /* Responsiveness */
+    @media (max-width: 520px){
+      .hero-title{font-size:24px}
+      .row-inner{grid-template-columns:70px 1fr 110px 56px}
+      .rank{width:70px; height:64px; font-size:26px}
+      .team{font-size:22px}
+      .points{min-width:100px; height:48px}
+      .boardHead{grid-template-columns:70px 1fr 110px 56px}
     }
   </style>
 </head>
@@ -172,8 +170,7 @@
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <!-- not a link -->
-      <div class="nav-logo" aria-label="TeamQuest Home (logo)">
+      <div class="nav-logo" aria-label="TeamQuest">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </div>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
@@ -197,19 +194,19 @@
   <!-- CONTENT -->
   <main class="stack">
     <section class="card" aria-live="polite">
-      <div class="refresh-wrap">
-        <button id="refreshBtn" class="btn">Refresh</button>
-      </div>
+      <div class="refreshWrap"><button id="refreshBtn" class="btn">Refresh</button></div>
 
       <div class="board">
-        <div class="head">
-          <div>Rank</div>
-          <div>Name</div>
-          <div style="text-align:right">Points</div>
-          <div>Detail</div>
+        <div class="boardHead">
+          <div class="hdr-c">Rank</div>
+          <div class="hdr-c">Name</div>
+          <div class="hdr-c" style="text-align:right">Points</div>
+          <div class="hdr-c" style="text-align:center">Detail</div>
         </div>
-
-        <div id="rows"></div>
+        <div id="rows" class="rows">
+          <!-- rows injected here -->
+          <div style="padding:16px;color:#fff4dc">Loading…</div>
+        </div>
       </div>
 
       <div id="updated" class="updated">Last updated — --:--:--</div>
@@ -217,24 +214,28 @@
   </main>
 
   <script>
-    // NAV toggle + keep ?event across links (logo isn't a link)
+    // Mobile nav + keep ?event= on links
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
-      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
-      document.addEventListener('click',e=>{
-        const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
-        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-      });
-
+      if(navToggle && navMenu){
+        navToggle.addEventListener('click', ()=> {
+          navMenu.classList.toggle('active');
+          navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
+        });
+        document.addEventListener('click', (e)=> {
+          const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
+          if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+        });
+      }
       const qs = new URLSearchParams(location.search);
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-      if(EVENT_ID){
-        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
+      if (EVENT_ID){
+        const needs = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
         document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
           try{
             const u = new URL(a.getAttribute('href'), location.origin);
-            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
+            if (!needs.some(p=>u.pathname.endsWith(p))) return;
             if (!u.searchParams.get('event')){
               u.searchParams.set('event', EVENT_ID);
               a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
@@ -244,7 +245,7 @@
       }
     })();
 
-    // ===== Leaderboard logic (totals shown; details in dropdown) =====
+    // Leaderboard data
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
@@ -255,71 +256,59 @@
     const num = v => Number.isFinite(+v) ? +v : 0;
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
-    function coerceRows(data){
+    function normalise(data){
       const list = data.leaderboard || data.rows || data.teams || [];
       return list.map(t => {
-        const scores = t.scores || t.activities || {};
-        const k = num(t.kindness ?? scores.kindness);
-        const l = num(t.limerick ?? scores.limerick);
-        const s = num(t.scavenger ?? scores.scavenger);
-        const c = num(t.cluehunt ?? scores.cluehunt ?? scores.clue_hunt);
-        const q = num(t.quiz ?? scores.quiz);
+        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
+        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
+        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
+        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
+        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
         const total = num(t.total ?? (k+l+s+c+q));
         const name = t.teamName || t.name || t.team || t.teamCode || '—';
         return { name, k, l, s, c, q, total };
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
-    function rankBadge(i){
-      if(i===1) return '<div class="rank-badge">1</div>';
-      if(i===2) return '<div class="rank-badge silver">2</div>';
-      if(i===3) return '<div class="rank-badge bronze">3</div>';
-      return `<div class="rank-badge" style="background:#f5f2ea;border-color:#d1c3a9">${i}</div>`;
-    }
-
-    function rowHtml(t, i){
-      const tier = i===1?'gold':i===2?'silver':i===3?'bronze':'';
+    function rowTemplate(t, i){
+      const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       return `
-        <div class="row ${tier}">
-          <div class="row-head">
-            ${rankBadge(i)}
-            <div class="name"><span>${escapeHtml(t.name)}</span></div>
-            <div class="total"><span class="star-pill">${t.total}</span></div>
-            <button class="chev" aria-label="Toggle details"><span>▾</span></button>
+        <div class="row ${rankClass}">
+          <div class="row-inner">
+            <div class="rank">${i+1}</div>
+            <div class="team">${escapeHtml(t.name)}</div>
+            <div class="points"><span class="star">★</span><span class="num">${t.total}</span></div>
+            <button class="toggle" aria-label="Toggle details"></button>
           </div>
-          <div class="row-body" aria-hidden="true">
+          <div class="break" aria-hidden="true">
             ${detailLine('The Clue Hunt', t.c)}
             ${detailLine('The Quiz', t.q)}
             ${detailLine('The Scavenger Hunt', t.s)}
             ${detailLine('The Kindness Challenge', t.k)}
-            ${detailLine('The Limerick Challenge', t.l, true)}
+            ${detailLine('The Limerick Challenge', t.l)}
           </div>
         </div>
       `;
     }
 
-    function detailLine(label, pts, last=false){
-      return `
-        <div class="detail"${last?' style="margin-bottom:4px"':''}>
-          <div class="detail-name">${escapeHtml(label)}</div>
-          <div class="star-pill">${pts}</div>
-        </div>
-      `;
+    function detailLine(label, val){
+      const v = (Number.isFinite(val) ? val : '--');
+      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
     }
 
     function render(list){
-      if(!Array.isArray(list) || !list.length){
-        rowsEl.innerHTML = `<div style="padding:16px;color:#fff">No teams yet.</div>`;
+      if (!Array.isArray(list) || list.length===0){
+        rowsEl.innerHTML = `<div style="padding:16px;color:#fff4dc">No teams yet.</div>`;
         return;
       }
-      rowsEl.innerHTML = list.map((t,idx)=> rowHtml(t, idx+1)).join('');
-
-      // Wire toggles
+      rowsEl.innerHTML = list.map(rowTemplate).join('');
+      // wire toggles
       rowsEl.querySelectorAll('.row').forEach(row=>{
-        const btn = row.querySelector('.chev');
-        btn.addEventListener('click', ()=>{
-          const open = row.classList.toggle('open');
-          row.querySelector('.row-body').setAttribute('aria-hidden', open ? 'false':'true');
+        const btn = row.querySelector('.toggle');
+        btn?.addEventListener('click', ()=>{
+          row.classList.toggle('open');
+          const br = row.querySelector('.break');
+          if (br) br.setAttribute('aria-hidden', row.classList.contains('open') ? 'false' : 'true');
         });
       });
     }
@@ -328,20 +317,19 @@
       const url = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
-
       try{
         const res = await fetch(url, { cache:'no-store' });
         const data = await res.json();
-        render(coerceRows(data));
+        render(normalise(data));
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         console.error('loadBoard error', e);
-        rowsEl.innerHTML = `<div style="padding:16px;color:#fff">Couldn’t load leaderboard. Please try again.</div>`;
+        rowsEl.innerHTML = `<div style="padding:16px;color:#fff4dc">Couldn’t load leaderboard. Please try again.</div>`;
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
     }
 
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
     refreshBtn.addEventListener('click', loadBoard);
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
