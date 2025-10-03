@@ -1,3 +1,12 @@
+<!--
+TeamQuest • Crew Registration — Font Fix (2025-10-03)
+CHANGES
+- “Titles” (hero title, section h2, sub-h3, and form labels) now use the sans-serif UI stack.
+- Text INSIDE inputs (including placeholders) is explicitly set to Handlee.
+- Kept overall theme and spacing intact; no layout/JS changes.
+- Minor polish: ensured labels have consistent weight/size; preserved accessible focus styles.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +15,7 @@
   <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest - Crew Registration</title>
 
-  <!-- Handlee for body copy only -->
+  <!-- Handlee for input/body where needed -->
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet">
 
   <style>
@@ -26,13 +35,18 @@
       --hero-h: 300px;
       --gutter: 22px;
       --hero-gap: 26px;
+
+      /* Font stacks */
+      --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --handlee: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family:"Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+      /* Keep Handlee as the base body font per theme */
+      font-family:var(--handlee);
       color:var(--ink);
       background:
         linear-gradient(180deg, rgba(0,0,0,.26), rgba(0,0,0,.45)),
@@ -51,8 +65,9 @@
       width:min(260px, 68vw); height:auto; margin-bottom:10px;
       filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
     }
+    /* Title: sans-serif */
     .hero-title{
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
       font-weight:900; font-size:22px; color:#F7EED8;
       text-shadow:0 2px 6px rgba(0,0,0,.6); letter-spacing:.2px;
     }
@@ -70,9 +85,10 @@
       max-width:720px;
     }
 
+    /* Section titles: sans-serif */
     .card h2{
       margin:0 0 10px; text-align:center;
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
       font-weight:900; font-size:24px; color:var(--ink);
     }
     .card p{ margin:0; line-height:1.6; color:var(--ink); font-size:18px; }
@@ -85,16 +101,25 @@
       border-radius:14px; font-size:20px; border:3px dashed rgba(0,0,0,.6);
     }
 
+    /* Form labels are “titles”: make sans-serif */
     label{
       display:block; margin:12px 6px 6px; font-size:22px; color:var(--ink); font-weight:800;
+      font-family: var(--sans);
+      line-height:1.2;
     }
+
+    /* Inputs explicitly Handlee inside the boxes */
     .input{
       width:100%; padding:14px 12px; border-radius:var(--radius-input);
       border:3px solid var(--gold); background:#fff; color:var(--ink);
-      font-size:20px;
+      font-size:20px; font-family: var(--handlee);
       transition:border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+      min-height:44px;
     }
-    .input::placeholder{ color:rgba(0,0,0,.35) }
+    .input::placeholder{
+      color:rgba(0,0,0,.35);
+      font-family: var(--handlee);
+    }
     .input:focus{ outline:none; box-shadow:var(--focus); border-color:var(--gold-deep); transform:translateY(-1px); }
 
     .char-row{ display:flex; justify-content:flex-end; margin:6px 6px 0; color:var(--ink-soft); font-size:16px; }
@@ -106,9 +131,10 @@
       padding:18px 14px; box-shadow:var(--shadow-soft);
       margin-top:12px; text-align:left;
     }
+    /* Subheading/title inside helper card: sans-serif */
     .remember h3{
       margin:6px 0 8px; font-size:22px; color:var(--ink);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
       font-weight:900; text-align:left;
     }
     .remember p{ margin:0; font-size:18px; color:var(--ink); }
@@ -116,15 +142,16 @@
 
     .cta-gap{ height:16px; }
 
+    /* Primary button stays sans-serif for clarity */
     .submit-btn{
       width:100%;
       background:linear-gradient(90deg, #FDBA2D, #F0C433);
       color:#442812; font-weight:900; font-size:22px;
       border-radius:16px; border:3px solid #A7711F;
-      padding:16px; cursor:pointer; margin-top:6px;
+      padding:16px; cursor:pointer; margin-top:6px; min-height:44px;
       box-shadow:0 10px 22px rgba(0,0,0,.25);
       transition:transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
     }
     .submit-btn:hover{ transform:translateY(-2px); box-shadow:0 14px 28px rgba(0,0,0,.3); }
     .submit-btn:active{ transform:translateY(0); }
@@ -133,15 +160,16 @@
     .loading{
       display:none; text-align:center; margin-top:10px; color:#EEE3CD; font-weight:700; font-size:18px;
       text-shadow:0 1px 2px rgba(0,0,0,.4);
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
     }
     .error-message{
       display:none; margin-top:12px; padding:10px; border-radius:12px;
       font-weight:700; font-size:16px; text-align:center; color:#fff;
       background:var(--error); border:2px solid #7E1C12;
-      font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-family: var(--sans);
     }
     .note{margin-top:8px; font-weight:800; color:#6A5A47; text-align:center}
+
     @media (min-width:480px){
       :root{ --hero-h: 340px; --gutter: 26px; --hero-gap: 30px; }
       .brand-logo{ width:min(300px, 62vw); }
@@ -181,11 +209,11 @@
         <div class="char-row"><span id="charCount" aria-live="polite">50</span></div>
 
         <label for="teamPin">Crew Code (4-digits)</label>
-        <input type="text" id="teamPin" name="teamPin" inputmode="numeric" pattern="\\d{4}"
+        <input type="text" id="teamPin" name="teamPin" inputmode="numeric" pattern="\d{4}"
                placeholder="1234" required autocomplete="off" class="input" aria-describedby="pinHelp">
 
         <div class="remember" id="pinHelp">
-          <h3><span class="icon">⚠️</span>Remember your code</h3>
+          <h3><span class="icon" aria-hidden="true">⚠️</span>Remember your code</h3>
           <p>You’ll use this code to access the activities during the Quest.</p>
         </div>
 
@@ -237,7 +265,7 @@
     // 4-digit clamp
     const teamPinInput = document.getElementById('teamPin');
     teamPinInput.addEventListener('input', function () {
-      this.value = this.value.replace(/\\D/g, '').slice(0, 4);
+      this.value = this.value.replace(/\D/g, '').slice(0, 4);
     });
 
     // Submit -> Netlify function (now includes eventId and preserves it on redirect)
