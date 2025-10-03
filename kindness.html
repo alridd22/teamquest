@@ -1,12 +1,12 @@
-<!-- TeamQuest • Kindness (refit)
-- Consistent first-screen sign-in only (title + sign in)
-- After sign-in: show rules + form
-- iOS/Android unified <select> styling + Handlee everywhere (including iOS with -webkit-text-fill-color)
-- Single signed-in banner (smaller, one line)
-- Upload photo block fixed (no overlap, full-width, filename shown)
-- Submit button only visible when signed in
-- No functionality changes to endpoints
+<!--
+TeamQuest • Kindness • Sign-in UI tweaks (2025-10-03)
+CHANGES (no functionality touched):
+- Labels (“titles above the boxes”) now use the sans-serif UI stack.
+- PIN placeholder text made fainter.
+- Added more vertical space between the PIN field and the Sign In button.
+- Ensured the button text reads “Sign In”.
 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,12 +29,16 @@
       --radius-card:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --focus:0 0 0 3px rgba(21,148,210,.45);
+
+      /* font stacks */
+      --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --handlee: "Handlee", ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family:var(--handlee);
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover;background-position:top center;background-attachment:fixed;
       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
@@ -48,7 +52,6 @@
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
     .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    /* Make header logo non-clickable */
     .nav-logo{pointer-events:none;cursor:default;}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
@@ -74,18 +77,20 @@
     h2{font-size:22px}
     .subtle{color:var(--ink-soft);margin:0 0 10px}
 
-    /* Inputs + unified select (iOS fix + Handlee everywhere) */
-    label{display:block;margin:12px 6px 6px;font-weight:800}
+    /* Inputs + unified select (iOS fix + Handlee inside fields) */
+    /* Labels = titles above boxes -> sans-serif */
+    label{display:block;margin:12px 6px 6px;font-weight:800;font-family:var(--sans)}
     .field{width:100%;font-size:18px;padding:14px;border:3px solid var(--gold);border-radius:16px;background:#fff;
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-text-fill-color:var(--ink);}
-    .field::placeholder{color:#b6a88f}
+      font-family:var(--handlee); -webkit-text-fill-color:var(--ink);}
+    /* Fainter placeholder (incl. sample PIN) */
+    .field::placeholder{color:rgba(0,0,0,.28)}
     .tq-select{
       -webkit-appearance:none; -moz-appearance:none; appearance:none;
       padding:14px 44px 14px 14px; background:#fff; color:var(--ink); -webkit-text-fill-color:var(--ink);
       border:3px solid var(--gold); border-radius:16px; font-size:18px;
       background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
       background-repeat:no-repeat;background-position:right 12px center;background-size:18px 18px;
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-family:var(--handlee);
     }
     .tq-select:focus{outline:none; box-shadow:var(--focus)}
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
@@ -104,18 +109,16 @@
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .msg.err{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
 
-    /* Signed-in banner (single, one-line) */
+    /* Signed-in banner */
     .banner-ok{display:none;margin-bottom:10px;border-radius:18px;padding:14px 16px;
       background:#dff7e6;border:3px solid #31a252;color:#0c5e24;font-weight:900}
     .banner-ok.show{display:block}
 
-    /* Rule chips */
     .rules{border-radius:16px;padding:14px;background:linear-gradient(145deg,#f9f0db,#f2e6cf);border:1px solid rgba(0,0,0,.06)}
     .rule{padding:12px 14px;border-radius:12px;background:#f1e4c9;border:3px solid #e1c26c;margin:10px 0;font-weight:800}
 
-    /* Upload control (layout fix) */
     .field-block{margin:12px 0 18px}
-    .field-block > label{display:block;margin:0 6px 8px;font-weight:800}
+    .field-block > label{display:block;margin:0 6px 8px;font-weight:800;font-family:var(--sans)}
     .uploader{display:block;position:relative}
     .uploader input[type="file"]{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
     .upload-cta{
@@ -127,20 +130,19 @@
     .upload-cta.has-file{border-style:solid}
     .upload-meta{margin-top:8px;font-size:14px;color:var(--ink-soft)}
 
-    /* Sections */
     .section{display:none}
     .section.active{display:block}
 
-    /* Tiny utility */
     .mt-8{margin-top:8px}
     .mt-14{margin-top:14px}
+    .mt-24{margin-top:24px} /* extra space utility */
   </style>
 </head>
 <body>
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+      <a class="nav-logo" aria-label="TeamQuest Home">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
@@ -176,7 +178,8 @@
       <label for="teamPin">Crew Pin</label>
       <input id="teamPin" class="field" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="4" placeholder="1234"/>
 
-      <button id="btnSign" class="btn mt-14">Sign In</button>
+      <!-- extra space between PIN and button -->
+      <button id="btnSign" class="btn mt-24">Sign In</button>
       <div id="signMsg" class="msg"></div>
     </section>
 
@@ -189,7 +192,6 @@
       <label> Crew </label>
       <div id="crewName" class="field" style="pointer-events:none;user-select:none"></div>
 
-      <!-- Rules first -->
       <div class="rules mt-14">
         <h2>Quick Rules</h2>
         <div class="rule">• Do a genuine act of kindness.</div>
@@ -197,7 +199,6 @@
         <div class="rule">• Tell us briefly what you did and the impact.</div>
       </div>
 
-      <!-- Upload -->
       <div class="field-block mt-14">
         <label for="kindPhoto">Photo of your kind act</label>
         <div class="uploader">
@@ -207,7 +208,6 @@
         </div>
       </div>
 
-      <!-- Text fields -->
       <label for="whatText">What happened?</label>
       <textarea id="whatText" class="field" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
       <div class="subtle">Max 500 characters. <span id="countWhat">0/500</span></div>
@@ -385,7 +385,6 @@
 
       btnSubmit.disabled = true;
       try{
-        // Try to attach 1 photo as base64 (small/mobile). If too large, you can handle server-side.
         let photoBase64 = '';
         const file = $('kindPhoto').files?.[0];
         if(file){
@@ -442,7 +441,6 @@
     // Boot
     loadTeams();
 
-    // Helper
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   </script>
 
