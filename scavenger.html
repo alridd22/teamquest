@@ -1,3 +1,12 @@
+<!--
+TeamQuest • Scavenger • Sign-in UI tweaks (2025-10-03)
+CHANGES (no functionality touched):
+- Labels (“titles above the boxes”) inside the sign-in card now use the sans-serif UI stack.
+- PIN placeholder text is fainter for clearer hinting.
+- Added more vertical space between the PIN field and the Sign In button.
+- Confirmed the button copy reads “Sign In”.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -116,6 +125,10 @@
   .note{margin-top:12px;padding:12px;border-radius:12px;border:2px solid #2ba05f;background:#e9f9ef;color:#136b3f;text-align:center;font-weight:800;display:none}
 
   .tq-select:focus,.input:focus,.btn:focus,.uploadBtn:focus{outline:3px solid var(--accent);outline-offset:2px}
+
+  /* --- Sign-in specific tweaks requested --- */
+  #secSign label{font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;}
+  #secSign .input::placeholder{color: rgba(0,0,0,.28);} /* fainter sample PIN */
 </style>
 </head>
 <body>
@@ -156,7 +169,7 @@
       <label class="handlee" for="teamPin">Crew Pin</label>
       <input id="teamPin" class="input pin handlee" inputmode="numeric" pattern="\\d{4}" maxlength="4" placeholder="1234"/>
 
-      <div style="height:10px"></div>
+      <div style="height:24px"></div> <!-- increased space -->
       <button id="btnSign" class="btn handlee">Sign In</button>
       <div id="signMsg" class="msg" role="status" aria-live="polite"></div>
     </section>
