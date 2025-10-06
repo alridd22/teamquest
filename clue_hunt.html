@@ -1,8 +1,12 @@
 <!--
-TeamQuest — Clue Hunt (updated)
-Change: Removed auto-return after submitting an answer. Now players must press “Back to Clues”.
-Also sets keyboard focus to the Back button for clarity/a11y.
+TeamQuest — Clue Hunt • Sign-in UI tweaks (2025-10-06)
+CHANGES (no functionality touched):
+- “Titles above the boxes” (labels) now use a sans-serif UI stack for clarity.
+- PIN placeholder “1234” made fainter for a hint-style appearance.
+- Added extra vertical space between the PIN field and the Sign In button.
+- Standardised the button copy to “Sign In” for consistency across activities.
 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,13 +37,17 @@ Also sets keyboard focus to the Back button for clarity/a11y.
       --shadow-soft:0 8px 20px rgba(0,0,0,.18);
 
       --nav-h:64px; --gutter:22px;
+
+      /* font stacks */
+      --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --handlee: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;
+      font-family:var(--handlee);
       background:
         linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
         var(--bg);
@@ -79,10 +87,10 @@ Also sets keyboard focus to the Back button for clarity/a11y.
     }
 
     /* labels/fields */
-    .field-label{display:block;margin:10px 6px 6px;font-weight:900;color:var(--ink)}
+    .field-label{display:block;margin:10px 6px 6px;font-weight:900;color:var(--ink);font-family:var(--sans)} /* sans-serif titles */
     .tq-input,.tq-select{
       width:100%; padding:14px 16px; font-size:18px; line-height:1.2;
-      font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;
+      font-family:var(--handlee);
       background:#fff; border:3px solid var(--gold); border-radius:16px; color:var(--ink);
       -webkit-text-fill-color:var(--ink);
     }
@@ -96,6 +104,9 @@ Also sets keyboard focus to the Back button for clarity/a11y.
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
     .row{margin-bottom:12px}
 
+    /* Fainter sample PIN */
+    #teamPin::placeholder{ color: rgba(0,0,0,.28); }
+
     /* Buttons */
     .btn{
       width:100%; padding:16px 18px; border-radius:16px; border:3px solid #6d4218;
@@ -103,6 +114,9 @@ Also sets keyboard focus to the Back button for clarity/a11y.
       color:#3a210a; font-weight:900; font-size:20px; cursor:pointer; box-shadow:var(--shadow-soft);
     }
     .btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.2)}
+
+    /* extra gap utility for sign-in button */
+    .mt-24{ margin-top:24px; }
 
     /* msg */
     .msg{display:none;margin-top:12px;padding:12px;border-radius:12px;border:2px solid}
@@ -196,7 +210,7 @@ Also sets keyboard focus to the Back button for clarity/a11y.
         <input id="teamPin" class="tq-input pin" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" minlength="4" maxlength="4"/>
       </div>
 
-      <button id="signinBtn" class="btn" type="button">Begin Treasure Hunt</button>
+      <button id="signinBtn" class="btn mt-24" type="button">Sign In</button>
       <div id="signinMsg" class="msg" role="status"></div>
     </section>
 
