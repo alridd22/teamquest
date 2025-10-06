@@ -1,12 +1,15 @@
 <!--
-TeamQuest — Clue Hunt • Sign-in UI tweaks (2025-10-06)
-CHANGES (no functionality touched):
-- “Titles above the boxes” (labels) now use a sans-serif UI stack for clarity.
-- PIN placeholder “1234” made fainter for a hint-style appearance.
-- Added extra vertical space between the PIN field and the Sign In button.
-- Standardised the button copy to “Sign In” for consistency across activities.
+TeamQuest — Clue Hunt • Designer tweaks (drop-in)
+WHAT CHANGED (styling only):
+- Hero page title and section headers set to a sans-serif stack.
+- “Crew” now shows as a titled parchment box (readonly display field).
+- “Treasure collected” now uses a title + parchment box (same style as Crew).
+- Progress header (“0/20…”) uses sans-serif; kept above the rules.
+- Rules chips simplified (no yellow border/gradient), smaller + more compact, placed under Crew.
+- Clue grid: text color switched to dark brown; red gem made larger and positioned mid-left on each tile.
+- Clue panel: title centered in dark sans-serif and a centered red gem added at the top of the box.
+- PIN placeholder made lighter; extra space above Sign In button; Sign In copy retained from previous pass.
 -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,7 +26,6 @@ CHANGES (no functionality touched):
 
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF;
-
       --gold:#F0C433; --gold-deep:#A7711F;
 
       --amber-1:#ffb939; --amber-2:#f0a21f; /* untried */
@@ -41,6 +43,8 @@ CHANGES (no functionality touched):
       /* font stacks */
       --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       --handlee: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
+
+      --ink-deep:#3b2a16;
     }
 
     *{box-sizing:border-box}
@@ -48,9 +52,7 @@ CHANGES (no functionality touched):
     body{
       margin:0; color:var(--ink);
       font-family:var(--handlee);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
-        var(--bg);
+      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
       background-size:cover; background-position:top center; background-attachment:fixed;
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
@@ -76,7 +78,7 @@ CHANGES (no functionality touched):
     /* HERO */
     .hero{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 14px;text-align:center}
     .brand-logo{width:min(220px,68vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-weight:900;font-size:24px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero-title{font-family:var(--sans);font-weight:900;font-size:24px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* LAYOUT */
     .stack{padding:0 var(--gutter) 28px}
@@ -87,7 +89,7 @@ CHANGES (no functionality touched):
     }
 
     /* labels/fields */
-    .field-label{display:block;margin:10px 6px 6px;font-weight:900;color:var(--ink);font-family:var(--sans)} /* sans-serif titles */
+    .field-label{display:block;margin:8px 6px 6px;font-weight:900;color:var(--ink);font-family:var(--sans)}
     .tq-input,.tq-select{
       width:100%; padding:14px 16px; font-size:18px; line-height:1.2;
       font-family:var(--handlee);
@@ -103,9 +105,14 @@ CHANGES (no functionality touched):
     }
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
     .row{margin-bottom:12px}
+    #teamPin::placeholder{ color: rgba(0,0,0,.28); } /* fainter sample PIN */
 
-    /* Fainter sample PIN */
-    #teamPin::placeholder{ color: rgba(0,0,0,.28); }
+    /* readonly display “fields” (Crew, Score) */
+    .display-field{
+      width:100%; padding:14px 16px; border:3px solid var(--gold); border-radius:16px;
+      background:#fff; font-weight:900; color:var(--ink-deep); font-family:var(--handlee);
+      box-shadow:0 2px 0 rgba(0,0,0,.03) inset;
+    }
 
     /* Buttons */
     .btn{
@@ -114,9 +121,7 @@ CHANGES (no functionality touched):
       color:#3a210a; font-weight:900; font-size:20px; cursor:pointer; box-shadow:var(--shadow-soft);
     }
     .btn:disabled{opacity:.5;cursor:not-allowed;filter:grayscale(.2)}
-
-    /* extra gap utility for sign-in button */
-    .mt-24{ margin-top:24px; }
+    .mt-24{margin-top:24px}
 
     /* msg */
     .msg{display:none;margin-top:12px;padding:12px;border-radius:12px;border:2px solid}
@@ -124,44 +129,49 @@ CHANGES (no functionality touched):
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
 
     /* ===== Hunt UI (visible after sign-in) ===== */
-    .pill{background:#fff7e6;border:3px solid var(--gold);border-radius:16px;padding:14px 16px;margin:8px 0;font-weight:900;color:#5b3a12}
-    .score{background:linear-gradient(135deg,#ffcc55,#f0b233);border:3px solid #8B4513;color:#3c220b;font-weight:900;border-radius:16px;text-align:center;padding:14px;margin-top:8px}
-
-    /* progress */
-    .progress-wrap{margin:14px 0}
-    .progress-line{font-weight:900;color:#5b3a12;margin-bottom:8px}
+    .progress-wrap{margin:10px 0 6px}
+    .progress-line{font-family:var(--sans);font-weight:900;color:var(--ink-deep);margin-bottom:8px}
     .progress-bar{position:relative;height:34px;border:3px solid var(--gold);border-radius:16px;background:#f6e5c7;overflow:hidden}
     .progress-fill{position:absolute;inset:0 0 0 auto;width:15%;background:linear-gradient(135deg,#a55a1f,#8b4513)}
     .progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 
-    /* grid: always ONE column (consistency iOS/Android) */
-    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin:18px 0}
+    /* compact rules under Crew */
+    .rules{display:grid;gap:8px;margin:10px 0 6px}
+    .rule-chip{
+      background:#f2e6cf;border:1px solid rgba(0,0,0,.08);
+      border-radius:12px;padding:10px 12px;font-weight:700;color:var(--ink);
+    }
 
-    /* clue buttons as 3-col grid so center text despite left diamond */
+    /* grid of clue buttons */
+    .grid{display:grid;grid-template-columns:1fr;gap:14px;margin:12px 0 18px}
+
     .clue{
-      display:grid; grid-template-columns:36px 1fr 36px; align-items:center; gap:8px;
+      position:relative;
       padding:16px; border-radius:16px; border:3px solid #8B4513;
-      background:linear-gradient(135deg,var(--amber-1),var(--amber-2)); color:#fff;
+      background:linear-gradient(135deg,var(--amber-1),var(--amber-2));
+      color:var(--ink-deep); /* dark text, not white */
       font-weight:900; font-size:20px; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft);
     }
-    .clue span.txt{grid-column:2}
     .clue::before{
-      content:""; grid-column:1; justify-self:center; width:26px; height:22px;
-      background:url("/Red%20Diamond.png") center/contain no-repeat;
+      content:""; position:absolute; left:-12px; top:50%; transform:translateY(-50%);
+      width:36px; height:32px; background:url("/Red%20Diamond.png") center/contain no-repeat;
       filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
     }
     .clue.completed{
-      background:linear-gradient(135deg,var(--green-1),var(--green-2)); border-color:#0e5b0e; cursor:not-allowed;
+      background:linear-gradient(135deg,var(--green-1),var(--green-2)); border-color:#0e5b0e; cursor:not-allowed; color:#fff;
     }
     .clue.incorrect{
-      background:linear-gradient(135deg,var(--red-1),var(--red-2)); border-color:#6b0000; cursor:not-allowed;
+      background:linear-gradient(135deg,var(--red-1),var(--red-2)); border-color:#6b0000; cursor:not-allowed; color:#fff;
     }
-    .clue.completed::after{content:"✓"; grid-column:3; justify-self:center; font-size:20px}
-    .clue.incorrect::after{content:"✗"; grid-column:3; justify-self:center; font-size:20px}
 
     /* clue panel */
-    .panel{background:#fff9ee;border:3px solid var(--gold);border-radius:18px;padding:18px}
-    .clue-title{font-weight:900;color:#b35c11;font-size:20px;margin-bottom:6px}
+    .panel{position:relative;background:#fff9ee;border:3px solid var(--gold);border-radius:18px;padding:18px}
+    .panel::before{
+      content:""; position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+      width:36px; height:30px; background:url("/Red%20Diamond.png") center/contain no-repeat;
+      filter: drop-shadow(0 1px 1px rgba(0,0,0,.35));
+    }
+    .clue-title{font-family:var(--sans);font-weight:900;color:var(--ink-deep);font-size:20px;margin:2px 0 6px;text-align:center}
     .clue-text{font-size:18px;color:#5b3a12;margin:8px 0 12px}
     .answer{width:100%;margin:10px 0 14px;font-size:20px;text-align:center}
     .result{display:none;margin:12px 0;border:3px solid;border-radius:12px;padding:14px;font-weight:900}
@@ -216,9 +226,11 @@ CHANGES (no functionality touched):
 
     <!-- ================== HUNT (HIDDEN until sign-in) ================== -->
     <section id="huntCard" class="card" style="display:none">
-      <div class="pill" id="teamInfo">Crew: —</div>
-      <div class="score" id="scoreDisplay">💰 Treasure Collected: 0 points</div>
+      <!-- Crew box -->
+      <div class="field-label">Crew</div>
+      <div id="teamInfo" class="display-field" aria-live="polite">—</div>
 
+      <!-- Progress (kept above rules) -->
       <div class="progress-wrap" aria-live="polite">
         <div class="progress-line" id="progressLine">0/20 Solved • 0 Explored</div>
         <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0">
@@ -227,10 +239,16 @@ CHANGES (no functionality touched):
         </div>
       </div>
 
-      <!-- Quick rules (now AFTER sign-in) -->
-      <div class="pill">• 20 clues • one try each</div>
-      <div class="pill">• Hidden reward per clue (5–10)</div>
-      <div class="pill">• Come and go anytime — progress saves</div>
+      <!-- Rules (compact) under Crew -->
+      <div class="rules">
+        <div class="rule-chip">• 20 clues • one try each</div>
+        <div class="rule-chip">• Hidden reward per clue (5–10)</div>
+        <div class="rule-chip">• Come and go anytime — progress saves</div>
+      </div>
+
+      <!-- Score box -->
+      <div class="field-label">Treasure collected</div>
+      <div class="display-field" id="scoreDisplay">0 points</div>
 
       <!-- Grid OR Clue view -->
       <div id="clueGridSection">
@@ -246,7 +264,7 @@ CHANGES (no functionality touched):
         <button id="continueBtn" class="btn" style="display:none">🗺️ Back to Clues</button>
       </div>
 
-      <div id="completionCelebration" class="pill" style="display:none;text-align:center">
+      <div id="completionCelebration" class="rule-chip" style="display:none;text-align:center">
         🎉 Treasure map complete! <span id="finalScore" style="font-weight:900;margin-left:6px">Final Treasure: 0 points</span>
       </div>
     </section>
@@ -382,10 +400,9 @@ CHANGES (no functionality touched):
         localStorage.setItem('teamCode', code);
         localStorage.setItem('teamName', $('teamSelect').options[$('teamSelect').selectedIndex]?.textContent || res.teamName || '');
 
-        // show hunt UI
         $('signinCard').style.display='none';
         $('huntCard').style.display='block';
-        $('teamInfo').textContent = 'Crew: ' + (localStorage.getItem('teamName')||'');
+        $('teamInfo').textContent = localStorage.getItem('teamName') || '—';
         await loadPreviousAttempts();
         renderClueGrid(); updateProgress(); updateScore();
       }catch(err){
@@ -428,7 +445,7 @@ CHANGES (no functionality touched):
         const state = completedClues[c.id];
         const btn = document.createElement('button');
         btn.className = 'clue';
-        btn.innerHTML = `<span class="txt">Clue ${c.id}</span>`;
+        btn.textContent = `Clue ${c.id}`;
         if(state){
           btn.classList.add(state.wasCorrect ? 'completed' : 'incorrect');
           btn.disabled = true;
@@ -500,7 +517,7 @@ CHANGES (no functionality touched):
         if (e.code==='CLOSED') showResult('Submissions are closed for this event.', false);
       }
 
-      // Show explicit Back-to-Clues button (no auto-return)
+      // Explicit Back-to-Clues
       $('submitAnswerBtn').style.display='none';
       $('continueBtn').style.display='block';
       $('continueBtn').focus();
@@ -525,7 +542,7 @@ CHANGES (no functionality touched):
     }
 
     function updateScore(){
-      $('scoreDisplay').textContent = '💰 Treasure Collected: ' + currentScore + ' points';
+      $('scoreDisplay').textContent = currentScore + ' points';
     }
     function updateProgress(){
       const attempted = Object.keys(completedClues).length;
