@@ -1,7 +1,11 @@
 <!--
-TeamQuest • Leaderboard — compact pass (v2)
-Adds: whole-row click to toggle breakdown; inline SVG star "coin"; board floats on page background.
-No endpoint/logic changes.
+TeamQuest • Leaderboard — wider + right-aligned points (all viewports)
+Also:
+• Floats directly on page background (no parchment card)
+• Rows are clickable (and have a toggle button)
+• Tiny inline SVGs for star + chevron
+• Team names clamp to 2 lines with ellipsis
+• Header row kept
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -15,12 +19,16 @@ No endpoint/logic changes.
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
+
       --panel:#22170E; --panel-ink:#FFF3D9;
-      --gold:#FFE39B; --gold-border:#CFB06D;
+
+      --gold:#FFE39B;   --gold-border:#CFB06D;
       --silver:#EEEEEE; --silver-border:#BFBFC0;
       --bronze:#F7D2B5; --bronze-border:#B2703D;
-      --nav-h:64px; --radius:20px; --shadow:0 14px 32px rgba(0,0,0,.28);
+
       --focus:#1594d2;
+
+      --shadow:0 14px 32px rgba(0,0,0,.28);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -30,25 +38,25 @@ No endpoint/logic changes.
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover;background-position:top center;background-attachment:fixed;
       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-      padding-top:var(--nav-h);
+      padding-top:64px;
     }
 
     /* NAV */
     .treasure-nav{
-      position:fixed; inset:0 0 auto 0; height:var(--nav-h); z-index:1000;
+      position:fixed; inset:0 0 auto 0; height:64px; z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
       border-bottom:1px solid rgba(255,255,255,.18);
     }
     .nav-container{
-      height:100%; max-width:1120px; margin:0 auto; padding:0 12px;
+      height:100%; max-width:1280px; margin:0 auto; padding:0 12px;
       display:flex; align-items:center; justify-content:space-between;
     }
     .nav-logo img{height:38px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.5rem;cursor:pointer;line-height:1; padding:8px}
     .nav-toggle:focus-visible{outline:3px solid var(--focus); border-radius:10px}
     .nav-menu{
-      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      position:fixed; top:64px; left:-100%; width:100%; height:calc(100vh - 64px);
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
       display:flex; flex-direction:column; align-items:center; gap:10px; padding:16px 14px; transition:left .25s;
     }
@@ -64,57 +72,49 @@ No endpoint/logic changes.
     /* HERO */
     .hero{
       min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:16px 14px 12px; text-align:center;
+      padding:16px 10px 12px; text-align:center;
     }
     .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px;
       filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-weight:900; font-size:24px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* CONTENT */
-    .stack{padding:0 14px 22px}
-    /* float directly on page background (no cream panel) */
-    .card{
-      background:transparent; border:0; box-shadow:none;
-      padding:0; margin:0 auto 16px; width:100%; max-width:1120px;
-    }
+    .stack{padding:0 10px 22px}
 
-    .refreshWrap{display:flex; justify-content:center; margin:0 0 8px}
+    .toolbar{display:flex; justify-content:center; margin:0 0 10px}
     .btn{
-      appearance:none; border:2px solid #7a521c; border-radius:14px; padding:8px 14px; cursor:pointer;
+      appearance:none; border:2px solid #7a521c; border-radius:14px; padding:10px 16px; cursor:pointer;
       font-weight:900; color:#442812; background:linear-gradient(90deg,#FDBA2D,#F0C433); box-shadow:0 6px 14px rgba(0,0,0,.18);
-      min-height:44px; font-size:15px;
+      min-height:44px; font-size:16px;
     }
     .btn:focus-visible{outline:3px solid var(--focus)}
 
-    /* BOARD */
+    /* BOARD (floats directly on background) */
     .board{
-      background:var(--panel); color:#fff; border-radius:22px; padding:8px; position:relative; overflow:hidden;
-      box-shadow:var(--shadow);
+      width:100%; max-width:1280px; margin:0 auto; box-shadow:var(--shadow);
+      background:var(--panel); color:#fff; border-radius:22px; padding:10px; position:relative; overflow:hidden;
     }
     .boardHead{
-      display:grid; grid-template-columns:72px 1fr 120px 56px; gap:6px; align-items:center;
-      color:var(--panel-ink); font-weight:900; padding:0 6px 8px; border-bottom:1px solid rgba(255,255,255,.12);
-      font-size:13px; letter-spacing:.2px;
+      display:grid; grid-template-columns:80px 1fr 120px 56px; gap:6px; align-items:center;
+      color:var(--panel-ink); font-weight:900; padding:0 6px 10px; border-bottom:1px solid rgba(255,255,255,.12);
+      font-size:14px; letter-spacing:.2px;
     }
-    .rows{padding:8px 4px 4px}
+    .rows{padding:10px 4px 6px}
 
     .row{
-      border-radius:20px; margin:8px 6px; padding:10px;
+      border-radius:20px; margin:10px 6px; padding:10px;
       background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.12);
-      overflow:hidden;
+      overflow:hidden; cursor:pointer;
     }
     /* whole-row medals */
     .row.gold{
-      background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%);
-      border:1px solid var(--gold-border);
+      background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%); border:1px solid var(--gold-border);
     }
     .row.silver{
-      background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%);
-      border:1px solid var(--silver-border);
+      background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border);
     }
     .row.bronze{
-      background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%);
-      border:1px solid var(--bronze-border);
+      background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border);
     }
     /* subtle inner plate for content so text stays readable on medal rows */
     .row::before{
@@ -122,18 +122,17 @@ No endpoint/logic changes.
       pointer-events:none;
     }
 
-    /* GRID with areas (lets us reflow on small screens) */
+    /* GRID with areas — points remain right on all sizes */
     .row-inner{
       position:relative; z-index:1;
       display:grid;
-      grid-template-columns:72px 1fr 120px 56px;
+      grid-template-columns:80px 1fr 120px 56px;
       grid-template-areas:"rank name points toggle";
       gap:6px; align-items:center;
-      cursor:pointer; /* whole-row click target */
     }
 
     .rank{
-      grid-area:rank; width:72px; height:60px;
+      grid-area:rank; width:80px; height:62px;
       display:flex; align-items:center; justify-content:center;
       border-radius:14px; font-weight:900; font-size:20px; color:#3b2a16;
       border:2px solid #cfb06d; background:linear-gradient(180deg,#ffe39b,#e7b844);
@@ -150,17 +149,12 @@ No endpoint/logic changes.
 
     .points{
       grid-area:points;
-      justify-self:end; min-width:100px; height:44px; padding:0 12px; border-radius:14px;
+      justify-self:end; min-width:112px; height:44px; padding:0 12px; border-radius:14px;
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
       font-weight:900; color:#3b2a16; border:2px solid #b37e00;
       background:linear-gradient(135deg,#f8d27b,#d5a243);
     }
-    .star{
-      display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:999px;
-      background:radial-gradient(circle at 30% 30%,#fff8,#0000), linear-gradient(135deg,#ffd776,#f0b020);
-      border:2px solid #b37e00;
-    }
-    .star svg{width:14px; height:14px; display:block; fill:#fff}
+    .star{width:22px; height:22px}
     .points .num{font-size:18px; line-height:1}
 
     .toggle{
@@ -169,11 +163,12 @@ No endpoint/logic changes.
       background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
       justify-self:end;
     }
-    .toggle:after{content:"▾"; font-size:18px; color:#3b2a16}
-    .row.open .toggle:after{content:"▴"}
+    .chev{width:18px; height:18px; transition:transform .18s ease}
+    .row.open .chev{transform:rotate(180deg)}
     .toggle:focus-visible{outline:3px solid var(--focus)}
+    .toggle:active{transform:translateY(1px)}
 
-    /* Breakdown – smooth expand/collapse without layout jump */
+    /* Breakdown – smooth expand/collapse */
     .break{
       position:relative; z-index:1;
       overflow:hidden; max-height:0; transition:max-height .26s ease;
@@ -191,21 +186,16 @@ No endpoint/logic changes.
     .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
     .detail .val{font-weight:900}
 
-    .updated{margin:8px 6px 0; color:#7b522a; font-weight:700; text-align:center; font-size:13px}
+    .updated{margin:10px auto 0; color:#f0e3cc; font-weight:700; text-align:center; font-size:13px; max-width:1280px}
 
-    /* —— Mobile layout —— */
+    /* —— Mobile tweaks (points stay on the right) —— */
     @media (max-width: 520px){
       .hero-title{font-size:22px}
       .boardHead{grid-template-columns:64px 1fr 96px 52px; font-size:12px}
-      .row-inner{
-        grid-template-columns:64px 1fr 52px;
-        grid-template-areas:
-          "rank name toggle"
-          "rank points toggle";
-      }
+      .row-inner{grid-template-columns:64px 1fr 96px 52px}
       .rank{width:64px; height:54px; font-size:18px}
       .team{font-size:18px}
-      .points{justify-self:start; min-width:92px; height:40px; padding:0 10px}
+      .points{min-width:92px; height:40px; padding:0 10px}
       .points .num{font-size:16px}
       .toggle{width:44px; height:44px}
     }
@@ -244,23 +234,21 @@ No endpoint/logic changes.
 
   <!-- CONTENT -->
   <main class="stack">
-    <section class="card" aria-live="polite">
-      <div class="refreshWrap"><button id="refreshBtn" class="btn">Refresh</button></div>
+    <div class="toolbar"><button id="refreshBtn" class="btn">Refresh</button></div>
 
-      <div class="board">
-        <div class="boardHead" aria-hidden="true">
-          <div>Rank</div>
-          <div>Name</div>
-          <div style="text-align:right">Points</div>
-          <div style="text-align:center">Detail</div>
-        </div>
-        <div id="rows" class="rows">
-          <div class="state">Loading…</div>
-        </div>
+    <section class="board" aria-live="polite">
+      <div class="boardHead" aria-hidden="true">
+        <div>Rank</div>
+        <div>Name</div>
+        <div style="text-align:right">Points</div>
+        <div style="text-align:center">Detail</div>
       </div>
-
-      <div id="updated" class="updated">Last updated — --:--:--</div>
+      <div id="rows" class="rows">
+        <div class="state">Loading…</div>
+      </div>
     </section>
+
+    <div id="updated" class="updated">Last updated — --:--:--</div>
   </main>
 
   <script>
@@ -326,25 +314,32 @@ No endpoint/logic changes.
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
-    function coinSvg(){
-      return `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-          <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.4l1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/>
-        </svg>`;
+    const STAR_SVG = `
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
+              fill="#fff"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
+              fill="none" stroke="#b37e00" stroke-width="1.6"/>
+      </svg>`;
+    const CHEV_SVG = `
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    function detailLine(label, val){
+      const v = (Number.isFinite(val) ? val : '--');
+      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
     }
 
     function rowTemplate(t, i){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       return `
-        <div class="row ${rankClass}">
-          <div class="row-inner" role="button" tabindex="0" aria-label="Toggle details for ${escapeAttr(t.name)}">
+        <div class="row ${rankClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
+          <div class="row-inner">
             <div class="rank" aria-hidden="true">${i+1}</div>
             <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
-              <span class="star" aria-hidden="true">${coinSvg()}</span>
-              <span class="num">${t.total}</span>
-            </div>
-            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false"></button>
+            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">${STAR_SVG}<span class="num">${t.total}</span></div>
+            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
           </div>
           <div class="break" aria-hidden="true">
             ${detailLine('The Clue Hunt', t.c)}
@@ -357,11 +352,6 @@ No endpoint/logic changes.
       `;
     }
 
-    function detailLine(label, val){
-      const v = (Number.isFinite(val) ? val : '--');
-      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
-    }
-
     function render(list){
       if (!Array.isArray(list) || list.length===0){
         rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
@@ -369,22 +359,26 @@ No endpoint/logic changes.
       }
       rowsEl.innerHTML = list.map(rowTemplate).join('');
 
-      // wire up toggles (button + whole row)
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
         const br  = row.querySelector('.break');
-        const clickArea = row.querySelector('.row-inner');
 
-        function toggle(force){
-          const nowOpen = typeof force === 'boolean' ? force : !row.classList.contains('open');
-          row.classList.toggle('open', nowOpen);
-          btn?.setAttribute('aria-expanded', String(nowOpen));
-          br?.setAttribute('aria-hidden', String(!nowOpen));
+        function toggle(open){
+          const willOpen = (typeof open==='boolean') ? open : !row.classList.contains('open');
+          row.classList.toggle('open', willOpen);
+          row.setAttribute('aria-expanded', String(willOpen));
+          btn?.setAttribute('aria-expanded', String(willOpen));
+          br?.setAttribute('aria-hidden', String(!willOpen));
         }
 
-        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); });
-        clickArea?.addEventListener('click', (e)=>{ if(!e.target.closest('.toggle')) toggle(); });
-        clickArea?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
+        // button
+        btn?.addEventListener('click', e=>{ e.stopPropagation(); toggle(); });
+        // whole row (including points/name areas)
+        row.addEventListener('click', ()=>{
+          // ignore clicks originating from interactive controls if needed
+          toggle();
+        });
+        row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
       });
     }
 
