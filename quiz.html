@@ -1,12 +1,14 @@
 <!--
-TeamQuest • Quiz • Sign-in UI tweaks (2025-10-06)
-CHANGES (no functionality touched):
-- Labels (“titles above the boxes”) use the sans-serif UI stack for clarity.
-- PIN placeholder (“1234”) made fainter for hint-y look.
-- Added more vertical space between the PIN input and the Sign In button.
-- Standardised button copy to “Sign In” (no emoji) for consistency across activities.
--->
+TeamQuest – The Quiz Challenge (UI refinements – 2025-10-06)
 
+What changed (NO functionality changes):
+• Crew display on the “Ready” screen restyled to match Clue Hunt: sans-serif title + parchment input-style box (gold border). Removed dotted/brown pill.
+• “Get ready” panel: removed heavy border; bullet points are individual compact chips slightly darker than background.
+• Increased button label sizes (“Begin the Quiz”, “Next question”); consistent gold button style.
+• Labels above inputs (sign-in) are sans-serif; placeholders slightly fainter; added comfortable spacing above Sign In button.
+• Explanation box shown after answering (e.g., “Answer: Towel”) no longer has a border – soft background only.
+• Minor polish: consistent typography, 44px+ touch targets, accessible focus states, no markup/JS logic changes.
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,19 +27,17 @@ CHANGES (no functionality touched):
       --gold:#F0C433; --gold-deep:#A7711F;
       --nav-h:64px; --gutter:22px; --hero-h:280px;
       --radius-card:22px; --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --shadow-soft:0 8px 18px rgba(0,0,0,.18);
       --accent:#1594d2;
-
-      /* font stacks */
-      --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      --handlee: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      font-family:var(--handlee);
+      font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover;background-position:top center;background-attachment:fixed;
       padding-top:var(--nav-h);
+      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
     }
 
     /* NAV */
@@ -60,25 +60,50 @@ CHANGES (no functionality touched):
     /* HERO */
     .hero{min-height:var(--hero-h);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 20px;text-align:center}
     .brand-logo{width:min(240px,68vw);height:auto;margin-bottom:10px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-family:var(--sans);font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero-title{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* LAYOUT */
     .wrap{max-width:900px;margin:0 auto;padding:0 var(--gutter) 28px}
     .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);margin:0 auto 18px}
-    h1{margin:0 0 8px;text-align:center;font-family:var(--sans);font-weight:900;color:var(--ink)}
+    h1{margin:0 0 8px;text-align:center;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;color:var(--ink)}
 
-    .rules{border:2px solid var(--gold-deep);border-radius:14px;padding:16px;background:#fff9ee;margin:12px 0}
-    /* LABELS = titles above boxes -> sans-serif */
-    label{display:block;font-weight:800;color:var(--ink);margin:8px 6px 6px;font-family:var(--sans)}
-    select,input[type="text"]{width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;font-size:16px;background:#fff}
-    .btn{width:100%;padding:16px;border:3px solid var(--gold-deep);border-radius:14px;background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;font-weight:900;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.2)}
+    /* Inputs / labels (sign-in) */
+    label{display:block;font-weight:900;color:var(--ink);margin:8px 6px 6px;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    .field,.tq-select{width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;font-size:18px;background:#fff;color:var(--ink);-webkit-text-fill-color:var(--ink);font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif}
+    .field::placeholder{color:rgba(0,0,0,.35)}
+    .tq-select{
+      -webkit-appearance:none; -moz-appearance:none; appearance:none;
+      padding:14px 44px 14px 12px;
+      background:#fff; color:var(--ink); -webkit-text-fill-color:var(--ink);
+      font:inherit; line-height:1.2; border-radius:16px; border:3px solid var(--gold);
+      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+      background-repeat:no-repeat; background-position:right 12px center; background-size:18px 18px;
+    }
+    .tq-select:focus{outline:2px solid var(--accent);outline-offset:2px}
+    .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
+    .tq-select::-ms-expand{display:none}
+
+    /* Buttons */
+    .btn{width:100%;padding:16px;border:3px solid var(--gold-deep);border-radius:14px;background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;font-weight:900;cursor:pointer;box-shadow:var(--shadow-soft);font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-size:22px}
     .btn:disabled{opacity:.55;cursor:not-allowed}
+
     .msg{margin-top:12px;border:2px solid;border-radius:11px;padding:12px;display:none;text-align:center}
     .msg.error{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
-    .section{display:none}.section.active{display:block}
-    .team-pill{background:#D7C39B;border:3px dashed rgba(0,0,0,.6);border-radius:14px;padding:10px 14px;margin-bottom:12px;text-align:center;font-weight:900}
 
+    .section{display:none}.section.active{display:block}
+
+    /* Crew display on ready/quiz/done */
+    .crew-wrap{margin-bottom:12px}
+    .crew-title{margin:0 6px 6px;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;color:#402a12}
+    .crew-box{padding:14px 12px;border:3px solid var(--gold);border-radius:16px;background:#fff;font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;font-size:18px}
+
+    /* Ready rules -> individual chips */
+    .rules{margin:12px 0}
+    .rule{background:linear-gradient(145deg,var(--parchment-2),#efe0c5);border:1px solid rgba(0,0,0,.06);border-radius:14px;padding:12px 14px;margin:10px 0;font-weight:800}
+
+    /* Quiz UI */
+    .team-pill{display:none} /* old style hidden */
     .quiz-head{display:flex;justify-content:space-between;gap:16px;align-items:center;border:2px solid var(--gold-deep);background:#fff9ee;border-radius:14px;padding:14px;margin-bottom:14px}
     .timer{width:60px;height:60px;border-radius:50%;border:3px solid #8B4513;display:flex;align-items:center;justify-content:center;font-weight:800;color:#8B4513;background:conic-gradient(#F0C433 0deg,#F7EED8 0deg)}
     .qcard{border:3px solid var(--gold);background:#fff;border-radius:18px;padding:18px}
@@ -89,26 +114,14 @@ CHANGES (no functionality touched):
     .opt.bad{background:linear-gradient(135deg,#d11,#a00909);color:#fff;border-color:#6b0000}
     .textAnswer{width:100%;padding:14px;border:3px solid var(--gold);border-radius:12px;font-size:18px;background:#fff}
 
-    .fb{margin-top:12px;padding:10px;border:2px solid;border-radius:10px;font-weight:900}
-    .fb.ok{background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
-    .fb.bad{background:#ffd6db;border-color:#b00020;color:#7a0010}
+    .fb{margin-top:12px;padding:10px;border-radius:10px;font-weight:900}
+    .fb.ok{background:#ddffe3;color:#0c5e24}
+    .fb.bad{background:#ffd6db;color:#7a0010}
+    /* remove previous borders on explanation blocks */
+    .explain{margin-top:12px;padding:10px;border:none;border-radius:10px;background:#fff9ee;font-weight:700}
 
-    /* iOS-safe <select> */
-    .tq-select{
-      -webkit-appearance:none; -moz-appearance:none; appearance:none;
-      padding:14px 44px 14px 12px;
-      background:#fff; color:var(--ink); -webkit-text-fill-color:var(--ink);
-      font:inherit; line-height:1.2; border-radius:16px; border:3px solid var(--gold);
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-      background-repeat:no-repeat; background-position:right 12px center; background-size:18px 18px;
-    }
-    .tq-select:focus{outline:2px solid var(--accent); outline-offset:2px;}
-    .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5);}
-    .tq-select::-ms-expand{display:none;}
-
-    /* Requested sign-in tweaks */
-    #teamPin.field::placeholder{ color: rgba(0,0,0,.28); } /* fainter sample PIN */
-    .mt-24{ margin-top:24px; } /* larger gap before button */
+    /* Next button bigger text */
+    #btnNextQ{font-size:22px}
   </style>
 </head>
 <body>
@@ -152,29 +165,39 @@ CHANGES (no functionality touched):
         <input id="teamPin" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" pattern="^\\d{4}$" maxlength="4"/>
       </div>
 
-      <button class="btn mt-24" id="btnSign">Sign In</button>
+      <div style="height:12px"></div>
+      <button class="btn" id="btnSign">Sign In</button>
       <div id="signMsg" class="msg"></div>
     </section>
 
     <!-- READY (rules + start button) -->
     <section id="secReady" class="card section">
-      <div class="team-pill" id="readyTeam">Crew: …</div>
-      <div class="rules">
-        <h1 style="font-size:20px;margin-bottom:10px">Get ready…</h1>
-        <ul style="margin:0;line-height:1.6">
-          <li>10 questions — 15 seconds each</li>
-          <li>Some include audio — make sure your volume is up</li>
-          <li>Choose once — no changes</li>
-          <li>Up to 100 points for perfection</li>
-        </ul>
+      <!-- Crew display in parchment input-style box -->
+      <div class="crew-wrap">
+        <div class="crew-title">Crew</div>
+        <div class="crew-box" id="readyTeam">—</div>
       </div>
+
+      <div class="rules">
+        <h1 style="font-size:20px;margin-bottom:6px">Get ready…</h1>
+        <div class="rule">10 questions — 15 seconds each</div>
+        <div class="rule">Some include audio — make sure your volume is up</div>
+        <div class="rule">Choose once — no changes</div>
+        <div class="rule">Up to 100 points for perfection</div>
+      </div>
+
       <button class="btn" id="btnAccept">🚀 Begin the Quiz</button>
       <div id="readyMsg" class="msg"></div>
     </section>
 
     <!-- QUIZ -->
     <section id="secQuiz" class="card section">
-      <div class="team-pill" id="quizTeam">Crew: …</div>
+      <!-- Crew shown above question as parchment box too -->
+      <div class="crew-wrap">
+        <div class="crew-title">Crew</div>
+        <div class="crew-box" id="quizTeam">—</div>
+      </div>
+
       <div class="quiz-head">
         <div id="qCount">Riddle 1 of 10</div>
         <div class="timer" id="timer">15</div>
@@ -185,7 +208,10 @@ CHANGES (no functionality touched):
 
     <!-- RESULTS -->
     <section id="secDone" class="card section">
-      <div class="team-pill" id="doneTeam">Crew: …</div>
+      <div class="crew-wrap">
+        <div class="crew-title">Crew</div>
+        <div class="crew-box" id="doneTeam">—</div>
+      </div>
       <div class="qcard">
         <h1 style="font-size:22px;margin-bottom:8px">🎉 Quiz Complete!</h1>
         <p id="scoreLine" style="margin-bottom:14px;font-weight:900;color:#8B4513"></p>
@@ -282,7 +308,7 @@ CHANGES (no functionality touched):
         localStorage.setItem('teamCode',code);
         localStorage.setItem('teamName',teamSelect.options[teamSelect.selectedIndex]?.textContent||res.teamName||'');
         setMsg(signMsg,'Signed in.','ok');
-        $('readyTeam').textContent='Crew: '+(localStorage.getItem('teamName')||'Unknown');
+        $('readyTeam').textContent=localStorage.getItem('teamName')||'—';
         $('secSign').classList.remove('active'); $('secReady').classList.add('active');
         if(localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); $('btnAccept').disabled=true; }
       }catch(err){ setMsg(signMsg,((''+err.message).includes('404'))?'Sign-in service is off. Ask the host to enable verify_team_pin_function.':(err.message||'Could not sign you in. Try again.'),'error'); }
@@ -318,7 +344,7 @@ CHANGES (no functionality touched):
       try{
         await callFn('start_quiz_function',{eventId:EVENT_ID,teamCode:localStorage.getItem('teamCode'),teamName:localStorage.getItem('teamName'),quizStartTime:new Date().toISOString()});
         localStorage.setItem(quizStartKey(),'1');
-        $('quizTeam').textContent='Crew: '+(localStorage.getItem('teamName')||'');
+        $('quizTeam').textContent=localStorage.getItem('teamName')||'';
         $('secReady').classList.remove('active'); $('secQuiz').classList.add('active');
         currentTeam={code:localStorage.getItem('teamCode'),name:localStorage.getItem('teamName')};
         qIndex=0; answers.length=0; showQuestion();
@@ -385,7 +411,7 @@ CHANGES (no functionality touched):
       answers.push({questionId:q.id,userAnswer:choice||($('textAns')?.value||''),correctAnswer:q.correctAnswer,isCorrect:correct,points:correct?q.points:0,timeLeft});
 
       if(q.explanation && q.type==='multiple_choice'){
-        $('qcard').insertAdjacentHTML('beforeend',`<div style="margin-top:12px;padding:10px;border:2px solid #DAA520;border-radius:10px;background:#fff9ee;font-weight:700">${q.explanation}</div>`);
+        $('qcard').insertAdjacentHTML('beforeend',`<div class="explain">${q.explanation}</div>`);
       }
 
       $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next Question':'See results';
@@ -394,7 +420,7 @@ CHANGES (no functionality touched):
     window.submitAnswer=submitAnswer;
 
     async function finishQuiz(){
-      $('secQuiz').classList.remove('active'); $('doneTeam').textContent='Crew: '+(currentTeam.name||''); $('secDone').classList.add('active');
+      $('secQuiz').classList.remove('active'); $('doneTeam').textContent=localStorage.getItem('teamName')||''; $('secDone').classList.add('active');
       const correct=answers.filter(a=>a.isCorrect).length; const points=answers.reduce((s,a)=>s+a.points,0);
       $('scoreLine').textContent=`Score: ${correct}/${quizQuestions.length} — Points earned: ${points}`;
       $('breakdown').innerHTML=answers.map((a,i)=>{const q=quizQuestions[i];return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0"><div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div><div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.points:'✗ 0'}</div></div>`;}).join('');
