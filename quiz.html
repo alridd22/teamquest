@@ -1,3 +1,12 @@
+<!--
+TeamQuest • Quiz • Sign-in UI tweaks (2025-10-06)
+CHANGES (no functionality touched):
+- Labels (“titles above the boxes”) use the sans-serif UI stack for clarity.
+- PIN placeholder (“1234”) made fainter for hint-y look.
+- Added more vertical space between the PIN input and the Sign In button.
+- Standardised button copy to “Sign In” (no emoji) for consistency across activities.
+-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,11 +26,15 @@
       --nav-h:64px; --gutter:22px; --hero-h:280px;
       --radius-card:22px; --shadow-card:0 18px 40px rgba(0,0,0,.35);
       --accent:#1594d2;
+
+      /* font stacks */
+      --sans: ui-sans-serif, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --handlee: "Handlee", ui-rounded, "Segoe UI", Roboto, Arial, sans-serif;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      font-family:"Handlee",ui-rounded,"Segoe UI",Roboto,Arial,sans-serif;
+      font-family:var(--handlee);
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover;background-position:top center;background-attachment:fixed;
       padding-top:var(--nav-h);
@@ -47,15 +60,16 @@
     /* HERO */
     .hero{min-height:var(--hero-h);display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 20px;text-align:center}
     .brand-logo{width:min(240px,68vw);height:auto;margin-bottom:10px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero-title{font-family:var(--sans);font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* LAYOUT */
     .wrap{max-width:900px;margin:0 auto;padding:0 var(--gutter) 28px}
     .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);margin:0 auto 18px}
-    h1{margin:0 0 8px;text-align:center;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;color:var(--ink)}
+    h1{margin:0 0 8px;text-align:center;font-family:var(--sans);font-weight:900;color:var(--ink)}
 
     .rules{border:2px solid var(--gold-deep);border-radius:14px;padding:16px;background:#fff9ee;margin:12px 0}
-    label{display:block;font-weight:800;color:var(--ink);margin:8px 6px 6px}
+    /* LABELS = titles above boxes -> sans-serif */
+    label{display:block;font-weight:800;color:var(--ink);margin:8px 6px 6px;font-family:var(--sans)}
     select,input[type="text"]{width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;font-size:16px;background:#fff}
     .btn{width:100%;padding:16px;border:3px solid var(--gold-deep);border-radius:14px;background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;font-weight:900;cursor:pointer;box-shadow:0 8px 18px rgba(0,0,0,.2)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
@@ -91,6 +105,10 @@
     .tq-select:focus{outline:2px solid var(--accent); outline-offset:2px;}
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5);}
     .tq-select::-ms-expand{display:none;}
+
+    /* Requested sign-in tweaks */
+    #teamPin.field::placeholder{ color: rgba(0,0,0,.28); } /* fainter sample PIN */
+    .mt-24{ margin-top:24px; } /* larger gap before button */
   </style>
 </head>
 <body>
@@ -134,7 +152,7 @@
         <input id="teamPin" class="field" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="1234" pattern="^\\d{4}$" maxlength="4"/>
       </div>
 
-      <button class="btn" id="btnSign">🔓 Sign in</button>
+      <button class="btn mt-24" id="btnSign">Sign In</button>
       <div id="signMsg" class="msg"></div>
     </section>
 
