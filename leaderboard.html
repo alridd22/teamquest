@@ -1,15 +1,8 @@
 <!--
-TeamQuest • Leaderboard — compact pass
-Key tweaks for this revision:
-• Typography: reduced all sizes ~10–25% (hero, headers, team name, points numerals).
-• Rank badge: smaller box + much smaller numeral; keeps strong shape without shouting.
-• Points pill: smaller (desktop 44px high, mobile 40px), star 24px, tighter padding.
-• Medal rows: stronger gold/silver/bronze backgrounds for the entire row (with soft inset strip).
-• Spacing: trimmed paddings/margins so more content fits; no side “squeeze”.
-• Mobile: same reflow; nothing overflows; line-clamp stays at 2.
-• A11y: aria and focus styles retained.
+TeamQuest • Leaderboard — compact pass (v2)
+Adds: whole-row click to toggle breakdown; inline SVG star "coin"; board floats on page background.
+No endpoint/logic changes.
 -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,7 +15,6 @@ Key tweaks for this revision:
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
-      --parchment:#F7EED8;
       --panel:#22170E; --panel-ink:#FFF3D9;
       --gold:#FFE39B; --gold-border:#CFB06D;
       --silver:#EEEEEE; --silver-border:#BFBFC0;
@@ -80,9 +72,10 @@ Key tweaks for this revision:
 
     /* CONTENT */
     .stack{padding:0 14px 22px}
+    /* float directly on page background (no cream panel) */
     .card{
-      background:var(--parchment); border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:12px 10px; border:1px solid rgba(0,0,0,.06); margin:0 auto 16px; width:100%; max-width:1120px;
+      background:transparent; border:0; box-shadow:none;
+      padding:0; margin:0 auto 16px; width:100%; max-width:1120px;
     }
 
     .refreshWrap{display:flex; justify-content:center; margin:0 0 8px}
@@ -96,6 +89,7 @@ Key tweaks for this revision:
     /* BOARD */
     .board{
       background:var(--panel); color:#fff; border-radius:22px; padding:8px; position:relative; overflow:hidden;
+      box-shadow:var(--shadow);
     }
     .boardHead{
       display:grid; grid-template-columns:72px 1fr 120px 56px; gap:6px; align-items:center;
@@ -130,12 +124,12 @@ Key tweaks for this revision:
 
     /* GRID with areas (lets us reflow on small screens) */
     .row-inner{
-      position:relative; /* sit above ::before */
-      z-index:1;
+      position:relative; z-index:1;
       display:grid;
       grid-template-columns:72px 1fr 120px 56px;
       grid-template-areas:"rank name points toggle";
       gap:6px; align-items:center;
+      cursor:pointer; /* whole-row click target */
     }
 
     .rank{
@@ -164,8 +158,9 @@ Key tweaks for this revision:
     .star{
       display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:999px;
       background:radial-gradient(circle at 30% 30%,#fff8,#0000), linear-gradient(135deg,#ffd776,#f0b020);
-      border:2px solid #b37e00; font-weight:900; font-size:14px;
+      border:2px solid #b37e00;
     }
+    .star svg{width:14px; height:14px; display:block; fill:#fff}
     .points .num{font-size:18px; line-height:1}
 
     .toggle{
@@ -331,14 +326,24 @@ Key tweaks for this revision:
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
+    function coinSvg(){
+      return `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.4l1.1-6.5L2.6 9.3l6.5-.9L12 2.5z"/>
+        </svg>`;
+    }
+
     function rowTemplate(t, i){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       return `
         <div class="row ${rankClass}">
-          <div class="row-inner">
+          <div class="row-inner" role="button" tabindex="0" aria-label="Toggle details for ${escapeAttr(t.name)}">
             <div class="rank" aria-hidden="true">${i+1}</div>
             <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}"><span class="star" aria-hidden="true">★</span><span class="num">${t.total}</span></div>
+            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
+              <span class="star" aria-hidden="true">${coinSvg()}</span>
+              <span class="num">${t.total}</span>
+            </div>
             <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false"></button>
           </div>
           <div class="break" aria-hidden="true">
@@ -363,15 +368,23 @@ Key tweaks for this revision:
         return;
       }
       rowsEl.innerHTML = list.map(rowTemplate).join('');
+
+      // wire up toggles (button + whole row)
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
         const br  = row.querySelector('.break');
-        btn?.addEventListener('click', ()=>{
-          const nowOpen = !row.classList.contains('open');
-          row.classList.toggle('open');
-          btn.setAttribute('aria-expanded', String(nowOpen));
-          if (br) br.setAttribute('aria-hidden', String(!nowOpen));
-        });
+        const clickArea = row.querySelector('.row-inner');
+
+        function toggle(force){
+          const nowOpen = typeof force === 'boolean' ? force : !row.classList.contains('open');
+          row.classList.toggle('open', nowOpen);
+          btn?.setAttribute('aria-expanded', String(nowOpen));
+          br?.setAttribute('aria-hidden', String(!nowOpen));
+        }
+
+        btn?.addEventListener('click', (e)=>{ e.stopPropagation(); toggle(); });
+        clickArea?.addEventListener('click', (e)=>{ if(!e.target.closest('.toggle')) toggle(); });
+        clickArea?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggle(); }});
       });
     }
 
