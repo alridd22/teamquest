@@ -1,3 +1,6 @@
+<!--
+TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-refresh)
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,17 +8,16 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest - Leaderboard</title>
-
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
-      --ink:#2E2114; --ink-soft:#6A5A47;
+      --ink:#2E2114;
       --panel:#22170E; --panel-ink:#FFF3D9;
-      --gold:#FFE39B; --gold-border:#CFB06D;
+      --gold:#FFE39B;   --gold-border:#CFB06D;
       --silver:#EEEEEE; --silver-border:#BFBFC0;
       --bronze:#F7D2B5; --bronze-border:#B2703D;
-      --nav-h:64px; --focus:#1594d2;
-      --shadow:0 14px 32px rgba(0,0,0,.28);
+      --focus:#1594d2;
+      --shadow:0 12px 28px rgba(0,0,0,.26);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -23,92 +25,78 @@
       margin:0; color:var(--ink);
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
-      background-size:cover;background-position:top center;background-attachment:fixed;
-      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
-      padding-top:var(--nav-h);
+      background-size:cover; background-position:top center; background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+      padding-top:64px;
     }
 
     /* NAV */
     .treasure-nav{
-      position:fixed; inset:0 0 auto 0; height:var(--nav-h); z-index:1000;
+      position:fixed; inset:0 0 auto 0; height:64px; z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
       border-bottom:1px solid rgba(255,255,255,.18);
     }
     .nav-container{
-      height:100%; max-width:1120px; margin:0 auto; padding:0 12px;
+      height:100%; max-width:1280px; margin:0 auto; padding:0 12px;
       display:flex; align-items:center; justify-content:space-between;
     }
     .nav-logo img{height:38px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.5rem;cursor:pointer;line-height:1; padding:8px}
+    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.5rem;cursor:pointer;line-height:1;padding:8px}
     .nav-toggle:focus-visible{outline:3px solid var(--focus); border-radius:10px}
     .nav-menu{
-      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      position:fixed; top:64px; left:-100%; width:100%; height:calc(100vh - 64px);
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
       display:flex; flex-direction:column; align-items:center; gap:10px; padding:16px 14px; transition:left .25s;
     }
     .nav-menu.active{left:0}
     .nav-link,.dropdown-link{
       display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
-      color:#F7EED8; font-weight:900; padding:10px 12px; border-radius:12px;
+      color:#F7EED8; font-weight:800; padding:10px 12px; border-radius:12px;
       background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
     }
     .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
     .nav-link:focus-visible,.dropdown-link:focus-visible{outline:3px solid var(--focus)}
 
     /* HERO */
-    .hero{
-      min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:16px 14px 12px; text-align:center;
-    }
-    .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px;
-      filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero{min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 8px 12px; text-align:center}
+    .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-weight:900; font-size:24px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* CONTENT */
-    .stack{padding:0 14px 22px}
+    .stack{padding:0 8px 20px}
 
-    /* Board floats directly on the background (no parchment card) */
+    /* BOARD — floats on background (narrower side paddings to “feel wider”) */
     .board{
-      background:var(--panel); color:#fff; border-radius:22px; padding:8px; position:relative; overflow:hidden;
-      box-shadow:var(--shadow); max-width:1120px; margin:0 auto;
+      width:100%; max-width:1280px; margin:0 auto; padding:8px 6px 10px;
+      background:var(--panel); color:#fff; border-radius:22px; box-shadow:var(--shadow);
     }
-    .rows{padding:8px 4px 4px}
+    .rows{padding:8px 2px 4px}
 
+    /* ROW */
     .row{
-      border-radius:20px; margin:8px 6px; padding:10px;
+      border-radius:18px; margin:8px 4px; padding:8px;
       background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.12);
       overflow:hidden; cursor:pointer;
     }
-    .row.gold{
-      background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%);
-      border:1px solid var(--gold-border);
-    }
-    .row.silver{
-      background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%);
-      border:1px solid var(--silver-border);
-    }
-    .row.bronze{
-      background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%);
-      border:1px solid var(--bronze-border);
-    }
-    .row::before{
-      content:""; display:block; position:absolute; inset:6px; border-radius:14px; background:#ffffff; opacity:.88;
-      pointer-events:none;
-    }
+    .row.gold{background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%); border:1px solid var(--gold-border)}
+    .row.silver{background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border)}
+    .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
+    .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
 
+    /* GRID — give more space to the name column; keep points right */
     .row-inner{
       position:relative; z-index:1;
       display:grid;
-      grid-template-columns:64px 1fr 116px 52px;
+      grid-template-columns:56px 1fr 100px 44px;
       grid-template-areas:"rank name points toggle";
       gap:6px; align-items:center;
     }
 
     .rank{
-      grid-area:rank; width:64px; height:54px;
+      grid-area:rank; width:56px; height:48px;
       display:flex; align-items:center; justify-content:center;
-      border-radius:14px; font-weight:900; font-size:18px; color:#3b2a16;
+      border-radius:12px; font-weight:800; font-size:16px; color:#3b2a16;
       border:2px solid #cfb06d; background:linear-gradient(180deg,#ffe39b,#e7b844);
     }
     .silver .rank{background:linear-gradient(180deg,#eeeeee,#cfcfd0); border-color:#bfbfc0; color:#3b3b3b}
@@ -116,65 +104,56 @@
 
     .team{
       grid-area:name;
-      font-weight:800; color:#2f2216; font-size:18px; line-height:1.08;
+      font-weight:700;
+      color:#2f2216;
+      font-size:17px;
+      line-height:1.12;
       display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-      padding-right:4px;
+      padding-right:2px;
     }
 
     .points{
       grid-area:points;
-      justify-self:end; min-width:100px; height:40px; padding:0 10px; border-radius:14px;
-      display:inline-flex; align-items:center; justify-content:center; gap:8px;
-      font-weight:900; color:#3b2a16; border:2px solid #b37e00;
+      justify-self:end; min-width:84px; height:36px; padding:0 8px; border-radius:12px;
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      font-weight:800; color:#3b2a16; border:2px solid #b37e00;
       background:linear-gradient(135deg,#f8d27b,#d5a243);
     }
-    .star{display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px}
-    .star svg{display:block}
-    .points .num{font-size:16px; line-height:1}
+    .star{width:18px; height:18px}
+    .points .num{font-size:15px; line-height:1}
 
     .toggle{
       grid-area:toggle;
-      width:44px; height:44px; min-width:44px; border-radius:999px; border:2px solid #cdbb9c;
+      width:38px; height:38px; min-width:38px; border-radius:999px; border:2px solid #cdbb9c;
       background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
       justify-self:end;
     }
-    .toggle:after{content:"▾"; font-size:18px; color:#3b2a16}
-    .row.open .toggle:after{content:"▴"}
+    .chev{width:16px; height:16px; transition:transform .18s ease}
+    .row.open .chev{transform:rotate(180deg)}
     .toggle:focus-visible{outline:3px solid var(--focus)}
+    .toggle:active{transform:translateY(1px)}
 
-    .break{
-      position:relative; z-index:1;
-      overflow:hidden; max-height:0; transition:max-height .26s ease;
-      margin:6px 2px 0; border-radius:12px; border:1px solid #ead7b9; background:#fff;
-    }
+    /* Breakdown */
+    .break{position:relative; z-index:1; overflow:hidden; max-height:0; transition:max-height .26s ease; margin:6px 2px 0; border-radius:12px; border:1px solid #ead7b9; background:#fff}
     .row.open .break{max-height:420px}
-
-    .detail{
-      display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
-      padding:9px 10px; border-bottom:1px solid #f0e3cc;
-      font-weight:800; color:#4a341e; background:#fff7e6; font-size:15px;
-    }
+    .detail{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px solid #f0e3cc; font-weight:700; color:#4a341e; background:#fff7e6; font-size:14px}
     .detail:last-child{border-bottom:0; border-radius:0 0 12px 12px}
     .detail:first-child{border-radius:12px 12px 0 0}
+    .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .detail .val{font-weight:800}
 
-    .updated{margin:10px auto 0; color:#e6d2b2; font-weight:700; text-align:center; font-size:13px; max-width:1120px}
-    .state{
-      color:var(--panel-ink); background:rgba(255,255,255,.06);
-      border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center
+    .updated{margin:10px auto 0; color:#f0e3cc; font-weight:700; text-align:center; font-size:13px; max-width:1280px}
+
+    /* Mobile */
+    @media (max-width:520px){
+      .row-inner{grid-template-columns:56px 1fr 84px 44px}
+      .rank{width:56px; height:48px; font-size:16px}
+      .team{font-size:16.5px}
+      .points{min-width:78px; height:34px; padding:0 8px}
+      .points .num{font-size:14px}
     }
 
-    @media (max-width: 520px){
-      .hero-title{font-size:22px}
-      .row-inner{
-        grid-template-columns:60px 1fr 48px;
-        grid-template-areas:
-          "rank name toggle"
-          "rank points toggle";
-      }
-      .rank{width:60px; height:50px; font-size:17px}
-      .team{font-size:17px}
-      .points{justify-self:start; min-width:92px; height:38px}
-    }
+    .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
   </style>
 </head>
 <body>
@@ -204,15 +183,13 @@
 
   <!-- CONTENT -->
   <main class="stack">
-    <section aria-live="polite">
-      <div class="board">
-        <div id="rows" class="rows">
-          <div class="state">Loading…</div>
-        </div>
+    <section class="board" aria-live="polite">
+      <div id="rows" class="rows">
+        <div class="state">Loading…</div>
       </div>
-
-      <div id="updated" class="updated">Last updated — --:--:--</div>
     </section>
+
+    <div id="updated" class="updated">Last updated — --:--:--</div>
   </main>
 
   <script>
@@ -277,23 +254,32 @@
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
-    function starSvg(){
-      return `<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path d="M12 2.5l2.9 5.88 6.5.95-4.7 4.58 1.11 6.47L12 17.98 6.19 20.38l1.11-6.47L2.6 9.33l6.5-.95L12 2.5z" fill="currentColor"/>
+    const STAR_SVG = `
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
+              fill="#fff"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
+              fill="none" stroke="#b37e00" stroke-width="1.6"/>
       </svg>`;
+    const CHEV_SVG = `
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    function detailLine(label, val){
+      const v = (Number.isFinite(val) ? val : '--');
+      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
     }
 
     function rowTemplate(t, i){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       return `
-        <div class="row ${rankClass}">
+        <div class="row ${rankClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
           <div class="row-inner">
             <div class="rank" aria-hidden="true">${i+1}</div>
             <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
-              <span class="star">${starSvg()}</span><span class="num">${t.total}</span>
-            </div>
-            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false"></button>
+            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">${STAR_SVG}<span class="num">${t.total}</span></div>
+            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
           </div>
           <div class="break" aria-hidden="true">
             ${detailLine('The Clue Hunt', t.c)}
@@ -306,37 +292,28 @@
       `;
     }
 
-    function detailLine(label, val){
-      const v = (Number.isFinite(val) ? val : '--');
-      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
-    }
-
     function render(list){
       if (!Array.isArray(list) || list.length===0){
         rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
         return;
       }
       rowsEl.innerHTML = list.map(rowTemplate).join('');
+
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
         const br  = row.querySelector('.break');
 
-        // Row click toggles (except when clicking the toggle button itself)
-        row.addEventListener('click', (e)=>{
-          if (e.target.closest('.toggle')) return;
-          const nowOpen = !row.classList.contains('open');
-          row.classList.toggle('open');
-          btn?.setAttribute('aria-expanded', String(nowOpen));
-          br?.setAttribute('aria-hidden', String(!nowOpen));
-        });
+        function toggle(open){
+          const willOpen = (typeof open==='boolean') ? open : !row.classList.contains('open');
+          row.classList.toggle('open', willOpen);
+          row.setAttribute('aria-expanded', String(willOpen));
+          btn?.setAttribute('aria-expanded', String(willOpen));
+          br?.setAttribute('aria-hidden', String(!willOpen));
+        }
 
-        btn?.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          const nowOpen = !row.classList.contains('open');
-          row.classList.toggle('open');
-          btn.setAttribute('aria-expanded', String(nowOpen));
-          br?.setAttribute('aria-hidden', String(!nowOpen));
-        });
+        btn?.addEventListener('click', e=>{ e.stopPropagation(); toggle(); });
+        row.addEventListener('click', ()=> toggle());
+        row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
       });
     }
 
@@ -350,7 +327,6 @@
         render(normalise(data));
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
-        console.error('loadBoard error', e);
         rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }
@@ -360,8 +336,9 @@
     function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
     document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
+
     loadBoard();
-    setInterval(loadBoard, 10_000); // auto-refresh every 10 seconds
+    setInterval(loadBoard, 10_000); /* auto-refresh every 10 seconds */
   </script>
 </body>
 </html>
