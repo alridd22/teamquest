@@ -101,6 +101,7 @@
     .btn.reset{background:#f7efe7; border:3px solid #dfd1c2; color:#4e3b25}
     .btn.publish{background:#e6fff2; border:3px solid #bfeeda; color:#0d6a40}
     .btn.secondary{background:#fffdf8; border:3px solid #e5d5c4; color:#3b2d16}
+    .btn.final{background:#fffdf8; border:3px solid #d9c5a9; color:#3b2d16}
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
     .grid1{display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px}
@@ -112,7 +113,6 @@
       text-align:center; padding:14px 12px; box-shadow:var(--shadow-soft);
       display:flex; flex-direction:column; align-items:center;
     }
-    /* Reserve two lines for labels so numbers align horizontally */
     .stat small{display:block; opacity:.8; color:#6A5A47; line-height:1.1; min-height:2.4em}
     .stat h3{margin:6px 0 0; font-size:28px; color:#5b3a12; line-height:1}
 
@@ -183,6 +183,8 @@
 
         <div class="grid1">
           <button id="btnPublish" class="btn publish">📢 Publish Results</button>
+          <!-- NEW: Final Results button -->
+          <button id="btnFinalResults" class="btn final" disabled>🏁 Final Results</button>
         </div>
 
         <div class="stats">
@@ -237,6 +239,9 @@
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
     if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
+    // Fixed final results key per request
+    const FINAL_RESULTS_KEY = 'QXrPBXGrZI';
+
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
       start: '/.netlify/functions/admin_start_event',
@@ -253,6 +258,7 @@
       btnEnd: document.getElementById('btnEnd'),
       btnReset: document.getElementById('btnReset'),
       btnPublish: document.getElementById('btnPublish'),
+      btnFinalResults: document.getElementById('btnFinalResults'),
       teams: document.getElementById('teams'),
       statTotal: document.getElementById('statTotal'),
       statActive: document.getElementById('statActive'),
@@ -298,6 +304,9 @@
     };
     let initialDurationSec = null;
 
+    // Track team counts to decide Final Results readiness
+    let teamTotals = { total: 0, returned: 0 };
+
     function setStatusPill(state){
       const s = normState(state);
       el.statusPill.className = 'pill ' + (
@@ -316,6 +325,19 @@
       el.btnReset.disabled   = (s==='running');
       el.btnPublish.disabled = !(s==='ended');
       el.btnPublish.textContent = (s==='published') ? '✅ Published' : '📢 Publish Results';
+
+      updateFinalButton(); // re-evaluate whenever state changes
+    }
+
+    function canShowFinal(){
+      const s = normState(current.state);
+      const ended = (s === 'ended' || s === 'published'); // once published, also fine
+      const everyoneReturned = (teamTotals.total > 0 && teamTotals.returned === teamTotals.total);
+      return ended || everyoneReturned;
+    }
+    function updateFinalButton(){
+      if (!el.btnFinalResults) return;
+      el.btnFinalResults.disabled = !canShowFinal();
     }
 
     let rafId = null;
@@ -440,6 +462,7 @@
         alert(`Failed to ${action}. ${r.error || ''}`.trim());
       }
       await fetchState({force:true});
+      updateFinalButton();
     }
 
     /* ===== Leaderboard merge (totals + rank) ===== */
@@ -499,6 +522,11 @@
       el.statTotal.textContent = teams.length || 0;
       el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
       el.statReturned.textContent = returnedCount;
+
+      // store for Final Results readiness check
+      teamTotals.total = teams.length || 0;
+      teamTotals.returned = returnedCount;
+      updateFinalButton();
 
       // render
       el.teams.innerHTML = teams.map(t => {
@@ -583,6 +611,15 @@
       const ok = confirm('Publish results now?\n\nThis will:\n• Show FINAL results on the leaderboard\n• Unlock the Gallery (Limericks + Kindness)\nThis action is safe (you can still edit scores later).');
       if (!ok) return;
       await doAction('publish');
+    });
+
+    // NEW: Final Results click
+    el.btnFinalResults.addEventListener('click', () => {
+      if (el.btnFinalResults.disabled) return;
+      const url = new URL('/final_results', location.origin);
+      url.searchParams.set('event', EVENT_ID);
+      url.searchParams.set('key', FINAL_RESULTS_KEY);
+      location.href = url.toString();
     });
 
     // Interval with in-flight guard to prevent overlapping polls
