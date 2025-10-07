@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (via public returns endpoint)
+TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -115,7 +115,10 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (via public 
     .row.returned{opacity:.88}
     .row.returned::after{
       content:"Returned";
-      position:absolute; top:10px; right:10px; z-index:2;
+      position:absolute;
+      top:10px;
+      left:74px; /* moved to left, clears rank box */
+      z-index:2;
       font-weight:800; font-size:11px; letter-spacing:.2px;
       padding:4px 8px; border-radius:999px;
       background:var(--ret-bg); color:var(--ret-ink); border:1px solid var(--ret-border);
