@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — with Returned badge
+TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -18,7 +18,12 @@ TeamQuest • Leaderboard — with Returned badge
       --bronze:#F7D2B5; --bronze-border:#B2703D;
       --focus:#1594d2;
       --shadow:0 12px 28px rgba(0,0,0,.26);
+
       --ret-bg:#eaf8ff; --ret-border:#bfe8ff; --ret-ink:#0a4c68;
+      --pill-ok-bg:#e6fbf1; --pill-ok-ink:#106a3e; --pill-ok-b:#b8efcf;
+      --pill-warn-bg:#fff6e9; --pill-warn-ink:#7a5a13; --pill-warn-b:#f1d093;
+      --pill-end-bg:#fdeeee; --pill-end-ink:#8b1f1f; --pill-end-b:#f1b3b3;
+      --pill-pub-bg:#e7f9ef; --pill-pub-ink:#0f6e44; --pill-pub-b:#b7ebcf;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -64,8 +69,31 @@ TeamQuest • Leaderboard — with Returned badge
     .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-weight:900; font-size:24px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* CONTENT */
-    .stack{padding:0 8px 20px}
+    /* TIMER STRIP */
+    .timer-strip{
+      max-width:1280px; margin:0 auto 10px; padding:10px 12px;
+      display:flex; align-items:center; justify-content:center; gap:10px;
+      color:#f3e7d0;
+    }
+    .timer-box{
+      background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.24);
+      border-radius:14px; padding:10px 14px; font-weight:900; letter-spacing:.12em; font-size:20px;
+      color:#FFF3D9; min-width:220px; text-align:center;
+    }
+    .pill{
+      padding:6px 10px; border-radius:999px; font-size:13px; font-weight:800; display:inline-block;
+      border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.12); color:#fff;
+    }
+    .pill.running{background:var(--pill-ok-bg); color:var(--pill-ok-ink); border-color:var(--pill-ok-b)}
+    .pill.paused{background:var(--pill-warn-bg); color:var(--pill-warn-ink); border-color:var(--pill-warn-b)}
+    .pill.ended{background:var(--pill-end-bg); color:var(--pill-end-ink); border-color:var(--pill-end-b)}
+    .pill.published{background:var(--pill-pub-bg); color:var(--pill-pub-ink); border-color:var(--pill-pub-b)}
+
+    /* FREEZE BANNER */
+    .freeze-banner{
+      max-width:1280px; margin:0 auto 8px; padding:8px 12px; text-align:center;
+      color:#ffe7b8; font-weight:800;
+    }
 
     /* BOARD */
     .board{
@@ -162,6 +190,7 @@ TeamQuest • Leaderboard — with Returned badge
     }
 
     .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
+    .hidden{display:none !important}
   </style>
 </head>
 <body>
@@ -188,6 +217,14 @@ TeamQuest • Leaderboard — with Returned badge
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
     <div class="hero-title">Leaderboard</div>
   </header>
+
+  <!-- TIMER STRIP -->
+  <div class="timer-strip">
+    <span id="statusPill" class="pill">Checking…</span>
+    <div id="timer" class="timer-box">-- : -- : --</div>
+  </div>
+
+  <div id="freezeBanner" class="freeze-banner hidden">Final stretch — scores hidden. They’ll be revealed when results are published.</div>
 
   <!-- CONTENT -->
   <main class="stack">
@@ -238,30 +275,19 @@ TeamQuest • Leaderboard — with Returned badge
       }
     })();
 
-    // Leaderboard logic
+    // -------- STATE / TIMER --------
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+
+    const statusPill = document.getElementById('statusPill');
+    const timerEl = document.getElementById('timer');
+    const freezeBanner = document.getElementById('freezeBanner');
 
     const rowsEl = document.getElementById('rows');
     const updatedEl = document.getElementById('updated');
 
     const num = v => Number.isFinite(+v) ? +v : 0;
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
-
-    function normalise(data){
-      const list = data.leaderboard || data.rows || data.teams || [];
-      return list.map(t => {
-        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
-        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
-        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
-        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
-        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
-        const total = num(t.total ?? (k+l+s+c+q));
-        const name = t.teamName || t.name || t.team || t.teamCode || '—';
-        const returned = !!(t.returned || t.hasReturned || t.returnedAt);
-        return { name, k, l, s, c, q, total, returned };
-      }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
-    }
 
     const STAR_SVG = `
       <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
@@ -275,39 +301,159 @@ TeamQuest • Leaderboard — with Returned badge
         <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>`;
 
-    function detailLine(label, val){
-      const v = (Number.isFinite(val) ? val : '--');
+    const normState = (s='') => {
+      const v = (s || '').toString().trim().toLowerCase();
+      if (['published'].includes(v)) return 'published';
+      if (['running','started','start','active'].includes(v)) return 'running';
+      if (['paused','pause'].includes(v)) return 'paused';
+      if (['ended','end','stopped','stop','complete','completed','finished'].includes(v)) return 'ended';
+      if (['notstarted','idle','ready','pending','draft',''].includes(v)) return 'notstarted';
+      return 'unknown';
+    };
+
+    const fmt = (ms) => {
+      if (ms < 0) ms = 0;
+      const t = Math.floor(ms/1000);
+      const hh = String(Math.floor(t/3600)).padStart(2,'0');
+      const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
+      const ss = String(t%60).padStart(2,'0');
+      return `${hh} : ${mm} : ${ss}`;
+    };
+
+    let eventState = {
+      state: 'unknown',
+      endsAt: null,
+      remainingMs: 0,
+      lastUpdateAt: 0,
+    };
+    let rafId = null;
+
+    function setStatusPill(state){
+      const s = normState(state);
+      statusPill.className = 'pill ' + (
+        s==='running' ? 'running' : s==='paused' ? 'paused' : s==='ended' ? 'ended' : s==='published' ? 'published' : ''
+      );
+      statusPill.textContent =
+        s==='running'   ? 'Running'   :
+        s==='paused'    ? 'Paused'    :
+        s==='ended'     ? 'Ended'     :
+        s==='published' ? 'Published' : 'Not Started';
+    }
+
+    function tick(){
+      cancelAnimationFrame(rafId);
+      const s = normState(eventState.state);
+      let displayMs = 0;
+      if (s === 'running' && eventState.endsAt){
+        displayMs = new Date(eventState.endsAt).getTime() - Date.now();
+        eventState.remainingMs = displayMs;
+      } else if (s === 'paused'){
+        displayMs = Math.max(0, eventState.remainingMs || 0);
+      } else {
+        displayMs = Math.max(0, eventState.remainingMs || 0);
+      }
+      timerEl.textContent = fmt(displayMs);
+      rafId = requestAnimationFrame(tick);
+    }
+
+    async function fetchEventState(){
+      if (!EVENT_ID) return;
+      try{
+        const res = await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`, {cache:'no-store'});
+        if (!res.ok) return;
+        const data = await res.json().catch(()=>null);
+        if (!data) return;
+        const s = normState(data.state);
+        let remainingMs = 0;
+        if (typeof data.remainingMs === 'number')       remainingMs = data.remainingMs;
+        else if (typeof data.remainingSec === 'number') remainingMs = Math.max(0, Math.floor(data.remainingSec*1000));
+        else if (s === 'running' && data.endsAt)        remainingMs = new Date(data.endsAt).getTime() - Date.now();
+
+        eventState = {
+          ...eventState,
+          state: s,
+          endsAt: data.endsAt || null,
+          remainingMs: Math.max(0, remainingMs),
+          lastUpdateAt: Date.now(),
+        };
+        setStatusPill(s);
+        tick();
+      }catch{}
+    }
+
+    function shouldFreeze(){
+      const s = normState(eventState.state);
+      if (s === 'published') return false;
+      const ms = Math.max(0, eventState.remainingMs || 0);
+      return ms <= 15 * 60 * 1000; // 15 minutes
+    }
+
+    // -------- LEADERBOARD RENDER --------
+    function detectReturned(t){
+      // robustly detect various shapes from backend
+      if (t.returned === true || t.hasReturned === true) return true;
+      if (typeof t.returned === 'string' && t.returned.trim().toUpperCase() === 'TRUE') return true;
+      if (typeof t.Returned === 'string' && t.Returned.trim().toUpperCase() === 'TRUE') return true;
+      if (t.returnedAt) return true;
+      if (t['ReturnedAt (ISO)']) return true;
+      if (t.returned_at) return true;
+      return false;
+    }
+
+    function normalise(data){
+      const list = data.leaderboard || data.rows || data.teams || [];
+      return list.map(t => {
+        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
+        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
+        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
+        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
+        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
+        const total = num(t.total ?? (k+l+s+c+q));
+        const name = t.teamName || t.name || t.team || t.teamCode || '—';
+        const returned = detectReturned(t);
+        return { name, k, l, s, c, q, total, returned };
+      }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
+    }
+
+    function detailLine(label, val, frozen){
+      const v = frozen ? '—' : (Number.isFinite(val) ? val : '--');
       return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
     }
 
-    function rowTemplate(t, i){
+    function rowTemplate(t, i, frozen){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
       const retClass = t.returned ? 'returned' : '';
+      const pointsHtml = frozen ? '—' : `<span class="num">${t.total}</span>`;
       return `
         <div class="row ${rankClass} ${retClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
           <div class="row-inner">
             <div class="rank" aria-hidden="true">${i+1}</div>
             <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">${STAR_SVG}<span class="num">${t.total}</span></div>
+            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
+              ${STAR_SVG}${pointsHtml}
+            </div>
             <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
           </div>
           <div class="break" aria-hidden="true">
-            ${detailLine('The Clue Hunt', t.c)}
-            ${detailLine('The Quiz', t.q)}
-            ${detailLine('The Scavenger Hunt', t.s)}
-            ${detailLine('The Kindness Challenge', t.k)}
-            ${detailLine('The Limerick Challenge', t.l)}
+            ${detailLine('The Clue Hunt', t.c, frozen)}
+            ${detailLine('The Quiz', t.q, frozen)}
+            ${detailLine('The Scavenger Hunt', t.s, frozen)}
+            ${detailLine('The Kindness Challenge', t.k, frozen)}
+            ${detailLine('The Limerick Challenge', t.l, frozen)}
           </div>
         </div>
       `;
     }
 
     function render(list){
+      const frozen = shouldFreeze();
+      freezeBanner.classList.toggle('hidden', !frozen);
+
       if (!Array.isArray(list) || list.length===0){
         rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
         return;
       }
-      rowsEl.innerHTML = list.map(rowTemplate).join('');
+      rowsEl.innerHTML = list.map((t,i)=>rowTemplate(t,i,frozen)).join('');
 
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
@@ -345,10 +491,14 @@ TeamQuest • Leaderboard — with Returned badge
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
-    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
+    // keep fresh when tab is visible
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ fetchEventState(); loadBoard(); } });
 
+    // initial + intervals
+    fetchEventState();
     loadBoard();
-    setInterval(loadBoard, 10_000); /* auto-refresh every 10 seconds */
+    setInterval(fetchEventState, 5000);
+    setInterval(loadBoard, 10000);
   </script>
 </body>
 </html>
