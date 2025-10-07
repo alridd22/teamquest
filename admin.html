@@ -183,7 +183,7 @@
 
         <div class="grid1">
           <button id="btnPublish" class="btn publish">📢 Publish Results</button>
-          <!-- NEW: Final Results button -->
+          <!-- Final Results -->
           <button id="btnFinalResults" class="btn final" disabled>🏁 Final Results</button>
         </div>
 
@@ -238,9 +238,6 @@
 
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
     if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
-
-    // Fixed final results key per request
-    const FINAL_RESULTS_KEY = 'QXrPBXGrZI';
 
     const endpoints = {
       state: '/.netlify/functions/get_event_state',
@@ -331,7 +328,7 @@
 
     function canShowFinal(){
       const s = normState(current.state);
-      const ended = (s === 'ended' || s === 'published'); // once published, also fine
+      const ended = (s === 'ended' || s === 'published');
       const everyoneReturned = (teamTotals.total > 0 && teamTotals.returned === teamTotals.total);
       return ended || everyoneReturned;
     }
@@ -613,12 +610,17 @@
       await doAction('publish');
     });
 
-    // NEW: Final Results click
+    // Final Results click — reuse key from URL/localStorage
     el.btnFinalResults.addEventListener('click', () => {
       if (el.btnFinalResults.disabled) return;
+      const key = ADMIN_KEY || qs.get('key') || '';
+      if (!key) {
+        alert('Admin key missing. Open this page with ?key=YOUR_ADMIN_KEY');
+        return;
+      }
       const url = new URL('/final_results', location.origin);
       url.searchParams.set('event', EVENT_ID);
-      url.searchParams.set('key', FINAL_RESULTS_KEY);
+      url.searchParams.set('key', key);
       location.href = url.toString();
     });
 
