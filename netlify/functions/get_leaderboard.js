@@ -1,7 +1,6 @@
 // netlify/functions/get_leaderboard.js
 const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
 
-/** Read a tab by any of a few likely titles. */
 async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
   for (const name of tabNames) {
     try {
@@ -11,7 +10,7 @@ async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999"
       });
       const values = res?.data?.values || [];
       if (values.length) return { name, values };
-    } catch { /* try next */ }
+    } catch {}
   }
   return { name: null, values: [] };
 }
@@ -25,35 +24,36 @@ function indexHeaders(row = []) {
   return idx;
 }
 
-function num(v) {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-}
+const num = (v) => (Number.isFinite(+v) ? +v : 0);
+const norm = (s) => String(s ?? "").trim();
+const lower = (s) => norm(s).toLowerCase();
+const upper = (s) => norm(s).toUpperCase();
 
-// Map sheet "Activity" values to leaderboard keys (kept from your version)
+// activity -> bucket mapping (more aliases, case-insensitive)
 function activityKey(raw) {
-  const k = String(raw || "").trim().toLowerCase();
-  if (["kindness"].includes(k)) return "kindness";
-  if (["limerick"].includes(k)) return "limerick";
-  if (["scavenger", "hunt", "scav", "scavenger hunt"].includes(k)) return "scavenger";
-  if (["clue", "clue hunt", "cluehunt", "clue-hunt"].includes(k)) return "cluehunt";
-  if (["quiz", "timed quiz", "the timed quiz"].includes(k)) return "quiz";
-  return null; // unknown/ignored for breakdown (still added to total)
+  const k = lower(raw);
+  if (["kindness", "the kindness challenge"].includes(k)) return "kindness";
+  if (["limerick", "the limerick challenge"].includes(k)) return "limerick";
+  if (["scavenger", "scav", "scavenger hunt", "the scavenger hunt"].includes(k)) return "scavenger";
+  if (["clue", "clue hunt", "cluehunt", "clue-hunt", "the clue hunt"].includes(k)) return "cluehunt";
+  if (["quiz", "timed quiz", "the timed quiz", "the quiz"].includes(k)) return "quiz";
+  return null;
 }
 
 exports.handler = async (event) => {
   try {
-    // Allow both POST {eventId:"..."} and GET ?eventId=... (and ?event=...)
-    const payload =
-      event.httpMethod === "POST"
-        ? (JSON.parse(event.body || "{}") || {})
-        : Object.fromEntries(new URLSearchParams(event.queryStringParameters || {}));
-    const eventIdFilter = String(payload.eventId || payload.event || "").trim();
+    // Accept POST or GET; allow ?eventId= or ?event=
+    const payload = event.httpMethod === "POST"
+      ? (JSON.parse(event.body || "{}") || {})
+      : Object.fromEntries(new URLSearchParams(event.queryStringParameters || {}));
+
+    const eventIdFilterRaw = norm(payload.eventId || payload.event || "");
+    const eventIdFilter = upper(eventIdFilterRaw); // <- case-insensitive compare
 
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // ---- PREFERRED: read from Submissions (your AI writes Final Score here) ----
+    // Try Submissions first (Final Score lives here)
     const { values: subRows } = await readTabValues(
       sheets,
       spreadsheetId,
@@ -66,55 +66,53 @@ exports.handler = async (event) => {
       const header = subRows[0] || [];
       const idx = indexHeaders(header);
 
-      // Column names as seen in your screenshots (case-insensitive):
-      // "Timestamp" | "Team Code" | "Activity" | "AI Status" | "Final Score" | "Idempotency" | "Event Id"
-      const iTimestamp   = idx["timestamp"];
-      const iTeamCode    = idx["team code"] ?? idx["team"];
-      const iActivity    = idx["activity"];
-      const iAiStatus    = idx["ai status"] ?? idx["status"];
-      const iFinalScore  = idx["final score"] ?? idx["score"];
-      const iIdempotency = idx["idempotency"] ?? idx["submissionid"];
-      const iEventId     = idx["event id"] ?? idx["eventid"];
+      const iTs    = idx["timestamp"];
+      const iCode  = idx["team code"] ?? idx["team"];
+      const iAct   = idx["activity"];
+      const iStat  = idx["ai status"] ?? idx["status"];
+      const iFinal = idx["final score"] ?? idx["score"];
+      const iIdem  = idx["idempotency"] ?? idx["submissionid"];
+      const iEvt   = idx["event id"] ?? idx["eventid"];
 
-      // De-dupe FINAL rows by Idempotency (keep latest Timestamp)
-      const byIdem = new Map(); // idem -> row
+      // De-dupe FINAL rows by idempotency; keep latest timestamp.
+      const byIdem = new Map();
       for (let r = 1; r < subRows.length; r++) {
         const row = subRows[r] || [];
-        const status = String(row[iAiStatus] || "").trim().toLowerCase();
+        const status = lower(row[iStat] || "");
         if (!status.includes("final")) continue;
 
-        if (eventIdFilter && String(row[iEventId] || "").trim() !== eventIdFilter) continue;
+        // case-insensitive event match
+        if (eventIdFilter && upper(row[iEvt] || "") !== eventIdFilter) continue;
 
-        const idem = String(row[iIdempotency] || "").trim();
-        const ts = new Date(row[iTimestamp] || 0).getTime() || 0;
+        const idem = norm(row[iIdem] || "");
+        const stamp = new Date(row[iTs] || 0).getTime() || 0;
 
         if (!idem) {
-          // No idempotency? still keep (use unique key)
-          const code = String(row[iTeamCode] || "").trim().toUpperCase();
-          const act  = String(row[iActivity] || "").trim().toLowerCase();
-          byIdem.set(`NOIDEM:${code}:${act}:${ts}`, row);
+          const code = upper(row[iCode] || "");
+          const act  = lower(row[iAct] || "");
+          byIdem.set(`NOIDEM:${code}:${act}:${stamp}`, row);
           continue;
         }
         const prev = byIdem.get(idem);
         if (!prev) byIdem.set(idem, row);
         else {
-          const prevTs = new Date(prev[iTimestamp] || 0).getTime() || 0;
-          if (ts >= prevTs) byIdem.set(idem, row);
+          const pTs = new Date(prev[iTs] || 0).getTime() || 0;
+          if (stamp >= pTs) byIdem.set(idem, row);
         }
       }
 
       outByTeam = new Map();
       for (const row of byIdem.values()) {
-        const teamCode = String(row[iTeamCode] || "").trim();
+        const teamCode = norm(row[iCode] || "");
         if (!teamCode) continue;
 
-        const act = activityKey(row[iActivity]);
-        const score = num(row[iFinalScore]);
+        const bucket = activityKey(row[iAct]);
+        const score = num(row[iFinal]);
 
         if (!outByTeam.has(teamCode)) {
           outByTeam.set(teamCode, {
             teamCode,
-            teamName: "", // filled from Teams sheet below
+            teamName: "",
             kindness: 0,
             limerick: 0,
             scavenger: 0,
@@ -124,13 +122,13 @@ exports.handler = async (event) => {
           });
         }
         const agg = outByTeam.get(teamCode);
-        if (act && Object.prototype.hasOwnProperty.call(agg, act)) {
-          agg[act] += score;
+        if (bucket && Object.prototype.hasOwnProperty.call(agg, bucket)) {
+          agg[bucket] += score;
         }
-        agg.total += score; // always add to total
+        agg.total += score;
       }
     } else {
-      // ---- FALLBACK: your existing Scores-based logic (unchanged) ----
+      // Fallback to your previous Scores logic (unchanged)
       const { values: scoreRows } = await readTabValues(
         sheets,
         spreadsheetId,
@@ -148,7 +146,7 @@ exports.handler = async (event) => {
         if (!teamCode) continue;
 
         const status = String(row[idx["status"]] || "").trim().toLowerCase();
-        if (status && status !== "final") continue; // only final rows
+        if (status && status !== "final") continue;
 
         const act = activityKey(row[idx["activity"]]);
         const score = num(row[idx["score"]]);
@@ -173,7 +171,7 @@ exports.handler = async (event) => {
       }
     }
 
-    // ---- Merge team names from Teams tab (same as before) ----
+    // Merge team names (same as before)
     const { values: teamRows } = await readTabValues(
       sheets,
       spreadsheetId,
