@@ -112,7 +112,8 @@
       text-align:center; padding:14px 12px; box-shadow:var(--shadow-soft);
       display:flex; flex-direction:column; align-items:center;
     }
-    .stat small{display:block; opacity:.8; color:#6A5A47; min-height:20px; line-height:20px}
+    /* Reserve two lines for labels so numbers align horizontally */
+    .stat small{display:block; opacity:.8; color:#6A5A47; line-height:1.1; min-height:2.4em}
     .stat h3{margin:6px 0 0; font-size:28px; color:#5b3a12; line-height:1}
 
     /* TEAM LIST */
@@ -579,7 +580,7 @@
       await doAction('reset');
     });
     el.btnPublish.addEventListener('click', async () => {
-      const ok = confirm('Publish results now?\n\nThis will:\n• Show FINAL results on the public leaderboard\n• Unlock the Gallery (Limericks + Kindness)\nThis action is safe (you can still edit scores later).');
+      const ok = confirm('Publish results now?\n\nThis will:\n• Show FINAL results on the leaderboard\n• Unlock the Gallery (Limericks + Kindness)\nThis action is safe (you can still edit scores later).');
       if (!ok) return;
       await doAction('publish');
     });
