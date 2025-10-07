@@ -131,6 +131,19 @@
     .row1{display:flex; justify-content:space-between; gap:12px; align-items:center}
     .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px}
     .tag{font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee; color:#5e4b35}
+
+    /* NEW: Rank + Points pill */
+    .team-points{
+      display:inline-flex; align-items:center; gap:6px;
+      font-weight:900; color:#4a351e;
+      border:2px solid #d9c5a9; background:#fffdf8;
+      padding:4px 8px; border-radius:10px; min-width:64px; justify-content:center;
+    }
+    .team-rank{
+      font-weight:900; color:#3b2d16; background:#f6e7c9; border:2px solid #d9c5a9;
+      border-radius:10px; padding:4px 8px; min-width:40px; text-align:center;
+    }
+    .team-row-points{ display:flex; align-items:center; gap:8px; }
   </style>
 </head>
 <body>
@@ -228,7 +241,7 @@
     })();
   </script>
 
-  <!-- ORIGINAL FUNCTIONAL JS (unchanged) -->
+  <!-- ORIGINAL FUNCTIONAL JS + leaderboard merge -->
   <script>
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
@@ -242,6 +255,8 @@
       start: '/.netlify/functions/admin_start_event',
       teams: '/.netlify/functions/admin_list_teams',
       markReturn: '/.netlify/functions/admin_mark_return',
+      /* NEW: pull leaderboard totals */
+      leaderboard: '/.netlify/functions/get_leaderboard',
     };
 
     const el = {
@@ -425,16 +440,70 @@
       await fetchState({force:true});
     }
 
+    /* ===== NEW: Leaderboard merge (totals + rank) ===== */
+    async function fetchLeaderboardTotals(){
+      try{
+        const url = `${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
+        const res = await fetch(url, { headers: headers() });
+        const data = await res.json().catch(()=>({}));
+        const rows = data.leaderboard || data.rows || data.teams || [];
+        const map = new Map();
+        for (const t of rows){
+          const code = (t.teamCode || t.code || '').toString().trim().toUpperCase();
+          const name = (t.teamName || t.name || t.team || '').toString().trim().toUpperCase();
+          const k = Number(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness ?? 0);
+          const l = Number(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick ?? 0);
+          const s = Number(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger ?? 0);
+          const c = Number(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt ?? 0);
+          const q = Number(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz ?? 0);
+          const total = Number.isFinite(+t.total) ? +t.total : (k+l+s+c+q);
+          if (code) map.set(`CODE:${code}`, total);
+          if (name) map.set(`NAME:${name}`, total);
+        }
+        return (team) => {
+          const code = (team.teamCode || '').toString().trim().toUpperCase();
+          const name = (team.teamName || '').toString().trim().toUpperCase();
+          return map.get(`CODE:${code}`) ?? map.get(`NAME:${name}`) ?? 0;
+        };
+      }catch{
+        return () => 0;
+      }
+    }
+
+    function addRanks(items, scoreKey='total'){
+      let lastScore = null, lastRank = 0;
+      items.forEach((it, idx)=>{
+        const s = it[scoreKey];
+        if (s === lastScore) {
+          it.rank = lastRank;
+        } else {
+          it.rank = idx + 1;
+          lastRank = it.rank;
+          lastScore = s;
+        }
+      });
+    }
+
     async function loadTeams(){
       const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers()});
       const data = await res.json().catch(()=>({teams:[]}));
-      const teams = Array.isArray(data.teams) ? data.teams : [];
+      let teams = Array.isArray(data.teams) ? data.teams : [];
 
+      // merge totals
+      const getTotal = await fetchLeaderboardTotals();
+      teams = teams.map(t => ({ ...t, total: getTotal(t) || 0 }));
+
+      // sort & rank
+      teams.sort((a,b) => (b.total - a.total) || String(a.teamName||'').localeCompare(String(b.teamName||'')));
+      addRanks(teams, 'total');
+
+      // stats
       const returnedCount = teams.filter(t => !!(t.returned || t.hasReturned || t.returnedAt)).length;
       el.statTotal.textContent = teams.length || 0;
       el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
       el.statReturned.textContent = returnedCount;
 
+      // render
       el.teams.innerHTML = teams.map(t => {
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
@@ -442,14 +511,22 @@
         const tagB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
         const tagC = (t.returned || t.hasReturned || t.returnedAt) ? `<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>` : '';
         const returned = !!(t.returned || t.hasReturned || t.returnedAt);
+        const total = Number.isFinite(+t.total)? +t.total : 0;
+        const rank = t.rank || '-';
         return `
           <div class="team ${returned?'returned':''}">
             <div class="row1">
               <div>
-                <div style="font-weight:900;color:#4a351e">${name}</div>
+                <div style="font-weight:900;color:#4a351e;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                  <span class="team-rank" title="Current rank">#${rank}</span>
+                  <span>${name}</span>
+                </div>
                 <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${code || 'TEAM'}</span></div>
               </div>
-              <div class="actions">
+              <div class="actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+                <div class="team-row-points">
+                  <div class="team-points" title="Current total points">${total}</div>
+                </div>
                 <button class="btn secondary" data-action="${returned?'undoReturn':'markReturn'}" data-team="${code}">
                   ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
                 </button>
@@ -458,6 +535,7 @@
           </div>`;
       }).join('');
 
+      // wire mark/undo
       el.teams.querySelectorAll('button[data-action]').forEach(btn=>{
         btn.addEventListener('click', async ()=>{
           const teamCode = btn.getAttribute('data-team');
