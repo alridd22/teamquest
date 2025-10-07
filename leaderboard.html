@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
+TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (via public returns endpoint)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -112,7 +112,7 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
     .row.silver{background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border)}
     .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
     .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
-    .row.returned{opacity:.85}
+    .row.returned{opacity:.88}
     .row.returned::after{
       content:"Returned";
       position:absolute; top:10px; right:10px; z-index:2;
@@ -238,7 +238,7 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
   </main>
 
   <script>
-    // Nav + keep ?event=
+    // Nav + persist ?event=
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
@@ -291,10 +291,8 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
 
     const STAR_SVG = `
       <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
-              fill="#fff"/>
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
-              fill="none" stroke="#b37e00" stroke-width="1.6"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#fff"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="none" stroke="#b37e00" stroke-width="1.6"/>
       </svg>`;
     const CHEV_SVG = `
       <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
@@ -320,12 +318,7 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
       return `${hh} : ${mm} : ${ss}`;
     };
 
-    let eventState = {
-      state: 'unknown',
-      endsAt: null,
-      remainingMs: 0,
-      lastUpdateAt: 0,
-    };
+    let eventState = { state:'unknown', endsAt:null, remainingMs:0, lastUpdateAt:0 };
     let rafId = null;
 
     function setStatusPill(state){
@@ -369,13 +362,7 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
         else if (typeof data.remainingSec === 'number') remainingMs = Math.max(0, Math.floor(data.remainingSec*1000));
         else if (s === 'running' && data.endsAt)        remainingMs = new Date(data.endsAt).getTime() - Date.now();
 
-        eventState = {
-          ...eventState,
-          state: s,
-          endsAt: data.endsAt || null,
-          remainingMs: Math.max(0, remainingMs),
-          lastUpdateAt: Date.now(),
-        };
+        eventState = { ...eventState, state:s, endsAt:data.endsAt || null, remainingMs:Math.max(0, remainingMs), lastUpdateAt:Date.now() };
         setStatusPill(s);
         tick();
       }catch{}
@@ -389,17 +376,6 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
     }
 
     // -------- LEADERBOARD RENDER --------
-    function detectReturned(t){
-      // robustly detect various shapes from backend
-      if (t.returned === true || t.hasReturned === true) return true;
-      if (typeof t.returned === 'string' && t.returned.trim().toUpperCase() === 'TRUE') return true;
-      if (typeof t.Returned === 'string' && t.Returned.trim().toUpperCase() === 'TRUE') return true;
-      if (t.returnedAt) return true;
-      if (t['ReturnedAt (ISO)']) return true;
-      if (t.returned_at) return true;
-      return false;
-    }
-
     function normalise(data){
       const list = data.leaderboard || data.rows || data.teams || [];
       return list.map(t => {
@@ -409,9 +385,9 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
         const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
         const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
         const total = num(t.total ?? (k+l+s+c+q));
-        const name = t.teamName || t.name || t.team || t.teamCode || '—';
-        const returned = detectReturned(t);
-        return { name, k, l, s, c, q, total, returned };
+        const teamCode = (t.teamCode || t.code || '').toString().trim();
+        const name = t.teamName || t.name || t.team || teamCode || '—';
+        return { name, teamCode, k, l, s, c, q, total };
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
@@ -474,13 +450,41 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge
     }
 
     async function loadBoard(){
-      const url = EVENT_ID
+      const boardUrl = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
+      const returnsUrl = EVENT_ID
+        ? `/.netlify/functions/get_returns_public?eventId=${encodeURIComponent(EVENT_ID)}`
+        : null;
+
       try{
-        const res = await fetch(url, { cache:'no-store' });
-        const data = await res.json();
-        render(normalise(data));
+        const [boardRes, retRes] = await Promise.all([
+          fetch(boardUrl, { cache:'no-store' }),
+          returnsUrl ? fetch(returnsUrl, { cache:'no-store' }) : Promise.resolve(null)
+        ]);
+
+        const board = await boardRes.json();
+        const ret   = retRes ? await retRes.json() : { returns: [] };
+
+        // map of returned flags
+        const retMap = new Map();
+        for (const r of (ret.returns || [])) {
+          const code = (r.teamCode||"").toString().trim().toUpperCase();
+          const name = (r.teamName||"").toString().trim().toUpperCase();
+          const mark = { returned: !!r.returned || !!r.returnedAt, returnedAt: r.returnedAt || "" };
+          if (code) retMap.set(`C:${code}`, mark);
+          if (name) retMap.set(`N:${name}`, mark);
+        }
+
+        // normalise leaderboard (keeps your scoring), then merge flags
+        const list = normalise(board).map(t => {
+          const codeKey = `C:${(t.teamCode||"").toString().trim().toUpperCase()}`;
+          const nameKey = `N:${(t.name||"").toString().trim().toUpperCase()}`;
+          const info = retMap.get(codeKey) || retMap.get(nameKey);
+          return info ? { ...t, ...info } : t;
+        });
+
+        render(list);
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
