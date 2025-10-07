@@ -1,5 +1,10 @@
 <!--
-TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-refresh)
+TeamQuest • Leaderboard — compacted v3
+Adds:
+• Timer bar (HH:MM:SS) above the board
+• Freeze lock: once remaining <= 15:00, scores/breakdowns hide and STAY hidden
+  until Admin presses Publish (state: PUBLISHED). Persists via localStorage per event.
+• 10s auto-refresh retained
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -66,7 +71,21 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
     /* CONTENT */
     .stack{padding:0 8px 20px}
 
-    /* BOARD — floats on background (narrower side paddings to “feel wider”) */
+    /* Timer bar */
+    .timer-bar{
+      max-width:1280px; margin:0 auto 10px; padding:10px 8px;
+      display:flex; gap:10px; align-items:center; justify-content:space-between;
+      background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.22); border-radius:14px; color:#F7EED8;
+    }
+    .timer-pill{
+      font-weight:900; letter-spacing:.08em; font-size:18px;
+      background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.24);
+      padding:8px 12px; border-radius:999px; min-width:132px; text-align:center;
+    }
+    .timer-note{font-weight:700; opacity:.9; font-size:14px}
+    .freeze-msg{ opacity:.9; font-weight:800; }
+
+    /* BOARD */
     .board{
       width:100%; max-width:1280px; margin:0 auto; padding:8px 6px 10px;
       background:var(--panel); color:#fff; border-radius:22px; box-shadow:var(--shadow);
@@ -84,7 +103,7 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
     .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
     .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
 
-    /* GRID — give more space to the name column; keep points right */
+    /* GRID */
     .row-inner{
       position:relative; z-index:1;
       display:grid;
@@ -92,7 +111,6 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
       grid-template-areas:"rank name points toggle";
       gap:6px; align-items:center;
     }
-
     .rank{
       grid-area:rank; width:56px; height:48px;
       display:flex; align-items:center; justify-content:center;
@@ -154,6 +172,9 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
     }
 
     .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
+
+    /* Freeze visuals */
+    .points.frozen, .break.frozen{ visibility:hidden; }
   </style>
 </head>
 <body>
@@ -180,6 +201,12 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
     <div class="hero-title">Leaderboard</div>
   </header>
+
+  <!-- TIMER BAR -->
+  <div class="timer-bar" id="timerBar" hidden>
+    <div class="timer-pill" id="timerPill" aria-live="polite">-- : -- : --</div>
+    <div class="timer-note" id="timerNote" aria-live="polite"></div>
+  </div>
 
   <!-- CONTENT -->
   <main class="stack">
@@ -230,15 +257,31 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
       }
     })();
 
-    // Leaderboard logic
+    // Leaderboard logic (+ timer + freeze lock)
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     const rowsEl = document.getElementById('rows');
     const updatedEl = document.getElementById('updated');
+    const timerBar = document.getElementById('timerBar');
+    const timerPill = document.getElementById('timerPill');
+    const timerNote = document.getElementById('timerNote');
 
     const num = v => Number.isFinite(+v) ? +v : 0;
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    const STAR_SVG = `
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#fff"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
+              fill="none" stroke="#b37e00" stroke-width="1.6"/>
+      </svg>`;
+    const CHEV_SVG = `
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
 
     function normalise(data){
       const list = data.leaderboard || data.rows || data.teams || [];
@@ -254,34 +297,25 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
-    const STAR_SVG = `
-      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
-              fill="#fff"/>
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z"
-              fill="none" stroke="#b37e00" stroke-width="1.6"/>
-      </svg>`;
-    const CHEV_SVG = `
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-
     function detailLine(label, val){
       const v = (Number.isFinite(val) ? val : '--');
       return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
     }
 
-    function rowTemplate(t, i){
+    function rowTemplate(t, i, frozen){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      const pointsHtml = frozen ? '' : `${STAR_SVG}<span class="num">${t.total}</span>`;
       return `
         <div class="row ${rankClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
           <div class="row-inner">
             <div class="rank" aria-hidden="true">${i+1}</div>
             <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">${STAR_SVG}<span class="num">${t.total}</span></div>
+            <div class="points ${frozen?'frozen':''}" aria-label="${frozen?'Scores hidden until results are published':''}">
+              ${pointsHtml}
+            </div>
             <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
           </div>
-          <div class="break" aria-hidden="true">
+          <div class="break ${frozen?'frozen':''}" aria-hidden="true">
             ${detailLine('The Clue Hunt', t.c)}
             ${detailLine('The Quiz', t.q)}
             ${detailLine('The Scavenger Hunt', t.s)}
@@ -292,39 +326,139 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
       `;
     }
 
-    function render(list){
+    function render(list, frozen){
       if (!Array.isArray(list) || list.length===0){
         rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
         return;
       }
-      rowsEl.innerHTML = list.map(rowTemplate).join('');
+      rowsEl.innerHTML = list.map((t,i)=>rowTemplate(t,i,frozen)).join('');
 
       rowsEl.querySelectorAll('.row').forEach(row=>{
         const btn = row.querySelector('.toggle');
         const br  = row.querySelector('.break');
-
         function toggle(open){
+          if (br?.classList.contains('frozen')) return; // block details when frozen
           const willOpen = (typeof open==='boolean') ? open : !row.classList.contains('open');
           row.classList.toggle('open', willOpen);
           row.setAttribute('aria-expanded', String(willOpen));
           btn?.setAttribute('aria-expanded', String(willOpen));
           br?.setAttribute('aria-hidden', String(!willOpen));
         }
-
         btn?.addEventListener('click', e=>{ e.stopPropagation(); toggle(); });
         row.addEventListener('click', ()=> toggle());
         row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
       });
     }
 
-    async function loadBoard(){
-      const url = EVENT_ID
+    // Timer helpers
+    function fmt(ms){
+      ms = Math.max(0, ms|0);
+      const t = Math.floor(ms/1000);
+      const hh = String(Math.floor(t/3600)).padStart(2,'0');
+      const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
+      const ss = String(t%60).padStart(2,'0');
+      return `${hh} : ${mm} : ${ss}`;
+    }
+
+    let lastEndsAt = null;
+    let lastState = 'unknown';
+    let lastRemainingMs = null;
+    let timerTickId = null;
+
+    // Freeze persistence per event
+    const freezeKey = (id) => `tq_freeze_lock_${id||'default'}`;
+    function getFreezeLock(){ return !!JSON.parse(localStorage.getItem(freezeKey(EVENT_ID)) || 'false'); }
+    function setFreezeLock(v){
+      try{
+        if (v) localStorage.setItem(freezeKey(EVENT_ID), 'true');
+        else localStorage.removeItem(freezeKey(EVENT_ID));
+      }catch{}
+    }
+
+    function startTimerTick(){
+      stopTimerTick();
+      timerTickId = setInterval(()=>{
+        if (!lastEndsAt && !Number.isFinite(lastRemainingMs)) return;
+        let ms;
+        if (lastState === 'running' && lastEndsAt){
+          ms = new Date(lastEndsAt).getTime() - Date.now();
+        } else if (lastState === 'paused' && Number.isFinite(lastRemainingMs)){
+          ms = lastRemainingMs;
+        } else if (lastState === 'notstarted' && Number.isFinite(lastRemainingMs)){
+          ms = lastRemainingMs;
+        } else {
+          ms = 0;
+        }
+        timerPill.textContent = fmt(ms);
+      }, 1000);
+    }
+    function stopTimerTick(){ if (timerTickId){ clearInterval(timerTickId); timerTickId=null; } }
+
+    async function loadBoth(){
+      const lbUrl = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
+      const stUrl = EVENT_ID
+        ? `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`
+        : '/.netlify/functions/get_event_state';
+
       try{
-        const res = await fetch(url, { cache:'no-store' });
-        const data = await res.json();
-        render(normalise(data));
+        const [lbRes, stRes] = await Promise.all([
+          fetch(lbUrl, { cache:'no-store' }),
+          fetch(stUrl, { cache:'no-store' })
+        ]);
+        const [lbData, stData] = await Promise.all([lbRes.json(), stRes.json()]);
+        const list = normalise(lbData);
+
+        // derive state/remaining
+        const state = (stData?.state || '').toString().toLowerCase();
+        const published = !!stData?.published || state === 'published';
+        const running   = !!stData?.running   || state === 'running';
+        const paused    = !!stData?.paused    || state === 'paused';
+        const ended     = !!stData?.ended     || state === 'ended';
+
+        const endsAt = stData?.endsAt || stData?.endIso || null;
+        const remainingMs = Number.isFinite(stData?.remainingMs) ? stData.remainingMs
+                           : Number.isFinite(stData?.remainingSec) ? Math.floor(stData.remainingSec*1000)
+                           : (running && endsAt) ? (new Date(endsAt).getTime() - Date.now())
+                           : (paused && Number.isFinite(stData?.durationSec)) ? Math.floor((stData.durationSec||0)*1000)
+                           : null;
+
+        lastEndsAt = endsAt;
+        lastState = published ? 'published' : ended ? 'ended' : paused ? 'paused' : running ? 'running' : 'notstarted';
+        lastRemainingMs = remainingMs;
+
+        // Show timer bar if we know anything useful
+        timerBar.hidden = false;
+        startTimerTick();
+
+        // Freeze logic:
+        // - If published => clear lock (unfreeze)
+        // - Else if remaining <= 900 while running => set lock (freeze)
+        // - Otherwise keep whatever the lock currently is (once frozen, it stays until publish)
+        let lock = getFreezeLock();
+        const remSec = Number.isFinite(remainingMs) ? Math.max(0, Math.floor(remainingMs/1000)) : null;
+
+        if (published){
+          lock = false; setFreezeLock(false);
+        } else if (running && remSec != null && remSec <= 900){
+          lock = true; setFreezeLock(true);
+        } else {
+          // keep existing lock state (frozen persists through ended/paused/notstarted)
+        }
+
+        const frozen = !published && lock;
+
+        // Timer note
+        timerNote.innerHTML = frozen
+          ? `<span class="freeze-msg">Scores hidden until results are published.</span>`
+          : (published ? `Final results published.`
+             : running ? `Live scores visible.`
+             : paused ? `Event paused.`
+             : ended ? `Event ended.`
+             : `Event not started.`);
+
+        render(list, frozen);
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
         rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
@@ -332,13 +466,10 @@ TeamQuest • Leaderboard — compacted v2 (headers + refresh removed; 10s auto-
       }
     }
 
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-    function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoth(); });
 
-    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) loadBoard(); });
-
-    loadBoard();
-    setInterval(loadBoard, 10_000); /* auto-refresh every 10 seconds */
+    loadBoth();
+    setInterval(loadBoth, 10_000); /* auto-refresh every 10 seconds */
   </script>
 </body>
 </html>
