@@ -1,143 +1,96 @@
-// netlify/functions/get_leaderboard.js
-const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
+// /netlify/functions/get_leaderboard.js
+const { ok, bad } = require("./_lib/http");
+const { listTeamsByEventId } = require("./_lib/sheets");
 
 /**
- * Helper: read a tab by any of a few likely titles.
+ * Safely coerce to number
  */
-async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
-  for (const name of tabNames) {
-    try {
-      const res = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range: `${name}!${range}`,
-      });
-      const values = res?.data?.values || [];
-      if (values.length) return { name, values };
-    } catch (e) {
-      // try next
-    }
-  }
-  return { name: null, values: [] };
-}
-
-function indexHeaders(row = []) {
-  const idx = {};
-  row.forEach((h, i) => {
-    const key = String(h || "").trim().toLowerCase();
-    if (key) idx[key] = i;
-  });
-  return idx;
-}
-
 function num(v) {
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 }
 
-// Map sheet "Activity" values to leaderboard keys
-function activityKey(raw) {
-  const k = String(raw || "").trim().toLowerCase();
-  if (["kindness"].includes(k)) return "kindness";
-  if (["limerick"].includes(k)) return "limerick";
-  if (["scavenger", "hunt", "scav", "scavenger hunt"].includes(k)) return "scavenger";
-  // NEW: treat "clue" (and variants) as Clue Hunt column
-  if (["clue", "clue hunt", "cluehunt", "clue-hunt"].includes(k)) return "cluehunt";
-  if (["quiz", "timed quiz", "the timed quiz"].includes(k)) return "quiz";
-  return null; // unknown/ignored for breakdown (still added to total below)
+/**
+ * Pull a number from any of several candidate headers on a row
+ */
+function pickNum(row, keys) {
+  for (const k of keys) {
+    if (k in row) return num(row[k]);
+  }
+  return 0;
+}
+
+/**
+ * Normalise a team row into the leaderboard shape the frontend expects.
+ * Includes "returnedAt" and "returned".
+ */
+function mapRowToTeam(row) {
+  const teamCode = (row["Team Code"] || row["teamCode"] || row["Code"] || "").toString().trim();
+  const teamName = (row["Team Name"] || row["teamName"] || row["Name"] || teamCode || "—").toString().trim();
+
+  // Scores (accept a variety of column headings)
+  const k = pickNum(row, ["Kindness", "kindness", "Kindness Score", "KindnessPoints"]);
+  const l = pickNum(row, ["Limerick", "limerick", "Limerick Score", "LimerickPoints"]);
+  const s = pickNum(row, ["Scavenger", "scavenger", "Scavenger Hunt", "Scavenger Score", "ScavengerPoints"]);
+  const c = pickNum(row, ["ClueHunt", "Clue Hunt", "cluehunt", "Clue Hunt Score", "CluePoints"]);
+  const q = pickNum(row, ["Quiz", "quiz", "The Quiz", "Quiz Score", "QuizPoints"]);
+
+  const penalty = pickNum(row, ["LatePenalty", "Penalty", "latePenalty", "late_penalty"]);
+
+  // If a Total-like column exists, use it; otherwise compute sum minus any penalty
+  let total = pickNum(row, ["Total", "total", "Score", "Points"]);
+  if (total === 0) {
+    total = Math.max(0, k + l + s + c + q - penalty);
+  }
+
+  // Returned flags
+  const returnedAt = (row["ReturnedAt (ISO)"] || row["returnedAt"] || "").toString().trim();
+  const returned =
+    !!returnedAt ||
+    String(row["Returned"] || "")
+      .toString()
+      .trim()
+      .toUpperCase() === "TRUE";
+
+  return {
+    teamCode,
+    teamName,
+    // per-activity
+    kindness: k,
+    limerick: l,
+    scavenger: s,
+    cluehunt: c,
+    quiz: q,
+    // totals
+    total,
+    penalty,
+    // returned flags used by the UI
+    returnedAt,
+    returned,
+  };
 }
 
 exports.handler = async (event) => {
   try {
-    // Allow both POST {eventId:"..."} and GET ?eventId=...
-    const payload =
-      event.httpMethod === "POST"
-        ? (JSON.parse(event.body || "{}") || {})
-        : Object.fromEntries(new URLSearchParams(event.queryStringParameters || {}));
+    const url = new URL(event.rawUrl || `https://${event.headers.host}${event.path}`);
+    const eventId =
+      url.searchParams.get("eventId") ||
+      url.searchParams.get("event") ||
+      ""; // keep flexible
 
-    // Even if an eventId is passed, we compute from the Scores tab
-    const sheets = await getSheets();
-    const spreadsheetId = SHEET_ID;
+    if (!eventId) return bad(400, "Missing eventId");
 
-    // 1) Read Scores tab (various likely names)
-    const { values: scoreRows } = await readTabValues(
-      sheets,
-      spreadsheetId,
-      ["scores", "Scores", "scoreboard", "Scoreboard", "Points", "points", "Sheet1"]
-    );
+    // Pull team rows for this event
+    const rows = await listTeamsByEventId(eventId);
+    if (!Array.isArray(rows)) return ok({ leaderboard: [] });
 
-    if (!scoreRows.length) {
-      return ok({ leaderboard: [] }); // nothing to show
-    }
+    // Map and sort
+    const leaderboard = rows
+      .map(mapRowToTeam)
+      .sort((a, b) => b.total - a.total || a.teamName.localeCompare(b.teamName));
 
-    const header = scoreRows[0] || [];
-    const idx = indexHeaders(header);
-    // Expected headers (case-insensitive): Team Code, Activity, Score, Status
-    const outByTeam = new Map();
-
-    for (let i = 1; i < scoreRows.length; i++) {
-      const row = scoreRows[i] || [];
-      const teamCode = (row[idx["team code"]] || row[idx["team"]] || "").trim();
-      if (!teamCode) continue;
-
-      const status = String(row[idx["status"]] || "").trim().toLowerCase();
-      if (status && status !== "final") continue; // only final rows
-
-      const act = activityKey(row[idx["activity"]]);
-      const score = num(row[idx["score"]]);
-
-      if (!outByTeam.has(teamCode)) {
-        outByTeam.set(teamCode, {
-          teamCode,
-          teamName: "", // filled from Teams sheet below
-          kindness: 0,
-          limerick: 0,
-          scavenger: 0,
-          cluehunt: 0, // NEW column
-          quiz: 0,
-          total: 0,
-        });
-      }
-      const agg = outByTeam.get(teamCode);
-      if (act && Object.prototype.hasOwnProperty.call(agg, act)) {
-        agg[act] += score;
-      }
-      // Always add to total, even if the activity is not one of the tracked buckets
-      agg.total += score;
-    }
-
-    // 2) Merge team names from Teams tab (if available)
-    const { values: teamRows } = await readTabValues(
-      sheets,
-      spreadsheetId,
-      ["teams", "Teams", "Team List", "team_list", "teamlist"]
-    );
-
-    if (teamRows.length) {
-      const h2 = indexHeaders(teamRows[0] || []);
-      const codeIdx = h2["team code"] ?? h2["code"] ?? h2["team"] ?? null;
-      const nameIdx = h2["team name"] ?? h2["name"] ?? null;
-
-      if (codeIdx != null && nameIdx != null) {
-        for (let i = 1; i < teamRows.length; i++) {
-          const r = teamRows[i] || [];
-          const code = String(r[codeIdx] || "").trim();
-          const name = String(r[nameIdx] || "").trim();
-          if (!code || !name) continue;
-          const agg = outByTeam.get(code);
-          if (agg) agg.teamName = name;
-        }
-      }
-    }
-
-    // If a teamName wasn’t found, fallback to code
-    const leaderboard = [...outByTeam.values()]
-      .map((t) => ({ ...t, teamName: t.teamName || t.teamCode }))
-      .sort((a, b) => b.total - a.total);
-
-    // Final, stable shape
-    return ok({ leaderboard });
+    return ok({ eventId, leaderboard });
   } catch (e) {
-    console.error("get_leaderboard error:", e);
-    return error(500, e.message || "Unexpected error");
+    return bad(e.status || 500, e.message || "Error");
   }
 };
