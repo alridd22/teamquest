@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge under points
+TeamQuest • Leaderboard — returned teams dimmed + green Returned badge
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -19,11 +19,11 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge under points
       --focus:#1594d2;
       --shadow:0 12px 28px rgba(0,0,0,.26);
 
-      --ret-bg:#eaf8ff; --ret-border:#bfe8ff; --ret-ink:#0a4c68;
+      --ret-bg:#eaf8ff; --ret-border:#bfe8ff; --ret-ink:#0a4c68; /* (unused now) */
       --pill-ok-bg:#e6fbf1; --pill-ok-ink:#106a3e; --pill-ok-b:#b8efcf;
       --pill-warn-bg:#fff6e9; --pill-warn-ink:#7a5a13; --pill-warn-b:#f1d093;
       --pill-end-bg:#fdeeee; --pill-end-ink:#8b1f1f; --pill-end-b:#f1b3b3;
-      --pill-pub-bg:#e7f9ef; --pill-pub-ink:#0f6e44; --pill-pub-b:#b7ebcf;
+      --pill-pub-bg:#e7f9ef; --pill-pub-ink:#0f6e44; --pill-pub-b:#b7ebcf; /* green */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -106,15 +106,20 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge under points
     .row{
       border-radius:18px; margin:8px 4px; padding:8px;
       background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.12);
-      overflow:hidden; cursor:pointer; transition:opacity .18s ease;
+      overflow:hidden; cursor:pointer; transition:opacity .18s ease, filter .18s ease;
     }
     .row.gold{background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%); border:1px solid var(--gold-border)}
     .row.silver{background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border)}
     .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
     .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
-    .row.returned{opacity:.88}
 
-    /* GRID (now 2 rows so we can place the Returned badge under points) */
+    /* Returned styling: dim more + subtle grayscale */
+    .row.returned{
+      opacity:.78;
+      filter: grayscale(.45) saturate(.9) brightness(.98);
+    }
+
+    /* GRID (2 rows so we can place the Returned badge under points) */
     .row-inner{
       position:relative; z-index:1;
       display:grid;
@@ -155,13 +160,13 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge under points
     .star{width:18px; height:18px}
     .points .num{font-size:15px; line-height:1}
 
-    /* Returned badge under points */
+    /* Returned badge under points — now green */
     .ret-badge{
       grid-area:ret;
       justify-self:end;
       font-weight:800; font-size:11px; letter-spacing:.2px;
       padding:4px 8px; border-radius:999px;
-      background:var(--ret-bg); color:var(--ret-ink); border:1px solid var(--ret-border);
+      background:var(--pill-pub-bg); color:var(--pill-pub-ink); border:1px solid var(--pill-pub-b);
     }
 
     .toggle{
