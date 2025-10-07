@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
+TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge under points
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -113,23 +113,16 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
     .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
     .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
     .row.returned{opacity:.88}
-    .row.returned::after{
-      content:"Returned";
-      position:absolute;
-      top:10px;
-      left:74px; /* moved to left, clears rank box */
-      z-index:2;
-      font-weight:800; font-size:11px; letter-spacing:.2px;
-      padding:4px 8px; border-radius:999px;
-      background:var(--ret-bg); color:var(--ret-ink); border:1px solid var(--ret-border);
-    }
 
-    /* GRID */
+    /* GRID (now 2 rows so we can place the Returned badge under points) */
     .row-inner{
       position:relative; z-index:1;
       display:grid;
       grid-template-columns:56px 1fr 100px 44px;
-      grid-template-areas:"rank name points toggle";
+      grid-template-rows:auto auto;
+      grid-template-areas:
+        "rank name points toggle"
+        "rank name ret    toggle";
       gap:6px; align-items:center;
     }
 
@@ -162,6 +155,15 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
     .star{width:18px; height:18px}
     .points .num{font-size:15px; line-height:1}
 
+    /* Returned badge under points */
+    .ret-badge{
+      grid-area:ret;
+      justify-self:end;
+      font-weight:800; font-size:11px; letter-spacing:.2px;
+      padding:4px 8px; border-radius:999px;
+      background:var(--ret-bg); color:var(--ret-ink); border:1px solid var(--ret-border);
+    }
+
     .toggle{
       grid-area:toggle;
       width:38px; height:38px; min-width:38px; border-radius:999px; border:2px solid #cdbb9c;
@@ -185,7 +187,13 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
     .updated{margin:10px auto 0; color:#f0e3cc; font-weight:700; text-align:center; font-size:13px; max-width:1280px}
 
     @media (max-width:520px){
-      .row-inner{grid-template-columns:56px 1fr 84px 44px}
+      .row-inner{
+        grid-template-columns:56px 1fr 84px 44px;
+        grid-template-rows:auto auto;
+        grid-template-areas:
+          "rank name points toggle"
+          "rank name ret    toggle";
+      }
       .rank{width:56px; height:48px; font-size:16px}
       .team{font-size:16.5px}
       .points{min-width:78px; height:34px; padding:0 8px}
@@ -411,6 +419,7 @@ TeamQuest • Leaderboard — timer + freeze-at-15 + returned badge (left side)
             <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
               ${STAR_SVG}${pointsHtml}
             </div>
+            ${t.returned ? `<div class="ret-badge" aria-label="Returned">Returned</div>` : ``}
             <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
           </div>
           <div class="break" aria-hidden="true">
