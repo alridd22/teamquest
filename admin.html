@@ -8,7 +8,6 @@
 
   <style>
     :root{
-      /* Match activity palette */
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF; --paper:#FFFDF8;
@@ -31,7 +30,7 @@
       padding-top:var(--nav-h);
     }
 
-    /* NAV (same as activities, links rewritten via JS to keep ?event=) */
+    /* NAV */
     .treasure-nav{
       position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
       backdrop-filter:saturate(120%) blur(6px);
@@ -116,14 +115,6 @@
     .stat h3{margin:0; font-size:28px; color:#5b3a12}
     .stat small{display:block; opacity:.8; color:#6A5A47}
 
-    .help{
-      background:var(--parchment-2);
-      border-left:6px solid var(--gold-deep);
-      border-radius:12px;
-      padding:12px 14px;
-      color:#5e4b35; margin-top:12px; font-weight:700
-    }
-
     /* TEAM LIST */
     .teams{max-height:640px; overflow:auto; padding-right:6px}
     .team{background:var(--paper); border:1px solid #ecdac7; border-radius:16px; padding:12px; margin-bottom:12px; box-shadow:var(--shadow-soft)}
@@ -132,13 +123,14 @@
     .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px}
     .tag{font-size:12px; font-weight:800; padding:4px 8px; border-radius:999px; border:1px solid #d7c8b6; background:#f9f4ee; color:#5e4b35}
 
-    /* NEW: Rank + Points pill */
+    /* Rank + Points pill with a small star */
     .team-points{
       display:inline-flex; align-items:center; gap:6px;
       font-weight:900; color:#4a351e;
       border:2px solid #d9c5a9; background:#fffdf8;
       padding:4px 8px; border-radius:10px; min-width:64px; justify-content:center;
     }
+    .team-points .star{ width:14px; height:14px; }
     .team-rank{
       font-weight:900; color:#3b2d16; background:#f6e7c9; border:2px solid #d9c5a9;
       border-radius:10px; padding:4px 8px; min-width:40px; text-align:center;
@@ -156,7 +148,6 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <!-- Admin keeps links for quick jumping between public pages; eventId preserved in JS -->
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
@@ -198,11 +189,6 @@
           <div class="stat"><small>Active</small><h3 id="statActive">—</h3></div>
           <div class="stat"><small>Returned</small><h3 id="statReturned">0</h3></div>
         </div>
-
-        <div class="help">
-          Tip: The page auto-syncs every 3s. “Reset” sets the event back to “Not started”.
-          “Publish Results” flips the event to <b>PUBLISHED</b> — the public leaderboard shows final results and the Gallery unlocks.
-        </div>
       </section>
 
       <!-- RIGHT: Crew Management -->
@@ -241,7 +227,7 @@
     })();
   </script>
 
-  <!-- ORIGINAL FUNCTIONAL JS + leaderboard merge -->
+  <!-- Functional JS + leaderboard totals -->
   <script>
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
@@ -255,7 +241,6 @@
       start: '/.netlify/functions/admin_start_event',
       teams: '/.netlify/functions/admin_list_teams',
       markReturn: '/.netlify/functions/admin_mark_return',
-      /* NEW: pull leaderboard totals */
       leaderboard: '/.netlify/functions/get_leaderboard',
     };
 
@@ -272,6 +257,12 @@
       statActive: document.getElementById('statActive'),
       statReturned: document.getElementById('statReturned'),
     };
+
+    /* tiny star icon used in the points pill */
+    const STAR_SVG = `
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#b37e00"/>
+      </svg>`;
 
     const headers = () => {
       const h = {'Content-Type':'application/json'};
@@ -440,7 +431,7 @@
       await fetchState({force:true});
     }
 
-    /* ===== NEW: Leaderboard merge (totals + rank) ===== */
+    /* ===== Leaderboard merge (totals + rank) ===== */
     async function fetchLeaderboardTotals(){
       try{
         const url = `${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
@@ -525,7 +516,9 @@
               </div>
               <div class="actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
                 <div class="team-row-points">
-                  <div class="team-points" title="Current total points">${total}</div>
+                  <div class="team-points" title="Current total points">
+                    ${STAR_SVG}<span class="num">${total}</span>
+                  </div>
                 </div>
                 <button class="btn secondary" data-action="${returned?'undoReturn':'markReturn'}" data-team="${code}">
                   ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
