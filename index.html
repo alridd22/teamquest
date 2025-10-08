@@ -237,10 +237,13 @@ CHANGES
       if (eventId) localStorage.setItem(LS.eventId, eventId);
     }
 
-    // Params
+    // --- Params (NORMALISE EVENT TO UPPERCASE) ---
     const urlParams = new URLSearchParams(window.location.search);
     const teamCode = (urlParams.get('team') || 'UNKNOWN').toUpperCase();
-    const eventId  = (urlParams.get('event') || urlParams.get('eventId') || '').trim();
+
+    // Normalize EVENT to uppercase so backend/sheets match (e.g., TTHQTEST)
+    const eventIdRaw = (urlParams.get('event') || urlParams.get('eventId') || '').trim();
+    const eventId    = eventIdRaw ? eventIdRaw.toUpperCase() : '';
 
     // Display code + event hint
     document.getElementById('teamCodeDisplay').textContent = `Crew Code: ${teamCode}`;
@@ -300,11 +303,11 @@ CHANGES
 
         saveAuth({ token: result.token, teamCode: result.teamCode, teamName: result.teamName, eventId: (result.eventId || eventId) });
 
-        // Preserve event in the success URL too
+        // Preserve event in the success URL too (force uppercase)
         const successUrl = new URL('team-registration-success.html', location.origin);
         successUrl.searchParams.set('team', result.teamName);
         successUrl.searchParams.set('code', teamCode);
-        successUrl.searchParams.set('event', result.eventId || eventId);
+        successUrl.searchParams.set('event', (result.eventId || eventId).toUpperCase());
         window.location.href = successUrl.pathname + '?' + successUrl.searchParams.toString();
       } catch (err) {
         showError(err.message || 'Crew registration failed. Please try again.');
