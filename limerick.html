@@ -179,15 +179,24 @@ Changes:
         <div class="rules">
           <div class="rule">• Five lines. Keep it fun + clean.</div>
           <div class="rule">• At least 20 characters total.</div>
-          <div class="rule">• One submit at a time per crew.</div>
+          <div class="rule">• One submit per crew.</div>
         </div>
       </section>
 
       <!-- Limerick form -->
       <form id="limerickForm" class="card" novalidate>
         <div style="margin-bottom:10px">
-          <label for="topic">Topic <span class="optional">(optional)</span></label>
-          <input id="topic" class="field" placeholder="e.g. Castle gates / teamwork / parrot…"/>
+          <label for="topic">Topic</label>
+          <!-- CHANGED: input -> dropdown; ID unchanged to keep functionality identical -->
+          <select id="topic" class="tq-select">
+            <option value="" selected disabled>Choose a topic…</option>
+            <option value="Pirates &amp; Treasure">Pirates &amp; Treasure</option>
+            <option value="Sea Adventures">Sea Adventures</option>
+            <option value="Mysterious Islands">Mysterious Islands</option>
+            <option value="Ancient Maps">Ancient Maps</option>
+            <option value="Lost Expeditions">Lost Expeditions</option>
+            <option value="Buried Gold">Buried Gold</option>
+          </select>
         </div>
 
         <div style="margin-bottom:10px">
@@ -366,8 +375,8 @@ Changes:
         try{
           const r = await fetch('/.netlify/functions/submit_limerick_function',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
           if(!r.ok) throw new Error('Request failed');
-          showMsg(formMsg,'🎉 Submitted! Terry’s tallymaster is reviewing. Check the leaderboard in a few minutes.',true);
-          Array.from(document.querySelectorAll('#limerickForm input, #limerickForm textarea, #limerickForm button')).forEach(el=>el.disabled=true);
+          showMsg(formMsg,'🎉 Submitted! The AI judge is reviewing. Check the leaderboard in a few minutes.',true);
+          Array.from(document.querySelectorAll('#limerickForm input, #limerickForm textarea, #limerickForm button, #limerickForm select')).forEach(el=>el.disabled=true);
         }catch{
           showMsg(formMsg,'Network error. Try again.');
           $('#submitBtn').disabled=false;
