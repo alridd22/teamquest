@@ -1,6 +1,7 @@
 // netlify/functions/get_leaderboard.js
 const { ok, error, getSheets, SHEET_ID } = require("./_utils.js");
 
+/** Read a tab by any of a few likely titles. */
 async function readTabValues(sheets, spreadsheetId, tabNames, range = "A1:Z9999") {
   for (const name of tabNames) {
     try {
@@ -24,12 +25,12 @@ function indexHeaders(row = []) {
   return idx;
 }
 
-const num = (v) => (Number.isFinite(+v) ? +v : 0);
-const norm = (s) => String(s ?? "").trim();
+const num   = (v) => (Number.isFinite(+v) ? +v : 0);
+const norm  = (s) => String(s ?? "").trim();
 const lower = (s) => norm(s).toLowerCase();
 const upper = (s) => norm(s).toUpperCase();
 
-// activity -> bucket mapping (more aliases, case-insensitive)
+// activity -> bucket mapping (keeps your buckets + common aliases)
 function activityKey(raw) {
   const k = lower(raw);
   if (["kindness", "the kindness challenge"].includes(k)) return "kindness";
@@ -42,18 +43,16 @@ function activityKey(raw) {
 
 exports.handler = async (event) => {
   try {
-    // Accept POST or GET; allow ?eventId= or ?event=
+    // Accept POST or GET; support ?eventId= or ?event=
     const payload = event.httpMethod === "POST"
       ? (JSON.parse(event.body || "{}") || {})
       : Object.fromEntries(new URLSearchParams(event.queryStringParameters || {}));
-
-    const eventIdFilterRaw = norm(payload.eventId || payload.event || "");
-    const eventIdFilter = upper(eventIdFilterRaw); // <- case-insensitive compare
+    const eventIdFilter = upper(payload.eventId || payload.event || "");
 
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // Try Submissions first (Final Score lives here)
+    // Prefer Submissions (Final Score lives here)
     const { values: subRows } = await readTabValues(
       sheets,
       spreadsheetId,
@@ -66,6 +65,7 @@ exports.handler = async (event) => {
       const header = subRows[0] || [];
       const idx = indexHeaders(header);
 
+      // Submissions columns (case-insensitive)
       const iTs    = idx["timestamp"];
       const iCode  = idx["team code"] ?? idx["team"];
       const iAct   = idx["activity"];
@@ -74,40 +74,39 @@ exports.handler = async (event) => {
       const iIdem  = idx["idempotency"] ?? idx["submissionid"];
       const iEvt   = idx["event id"] ?? idx["eventid"];
 
-      // De-dupe FINAL rows by idempotency; keep latest timestamp.
-      const byIdem = new Map();
+      // Deduplicate by Idempotency using MAX Final Score (tie-break by latest timestamp)
+      const idemBest = new Map(); // idemKey -> {score, ts, row}
       for (let r = 1; r < subRows.length; r++) {
         const row = subRows[r] || [];
         const status = lower(row[iStat] || "");
         if (!status.includes("final")) continue;
 
-        // case-insensitive event match
         if (eventIdFilter && upper(row[iEvt] || "") !== eventIdFilter) continue;
 
-        const idem = norm(row[iIdem] || "");
-        const stamp = new Date(row[iTs] || 0).getTime() || 0;
+        const code = upper(row[iCode] || "");
+        const bucket = activityKey(row[iAct]);
+        if (!code || !bucket) continue;
 
-        if (!idem) {
-          const code = upper(row[iCode] || "");
-          const act  = lower(row[iAct] || "");
-          byIdem.set(`NOIDEM:${code}:${act}:${stamp}`, row);
-          continue;
-        }
-        const prev = byIdem.get(idem);
-        if (!prev) byIdem.set(idem, row);
-        else {
-          const pTs = new Date(prev[iTs] || 0).getTime() || 0;
-          if (stamp >= pTs) byIdem.set(idem, row);
+        const score = num(row[iFinal]);
+        const ts = new Date(row[iTs] || 0).getTime() || 0;
+
+        // Prefer Idempotency; if absent, synthesize a unique key
+        const rawIdem = norm(row[iIdem] || "");
+        const idemKey = rawIdem || `NOIDEM:${code}:${bucket}:${ts}`;
+
+        const prev = idemBest.get(idemKey);
+        if (!prev || score > prev.score || (score === prev.score && ts >= prev.ts)) {
+          idemBest.set(idemKey, { score, ts, row });
         }
       }
 
+      // Aggregate per team/activity
       outByTeam = new Map();
-      for (const row of byIdem.values()) {
+      for (const { row, score } of idemBest.values()) {
         const teamCode = norm(row[iCode] || "");
         if (!teamCode) continue;
-
         const bucket = activityKey(row[iAct]);
-        const score = num(row[iFinal]);
+        if (!bucket) continue;
 
         if (!outByTeam.has(teamCode)) {
           outByTeam.set(teamCode, {
@@ -122,13 +121,11 @@ exports.handler = async (event) => {
           });
         }
         const agg = outByTeam.get(teamCode);
-        if (bucket && Object.prototype.hasOwnProperty.call(agg, bucket)) {
-          agg[bucket] += score;
-        }
+        agg[bucket] += score;
         agg.total += score;
       }
     } else {
-      // Fallback to your previous Scores logic (unchanged)
+      // Fallback: your existing Scores-based logic (unchanged)
       const { values: scoreRows } = await readTabValues(
         sheets,
         spreadsheetId,
@@ -171,7 +168,7 @@ exports.handler = async (event) => {
       }
     }
 
-    // Merge team names (same as before)
+    // Merge team names from Teams/teams_public tab (same as before)
     const { values: teamRows } = await readTabValues(
       sheets,
       spreadsheetId,
