@@ -4,7 +4,7 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18"/>
-  <title>TeamQuest - Random Act of Kindness</title>
+  <title>TeamQuest — Kindness</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Handlee&display=swap" rel="stylesheet"/>
 
@@ -14,23 +14,20 @@
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF;
       --gold:#F0C433; --gold-deep:#A7711F;
-      --brown:#6b4a3a; --brown-2:#7a5241;
       --nav-h:64px; --gutter:22px;
       --radius-card:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
-      --focus:0 0 0 3px rgba(21,148,210,.45);
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0; color:var(--ink);
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
-      background-size:cover;background-position:top center;background-attachment:fixed;
-      -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+      font-family:"Handlee", ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
+      background-size:cover; background-position:top center; background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
-
     /* NAV */
     .treasure-nav{position:fixed;inset:0 0 auto 0;height:var(--nav-h);z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
@@ -38,7 +35,6 @@
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
     .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    .nav-logo{pointer-events:none;cursor:default;}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
@@ -53,56 +49,31 @@
     /* HERO */
     .hero{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 18px;text-align:center}
     .brand-logo{width:min(220px,68vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-weight:900;font-size:24px;color:#F7EED8;letter-spacing:.2px;text-shadow:0 2px 6px rgba(0,0,0,.6);font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    .hero-title{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900;font-size:24px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* LAYOUT */
     .stack{padding:0 var(--gutter) 28px}
     .card{background:linear-gradient(145deg,var(--parchment),var(--parchment-2));border-radius:var(--radius-card);
       box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);max-width:980px;margin:0 auto 18px}
-    h1,h2,h3{margin:0 0 10px;font-weight:900;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-    h2{font-size:22px}
-    .subtle{color:var(--ink-soft);margin:0 0 10px}
-    .optional{font-size:.85rem;color:var(--ink-soft);font-weight:700}
-
-    /* Inputs + select */
-    label{display:block;margin:12px 6px 6px;font-weight:900;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-    .field{
-      width:100%;font-size:18px;padding:14px;border:3px solid var(--gold);border-radius:16px;background:#fff;
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-text-fill-color:var(--ink);
-    }
-    .field::placeholder{color:rgba(0,0,0,.38)}
+    h2{margin:0 0 10px;font-weight:900;color:#3b2a16;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    label{display:block;margin:10px 6px 6px;font-weight:900;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+    .field{width:100%;padding:14px 16px;border-radius:16px;border:3px solid var(--gold);background:#fff;font-size:18px;
+      font-family:"Handlee",ui-rounded,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-fill-color:var(--ink)}
     textarea.field{min-height:160px;resize:vertical}
 
-    /* Buttons (shared amber pill) */
-    .btn{
-      display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
-      min-height:48px;padding:16px;border-radius:16px;border:3px solid #A7711F;
-      color:#442812;font-weight:900;font-size:20px;cursor:pointer;
-      background:linear-gradient(135deg,#FFB026,#F0C433); box-shadow:0 10px 22px rgba(0,0,0,.25)
-    }
+    .btn{width:100%;padding:16px 18px;border-radius:16px;border:3px solid #A7711F;background:linear-gradient(135deg,#FFB026,#F0C433);
+      color:#442812;font-weight:900;font-size:20px;cursor:pointer;box-shadow:0 10px 22px rgba(0,0,0,.22)}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .btn:hover{transform:translateY(-1px)}
-    .btn:focus-visible{outline:3px solid rgba(240,196,51,.55);outline-offset:2px}
 
     .msg{display:none;margin-top:12px;padding:12px;border-radius:12px;border:2px solid;font-weight:800}
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .msg.err{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
 
-    /* Rules */
-    .rules{border-radius:16px;padding:14px;background:linear-gradient(145deg,#f9f0db,#f2e6cf);border:1px solid rgba(0,0,0,.06)}
-    .rule{padding:10px 12px;border-radius:12px;background:#f4ead1;margin:8px 0;font-weight:800;border:none}
-
-    /* Upload control */
-    .field-block{margin:12px 0 18px}
-    .uploader input[type="file"]{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
-    .upload-cta{
-      display:flex;align-items:center;justify-content:center;text-align:center;
-      width:100%;min-height:56px;padding:14px 16px;border-radius:16px;font-weight:900;cursor:pointer;
-      background:linear-gradient(135deg,var(--brown),var(--brown-2)); color:#fff; border:2px solid #3f2a21;
-      box-shadow:0 8px 18px rgba(0,0,0,.18)
-    }
+    .uploader input[type=file]{position:absolute;left:-9999px}
+    .upload-cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;padding:14px 16px;border-radius:16px;
+      background:linear-gradient(135deg,#6b4a3a,#7a5241);border:2px solid #3f2a21;color:#fff;font-weight:900;cursor:pointer}
     .upload-cta.has-file{border-color:#2ba05f}
-    .upload-meta{margin-top:8px;font-size:14px;color:var(--ink-soft);text-align:center}
+    .upload-meta{margin-top:8px;font-size:14px;color:#6A5A47;text-align:center}
   </style>
 </head>
 <body>
@@ -115,87 +86,95 @@
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
-      <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
-      <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
-      <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
-      <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
-      <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+      <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link">💎 The Treasure Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link">🔍 The Scavenger Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link">⏰ The Timed Quiz</a></li>
+      <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link">📝 The Limerick Challenge</a></li>
+      <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link">🏆 The Leaderboard</a></li>
+      <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link">📸 The Gallery</a></li>
     </ul>
   </nav>
 
   <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
-    <div class="hero-title">Random Act of Kindness</div>
+    <div class="hero-title">Kindness</div>
   </header>
 
   <main class="stack">
-    <!-- SIGN-IN -->
+    <!-- SIGN IN -->
     <section id="secSign" class="card">
       <h2>Sign in</h2>
-      <p class="subtle">Pick your crew and enter your 4-digit PIN to continue.</p>
-
       <label for="teamSelect">Crew Name</label>
       <select id="teamSelect" class="field" required>
         <option value="" disabled selected>Loading crews…</option>
       </select>
 
       <label for="teamPin">Crew Pin</label>
-      <input id="teamPin" class="field" inputmode="numeric" pattern="[0-9]*" minlength="4" maxlength="4" placeholder="1234"/>
+      <input id="teamPin" class="field" inputmode="numeric" maxlength="4" placeholder="1234"/>
 
-      <div style="height:14px"></div>
+      <div style="height:12px"></div>
       <button id="btnSign" class="btn">Sign In</button>
       <div id="signMsg" class="msg"></div>
     </section>
 
     <!-- FORM -->
     <section id="secForm" class="card" style="display:none">
-      <label for="crewName">Crew</label>
-      <div id="crewName" class="field" style="pointer-events:none;user-select:none"></div>
+      <label>Crew</label>
+      <div id="crewName" class="field" style="user-select:none;pointer-events:none"></div>
 
-      <div class="rules" style="margin-top:14px">
-        <h2>Quick Rules</h2>
-        <div class="rule">• Do a genuine act of kindness.</div>
-        <div class="rule">• Take a clear photo of the deed or outcome.</div>
-        <div class="rule">• Tell us briefly what you did and the impact.</div>
-      </div>
-
-      <div class="field-block">
-        <div class="uploader">
-          <input id="kindPhoto" type="file" accept="image/*" capture="environment">
-          <label for="kindPhoto" class="upload-cta">📷 Upload photo</label>
-          <div id="uploadMeta" class="upload-meta" aria-live="polite">JPEG/PNG/WebP</div>
-        </div>
+      <div style="height:10px"></div>
+      <div class="uploader">
+        <input id="kindPhoto" type="file" accept="image/*" capture="environment">
+        <label for="kindPhoto" class="upload-cta" id="uploadBtn">📷 Upload photo</label>
+        <div id="uploadMeta" class="upload-meta">JPEG/PNG/WebP • Max ~20MB</div>
       </div>
 
       <label for="whatText">What happened?</label>
-      <textarea id="whatText" class="field" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
+      <textarea id="whatText" class="field" placeholder="What did you do, who did it help, and what happened?"></textarea>
 
-      <label for="whereText">Where? <span class="optional">(optional)</span></label>
+      <label for="whereText">Where? (optional)</label>
       <input id="whereText" class="field" placeholder="e.g., High Street, Community Centre…"/>
 
-      <button id="btnSubmit" class="btn" style="margin-top:14px">💛 Submit Kind Act</button>
+      <div style="height:12px"></div>
+      <button id="btnSubmit" class="btn">💛 Submit Kind Act</button>
       <div id="submitMsg" class="msg"></div>
     </section>
   </main>
 
   <script>
-    /* ===== Small helpers ===== */
+    /* ---------- Nav keep ?event ---------- */
+    (function(){
+      const navToggle=document.getElementById('nav-toggle');
+      const navMenu=document.getElementById('nav-menu');
+      navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
+      document.addEventListener('click',e=>{
+        const inside=navToggle?.contains(e.target)||navMenu?.contains(e.target);
+        if(!inside && navMenu?.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+      });
+      const EVENT_ID=new URLSearchParams(location.search).get('event')||new URLSearchParams(location.search).get('eventId')||'';
+      if(!EVENT_ID) return;
+      document.querySelectorAll('.nav-menu a, .nav-logo').forEach(a=>{
+        try{
+          const u=new URL(a.getAttribute('href'), location.origin);
+          if(!u.searchParams.get('event')){ u.searchParams.set('event', EVENT_ID); a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`); }
+        }catch{}
+      });
+    })();
+
+    /* ---------- Helpers ---------- */
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
     const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
-    const $ = id => document.getElementById(id);
-    function esc(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+    const $ = (id)=>document.getElementById(id);
     function setMsg(el, text, kind='err'){ el.textContent=text; el.className='msg ' + (kind==='ok'?'ok':'err'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
-
-    const token = ()=> localStorage.getItem('teamToken') || '';
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
+    const token = ()=> localStorage.getItem('teamToken') || '';
 
     async function callFn(name, payload){
-      const res = await fetch(`/.netlify/functions/${name}`,{
+      const res = await fetch(`/.netlify/functions/${name}`, {
         method:'POST',
         headers:{
           'Content-Type':'application/json',
@@ -213,7 +192,7 @@
       return data;
     }
 
-    /* ===== Teams via CSV ===== */
+    /* ---------- CSV loader ---------- */
     function parseCsv(text){
       const rows=[]; let i=0,cur='',row=[],inQ=false;
       while(i<text.length){
@@ -227,12 +206,12 @@
     }
 
     async function loadTeams(){
-      const teamSelect = $('teamSelect'), signMsg = $('signMsg'), btnSign = $('btnSign');
+      const sel = $('teamSelect'), msg = $('signMsg');
       if (!EVENT_ID){
-        teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
-        setMsg(signMsg,'This page needs an event link (with ?event=...).'); btnSign.disabled = true; return;
+        sel.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        setMsg(msg,'This page needs an event link (with ?event=...).'); $('btnSign').disabled=true; return;
       }
-      teamSelect.innerHTML = `<option value="" disabled selected>Loading crews…</option>`;
+      sel.innerHTML = `<option value="" disabled selected>Loading crews…</option>`;
       try{
         const res = await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`, { cache:'no-store' });
         if(!res.ok) throw new Error('Could not fetch teams CSV');
@@ -254,23 +233,23 @@
 
         if(!teams.length) throw new Error('No crews for this event');
 
-        teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
-          teams.map(t=>`<option value="${esc(t.teamCode)}">${esc(t.teamName)}</option>`).join('');
-        clearMsg(signMsg);
-        btnSign.disabled = false;
+        sel.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
+          teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
+        clearMsg(msg);
+        $('btnSign').disabled=false;
 
         const savedCode = localStorage.getItem('teamCode');
         if (savedCode) {
-          const opt = [...teamSelect.options].find(o=>o.value===savedCode);
-          if (opt) teamSelect.value = savedCode;
+          const opt = [...sel.options].find(o=>o.value===savedCode);
+          if (opt) sel.value = savedCode;
         }
       }catch(err){
-        teamSelect.innerHTML = `<option value="" disabled selected>—</option>`;
+        sel.innerHTML = `<option value="" disabled selected>—</option>`;
         setMsg($('signMsg'),'Unable to load crew list. Please refresh.');
       }
     }
 
-    /* ===== Sign in ===== */
+    /* ---------- Sign in ---------- */
     async function signIn(){
       clearMsg($('signMsg'));
       const code = $('teamSelect').value;
@@ -296,78 +275,30 @@
     $('btnSign').addEventListener('click', signIn);
     $('teamPin').addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
-    /* ===== Image -> base64 (size-safe) =====
-       - resizes to <= 1280px longest side
-       - exports WebP (fallback JPEG) quality 0.7
-       - if still large, reduces quality to fit MAX_CHARS
-    */
-    const MAX_BASE64_CHARS = 45000; // keep well below Sheets cell limit
-    async function fileToSafeBase64(file){
-      if (!file) return { base64:'', mime:'', fileName:'', size:0, truncated:false };
-
-      const img = await new Promise((res, rej)=>{
-        const i = new Image(); i.onload=()=>res(i); i.onerror=rej;
-        i.src = URL.createObjectURL(file);
-      });
-
-      const maxSide = 1280;
-      let {width, height} = img;
-      const scale = Math.min(1, maxSide / Math.max(width, height));
-      width = Math.round(width * scale); height = Math.round(height * scale);
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-
-      let mime = 'image/webp';
-      let q = 0.72;
-      let dataUrl = canvas.toDataURL(mime, q);
-
-      // Safari iOS might not support webp encoding; fallback to jpeg
-      if (!/^data:image\/webp/.test(dataUrl)) {
-        mime = 'image/jpeg';
-        q = 0.72;
-        dataUrl = canvas.toDataURL(mime, q);
-      }
-
-      // If still too big, reduce quality iteratively
-      while (dataUrl.length > MAX_BASE64_CHARS && q > 0.4){
-        q -= 0.08;
-        dataUrl = canvas.toDataURL(mime, q);
-      }
-
-      let base64 = dataUrl.split(',')[1] || '';
-      let truncated = false;
-
-      // Last resort: hard trim (rare)
-      if (base64.length > MAX_BASE64_CHARS){
-        base64 = base64.slice(0, MAX_BASE64_CHARS);
-        truncated = true;
-      }
-
-      return {
-        base64,
-        mime,
-        fileName: file.name || 'photo',
-        size: file.size || 0,
-        truncated
-      };
+    /* ---------- Uploadcare (same as Scavenger) ---------- */
+    async function uploadToUploadcare(file){
+      const form = new FormData();
+      form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28'); // same key as scavenger
+      form.append('file', file);
+      const res = await fetch('https://upload.uploadcare.com/base/', { method:'POST', body:form });
+      if(!res.ok) throw new Error(`Upload failed (${res.status})`);
+      const j = await res.json(); if(!j.file) throw new Error('No file id');
+      return `https://ucarecdn.com/${j.file}/`;
     }
 
-    // filename hint
+    // File UI affordances
     (function(){
-      const fileInput = $('kindPhoto');
-      const meta = $('uploadMeta');
-      const cta = document.querySelector('label.upload-cta');
-      fileInput?.addEventListener('change', () => {
-        const f = fileInput.files?.[0];
-        if(f){ meta.textContent = `Selected: ${f.name}`; cta.classList.add('has-file'); }
-        else { meta.textContent='JPEG/PNG/WebP'; cta.classList.remove('has-file'); }
+      const input = $('kindPhoto'), meta = $('uploadMeta'), btn = $('uploadBtn');
+      input.addEventListener('change', ()=>{
+        const f = input.files?.[0];
+        if (f){ btn.classList.add('has-file'); meta.textContent = `Selected: ${f.name}`; }
+        else { btn.classList.remove('has-file'); meta.textContent = 'JPEG/PNG/WebP • Max ~20MB'; }
       });
     })();
 
-    /* ===== Submit Kindness ===== */
+    /* ---------- Submit Kindness ---------- */
+    $('btnSubmit').addEventListener('click', submitKindness);
+
     async function submitKindness(){
       clearMsg($('submitMsg'));
       const teamCode = localStorage.getItem('teamCode');
@@ -377,28 +308,25 @@
       const text = ($('whatText').value||'').trim();
       if(text.length < 10) return setMsg($('submitMsg'),'Tell us a little more about what happened.');
 
+      const file = $('kindPhoto').files?.[0] || null;
+      if(!file) return setMsg($('submitMsg'),'Please add a photo.');
+
       $('btnSubmit').disabled = true;
 
       try{
-        const file = $('kindPhoto').files?.[0] || null;
-        const photo = await fileToSafeBase64(file);
+        const photoUrl = await uploadToUploadcare(file);
 
-        const payload = {
+        await callFn('submit_kindness_function', {
           eventId: EVENT_ID,
           teamCode, teamName,
           what: text,
           where: ($('whereText').value||'').trim(),
-          photoBase64: photo.base64,
-          photoMime: photo.mime,
-          photoFileName: photo.fileName,
-          photoSize: photo.size,
-          photoWasTruncated: photo.truncated ? 1 : 0
-        };
+          photoUrl
+        });
 
-        await callFn('submit_kindness_function', payload);
         setMsg($('submitMsg'),'✅ Submitted! Points will be awarded after review.','ok');
-        $('whatText').value=''; $('whereText').value='';
-        $('kindPhoto').value=''; $('uploadMeta').textContent='JPEG/PNG/WebP'; document.querySelector('.upload-cta').classList.remove('has-file');
+        $('whatText').value=''; $('whereText').value=''; $('kindPhoto').value='';
+        $('uploadBtn').classList.remove('has-file'); $('uploadMeta').textContent='JPEG/PNG/WebP • Max ~20MB';
       }catch(e){
         if (e.code==='UNAUTHORIZED'){ setMsg($('submitMsg'),'Session expired — please sign in again.'); }
         else if (e.code==='RATE_LIMITED'){ setMsg($('submitMsg'),'Too many submissions — please try again soon.'); }
@@ -407,21 +335,9 @@
         $('btnSubmit').disabled = false;
       }
     }
-    $('btnSubmit').addEventListener('click', submitKindness);
 
-    /* Boot */
+    // Boot
     loadTeams();
-  </script>
-
-  <!-- Safeguard: neutralize any link behavior on the logo element -->
-  <script>
-    (function(){
-      document.querySelectorAll('.nav-logo[href]').forEach(a=>{
-        a.removeAttribute('href');
-        a.setAttribute('aria-disabled','true');
-        a.setAttribute('tabindex','-1');
-      });
-    })();
   </script>
 </body>
 </html>
