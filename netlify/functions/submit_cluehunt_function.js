@@ -19,7 +19,6 @@ async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
     });
   }
   if (headers?.length) {
-    // Merge: if header missing or shorter, write/extend it
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId, range: `${title}!A1:Z1`
     }).catch(() => null);
@@ -102,16 +101,17 @@ module.exports.handler = async (event) => {
     try { body = JSON.parse(event.body || "{}"); }
     catch { return error(400, "Invalid JSON"); }
 
+    // 👇 Legacy compatibility: allow frontend sending `points`
     const {
-      mode = "final",            // "draft" or "final"
-      eventId = "",              // strongly recommended (required for idempotency)
+      mode = "final",
+      eventId = "",
       teamCode,
       teamName = "",
-      clueId,                    // number 1..20
+      clueId,
       clueText = "",
       userAnswer = "",
       correctAnswer = "",
-      pointsIfCorrect,           // number (reward if correct)
+      pointsIfCorrect = body.points ?? 0, // <— fallback
     } = body || {};
 
     if (!teamCode || !clueId) {
@@ -170,14 +170,13 @@ module.exports.handler = async (event) => {
         spreadsheetId, range: "submissions!A1",
         valueInputOption: "RAW", requestBody: { values: [next] }
       });
-      // refresh indices
       for (const [i, h] of next.entries()) subIdx[h.toLowerCase()] = i;
     }
 
     // Idempotency
     const idem = `clue:${(eventId || "").toUpperCase()}:${teamCode.toUpperCase()}:${Number(clueId) || 0}`;
 
-    // Duplicate check (prefer exact clue row match; fallback to idempotency col)
+    // Duplicate check
     let existing = null;
     const iTeam  = subIdx["team code"],  iEvt = subIdx["event id"], iClue = subIdx["clue id"];
     const iScore = subIdx["final score"], iTs = subIdx["timestamp"], iAct = subIdx["activity"];
@@ -190,7 +189,6 @@ module.exports.handler = async (event) => {
       const sameTeam = ((r[iTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
       if (!sameTeam) continue;
 
-      // If Event Id column exists, enforce it; otherwise accept any
       const sameEvent = !iEvt || ((r[iEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
       if (!sameEvent) continue;
 
@@ -224,12 +222,12 @@ module.exports.handler = async (event) => {
       return ok({ success:true, idempotent:true, ...existing, totalScore: total });
     }
 
-    // Evaluate correctness defensively on the server (given expected answer)
+    // Server-side correctness & award
     const correct = norm(userAnswer) && norm(userAnswer) === norm(correctAnswer);
     const awarded = correct ? toNum(pointsIfCorrect, 0) : 0;
     const ts = new Date().toISOString();
 
-    // Build a row aligned to detected indices
+    // Append to submissions
     const subRow = [];
     subRow[subIdx["timestamp"]]      = ts;
     subRow[subIdx["team code"]]      = teamCode;
@@ -252,7 +250,7 @@ module.exports.handler = async (event) => {
       requestBody: { values: [subRow] }
     });
 
-    // Legacy: also append to Scores for backwards compatibility
+    // Legacy: also append to Scores
     const { header: scoresHeader } = await readTab(sheets, spreadsheetId, "Scores");
     const buildScoresRow = makeScoresRowBuilder(scoresHeader);
     await sheets.spreadsheets.values.append({
@@ -264,18 +262,21 @@ module.exports.handler = async (event) => {
     });
 
     // Recompute total
-    const { rows: subRows2 } = await readTab(sheets, spreadsheetId, "submissions");
+    const { rows: subRows2, header: subHeader2 } = await readTab(sheets, spreadsheetId, "submissions");
+    const idx2 = lcHeaders(subHeader2);
+    const jTeam = idx2["team code"], jEvt = idx2["event id"], jAct = idx2["activity"];
+    const jScore = idx2["final score"], jStat = idx2["status"];
     let totalScore = 0;
     for (const r of subRows2) {
-      const act = activityKey(r[iAct] || "");
+      const act = activityKey(r[jAct] || "");
       if (act !== "cluehunt") continue;
-      const sameTeam = ((r[iTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
+      const sameTeam = ((r[jTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
       if (!sameTeam) continue;
-      const sameEvent = !iEvt || ((r[iEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
+      const sameEvent = !jEvt || ((r[jEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
       if (!sameEvent) continue;
-      const status = ((iStat != null ? r[iStat] : "FINAL") || "FINAL").toString().toUpperCase();
+      const status = ((jStat != null ? r[jStat] : "FINAL") || "FINAL").toString().toUpperCase();
       if (status !== "FINAL") continue;
-      totalScore += toNum(r[iScore], 0);
+      totalScore += toNum(r[jScore], 0);
     }
 
     return ok({
