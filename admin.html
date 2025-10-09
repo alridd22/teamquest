@@ -61,6 +61,7 @@
     .stack{ padding:0 var(--gutter) 28px; }
     .grid{ display:grid; grid-template-columns:1fr; gap:18px; max-width:1200px; margin:0 auto; }
     @media (min-width:980px){ .grid{ grid-template-columns:480px 1fr; } }
+    .full{ grid-column: 1 / -1; }
 
     /* CARDS */
     .card{
@@ -102,6 +103,7 @@
     .btn.publish{background:#e6fff2; border:3px solid #bfeeda; color:#0d6a40}
     .btn.secondary{background:#fffdf8; border:3px solid #e5d5c4; color:#3b2d16}
     .btn.final{background:#fffdf8; border:3px solid #d9c5a9; color:#3b2d16}
+    .btn.muted{background:#fffdf8; border:3px solid #e1d6c8; color:#6b5642}
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
     .grid1{display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px}
@@ -138,6 +140,21 @@
       border-radius:10px; padding:4px 8px; min-width:40px; text-align:center;
     }
     .team-row-points{ display:flex; align-items:center; gap:8px; }
+
+    /* PINS: controls/table */
+    .controls{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin:8px 0 12px}
+    .controls input[type="text"]{
+      border:2px solid #e1d6c8; background:#fff; border-radius:10px; padding:10px 12px; min-width:220px; font-weight:600;
+    }
+    .controls .hint{font-size:12px; color:#6A5A47}
+    .table-wrap{overflow:auto; border:1px solid #ecdac7; border-radius:14px; background:#fffdf8}
+    table.pins{width:100%; border-collapse:separate; border-spacing:0; min-width:560px}
+    table.pins th, table.pins td{ padding:10px 12px; text-align:left; border-bottom:1px solid #f0e4d6; }
+    table.pins th{background:#fbf4e6; position:sticky; top:0; z-index:1; font-size:13px; color:#6A5A47}
+    table.pins tr:last-child td{border-bottom:none}
+    .pin-cell{font-weight:900; letter-spacing:.08em}
+    .blurred{filter:blur(6px)}
+    .subtle{color:#6A5A47; font-size:13px}
   </style>
 </head>
 <body>
@@ -200,6 +217,37 @@
         <h2 class="section-title">🧑‍✈️ Crew Management</h2>
         <div id="teams" class="teams"></div>
       </section>
+
+      <!-- FULL-WIDTH: Team PINs -->
+      <section class="card full" id="pinsCard">
+        <h2 class="section-title">🔐 Team PINs</h2>
+
+        <div class="controls">
+          <input type="text" id="pinsEvent" placeholder="Event ID (blank = all events)">
+          <input type="text" id="pinsSearch" placeholder="Search team name/code…">
+          <button id="pinsToggle" class="btn muted" type="button">👁️ Show PINs</button>
+          <button id="pinsRefresh" class="btn secondary" type="button">↻ Refresh</button>
+          <button id="pinsCopy" class="btn secondary" type="button">📋 Copy CSV</button>
+          <button id="pinsDownload" class="btn secondary" type="button">⬇️ Download CSV</button>
+        </div>
+        <div id="pinsStatus" class="subtle">Enter an event (defaults to current) and press Refresh.</div>
+
+        <div class="table-wrap" style="margin-top:8px">
+          <table class="pins" id="pinsTable">
+            <thead>
+              <tr>
+                <th style="width:140px">Team Code</th>
+                <th>Team Name</th>
+                <th style="width:180px">Event Id</th>
+                <th style="width:120px">PIN</th>
+              </tr>
+            </thead>
+            <tbody id="pinsBody">
+              <tr><td colspan="4" class="subtle" style="padding:14px">No data loaded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -211,7 +259,6 @@
       const qs = new URLSearchParams(location.search);
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
-      // Rewrite nav links to keep the event param
       document.querySelectorAll('.nav-menu a').forEach(a=>{
         const url = new URL(a.href, location.origin);
         if (EVENT_ID) url.searchParams.set('event', EVENT_ID);
@@ -227,8 +274,6 @@
           const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
           if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
         });
-
-        // Soft guard: confirm before leaving admin tools
         document.querySelectorAll('.nav-menu a').forEach(a=>{
           a.addEventListener('click', (e)=>{
             const url = new URL(a.href, location.origin);
@@ -242,7 +287,7 @@
     })();
   </script>
 
-  <!-- Functional JS + leaderboard totals -->
+  <!-- Functional JS + leaderboard totals + pins -->
   <script>
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event');
@@ -257,6 +302,7 @@
       teams: '/.netlify/functions/admin_list_teams',
       markReturn: '/.netlify/functions/admin_mark_return',
       leaderboard: '/.netlify/functions/get_leaderboard',
+      pinlist: '/.netlify/functions/admin_list_team_pins',
     };
 
     const el = {
@@ -272,6 +318,15 @@
       statTotal: document.getElementById('statTotal'),
       statActive: document.getElementById('statActive'),
       statReturned: document.getElementById('statReturned'),
+      // Pins
+      pinsEvent: document.getElementById('pinsEvent'),
+      pinsSearch: document.getElementById('pinsSearch'),
+      pinsToggle: document.getElementById('pinsToggle'),
+      pinsRefresh: document.getElementById('pinsRefresh'),
+      pinsCopy: document.getElementById('pinsCopy'),
+      pinsDownload: document.getElementById('pinsDownload'),
+      pinsStatus: document.getElementById('pinsStatus'),
+      pinsBody: document.getElementById('pinsBody'),
     };
 
     /* tiny star icon used in the points pill */
@@ -285,6 +340,8 @@
       if (ADMIN_KEY) h['Authorization'] = 'Bearer ' + ADMIN_KEY;
       return h;
     };
+
+    const escapeHtml = (s) => String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]));
 
     const normState = (s='') => {
       const v = (s || '').toString().trim().toLowerCase();
@@ -585,9 +642,9 @@
               <div>
                 <div style="font-weight:900;color:#4a351e;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                   <span class="team-rank" title="Current rank">#${rank}</span>
-                  <span>${name}</span>
+                  <span>${escapeHtml(name)}</span>
                 </div>
-                <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${code || 'TEAM'}</span></div>
+                <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${escapeHtml(code || 'TEAM')}</span></div>
               </div>
 
               <div class="actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
@@ -598,7 +655,7 @@
                 </div>
                 ${penaltyChip}
                 <button class="btn secondary mark-btn"
-                        data-team="${code}"
+                        data-team="${escapeHtml(code)}"
                         data-action="${returned?'undoReturn':'markReturn'}">
                   ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
                 </button>
@@ -653,7 +710,7 @@
       }
     }
 
-    // Wire UI
+    // Wire UI for event controls
     el.btnStart.addEventListener('click', async () => {
       const s = normState(current.state);
       if (s === 'paused') {
@@ -675,8 +732,6 @@
       if (!ok) return;
       await doAction('publish');
     });
-
-    // Final Results click — reuse key from URL/localStorage
     el.btnFinalResults.addEventListener('click', () => {
       if (el.btnFinalResults.disabled) return;
       const key = ADMIN_KEY || qs.get('key') || '';
@@ -690,11 +745,14 @@
       location.href = url.toString();
     });
 
-    // Interval with in-flight guard to prevent overlapping polls
+    // Poll state + teams
     let polling = false;
     (async function init(){
       await fetchState({force:true});
       await loadTeams();
+      // Prefill pins event with current EVENT_ID
+      if (el.pinsEvent) el.pinsEvent.value = EVENT_ID || '';
+      setPinsStatus('Enter an event (defaults to current) and press Refresh.');
       setInterval(async ()=>{
         if (polling) return;
         polling = true;
@@ -706,6 +764,108 @@
         }
       }, 5000);
     })();
+
+    /* ======== Team PINs panel ======== */
+    let PINS_DATA = [];     // raw from server
+    let PINS_HIDE = true;   // start hidden
+
+    function setPinsStatus(msg){ el.pinsStatus.textContent = msg; }
+
+    function filterPins(){
+      const term = (el.pinsSearch.value || '').trim().toLowerCase();
+      return PINS_DATA.filter(r=>{
+        if (!term) return true;
+        const hay = `${r.teamCode} ${r.teamName} ${r.eventId}`.toLowerCase();
+        return hay.includes(term);
+      });
+    }
+
+    function renderPins(){
+      const rows = filterPins().sort((a,b)=> String(a.teamName||'').localeCompare(String(b.teamName||'')));
+      if (!rows.length){
+        el.pinsBody.innerHTML = `<tr><td colspan="4" class="subtle" style="padding:14px">No teams match your filters.</td></tr>`;
+        return;
+      }
+      el.pinsBody.innerHTML = rows.map(r => `
+        <tr>
+          <td>${escapeHtml(r.teamCode || '')}</td>
+          <td>${escapeHtml(r.teamName || '')}</td>
+          <td>${escapeHtml(r.eventId || '')}</td>
+          <td class="pin-cell">${PINS_HIDE ? '••••' : escapeHtml(r.pin || '')}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadPins(){
+      const eventId = (el.pinsEvent.value || '').trim();
+      setPinsStatus('Loading…');
+      el.pinsBody.innerHTML = `<tr><td colspan="4" class="subtle" style="padding:14px">Loading…</td></tr>`;
+      try{
+        const url = new URL(endpoints.pinlist, location.origin);
+        if (eventId) url.searchParams.set('eventId', eventId);
+        const res = await fetch(url.toString(), { headers: headers(), cache:'no-store' });
+        const data = await res.json().catch(()=>({success:false}));
+        if (!res.ok || data.success === false) throw new Error(data.message || `HTTP ${res.status}`);
+
+        PINS_DATA = Array.isArray(data.teams) ? data.teams : [];
+        setPinsStatus(`Loaded ${PINS_DATA.length} team${PINS_DATA.length===1?'':'s'}. ${PINS_HIDE?'PINs hidden.':'PINs visible.'}`);
+        renderPins();
+      }catch(e){
+        setPinsStatus(e.message || 'Failed to load PINs.');
+        el.pinsBody.innerHTML = `<tr><td colspan="4" class="subtle" style="padding:14px">Error loading PINs.</td></tr>`;
+      }
+    }
+
+    function pinsToCSV(rows){
+      const esc = v => `"${String(v ?? '').replace(/"/g,'""')}"`;
+      const out = [['Team Code','Team Name','Event Id','PIN']]
+        .concat(rows.map(r => [r.teamCode, r.teamName, r.eventId, r.pin].map(esc)));
+      return out.map(r=>r.join(',')).join('\n');
+    }
+
+    async function copyPinsCSV(){
+      const rows = filterPins();
+      if (!rows.length){ alert('Nothing to copy.'); return; }
+      const csv = pinsToCSV(rows);
+      try{
+        await navigator.clipboard.writeText(csv);
+        setPinsStatus(`CSV copied (${rows.length} row${rows.length===1?'':'s'}).`);
+      }catch{
+        setPinsStatus('Unable to copy to clipboard.');
+      }
+    }
+
+    function downloadPinsCSV(){
+      const rows = filterPins();
+      if (!rows.length){ alert('Nothing to download.'); return; }
+      const csv = pinsToCSV(rows);
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const a = document.createElement('a');
+      const ts = new Date().toISOString().replace(/[:.]/g,'-');
+      const ev = (el.pinsEvent.value || EVENT_ID || 'ALL').toUpperCase();
+      a.href = URL.createObjectURL(blob);
+      a.download = `team_pins_${ev}_${ts}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setPinsStatus(`CSV downloaded (${rows.length} row${rows.length===1?'':'s'}).`);
+    }
+
+    el.pinsToggle.addEventListener('click', ()=>{
+      PINS_HIDE = !PINS_HIDE;
+      el.pinsToggle.textContent = PINS_HIDE ? '👁️ Show PINs' : '🙈 Hide PINs';
+      renderPins();
+      setPinsStatus(`Loaded ${PINS_DATA.length} team${PINS_DATA.length===1?'':'s'}. ${PINS_HIDE?'PINs hidden.':'PINs visible.'}`);
+    });
+    el.pinsRefresh.addEventListener('click', loadPins);
+    el.pinsCopy.addEventListener('click', copyPinsCSV);
+    el.pinsDownload.addEventListener('click', downloadPinsCSV);
+    el.pinsSearch.addEventListener('input', renderPins);
+
+    // If we have an event already, auto-load on first paint
+    window.addEventListener('load', ()=>{
+      if (el.pinsEvent.value || EVENT_ID) loadPins();
+    });
   </script>
 </body>
 </html>
