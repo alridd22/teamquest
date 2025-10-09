@@ -125,13 +125,14 @@
 
       <div style="height:10px"></div>
       <div class="uploader">
-        <input id="kindPhoto" type="file" accept="image/*" capture="environment">
-        <label for="kindPhoto" class="upload-cta" id="uploadBtn">📷 Upload photo</label>
+        <!-- CHOICE: camera or files (no capture attribute) -->
+        <input id="kindPhoto" type="file" accept="image/*">
+        <label for="kindPhoto" class="upload-cta" id="uploadBtn">📷 Take photo or choose file</label>
         <div id="uploadMeta" class="upload-meta">JPEG/PNG/WebP • Max ~20MB</div>
       </div>
 
       <label for="whatText">What happened?</label>
-      <textarea id="whatText" class="field" placeholder="What did you do, who did it help, and what happened?"></textarea>
+      <textarea id="whatText" class="field" placeholder="Tell us briefly what you did and the impact (optional)"></textarea>
 
       <label for="whereText">Where? (optional)</label>
       <input id="whereText" class="field" placeholder="e.g., High Street, Community Centre…"/>
@@ -275,10 +276,10 @@
     $('btnSign').addEventListener('click', signIn);
     $('teamPin').addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
-    /* ---------- Uploadcare (same as Scavenger) ---------- */
+    /* ---------- Uploadcare ---------- */
     async function uploadToUploadcare(file){
       const form = new FormData();
-      form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28'); // same key as scavenger
+      form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28');
       form.append('file', file);
       const res = await fetch('https://upload.uploadcare.com/base/', { method:'POST', body:form });
       if(!res.ok) throw new Error(`Upload failed (${res.status})`);
@@ -286,7 +287,7 @@
       return `https://ucarecdn.com/${j.file}/`;
     }
 
-    // File UI affordances
+    // File UI
     (function(){
       const input = $('kindPhoto'), meta = $('uploadMeta'), btn = $('uploadBtn');
       input.addEventListener('change', ()=>{
@@ -305,8 +306,9 @@
       const teamName = localStorage.getItem('teamName');
       if(!teamCode) return setMsg($('submitMsg'),'Please sign in again.');
 
+      // No minimum character limit anymore
       const text = ($('whatText').value||'').trim();
-      if(text.length < 10) return setMsg($('submitMsg'),'Tell us a little more about what happened.');
+      const where = ($('whereText').value||'').trim();
 
       const file = $('kindPhoto').files?.[0] || null;
       if(!file) return setMsg($('submitMsg'),'Please add a photo.');
@@ -320,7 +322,7 @@
           eventId: EVENT_ID,
           teamCode, teamName,
           what: text,
-          where: ($('whereText').value||'').trim(),
+          where,
           photoUrl
         });
 
