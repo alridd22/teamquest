@@ -105,6 +105,7 @@
     .btn:disabled{opacity:.55; cursor:not-allowed}
     .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px}
     .grid1{display:grid; grid-template-columns:1fr; gap:10px; margin-top:12px}
+    button:active { transform: translateY(1px); } /* instant press feedback */
 
     /* STATS */
     .stats{display:grid; grid-template-columns: repeat(3,1fr); gap:12px; margin-top:16px}
@@ -225,6 +226,17 @@
         document.addEventListener('click', (e)=> {
           const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
           if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+        });
+
+        // Soft guard: confirm before leaving admin tools
+        document.querySelectorAll('.nav-menu a').forEach(a=>{
+          a.addEventListener('click', (e)=>{
+            const url = new URL(a.href, location.origin);
+            if (!/\/admin/i.test(url.pathname)) {
+              const ok = confirm('Leave Command Centre? You can open tools in a new tab instead.');
+              if (!ok) { e.preventDefault(); }
+            }
+          });
         });
       }
     })();
@@ -359,6 +371,19 @@
       rafId = requestAnimationFrame(tick);
     }
 
+    // ---------------- robust fetch helpers ----------------
+    let _pollCtrl = null;
+    async function fetchJSON(url, opts = {}) {
+      if (opts.abortPrevious && _pollCtrl) _pollCtrl.abort();
+      const ctrl = new AbortController();
+      _pollCtrl = ctrl;
+      const res = await fetch(url, { ...opts, signal: ctrl.signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+    function showReconnect(){}  // optional banner hook
+    function hideReconnect(){}
+
     // Hardened: ignore bad/empty responses to avoid "Not Started" flash
     async function fetchState({force=false}={}) {
       const callAt = Date.now();
@@ -466,8 +491,7 @@
     async function fetchLeaderboardTotals(){
       try{
         const url = `${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
-        const res = await fetch(url, { headers: headers() });
-        const data = await res.json().catch(()=>({}));
+        const data = await fetchJSON(url, { headers: headers() });
         const rows = data.leaderboard || data.rows || data.teams || [];
         const map = new Map();
         for (const t of rows){
@@ -501,42 +525,62 @@
       });
     }
 
-    async function loadTeams(){
-      const res = await fetch(`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`, {headers: headers(), cache:'no-store'});
-      const data = await res.json().catch(()=>({teams:[]}));
+    // ---------- LKG + optimistic Mark Returned ----------
+    let LKG_TEAMS = null;
+    const inFlight = new Set();
+
+    async function loadTeams() {
+      let data;
+      try {
+        const url = `${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`;
+        data = await fetchJSON(url, { headers: headers(), cache: 'no-store', abortPrevious: true });
+      } catch {
+        if (LKG_TEAMS) renderTeams(LKG_TEAMS);
+        showReconnect();
+        return;
+      }
+      hideReconnect();
+
       let teams = Array.isArray(data.teams) ? data.teams : [];
 
-      // merge totals
       const getTotal = await fetchLeaderboardTotals();
       teams = teams.map(t => ({ ...t, total: getTotal(t) || 0 }));
 
-      // sort & rank
       teams.sort((a,b) => (b.total - a.total) || String(a.teamName||'').localeCompare(String(b.teamName||'')));
       addRanks(teams, 'total');
 
-      // stats
       const returnedCount = teams.filter(t => !!(t.returned || t.hasReturned || t.returnedAt)).length;
       el.statTotal.textContent = teams.length || 0;
       el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
       el.statReturned.textContent = returnedCount;
 
-      // store for Final Results readiness check
       teamTotals.total = teams.length || 0;
       teamTotals.returned = returnedCount;
       updateFinalButton();
 
-      // render
+      renderTeams(teams);
+      LKG_TEAMS = teams;
+    }
+
+    function renderTeams(teams){
       el.teams.innerHTML = teams.map(t => {
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
-        const tagA = `<span class="tag">${t.active===false ? 'Inactive' : 'Active'}</span>`;
-        const tagB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
-        const tagC = (t.returned || t.hasReturned || t.returnedAt) ? `<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>` : '';
         const returned = !!(t.returned || t.hasReturned || t.returnedAt);
         const total = Number.isFinite(+t.total)? +t.total : 0;
         const rank = t.rank || '-';
+        const penalty = Number(t.penalty || 0) || 0;
+
+        const tagA = `<span class="tag">${t.active===false ? 'Inactive' : 'Active'}</span>`;
+        const tagB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
+        const tagC = returned ? `<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>` : '';
+
+        const penaltyChip = returned && penalty > 0
+          ? `<span class="tag" style="border-color:#f3b8b8;background:#fdeeee;color:#8b1f1f">Late −${penalty}</span>`
+          : '';
+
         return `
-          <div class="team ${returned?'returned':''}">
+          <div class="team ${returned?'returned':''}" data-team="${code}">
             <div class="row1">
               <div>
                 <div style="font-weight:900;color:#4a351e;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -545,13 +589,17 @@
                 </div>
                 <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${code || 'TEAM'}</span></div>
               </div>
+
               <div class="actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
                 <div class="team-row-points">
                   <div class="team-points" title="Current total points">
                     ${STAR_SVG}<span class="num">${total}</span>
                   </div>
                 </div>
-                <button class="btn secondary" data-action="${returned?'undoReturn':'markReturn'}" data-team="${code}">
+                ${penaltyChip}
+                <button class="btn secondary mark-btn"
+                        data-team="${code}"
+                        data-action="${returned?'undoReturn':'markReturn'}">
                   ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
                 </button>
               </div>
@@ -559,32 +607,50 @@
           </div>`;
       }).join('');
 
-      // wire mark/undo
-      el.teams.querySelectorAll('button[data-action]').forEach(btn=>{
-        btn.addEventListener('click', async ()=>{
-          const teamCode = btn.getAttribute('data-team');
-          const action = btn.getAttribute('data-action');
-          try{
-            const payload = {
-              eventId: EVENT_ID,
-              teamCode,
-              returnedAt: new Date().toISOString(),
-              undo: action === 'undoReturn'
-            };
-            const res = await fetch(endpoints.markReturn, {
-              method:'POST', headers: headers(), body: JSON.stringify(payload)
-            });
-            const data = await res.json().catch(()=>({success:false}));
-            if (!data.success) {
-              alert(data.message || 'Failed to mark/undo return.');
-              return;
-            }
-            await loadTeams();
-          }catch(e){
-            alert('admin_mark_return not available (or network error).');
-          }
-        });
+      el.teams.querySelectorAll('.mark-btn').forEach(btn => {
+        btn.addEventListener('click', () => handleMark(btn));
       });
+    }
+
+    async function handleMark(btn){
+      const teamCode = btn.getAttribute('data-team');
+      const action = btn.getAttribute('data-action');
+      if (!teamCode) return;
+
+      if (inFlight.has(teamCode)) return;
+      inFlight.add(teamCode);
+
+      const isUndo = (action === 'undoReturn');
+      const originalHTML = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Updating…';
+
+      try{
+        const payload = {
+          eventId: EVENT_ID,
+          teamCode,
+          returnedAt: new Date().toISOString(),
+          undo: isUndo
+        };
+
+        const res = await fetch(endpoints.markReturn, {
+          method:'POST',
+          headers: { ...headers(), 'X-Idempotency-Key': `${teamCode}-${Date.now()}` },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(()=>({success:false}));
+        if (!data.success) throw new Error(data.message || 'Failed to update');
+
+        await loadTeams(); // reconcile totals + penalty chip
+        btn.innerHTML = '✅ Saved';
+      } catch (e){
+        btn.innerHTML = 'Retry?';
+        alert(e.message || 'Network error. Please try again.');
+      } finally {
+        setTimeout(()=>{ btn.disabled = false; btn.innerHTML = originalHTML; }, 600);
+        inFlight.delete(teamCode);
+      }
     }
 
     // Wire UI
@@ -638,7 +704,7 @@
         } finally {
           polling = false;
         }
-      }, 3000);
+      }, 5000);
     })();
   </script>
 </body>
