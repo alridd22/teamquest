@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="theme-color" content="#2A1F18"/>
   <title>TeamQuest - Command Centre</title>
 
@@ -12,14 +12,12 @@
       --ink:#2E2114; --ink-soft:#6A5A47;
       --parchment:#F7EED8; --parchment-2:#F3E6CF; --paper:#FFFDF8;
       --gold:#F0C433; --gold-deep:#A7711F;
-      --ok:#1F6E38; --err:#B42318;
+      --ok:#1F6E38; --okbg:#CFF2DA;
       --nav-h:64px; --gutter:18px;
       --radius-card:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
-      --shadow-soft:0 8px 20px rgba(0,0,0,.12);
-      --btn-h:56px;
+      --shadow-soft:0 6px 18px rgba(0,0,0,.12);
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
@@ -29,7 +27,6 @@
       background-size:cover;background-position:top center;background-attachment:fixed;
       -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
-      touch-action:manipulation;
     }
 
     /* NAV */
@@ -37,90 +34,79 @@
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
       border-bottom:1px solid rgba(255,255,255,.18)}
-    .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
-    .nav-logo img{height:40px;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .nav-container{height:100%;display:flex;align-items:center;justify-content:space-between;max-width:1000px;margin:0 auto;padding:0 12px}
+    .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
-      display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px;transition:left .25s}
+      display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px 14px;transition:left .25s}
     .nav-menu.active{left:0}
-    .nav-link,.dropdown-link{display:block;width:92%;max-width:360px;text-align:center;text-decoration:none;color:#F7EED8;font-weight:900;
-      padding:12px 14px;border-radius:14px;background:rgba(247,238,216,.22);border:1px solid rgba(255,255,255,.3)}
+    .nav-link,.dropdown-link{display:block;width:92%;max-width:360px;text-align:center;text-decoration:none;color:#F7EED8;font-weight:900;padding:12px 14px;border-radius:14px;background:rgba(247,238,216,.22);border:1px solid rgba(255,255,255,.3)}
     .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
 
     /* HERO */
-    .hero{min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:20px var(--gutter) 16px;text-align:center}
-    .brand-logo{width:min(220px,70vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-weight:900;font-size:22px;color:#F7EED8;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 18px;text-align:center}
+    .brand-logo{width:min(220px,68vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-weight:900;font-size:22px;color:#F7EED8;letter-spacing:.2px;text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
     /* LAYOUT */
     .stack{padding:0 var(--gutter) 28px}
     .grid{display:grid;grid-template-columns:1fr;gap:18px;max-width:1200px;margin:0 auto}
-    @media (min-width:980px){ .grid{grid-template-columns:480px 1fr} }
+    @media (min-width:980px){ .grid{grid-template-columns: 520px 1fr;} }
 
     /* CARDS */
-    .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);
-      padding:18px;border:1px solid rgba(0,0,0,.06)}
-    h2.section-title{margin:0 0 10px;font-weight:900;display:flex;align-items:center;gap:8px;font-size:20px}
+    .card{background:var(--parchment);border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06)}
+    h2.section-title{margin:0 0 10px;font-weight:900;color:var(--ink);display:flex;align-items:center;gap:8px}
 
     /* TIMER + STATUS */
-    #timer{background:linear-gradient(180deg,#fff8ea,#fdeac7);border:3px solid var(--gold-deep);border-radius:18px;
-      text-align:center;color:#5b3a12;font-weight:900;font-size:34px;letter-spacing:.06em;padding:18px}
-    .status{margin-top:10px;display:flex;justify-content:center}
-    .pill{padding:8px 12px;border-radius:999px;font-size:14px;font-weight:800;border:2px solid #e3d3c2;background:#fffdf8;color:#5e4b35}
+    #timer{background:linear-gradient(180deg,#fff8ea,#fdeac7);border:3px solid var(--gold-deep);border-radius:18px;text-align:center;color:#5b3a12;font-weight:900;font-size:44px;letter-spacing:.12em;padding:22px 12px}
+    .status{margin-top:12px;display:flex;justify-content:center}
+    .pill{padding:6px 12px;border-radius:999px;font-size:14px;font-weight:800;display:inline-block;border:2px solid #e3d3c2;background:#fffdf8;color:#5e4b35}
     .pill.running{background:#e6fbf1;color:#106a3e;border-color:#b8efcf}
     .pill.paused{background:#fff6e9;color:#7a5a13;border-color:#f1d093}
     .pill.ended{background:#fdeeee;color:#8b1f1f;border-color:#f1b3b3}
     .pill.published{background:#e7f9ef;color:#0f6e44;border-color:#b7ebcf}
 
-    /* BUTTONS (mobile-first) */
-    button{appearance:none;border:0;border-radius:14px;padding:0 16px;min-height:var(--btn-h);font-weight:900;font-size:18px;cursor:pointer;
-      box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
+    /* BUTTONS */
+    button{appearance:none;border:0;border-radius:14px;padding:14px 16px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
     .btn{background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;border:3px solid var(--gold-deep)}
     .btn.pause{background:#fff6e9;border:3px solid #f3d49c;color:#6b4b0a}
     .btn.end{background:#ffe9e9;border:3px solid #f5b1b1;color:#7d2323}
     .btn.reset{background:#f7efe7;border:3px solid #dfd1c2;color:#4e3b25}
     .btn.publish{background:#e6fff2;border:3px solid #bfeeda;color:#0d6a40}
     .btn.secondary{background:#fffdf8;border:3px solid #e5d5c4;color:#3b2d16}
-    .btn.final{background:#fffdf8;border:3px solid #d9c5a9;color:#3b2d16}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .grid2{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    @media (min-width:560px){ .grid2{grid-template-columns:1fr 1fr} }
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
     .grid1{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-    button:active{transform:translateY(1px)}
+    .sm{padding:10px 12px;font-size:14px;border-radius:12px}
 
-    /* STATS (wrap nicely on mobile) */
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-top:14px}
-    .stat{background:var(--paper);border:1px solid #ecdac7;border-radius:16px;text-align:center;padding:14px 10px;box-shadow:var(--shadow-soft)}
-    .stat small{display:block;opacity:.8;color:#6A5A47;line-height:1.1}
-    .stat h3{margin:6px 0 0;font-size:26px;color:#5b3a12;line-height:1}
+    /* STATS */
+    .stats{display:grid;grid-template-columns: repeat(3,1fr);gap:12px;margin-top:16px}
+    .stat{background:var(--paper);border:1px solid #ecdac7;border-radius:16px;text-align:center;padding:14px 12px;box-shadow:var(--shadow-soft);display:flex;flex-direction:column;align-items:center}
+    .stat small{display:block;opacity:.8;color:#6A5A47;line-height:1.1;min-height:2.4em}
+    .stat h3{margin:6px 0 0;font-size:28px;color:#5b3a12;line-height:1}
 
-    /* TEAM LIST */
+    /* TEAMS */
     .teams{max-height:70vh;overflow:auto;padding-right:6px}
-    .team{background:var(--paper);border:1px solid #ecdac7;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow-soft)}
-    .team.returned{opacity:.9}
-    .row1{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+    .team{background:var(--paper);border:1px solid #ecdac7;border-radius:18px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow-soft)}
+    .team.returned{opacity:.88}
+    .row1{display:flex;justify-content:space-between;gap:12px;align-items:center}
     .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
-    .tag{font-size:13px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid #d7c8b6;background:#f9f4ee;color:#5e4b35}
-
-    .team-rank{font-weight:900;color:#3b2d16;background:#f6e7c9;border:2px solid #d9c5a9;border-radius:10px;padding:6px 10px;min-width:44px;text-align:center}
-    .team-points{display:inline-flex;align-items:center;gap:6px;font-weight:900;color:#4a351e;border:2px solid #d9c5a9;background:#fffdf8;
-      padding:6px 10px;border-radius:10px;min-width:68px;justify-content:center}
-    .team-points .star{width:16px;height:16px}
+    .tag{font-size:12px;font-weight:800;padding:6px 10px;border-radius:999px;border:1px solid #d7c8b6;background:#f9f4ee;color:#5e4b35}
+    .team-points{display:inline-flex;align-items:center;gap:6px;font-weight:900;color:#4a351e;border:2px solid #d9c5a9;background:#fffdf8;padding:6px 10px;border-radius:12px;min-width:64px;justify-content:center}
+    .team-rank{font-weight:900;color:#3b2d16;background:#f6e7c9;border:2px solid #d9c5a9;border-radius:12px;padding:6px 10px;min-width:40px;text-align:center}
     .team-row-points{display:flex;align-items:center;gap:8px}
-    .actions{display:flex;flex-direction:column;gap:8px;align-items:stretch}
 
-    /* PIN PANEL */
-    .pin-card .controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-    @media (max-width:520px){ .pin-card .controls{grid-template-columns:1fr} }
-    .pin-row{display:grid;grid-template-columns:1.2fr 1.4fr .9fr .7fr;gap:10px;padding:10px;border-top:1px solid #eadcc9}
-    .pin-row.head{font-weight:900;background:#fff8e9;border-radius:12px}
-    .pin-empty{padding:16px;text-align:center;color:#6A5A47}
+    /* PIN chip */
+    .pin-chip{font-weight:900;font-size:12px;border:1px dashed #d9c5a9;background:#fff9e8;color:#5b3a12;padding:6px 10px;border-radius:999px}
+    .pin-on .pin-chip{display:inline-flex}
+    .pin-off .pin-chip{display:none}
 
-    .search{width:100%;padding:12px 14px;border-radius:12px;border:3px solid #e4d4c3;background:#fff;font-size:16px}
+    /* tiny star in points pill */
+    .team-points .star{width:14px;height:14px}
   </style>
 </head>
-<body>
+<body class="pin-off">
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
@@ -149,7 +135,7 @@
   <!-- CONTENT -->
   <main class="stack">
     <div class="grid">
-      <!-- LEFT: Adventure Control -->
+      <!-- LEFT: Controls -->
       <section class="card">
         <h2 class="section-title">⚓ Adventure Control</h2>
         <div id="timer">-- : -- : --</div>
@@ -164,7 +150,7 @@
 
         <div class="grid1">
           <button id="btnPublish" class="btn publish">📢 Publish Results</button>
-          <button id="btnFinalResults" class="btn final" disabled>🏁 Final Results</button>
+          <button id="btnFinalResults" class="btn secondary" disabled>🏁 Final Results</button>
         </div>
 
         <div class="stats">
@@ -174,113 +160,100 @@
         </div>
       </section>
 
-      <!-- RIGHT: Crew Management -->
+      <!-- RIGHT: Teams -->
       <section class="card">
-        <h2 class="section-title">🧑‍✈️ Crew Management</h2>
+        <h2 class="section-title" style="justify-content:space-between;align-items:center">
+          <span>🧑‍✈️ Crew Management</span>
+          <button id="btnTogglePins" class="btn secondary sm" type="button" title="Show/Hide PINs">🔐 Show PINs</button>
+        </h2>
         <div id="teams" class="teams"></div>
-      </section>
-
-      <!-- FULL-WIDTH: Team PINs -->
-      <section class="card pin-card" style="grid-column:1 / -1">
-        <h2 class="section-title">🔐 Team PINs</h2>
-
-        <input id="pinSearch" class="search" placeholder="Search team name or code…" aria-label="Search teams"/>
-
-        <div class="controls">
-          <button id="btnTogglePins" class="btn secondary">🙈 Show PINs</button>
-          <button id="btnRefreshPins" class="btn secondary">↻ Refresh</button>
-          <button id="btnCopyCsv" class="btn secondary">📋 Copy CSV</button>
-          <button id="btnDownloadCsv" class="btn secondary">⬇️ Download CSV</button>
-        </div>
-
-        <div id="pinTable" style="margin-top:10px;border:1px solid #eadcc9;border-radius:14px;overflow:hidden">
-          <div class="pin-row head">
-            <div>Team Code</div>
-            <div>Team Name</div>
-            <div>Event Id</div>
-            <div>PIN</div>
-          </div>
-          <div id="pinBody" class="pin-empty">Tap “Show PINs” then “Refresh” to load.</div>
-        </div>
       </section>
     </div>
   </main>
 
   <script>
-    /* NAV + keep ?event= */
+    /* NAV + keep ?event= on links + leave guard */
     (function(){
-      const navToggle=document.getElementById('nav-toggle');
-      const navMenu=document.getElementById('nav-menu');
-      const qs=new URLSearchParams(location.search);
-      const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
+      const navToggle = document.getElementById('nav-toggle');
+      const navMenu   = document.getElementById('nav-menu');
+      const qs = new URLSearchParams(location.search);
+      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+
       document.querySelectorAll('.nav-menu a').forEach(a=>{
-        const url=new URL(a.href,location.origin);
-        if(EVENT_ID) url.searchParams.set('event',EVENT_ID);
-        a.href=url.toString();
+        const url = new URL(a.href, location.origin);
+        if (EVENT_ID) url.searchParams.set('event', EVENT_ID);
+        a.href = url.toString();
       });
-      navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
-      document.addEventListener('click',e=>{const inside=navToggle.contains(e.target)||navMenu.contains(e.target);if(!inside&&navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}});
-      document.querySelectorAll('.nav-menu a').forEach(a=>{
-        a.addEventListener('click',e=>{
-          const url=new URL(a.href,location.origin);
-          if(!/\/admin/i.test(url.pathname)){
-            const ok=confirm('Leave Command Centre? You can open tools in a new tab instead.');
-            if(!ok){e.preventDefault();}
-          }
+      if(navToggle && navMenu){
+        navToggle.addEventListener('click',()=>{
+          navMenu.classList.toggle('active');
+          navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
         });
-      });
+        document.addEventListener('click',(e)=>{
+          const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
+          if(!inside&&navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+        });
+        document.querySelectorAll('.nav-menu a').forEach(a=>{
+          a.addEventListener('click',(e)=>{
+            const url=new URL(a.href,location.origin);
+            if(!/\/admin/i.test(url.pathname)){
+              const ok=confirm('Leave Command Centre? You can open tools in a new tab instead.');
+              if(!ok) e.preventDefault();
+            }
+          });
+        });
+      }
     })();
   </script>
 
-  <!-- Functional JS -->
   <script>
+    /* ---------- Config ---------- */
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId');
-    if(!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
+    if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
 
     const ADMIN_KEY = qs.get('key') || localStorage.getItem('adminKey') || '';
-    if(qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
+    if (qs.get('key')) localStorage.setItem('adminKey', qs.get('key'));
 
     const endpoints = {
-      state:'/ .netlify/functions/get_event_state'.replace(' ',''),
-      start:'/ .netlify/functions/admin_start_event'.replace(' ',''),
-      teams:'/ .netlify/functions/admin_list_teams'.replace(' ',''),
-      markReturn:'/ .netlify/functions/admin_mark_return'.replace(' ',''),
-      leaderboard:'/ .netlify/functions/get_leaderboard'.replace(' ',''),
-      pins:'/ .netlify/functions/admin_list_team_pins'.replace(' ','')   // <-- NEW
+      state: '/.netlify/functions/get_event_state',
+      start: '/.netlify/functions/admin_start_event',
+      teams: '/.netlify/functions/admin_list_teams',
+      markReturn: '/.netlify/functions/admin_mark_return',
+      leaderboard: '/.netlify/functions/get_leaderboard',
+      pins: '/.netlify/functions/admin_get_team_pins'   // <-- NEW
     };
 
     const el = {
-      timer:document.getElementById('timer'),
-      statusPill:document.getElementById('statusPill'),
-      btnStart:document.getElementById('btnStart'),
-      btnPause:document.getElementById('btnPause'),
-      btnEnd:document.getElementById('btnEnd'),
-      btnReset:document.getElementById('btnReset'),
-      btnPublish:document.getElementById('btnPublish'),
-      btnFinalResults:document.getElementById('btnFinalResults'),
-      teams:document.getElementById('teams'),
-      statTotal:document.getElementById('statTotal'),
-      statActive:document.getElementById('statActive'),
-      statReturned:document.getElementById('statReturned'),
-
-      // PIN panel
-      pinSearch:document.getElementById('pinSearch'),
-      btnTogglePins:document.getElementById('btnTogglePins'),
-      btnRefreshPins:document.getElementById('btnRefreshPins'),
-      btnCopyCsv:document.getElementById('btnCopyCsv'),
-      btnDownloadCsv:document.getElementById('btnDownloadCsv'),
-      pinBody:document.getElementById('pinBody')
+      timer: document.getElementById('timer'),
+      statusPill: document.getElementById('statusPill'),
+      btnStart: document.getElementById('btnStart'),
+      btnPause: document.getElementById('btnPause'),
+      btnEnd: document.getElementById('btnEnd'),
+      btnReset: document.getElementById('btnReset'),
+      btnPublish: document.getElementById('btnPublish'),
+      btnFinalResults: document.getElementById('btnFinalResults'),
+      btnTogglePins: document.getElementById('btnTogglePins'),
+      teams: document.getElementById('teams'),
+      statTotal: document.getElementById('statTotal'),
+      statActive: document.getElementById('statActive'),
+      statReturned: document.getElementById('statReturned'),
+      body: document.body
     };
 
+    /* tiny star icon used in the points pill */
+    const STAR_SVG = `
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#b37e00"/>
+      </svg>`;
+
     const headers = () => {
-      const h={'Content-Type':'application/json'};
-      if(ADMIN_KEY) h['Authorization']='Bearer '+ADMIN_KEY;
+      const h = {'Content-Type':'application/json'};
+      if (ADMIN_KEY) h['Authorization'] = 'Bearer ' + ADMIN_KEY;
       return h;
     };
 
-    /* ---------- Timer / status (unchanged logic, slightly tidied) ---------- */
-    const normState = s => {
+    const normState = (s='')=>{
       const v=(s||'').toString().trim().toLowerCase();
       if(['published'].includes(v)) return 'published';
       if(['running','started','start','active'].includes(v)) return 'running';
@@ -289,236 +262,327 @@
       if(['notstarted','idle','ready','pending',''].includes(v)) return 'notstarted';
       return 'unknown';
     };
-    const fmt = ms => { if(ms<0) ms=0; const t=Math.floor(ms/1000); const hh=String(Math.floor(t/3600)).padStart(2,'0'); const mm=String(Math.floor((t%3600)/60)).padStart(2,'0'); const ss=String(t%60).padStart(2,'0'); return `${hh} : ${mm} : ${ss}`; };
 
-    let current={state:'unknown',startedAt:null,endsAt:null,durationSec:null,remainingMs:0,lastUpdateAt:0};
-    let initialDurationSec=null, rafId=null;
+    const fmt=(ms)=>{ if(ms<0)ms=0; const t=Math.floor(ms/1000); const hh=String(Math.floor(t/3600)).padStart(2,'0'); const mm=String(Math.floor((t%3600)/60)).padStart(2,'0'); const ss=String(t%60).padStart(2,'0'); return `${hh} : ${mm} : ${ss}`; };
+
+    let current={state:'unknown',startedAt:null,endsAt:null,durationSec:null,remainingMs:0,lastUpdateAt:0,prevState:'unknown'};
+    let initialDurationSec=null;
+
+    let teamTotals={total:0,returned:0};
+
     function setStatusPill(state){
       const s=normState(state);
       el.statusPill.className='pill '+(s==='running'?'running':s==='paused'?'paused':s==='ended'?'ended':s==='published'?'published':'');
       el.statusPill.textContent=s==='running'?'Running':s==='paused'?'Paused':s==='ended'?'Ended':s==='published'?'Published':'Not Started';
+
       el.btnStart.disabled=(s==='running'||s==='ended'||s==='published');
       el.btnStart.textContent=(s==='paused')?'▶ Resume':'🍭 Launch';
       el.btnPause.disabled=!(s==='running');
       el.btnEnd.disabled=(s==='ended'||s==='notstarted'||s==='published');
       el.btnReset.disabled=(s==='running');
       el.btnPublish.disabled=!(s==='ended');
+      el.btnPublish.textContent=(s==='published')?'✅ Published':'📢 Publish Results';
+
       updateFinalButton();
     }
-    function updateFinalButton(){
-      const ended=['ended','published'].includes(normState(current.state));
+
+    function canShowFinal(){
+      const s=normState(current.state);
+      const ended=(s==='ended'||s==='published');
       const everyoneReturned=(teamTotals.total>0 && teamTotals.returned===teamTotals.total);
-      el.btnFinalResults.disabled=!(ended||everyoneReturned);
+      return ended || everyoneReturned;
     }
+    function updateFinalButton(){
+      if(!el.btnFinalResults) return;
+      el.btnFinalResults.disabled=!canShowFinal();
+    }
+
+    let rafId=null;
     function tick(){
       cancelAnimationFrame(rafId);
       const now=Date.now(); let displayMs=0; const s=normState(current.state);
-      if(s==='running' && current.startedAt && current.endsAt){ displayMs=new Date(current.endsAt).getTime()-now; current.remainingMs=displayMs; }
+      if(s==='running'&&current.startedAt&&current.endsAt){ displayMs=new Date(current.endsAt).getTime()-now; current.remainingMs=displayMs; }
       else if(s==='paused'){ displayMs=Math.max(0,current.remainingMs||0); }
-      else if(s==='ended' || s==='published'){ displayMs=0; }
-      else{ const dur=current.durationSec ?? initialDurationSec; if(dur!=null) displayMs=dur*1000; }
+      else if(s==='ended'||s==='published'){ displayMs=0; }
+      else { const dur=current.durationSec??initialDurationSec; if(dur!=null) displayMs=dur*1000; }
       el.timer.textContent=fmt(displayMs);
       rafId=requestAnimationFrame(tick);
     }
-    async function fetchState(){
-      let res; try{ res=await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`,{headers:headers(),cache:'no-store'}); }catch{return}
-      if(!res.ok) return; const data=await res.json().catch(()=>null); if(!data) return;
+
+    /* fetch helpers */
+    let _pollCtrl=null;
+    async function fetchJSON(url, opts={}) {
+      if(opts.abortPrevious && _pollCtrl) _pollCtrl.abort();
+      const ctrl=new AbortController(); _pollCtrl=ctrl;
+      const res=await fetch(url,{...opts,signal:ctrl.signal});
+      if(!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    }
+    function showReconnect(){} function hideReconnect(){}
+
+    async function fetchState({force=false}={}){
+      const callAt=Date.now(); let res;
+      try{ res=await fetch(`${endpoints.state}?eventId=${encodeURIComponent(EVENT_ID)}`,{headers:headers(),cache:'no-store'}); }catch{ return; }
+      if(!res.ok) return;
+      const data=await res.json().catch(()=>null);
+      if(!data || Object.keys(data).length===0) return;
+      if(!force && callAt<current.lastUpdateAt) return;
+
       const nextState=normState(data.state || (data.running?'running':data.paused?'paused':data.ended?'ended':data.published?'published':'notstarted'));
       if(initialDurationSec==null && typeof data.durationSec==='number') initialDurationSec=data.durationSec;
+
       let remainingMs=current.remainingMs;
       if(typeof data.remainingMs==='number') remainingMs=data.remainingMs;
       else if(typeof data.remainingSec==='number') remainingMs=Math.max(0,Math.floor(data.remainingSec*1000));
       else if(nextState==='running' && data.endsAt) remainingMs=new Date(data.endsAt).getTime()-Date.now();
-      current={...current,state:nextState,startedAt:data.startedAt||current.startedAt,endsAt:data.endsAt||current.endsAt,durationSec:(data.durationSec ?? current.durationSec ?? initialDurationSec),remainingMs:Math.max(0,remainingMs)};
+
+      current={...current,prevState:current.state,state:nextState,startedAt:data.startedAt||data.startIso||current.startedAt,endsAt:data.endsAt||data.endIso||current.endsAt,durationSec:(data.durationSec ?? current.durationSec ?? initialDurationSec),remainingMs:Math.max(0,remainingMs),lastUpdateAt:callAt};
       setStatusPill(nextState); tick();
     }
+
     async function postActionSmart(action, extra={}){
       const tryActions=(action==='end')?['stop','end']:(action==='reset')?['reset']:(action==='publish')?['publish']:[action];
+      let lastErr=null;
       for(const a of tryActions){
+        const body={eventId:EVENT_ID,action:a,...extra};
         try{
-          const body={eventId:EVENT_ID,action:a,...extra};
-          const r=await fetch(endpoints.start,{method:'POST',headers:headers(),body:JSON.stringify(body)});
-          const d=await r.json().catch(()=>({success:false}));
-          if(d?.success) return true;
-        }catch{}
-      } return false;
-    }
-    async function doAction(action, extra={}){
-      if(action==='pause'){const ms=(current.endsAt?new Date(current.endsAt).getTime()-Date.now():current.remainingMs)||0; current.remainingMs=Math.max(0,ms); current.state='paused'; setStatusPill('paused'); tick();}
-      if(action==='end'){current.remainingMs=0; current.state='ended'; setStatusPill('ended'); tick();}
-      if(action==='reset'){const dur=current.durationSec ?? initialDurationSec ?? 0; current.startedAt=null; current.endsAt=null; current.remainingMs=dur*1000; current.state='notstarted'; setStatusPill('notstarted'); tick();}
-      if(action==='start'){const now=Date.now(); if(typeof extra.remainingSec==='number' && extra.remainingSec>0){ current.state='running'; current.endsAt=new Date(now+extra.remainingSec*1000).toISOString(); } else { const dur=current.durationSec ?? initialDurationSec ?? 0; current.state='running'; current.endsAt=new Date(now+dur*1000).toISOString(); } setStatusPill('running'); tick();}
-      if(action==='publish'){current.state='published'; setStatusPill('published'); tick();}
-      const ok=await postActionSmart(action, extra); if(!ok) alert(`Failed to ${action}. Check network/functions.`);
-      fetchState();
+          const res=await fetch(endpoints.start,{method:'POST',headers:headers(),body:JSON.stringify(body)});
+          const data=await res.json().catch(()=>({success:false,message:'Bad JSON'}));
+          if(data && data.success) return {ok:true,data};
+          lastErr=data?.message || `Failed ${a}`;
+        }catch(e){ lastErr=e.message; }
+      }
+      return {ok:false,error:lastErr||'Unknown error'};
     }
 
-    /* ---------- Leaderboard totals to decorate team list ---------- */
+    async function doAction(action, extra={}){
+      if(action==='pause'){ const ms=(current.endsAt?new Date(current.endsAt).getTime()-Date.now():current.remainingMs)||0; current.remainingMs=Math.max(0,ms); current.state='paused'; setStatusPill('paused'); tick(); }
+      if(action==='end'){ current.remainingMs=0; current.state='ended'; setStatusPill('ended'); tick(); }
+      if(action==='reset'){ const dur=current.durationSec??initialDurationSec??0; current.startedAt=null; current.endsAt=null; current.remainingMs=dur*1000; current.state='notstarted'; setStatusPill('notstarted'); tick(); }
+      if(action==='start'){
+        const now=Date.now();
+        if(typeof extra.remainingSec==='number' && extra.remainingSec>0){ current.state='running'; current.endsAt=new Date(now+extra.remainingSec*1000).toISOString(); }
+        else { const dur=current.durationSec??initialDurationSec??0; current.state='running'; current.endsAt=new Date(now+dur*1000).toISOString(); }
+        setStatusPill('running'); tick();
+      }
+      if(action==='publish'){ current.state='published'; setStatusPill('published'); tick(); }
+
+      const r=await postActionSmart(action, extra);
+      if(!r.ok){ alert(`Failed to ${action}. ${r.error||''}`.trim()); }
+      await fetchState({force:true}); updateFinalButton();
+    }
+
+    /* Leaderboard merge (totals + rank) */
     async function fetchLeaderboardTotals(){
       try{
         const url=`${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
-        const res=await fetch(url,{headers:headers()}); if(!res.ok) throw 0;
-        const data=await res.json(); const rows=data.leaderboard||data.rows||data.teams||[];
-        const map=new Map(); for(const t of rows){const code=(t.teamCode||t.code||'').toString().trim().toUpperCase(); const name=(t.teamName||t.name||'').toString().trim().toUpperCase();
-          const k=+t.kindness||0,l=+t.limerick||0,s=+t.scavenger||0,c=+t.cluehunt||0,q=+t.quiz||0,total=Number.isFinite(+t.total)?+t.total:(k+l+s+c+q);
-          if(code) map.set('C:'+code,total); if(name) map.set('N:'+name,total);
+        const data=await fetchJSON(url,{headers:headers()});
+        const rows=data.leaderboard || data.rows || data.teams || [];
+        const map=new Map();
+        for(const t of rows){
+          const code=(t.teamCode||t.code||'').toString().trim().toUpperCase();
+          const name=(t.teamName||t.name||t.team||'').toString().trim().toUpperCase();
+          const k=Number(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness ?? 0);
+          const l=Number(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick ?? 0);
+          const s=Number(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger ?? 0);
+          const c=Number(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt ?? 0);
+          const q=Number(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz ?? 0);
+          const total=Number.isFinite(+t.total)?+t.total:(k+l+s+c+q);
+          if(code) map.set(`CODE:${code}`, total);
+          if(name) map.set(`NAME:${name}`, total);
         }
-        return team=>{const code=(team.teamCode||'').toString().trim().toUpperCase(); const name=(team.teamName||'').toString().trim().toUpperCase();
-          return map.get('C:'+code) ?? map.get('N:'+name) ?? 0; };
+        return (team)=>{
+          const code=(team.teamCode||'').toString().trim().toUpperCase();
+          const name=(team.teamName||'').toString().trim().toUpperCase();
+          return map.get(`CODE:${code}`) ?? map.get(`NAME:${name}`) ?? 0;
+        };
       }catch{ return ()=>0; }
     }
-    function addRanks(items,key='total'){let last=null,rank=0;items.forEach((t,i)=>{const s=t[key]; if(s===last){t.rank=rank;} else {rank=i+1;t.rank=rank;last=s;}});}
-
-    /* ---------- Teams list ---------- */
-    let teamTotals={total:0,returned:0};
-    async function loadTeams(){
-      let data; try{
-        const url=`${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`;
-        const res=await fetch(url,{headers:headers(),cache:'no-store'}); if(!res.ok) throw 0; data=await res.json();
-      }catch{ return; }
-      let teams=Array.isArray(data.teams)?data.teams:[];
-      const getTotal=await fetchLeaderboardTotals();
-      teams=teams.map(t=>({...t,total:getTotal(t)||0}));
-      teams.sort((a,b)=>(b.total-a.total)||String(a.teamName||'').localeCompare(String(b.teamName||'')));
-      addRanks(teams,'total');
-
-      const returnedCount=teams.filter(t=>!!(t.returned||t.hasReturned||t.returnedAt)).length;
-      el.statTotal.textContent=teams.length||0;
-      el.statActive.textContent=teams.filter(t=>!t.locked&&t.active!==false).length||0;
-      el.statReturned.textContent=returnedCount;
-      teamTotals={total:teams.length||0,returned:returnedCount};
-      updateFinalButton();
-      renderTeams(teams);
+    function addRanks(items, scoreKey='total'){
+      let lastScore=null,lastRank=0;
+      items.forEach((it,idx)=>{
+        const s=it[scoreKey];
+        if(s===lastScore){ it.rank=lastRank; }
+        else { it.rank=idx+1; lastRank=it.rank; lastScore=s; }
+      });
     }
 
-    const STAR_SVG=`<svg class="star" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#b37e00"/></svg>`;
+    /* ----- PINs (inline) ----- */
+    const SHOW_PINS_KEY='admin.showPins';
+    let SHOW_PINS = localStorage.getItem(SHOW_PINS_KEY)==='1';
+    const PIN_MAP = new Map();
+
+    function applyPinMode(){
+      document.body.classList.toggle('pin-on', SHOW_PINS);
+      document.body.classList.toggle('pin-off', !SHOW_PINS);
+      el.btnTogglePins.textContent = SHOW_PINS ? '🙈 Hide PINs' : '🔐 Show PINs';
+      localStorage.setItem(SHOW_PINS_KEY, SHOW_PINS ? '1' : '0');
+    }
+
+    async function fetchPins(){
+      try{
+        const url = `${endpoints.pins}?eventId=${encodeURIComponent(EVENT_ID)}`;
+        const data = await fetchJSON(url, { headers: headers(), cache: 'no-store' });
+        const arr = data.pins || [];
+        PIN_MAP.clear();
+        for(const p of arr){
+          const code = (p.teamCode || p.code || '').toString().trim().toUpperCase();
+          const pin = (p.pin ?? p.PIN ?? '').toString().trim();
+          if(code && pin) PIN_MAP.set(code, pin);
+        }
+      }catch(e){
+        // silent fail; list still renders without pins
+      }
+    }
+
+    /* Teams */
+    let LKG_TEAMS=null;
+    const inFlight=new Set();
+
+    async function loadTeams(){
+      let data;
+      try{
+        const url = `${endpoints.teams}?eventId=${encodeURIComponent(EVENT_ID)}`;
+        data = await fetchJSON(url,{headers:headers(),cache:'no-store',abortPrevious:true});
+      }catch{
+        if(LKG_TEAMS) renderTeams(LKG_TEAMS);
+        showReconnect(); return;
+      }
+      hideReconnect();
+
+      let teams = Array.isArray(data.teams) ? data.teams : [];
+      const getTotal = await fetchLeaderboardTotals();
+      teams = teams.map(t=>({ ...t, total: getTotal(t) || 0 }));
+
+      teams.sort((a,b)=>(b.total - a.total) || String(a.teamName||'').localeCompare(String(b.teamName||'')));
+      addRanks(teams,'total');
+
+      const returnedCount = teams.filter(t => !!(t.returned || t.hasReturned || t.returnedAt)).length;
+      el.statTotal.textContent = teams.length || 0;
+      el.statActive.textContent = teams.filter(t => !t.locked && t.active !== false).length || 0;
+      el.statReturned.textContent = returnedCount;
+
+      teamTotals.total=teams.length||0;
+      teamTotals.returned=returnedCount;
+      updateFinalButton();
+
+      renderTeams(teams);
+      LKG_TEAMS = teams;
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+
     function renderTeams(teams){
-      el.teams.innerHTML=teams.map(t=>{
-        const name=t.teamName||t.name||'Unnamed crew';
-        const code=t.teamCode||t.code||'';
-        const returned=!!(t.returned||t.hasReturned||t.returnedAt);
-        const total=Number.isFinite(+t.total)?+t.total:0;
-        const rank=t.rank||'-';
-        const tagA=`<span class="tag">${t.active===false?'Inactive':'Active'}</span>`;
-        const tagB=`<span class="tag">${t.locked?'Locked':'Unlocked'}</span>`;
-        const tagC=returned?`<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>`:'';
+      el.teams.innerHTML = teams.map(t=>{
+        const name = (t.teamName || t.name || 'Unnamed crew');
+        const code = t.teamCode || t.code || '';
+        const codeKey = String(code).trim().toUpperCase();
+        const returned = !!(t.returned || t.hasReturned || t.returnedAt);
+        const total = Number.isFinite(+t.total)? +t.total : 0;
+        const rank = t.rank || '-';
+        const penalty = Number(t.penalty || 0) || 0;
+        const pin = PIN_MAP.get(codeKey);
+
+        const tagA = `<span class="tag">${t.active===false?'Inactive':'Active'}</span>`;
+        const tagB = `<span class="tag">${t.locked ? 'Locked' : 'Unlocked'}</span>`;
+        const tagC = returned ? `<span class="tag" style="border-color:#bfe8ff;background:#eaf8ff;color:#0a4c68">Returned</span>` : '';
+        const penaltyChip = returned && penalty>0 ? `<span class="tag" style="border-color:#f3b8b8;background:#fdeeee;color:#8b1f1f">Late −${penalty}</span>` : '';
+        const pinChip = pin ? `<span class="pin-chip" title="Crew PIN">PIN · ${escapeHtml(pin)}</span>` : '';
+
         return `
-          <div class="team ${returned?'returned':''}" data-team="${code}">
+          <div class="team ${returned?'returned':''}" data-team="${escapeHtml(codeKey)}">
             <div class="row1">
               <div>
                 <div style="font-weight:900;color:#4a351e;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                  <span class="team-rank">#${rank}</span><span>${name}</span>
+                  <span class="team-rank" title="Current rank">#${rank}</span>
+                  <span>${escapeHtml(name)}</span>
+                  ${pinChip}
                 </div>
-                <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${code||'TEAM'}</span></div>
+                <div class="meta">${tagA}${tagB}${tagC}<span class="tag">${escapeHtml(codeKey||'TEAM')}</span></div>
               </div>
-              <div class="actions">
+              <div class="actions" style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
                 <div class="team-row-points">
-                  <div class="team-points" title="Current points">${STAR_SVG}<span class="num">${total}</span></div>
+                  <div class="team-points" title="Current total points">
+                    ${STAR_SVG}<span class="num">${total}</span>
+                  </div>
                 </div>
-                <button class="btn secondary mark-btn" data-team="${code}" data-action="${returned?'undoReturn':'markReturn'}">
+                ${penaltyChip}
+                <button class="btn secondary mark-btn" data-team="${escapeHtml(codeKey)}" data-action="${returned?'undoReturn':'markReturn'}">
                   ${returned?'↩︎ Undo Return':'✅ Mark Returned'}
                 </button>
               </div>
             </div>
           </div>`;
       }).join('');
+
       el.teams.querySelectorAll('.mark-btn').forEach(btn=>{
         btn.addEventListener('click',()=>handleMark(btn));
       });
+      applyPinMode(); // ensure correct visibility class
     }
+
     async function handleMark(btn){
-      const teamCode=btn.getAttribute('data-team'); const undo=(btn.getAttribute('data-action')==='undoReturn');
-      if(!teamCode) return;
-      btn.disabled=true; const original=btn.textContent; btn.textContent='⏳ Updating…';
+      const teamCode=btn.getAttribute('data-team'); const action=btn.getAttribute('data-action'); if(!teamCode) return;
+      if(inFlight.has(teamCode)) return; inFlight.add(teamCode);
+      const isUndo=(action==='undoReturn'); const originalHTML=btn.innerHTML; btn.disabled=true; btn.innerHTML='⏳ Updating…';
       try{
-        const payload={eventId:EVENT_ID,teamCode,returnedAt:new Date().toISOString(),undo};
-        const r=await fetch(endpoints.markReturn,{method:'POST',headers:{...headers(),'X-Idempotency-Key':`${teamCode}-${Date.now()}`},body:JSON.stringify(payload)});
-        const d=await r.json().catch(()=>({success:false}));
-        if(!d.success) throw new Error(d.message||'Failed');
-        await loadTeams(); btn.textContent='✅ Saved';
-      }catch(e){ alert(e.message||'Network error'); }
-      finally{ setTimeout(()=>{btn.disabled=false; btn.textContent=original;},600); }
-    }
-
-    /* ---------- Buttons ---------- */
-    el.btnStart.addEventListener('click', async ()=>{
-      const s=normState(current.state);
-      if(s==='paused'){const remainingSec=Math.max(0,Math.ceil((current.remainingMs||0)/1000)); await doAction('start',{remainingSec});}
-      else { await doAction('start'); }
-    });
-    el.btnPause.addEventListener('click',()=>doAction('pause'));
-    el.btnEnd.addEventListener('click',()=>{ if(confirm('End the adventure now?')) doAction('end'); });
-    el.btnReset.addEventListener('click',async()=>{ if(confirm('Reset timer to “Not started”?')) await doAction('reset'); });
-    el.btnPublish.addEventListener('click',async()=>{ if(confirm('Publish results now? This shows FINAL results and unlocks Gallery.')) await doAction('publish'); });
-    el.btnFinalResults.addEventListener('click',()=>{
-      if(el.btnFinalResults.disabled) return;
-      const key=ADMIN_KEY||qs.get('key')||''; if(!key){ alert('Admin key missing. Open with ?key=YOUR_ADMIN_KEY'); return; }
-      const url=new URL('/final_results',location.origin); url.searchParams.set('event',EVENT_ID); url.searchParams.set('key',key); location.href=url.toString();
-    });
-
-    /* ---------- PIN PANEL ---------- */
-    let pinsShown=false, pinsCache=[];
-    function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
-
-    el.btnTogglePins.addEventListener('click',()=>{
-      pinsShown=!pinsShown;
-      el.btnTogglePins.textContent = pinsShown ? '🙊 Hide PINs' : '🙈 Show PINs';
-      renderPins(); // re-render to mask/unmask
-    });
-    el.btnRefreshPins.addEventListener('click', loadPins);
-    el.pinSearch.addEventListener('input', renderPins);
-    el.btnCopyCsv.addEventListener('click', async ()=>{
-      if(!pinsCache.length) return alert('Nothing to copy.');
-      const rows=[['Team Code','Team Name','Event Id','PIN'],...pinsCache.map(p=>[p.teamCode,p.teamName,p.eventId,p.pin])];
-      const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
-      try{ await navigator.clipboard.writeText(csv); alert('Copied CSV to clipboard.'); }catch{ alert('Copy failed.'); }
-    });
-    el.btnDownloadCsv.addEventListener('click', ()=>{
-      if(!pinsCache.length) return alert('Nothing to download.');
-      const rows=[['Team Code','Team Name','Event Id','PIN'],...pinsCache.map(p=>[p.teamCode,p.teamName,p.eventId,p.pin])];
-      const csv=rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\n');
-      const blob=new Blob([csv],{type:'text/csv'});
-      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`team-pins-${EVENT_ID}.csv`; a.click(); URL.revokeObjectURL(a.href);
-    });
-
-    async function loadPins(){
-      el.pinBody.innerHTML='<div class="pin-empty">Loading…</div>';
-      try{
-        const url=`${endpoints.pins}?eventId=${encodeURIComponent(EVENT_ID)}`;
-        const res=await fetch(url,{headers:headers(),cache:'no-store'});
+        const payload={eventId:EVENT_ID,teamCode,returnedAt:new Date().toISOString(),undo:isUndo};
+        const res=await fetch(endpoints.markReturn,{method:'POST',headers:{...headers(),'X-Idempotency-Key':`${teamCode}-${Date.now()}`},body:JSON.stringify(payload)});
         const data=await res.json().catch(()=>({success:false}));
-        if(!res.ok || data.success===false) throw new Error(data.message||`HTTP ${res.status}`);
-        pinsCache = Array.isArray(data.pins)? data.pins : (Array.isArray(data.teams)?data.teams:[]);
-        renderPins();
+        if(!data.success) throw new Error(data.message || 'Failed to update');
+        await loadTeams();
+        btn.innerHTML='✅ Saved';
       }catch(e){
-        el.pinBody.innerHTML='<div class="pin-empty">Error loading PINs.</div>';
+        btn.innerHTML='Retry?'; alert(e.message || 'Network error. Please try again.');
+      }finally{
+        setTimeout(()=>{ btn.disabled=false; btn.innerHTML=originalHTML; }, 600);
+        inFlight.delete(teamCode);
       }
     }
 
-    function renderPins(){
-      const q=(el.pinSearch.value||'').trim().toLowerCase();
-      const rows=pinsCache.filter(p=>{
-        const name=(p.teamName||'').toLowerCase(); const code=(p.teamCode||'').toLowerCase();
-        return !q || name.includes(q) || code.includes(q);
-      });
-      if(!rows.length){ el.pinBody.innerHTML='<div class="pin-empty">No matching teams.</div>'; return; }
-      el.pinBody.innerHTML = rows.map(p=>{
-        const pinText = pinsShown ? escapeHtml(p.pin||'') : '••••';
-        return `<div class="pin-row">
-          <div>${escapeHtml(p.teamCode||'')}</div>
-          <div>${escapeHtml(p.teamName||'')}</div>
-          <div>${escapeHtml(p.eventId||'')}</div>
-          <div>${pinText}</div>
-        </div>`;
-      }).join('');
-    }
+    /* Wire controls */
+    el.btnStart.addEventListener('click',async()=>{
+      const s=normState(current.state);
+      if(s==='paused'){ const remainingSec=Math.max(0,Math.ceil((current.remainingMs||0)/1000)); await doAction('start',{remainingSec}); }
+      else { await doAction('start'); }
+    });
+    el.btnPause.addEventListener('click',()=>doAction('pause'));
+    el.btnEnd.addEventListener('click',()=>doAction('end'));
+    el.btnReset.addEventListener('click',async()=>{
+      const ok=confirm('Reset timer and set event to “Not started”?'); if(!ok) return; await doAction('reset');
+    });
+    el.btnPublish.addEventListener('click',async()=>{
+      const ok=confirm('Publish results now?\n\nThis will:\n• Show FINAL results on the leaderboard\n• Unlock the Gallery\n(You can still adjust scores later.)');
+      if(!ok) return; await doAction('publish');
+    });
+    el.btnFinalResults.addEventListener('click',()=>{
+      if(el.btnFinalResults.disabled) return;
+      const key=ADMIN_KEY || qs.get('key') || '';
+      if(!key){ alert('Admin key missing. Open with ?key=YOUR_ADMIN_KEY'); return; }
+      const url=new URL('/final_results',location.origin); url.searchParams.set('event',EVENT_ID); url.searchParams.set('key',key); location.href=url.toString();
+    });
 
-    /* ---------- Boot ---------- */
+    /* PIN toggle */
+    el.btnTogglePins.addEventListener('click',()=>{
+      SHOW_PINS = !SHOW_PINS;
+      applyPinMode();
+    });
+
+    /* Polling */
     let polling=false;
     (async function init(){
-      await fetchState();
-      await loadTeams();
-      setInterval(async()=>{ if(polling) return; polling=true; try{ await fetchState(); await loadTeams(); } finally{ polling=false; } }, 5000);
+      applyPinMode();
+      await fetchState({force:true});
+      await fetchPins();      // <--- load PINs first
+      await loadTeams();      // renders with pins if available
+      setInterval(async()=>{
+        if(polling) return; polling=true;
+        try{
+          await fetchState();
+          await fetchPins();   // keep PINs fresh if updated
+          await loadTeams();
+        }finally{ polling=false; }
+      }, 5000);
     })();
   </script>
 </body>
