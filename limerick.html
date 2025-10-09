@@ -1,4 +1,4 @@
-<!-- TeamQuest • Limerick (visual refinements only; NO functionality changes)
+<!-- TeamQuest • Limerick (visual refinements + auto-expanding textarea)
 Changes:
 • Labels/titles use sans-serif; inputs/selects/textarea use Handlee.
 • Removed green “Signed in” banner.
@@ -6,6 +6,7 @@ Changes:
 • Rules shown as compact chips (darker than card background).
 • Placeholders made lighter; “(optional)” rendered smaller.
 • Submit button restyled to shared amber pill and larger text.
+• NEW: Limerick textarea auto-expands to fit content (no scrollbars).
 • Kept all IDs and JS hooks the same; endpoints and logic unchanged.
 -->
 <!DOCTYPE html>
@@ -83,6 +84,14 @@ Changes:
     .field:focus, textarea:focus, select:focus{outline:none;box-shadow:var(--focus);border-color:var(--gold-deep);transform:translateY(-1px)}
     .row{display:grid;grid-template-columns:1fr 150px;gap:10px}
     @media (max-width:560px){.row{grid-template-columns:1fr}}
+
+    /* Auto-grow for the limerick textarea */
+    #limerick{
+      resize:none;
+      overflow:hidden;
+      min-height:140px;   /* ~5–6 lines */
+      max-height:60vh;    /* safety cap */
+    }
 
     /* Button (shared amber pill) */
     .btn{appearance:none;border:none;cursor:pointer;font-weight:900;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
@@ -349,7 +358,15 @@ Changes:
 
           setCrewStrip();
           setSignedUI(true);
+
+          // Focus topic once visible
           setTimeout(()=> document.getElementById('topic')?.focus(), 100);
+
+          // Kick auto-grow now that the textarea is visible
+          setTimeout(() => {
+            autoGrow(document.getElementById('limerick'), { immediate: true });
+          }, 0);
+
         }catch(e){
           showMsg(signMsg,'Sign-in service unavailable. Try again later.');
         }finally{
@@ -357,10 +374,25 @@ Changes:
         }
       }
 
-      // Character counter
+      // ------- Auto-grow helper for textarea -------
+      function autoGrow(el, { immediate = false } = {}) {
+        if (!el) return;
+        const set = () => {
+          el.style.height = 'auto';
+          el.style.height = (el.scrollHeight) + 'px';
+        };
+        const on = () => requestAnimationFrame(set);
+        ['input','change','cut','paste','drop'].forEach(evt => el.addEventListener(evt, on));
+        window.addEventListener('resize', on);
+        if (immediate) set();
+      }
+
+      // Character counter + initial auto-grow wiring
       const limEl = $('#limerick');
       const cntEl = $('#charCount');
       limEl?.addEventListener('input',()=>{ cntEl.textContent = (limEl.value||'').length; });
+      // Safe to call before sign-in; will run again after it becomes visible
+      autoGrow(limEl);
 
       // Submit limerick
       $('#limerickForm')?.addEventListener('submit', async (e)=>{
