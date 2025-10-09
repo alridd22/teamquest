@@ -228,7 +228,6 @@
     const signMsg = $('signMsg'), submitMsg = $('submitMsg');
     const secSign = $('secSign'), secForm = $('secForm');
     const crewName = $('crewName');
-
     const whatText = $('whatText'), countWhat = $('countWhat');
     const whereText = $('whereText');
     const btnSign = $('btnSign'), btnSubmit = $('btnSubmit');
@@ -239,24 +238,33 @@
     const token = ()=> localStorage.getItem('teamToken') || '';
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
 
-    async function callFn(name, payload){
-      const res = await fetch(`/.netlify/functions/${name}`,{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
-          'Idempotency-Key': uuidv4()
-        },
-        body: JSON.stringify(payload||{}),
-        keepalive:true
-      });
-      let data={}; try{ data = await res.json(); }catch{}
-      if(!res.ok || data.success===false){
-        const err = new Error((data && (data.message || data.error)) || `HTTP ${res.status}`);
-        err.code = data?.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
-        throw err;
+    // Try multiple function names to survive deploy naming differences
+    async function callAny(names, payload){
+      let lastErr;
+      for (const name of names){
+        try{
+          const res = await fetch(`/.netlify/functions/${name}`,{
+            method:'POST',
+            headers:{
+              'Content-Type':'application/json',
+              ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
+              'Idempotency-Key': uuidv4()
+            },
+            // NOTE: no keepalive (this can cause "Failed to fetch" on mobile)
+            body: JSON.stringify(payload||{})
+          });
+          let data={}; try{ data = await res.json(); }catch{}
+          if(!res.ok || data.success===false){
+            const err = new Error((data && (data.message || data.error)) || `HTTP ${res.status}`);
+            err.code = data?.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
+            throw err;
+          }
+          return data;
+        }catch(e){
+          lastErr = e;
+        }
       }
-      return data;
+      throw lastErr || new Error('Network error');
     }
 
     // ===== CSV (minimal) + load teams
@@ -325,7 +333,7 @@
       if(!/^\d{4}$/.test(pin)){ setMsg(signMsg,'Enter your 4-digit PIN.','error'); return; }
 
       try{
-        const res = await callFn('verify_team_pin_function',{ eventId: EVENT_ID, teamCode: code, pin });
+        const res = await callAny(['verify_team_pin_function','verify_team_pin'],{ eventId: EVENT_ID, teamCode: code, pin });
         if(!res.success || !res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
 
         if(res.token) localStorage.setItem('teamToken', res.token);
@@ -356,27 +364,24 @@
 
       btnSubmit.disabled = true;
       try{
-        let photoBase64 = '';
-        const file = $('kindPhoto').files?.[0];
-        if(file){
-          photoBase64 = await fileToBase64(file); // server ignores base64; safe to send or skip
-        }
+        // We only send a minimal payload; no base64 (prevents mobile fetch drop).
+        const file = $('kindPhoto').files?.[0] || null;
 
         const payload = {
           eventId: EVENT_ID,
           teamCode, teamName,
           what: text,
           where: (whereText.value||'').trim(),
-          photoBase64
+          hasPhoto: !!file,
+          photoName: file ? (file.name || '') : ''
         };
 
-        await callFn('submit_kindness_function', payload);
+        await callAny(['submit_kindness_function','submit_kindness'], payload);
         setMsg(submitMsg,'✅ Submitted! Points will be awarded after review.','ok');
         whatText.value=''; whereText.value=''; $('kindPhoto').value='';
         $('uploadMeta').textContent='JPEG/PNG/WebP • Max ~20MB'; document.querySelector('.upload-cta').classList.remove('has-file');
         countWhat.textContent='0';
       }catch(e){
-        // show real server message so we can diagnose quickly
         setMsg(submitMsg, e.message || 'Couldn’t submit right now. Please try again.','error');
       }finally{
         btnSubmit.disabled = false;
@@ -384,18 +389,8 @@
     }
     btnSubmit.addEventListener('click', submitKindness);
 
-    function fileToBase64(file){
-      return new Promise((res, rej)=>{
-        const reader = new FileReader();
-        reader.onload = ()=> res(String(reader.result||'').split(',')[1] || '');
-        reader.onerror = rej;
-        reader.readAsDataURL(file);
-      });
-    }
-
     // Counter + upload filename
     whatText.addEventListener('input', ()=>{ countWhat.textContent = `${whatText.value.length}`; });
-
     (function(){
       const fileInput = document.getElementById('kindPhoto');
       const meta = document.getElementById('uploadMeta');
@@ -415,7 +410,6 @@
     function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   </script>
 
-  <!-- Safeguard: neutralize any link behavior on the logo element -->
   <script>
     (function(){
       document.querySelectorAll('.nav-logo[href]').forEach(a=>{
