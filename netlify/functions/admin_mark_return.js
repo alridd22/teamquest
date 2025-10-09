@@ -1,9 +1,8 @@
-// /netlify/functions/admin_mark_return.js
 const { google } = require('googleapis');
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Idempotency-Key',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
@@ -12,7 +11,6 @@ const bad = (c,m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ suc
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID || process.env.SPREADSHEET_ID || '';
 
 function parseServiceAccount() {
-  // Prefer full JSON (raw or base64)…
   const rawJson =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON ||
@@ -22,7 +20,6 @@ function parseServiceAccount() {
     const text = rawJson.trim().startsWith('{') ? rawJson : Buffer.from(rawJson, 'base64').toString('utf8');
     return JSON.parse(text);
   }
-  // …or email + key (raw or base64)
   const email =
     process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
     process.env.GOOGLE_CLIENT_EMAIL ||
@@ -98,6 +95,8 @@ exports.handler = async (event) => {
     const token = tokenFromReq(event);
     if (!isAllowed(token)) return bad(401, 'Unauthorized');
 
+    const idemKey = (event.headers['x-idempotency-key'] || event.headers['X-Idempotency-Key'] || '').toString().trim();
+
     let body; try { body = JSON.parse(event.body || '{}'); } catch { return bad(400, 'Invalid JSON'); }
     const eventId  = (body.eventId  || '').toString().trim();
     const teamCode = (body.teamCode || '').toString().trim();
@@ -146,6 +145,21 @@ exports.handler = async (event) => {
       }
     }
 
+    // Idempotency: if already returned and undo=false, don't error
+    const alreadyReturned = !!(teamRowObj['Returned'] === 'TRUE' || teamRowObj['ReturnedAt (ISO)']);
+    if (!undo && alreadyReturned) {
+      const existingPenalty = Number(teamRowObj['LatePenalty'] || teamRowObj['Penalty'] || 0) || 0;
+      return ok({
+        success: true,
+        eventId, teamCode,
+        returnedAt: teamRowObj['ReturnedAt (ISO)'] || whenIso,
+        minutesLate: 0,
+        penalty: existingPenalty,
+        undo,
+        idempotency: idemKey || null
+      });
+    }
+
     // Build patch for teams sheet (only set fields that exist)
     const patch = { 'UpdatedAt (ISO)': new Date().toISOString() };
     const has = (name) => tHdrs.includes(name);
@@ -173,6 +187,7 @@ exports.handler = async (event) => {
       minutesLate: undo ? 0 : minutesLate,
       penalty: undo ? 0 : penalty,
       undo,
+      idempotency: idemKey || null
     });
 
   } catch (err) {
