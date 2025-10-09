@@ -1,10 +1,3 @@
-<!--
-TeamQuest — Clue Hunt • Gem placement tweak (drop-in)
-WHAT CHANGED (styling only):
-- Clue tile gem now sits INSIDE the button (center-left), not outside.
-- Clue panel gem now sits INSIDE the panel at the top; added padding-top so it doesn’t overlap text.
-- No JavaScript or endpoint changes.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -137,9 +130,8 @@ WHAT CHANGED (styling only):
       background:linear-gradient(135deg,var(--amber-1),var(--amber-2));
       color:var(--ink-deep);
       font-weight:900; font-size:20px; text-align:center; cursor:pointer; box-shadow:var(--shadow-soft);
-      overflow:hidden; /* ensure inner gem never overflows rounded corners */
+      overflow:hidden;
     }
-    /* ✅ Gem INSIDE the button */
     .clue::before{
       content:""; position:absolute; left:12px; top:50%; transform:translateY(-50%);
       width:36px; height:32px; background:url("/Red%20Diamond.png") center/contain no-repeat;
@@ -155,10 +147,8 @@ WHAT CHANGED (styling only):
     /* clue panel */
     .panel{
       position:relative;background:#fff9ee;border:3px solid var(--gold);border-radius:18px;
-      padding:36px 18px 18px; /* extra top padding to clear inner gem */
-      overflow:hidden;
+      padding:36px 18px 18px; overflow:hidden;
     }
-    /* ✅ Gem INSIDE the panel at the top center */
     .panel::before{
       content:""; position:absolute; top:8px; left:50%; transform:translateX(-50%);
       width:36px; height:30px; background:url("/Red%20Diamond.png") center/contain no-repeat;
@@ -166,28 +156,33 @@ WHAT CHANGED (styling only):
     }
     .clue-title{font-family:var(--sans);font-weight:900;color:var(--ink-deep);font-size:20px;margin:2px 0 6px;text-align:center}
     .clue-text{font-size:18px;color:#5b3a12;margin:8px 0 12px}
-    .answer{width:100%;margin:10px 0 14px;font-size:20px;text-align:center}
+    .answer{width:100%;margin:10px 0 6px;font-size:20px;text-align:center}
+    .save-hint{font-family:var(--sans);font-size:13px;color:#6A5A47;text-align:center;margin-bottom:10px}
     .result{display:none;margin:12px 0;border:3px solid;border-radius:12px;padding:14px;font-weight:900}
     .result.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .result.bad{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
+
+    .statusline{font-family:var(--sans);font-size:13px;text-align:center;margin-top:6px}
+    .statusline.saving{color:#7a5a13}
+    .statusline.saved{color:#106a3e}
   </style>
 </head>
 <body>
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
-      <a href="https://theteamquest.netlify.app/" class="nav-logo" aria-label="TeamQuest Home">
+      <a href="/" class="nav-logo" aria-label="TeamQuest Home">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
-      <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
-      <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
-      <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
-      <li><a href="https://theteamquest.netlify.app/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
-      <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
-      <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+      <li><a href="/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
+      <li><a href="/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
+      <li><a href="/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
+      <li><a href="/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
+      <li><a href="/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
+      <li><a href="/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
     </ul>
   </nav>
 
@@ -198,7 +193,7 @@ WHAT CHANGED (styling only):
   </header>
 
   <main class="stack">
-    <!-- SIGN-IN ONLY -->
+    <!-- SIGN-IN -->
     <section id="signinCard" class="card">
       <label class="field-label" for="teamSelect">Crew Name</label>
       <div class="row">
@@ -246,7 +241,9 @@ WHAT CHANGED (styling only):
         <div class="clue-title" id="clueNumber">Clue #</div>
         <div class="clue-text" id="clueText"></div>
         <input id="answerInput" class="tq-input answer" placeholder="Enter your answer…"/>
+        <div class="save-hint" id="saveHint">Tip: typing autosaves. Press “Claim treasure” to lock in.</div>
         <button id="submitAnswerBtn" class="btn">💰 Claim treasure</button>
+        <div class="statusline" id="saveStatus" aria-live="polite"></div>
         <div id="resultMessage" class="result"></div>
         <button id="continueBtn" class="btn" style="display:none">🗺️ Back to Clues</button>
       </div>
@@ -258,8 +255,6 @@ WHAT CHANGED (styling only):
   </main>
 
   <script>
-    /* JS unchanged – only styles moved the gems inside the boxes. */
-
     // ===== Config =====
     const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
 
@@ -277,8 +272,7 @@ WHAT CHANGED (styling only):
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
       if (EVENT_ID){
         const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo');
-        anchors.forEach(a=>{
+        document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
           try{
             const u = new URL(a.getAttribute('href'), location.origin);
             if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
@@ -295,6 +289,8 @@ WHAT CHANGED (styling only):
     const $ = (id)=> document.getElementById(id);
     function setMsg(el, text, type){ el.textContent = text; el.className = 'msg ' + (type==='ok'?'ok':'err'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.className='msg'; el.style.display='none'; }
+    const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
+    const debounce = (fn, ms)=>{ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); }; };
 
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
@@ -367,6 +363,13 @@ WHAT CHANGED (styling only):
           teams.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
         clearMsg($('signinMsg'));
         $('signinBtn').disabled = false;
+
+        // If session exists, auto-select crew
+        const savedCode = localStorage.getItem('teamCode');
+        if (savedCode) {
+          const opt = [...teamSelect.options].find(o=>o.value===savedCode);
+          if (opt) teamSelect.value = savedCode;
+        }
       }catch(err){
         teamSelect.innerHTML = `<option value="" disabled selected>—</option>`;
         setMsg($('signinMsg'),'Unable to load crew list. Please refresh.','err');
@@ -460,54 +463,90 @@ WHAT CHANGED (styling only):
       $('clueGridSection').style.display='none';
       $('clueSection').style.display='block';
       setTimeout(()=>$('answerInput').focus(),100);
+      updateSaveStatus(''); // reset
     }
 
     function normalize(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
 
+    // ---- AUTOSAVE (draft) ----
+    const saveDraft = debounce(async ()=>{
+      if (!currentClue) return;
+      const answer = ($('answerInput').value||'').trim();
+      if (!answer) return updateSaveStatus('');
+      updateSaveStatus('saving');
+      try{
+        await callFn('submit_cluehunt_function', {
+          mode: 'draft',
+          eventId: EVENT_ID,
+          teamCode: localStorage.getItem('teamCode'),
+          clueId: currentClue.id,
+          userAnswer: answer
+        });
+        updateSaveStatus('saved');
+      }catch{
+        updateSaveStatus(''); // keep quiet on drafts
+      }
+    }, 350);
+
+    function updateSaveStatus(state){
+      const el = $('saveStatus');
+      if (state === 'saving'){ el.textContent='Saving…'; el.className='statusline saving'; }
+      else if (state === 'saved'){ el.textContent='Saved ✓'; el.className='statusline saved'; }
+      else { el.textContent=''; el.className='statusline'; }
+    }
+
+    $('answerInput').addEventListener('input', saveDraft);
+
+    // ---- SUBMIT (final) ----
+    let inFlightSubmit = false;
     async function submitAnswer(){
+      if (inFlightSubmit) return;
       const val = ($('answerInput').value||'').trim();
       if(!val){ showResult('Please enter an answer.', false); return; }
       if(!currentClue){ showResult('No clue selected.', false); return; }
 
-      const correct = currentClue.acceptableAnswers.some(a => normalize(a)===normalize(val));
-
+      inFlightSubmit = true;
       $('submitAnswerBtn').disabled = true;
 
-      if(correct){
-        completedClues[currentClue.id] = {
-          points: currentClue.points, answer: val, correctAnswer: currentClue.answer,
-          completedAt: new Date().toISOString(), wasCorrect:true
-        };
-        currentScore += currentClue.points;
-        showResult(`🎉 Treasure claimed! +${currentClue.points} doubloons`, true);
-        updateScore(); updateProgress();
-      }else{
-        completedClues[currentClue.id] = {
-          points: 0, answer: val, correctAnswer: currentClue.answer,
-          completedAt: new Date().toISOString(), wasCorrect:false
-        };
-        showResult(`❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, false);
-        updateProgress();
-      }
+      // Local correctness (UX only); source of truth is server
+      const locallyCorrect = currentClue.acceptableAnswers.some(a => normalize(a)===normalize(val));
 
       try{
-        await callFn('submit_cluehunt_function', {
+        const data = await callFn('submit_cluehunt_function', {
+          mode: 'final',
           eventId: EVENT_ID,
           teamCode: localStorage.getItem('teamCode'),
           teamName: localStorage.getItem('teamName'),
-          clueId: currentClue.id, clueText: currentClue.clue,
-          userAnswer: val, correctAnswer: currentClue.answer,
-          points: completedClues[currentClue.id].points,
-          currentScore, wasCorrect: completedClues[currentClue.id].wasCorrect
+          clueId: currentClue.id,
+          clueText: currentClue.clue,
+          userAnswer: val,
+          correctAnswer: currentClue.answer,
+          pointsIfCorrect: currentClue.points
         });
+
+        // Server truth
+        const award = Number(data.awarded || 0);
+        const wasCorrect = !!data.correct;
+        completedClues[currentClue.id] = {
+          points: award,
+          answer: val,
+          correctAnswer: currentClue.answer,
+          completedAt: data.attemptTime || new Date().toISOString(),
+          wasCorrect
+        };
+        reconcileScore(data.totalScore);
+        showResult(wasCorrect ? `🎉 Treasure claimed! +${award} doubloons` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
+        updateScore(); updateProgress();
       }catch(e){
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
-        if (e.code==='CLOSED') showResult('Submissions are closed for this event.', false);
+        else if (e.code==='CLOSED') showResult('Submissions are closed for this event.', false);
+        else showResult('Could not submit. Please try again.', false);
+      } finally {
+        $('submitAnswerBtn').style.display='none';
+        $('continueBtn').style.display='block';
+        $('continueBtn').focus();
+        inFlightSubmit = false;
       }
-
-      $('submitAnswerBtn').style.display='none';
-      $('continueBtn').style.display='block';
-      $('continueBtn').focus();
     }
     $('submitAnswerBtn').addEventListener('click', submitAnswer);
     $('answerInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submitAnswer(); });
@@ -528,6 +567,10 @@ WHAT CHANGED (styling only):
       }
     }
 
+    function reconcileScore(serverTotal){
+      const local = Object.values(completedClues).reduce((a,b)=>a+(b.points||0),0);
+      currentScore = Number.isFinite(+serverTotal) ? +serverTotal : local;
+    }
     function updateScore(){ $('scoreDisplay').textContent = currentScore + ' points'; }
     function updateProgress(){
       const attempted = Object.keys(completedClues).length;
@@ -568,7 +611,7 @@ WHAT CHANGED (styling only):
                 wasCorrect: s.points > 0
               };
             });
-            currentScore = data.totalScore || Object.values(completedClues).reduce((a,b)=>a+(b.points||0),0);
+            reconcileScore(data.totalScore);
           }
         }
       }catch(e){}
