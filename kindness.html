@@ -1,5 +1,5 @@
 <!-- TeamQuest • Kindness (visual refinements only)
-CHANGES (no functionality altered):
+CHANGES (no functionality altered, + removed description limit):
 • Removed the green “Signed in” info bar to match other activities.
 • Labels/titles above inputs use sans-serif; inputs/selects/textarea stay Handlee.
 • “Crew” display kept as a parchment-style field (white with gold border), not a yellow chip.
@@ -11,6 +11,7 @@ CHANGES (no functionality altered):
 • Submit button restyled to the shared amber pill look and larger text (consistent across activities).
 • Increased spacing between PIN and the Sign In button; PIN placeholder lightened.
 • Accessibility: focus rings kept; touch targets ≥44px.
+• NEW: Removed character limit on kindness description (no maxlength, counter shows plain count).
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -210,8 +211,9 @@ CHANGES (no functionality altered):
 
       <!-- Text fields -->
       <label for="whatText">What happened?</label>
-      <textarea id="whatText" class="field" maxlength="500" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
-      <div class="subtle">Max 500 characters. <span id="countWhat">0/500</span></div>
+      <!-- REMOVED maxlength -->
+      <textarea id="whatText" class="field" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
+      <div class="subtle">Characters: <span id="countWhat">0</span></div>
 
       <label for="whereText">Where? <span class="optional">(optional)</span></label>
       <input id="whereText" class="field" placeholder="e.g., High Street, Community Centre…"/>
@@ -403,7 +405,7 @@ CHANGES (no functionality altered):
         await callFn('submit_kindness_function', payload);
         setMsg(submitMsg,'✅ Submitted! Points will be awarded after review.','ok');
         whatText.value=''; whereText.value=''; $('kindPhoto').value=''; $('uploadMeta').textContent='JPEG/PNG/WebP • Max ~20MB'; document.querySelector('.upload-cta').classList.remove('has-file');
-        countWhat.textContent='0/500';
+        countWhat.textContent='0';
       }catch(e){
         if (e.code==='UNAUTHORIZED'){ setMsg(submitMsg,'Session expired — please sign in again.','error'); }
         else if (e.code==='RATE_LIMITED'){ setMsg(submitMsg,'Too many submissions — please try again soon.','error'); }
@@ -423,8 +425,8 @@ CHANGES (no functionality altered):
       });
     }
 
-    // Counters + upload filename
-    whatText.addEventListener('input', ()=>{ countWhat.textContent = `${whatText.value.length}/500`; });
+    // Counter + upload filename
+    whatText.addEventListener('input', ()=>{ countWhat.textContent = String(whatText.value.length); });
 
     (function(){
       const fileInput = document.getElementById('kindPhoto');
