@@ -230,7 +230,7 @@
         <div class="rule-chip">• Come and go anytime — progress saves</div>
       </div>
 
-      <div class="field-label">Treasure collected</div>
+      <div class="field-label">Points awarded</div>
       <div class="display-field" id="scoreDisplay">0 points</div>
 
       <div id="clueGridSection">
@@ -241,15 +241,15 @@
         <div class="clue-title" id="clueNumber">Clue #</div>
         <div class="clue-text" id="clueText"></div>
         <input id="answerInput" class="tq-input answer" placeholder="Enter your answer…"/>
-        <div class="save-hint" id="saveHint">Tip: typing autosaves. Press “Claim treasure” to lock in.</div>
-        <button id="submitAnswerBtn" class="btn">💰 Claim treasure</button>
+        <div class="save-hint" id="saveHint">Tip: typing autosaves. Press “Submit Answer” to lock in.</div>
+        <button id="submitAnswerBtn" class="btn">Submit Answer</button>
         <div class="statusline" id="saveStatus" aria-live="polite"></div>
         <div id="resultMessage" class="result"></div>
         <button id="continueBtn" class="btn" style="display:none">🗺️ Back to Clues</button>
       </div>
 
       <div id="completionCelebration" class="rule-chip" style="display:none;text-align:center">
-        🎉 Treasure map complete! <span id="finalScore" style="font-weight:900;margin-left:6px">Final Treasure: 0 points</span>
+        🎉 Clue Hunt complete! <span id="finalScore" style="font-weight:900;margin-left:6px">Final Score: 0 points</span>
       </div>
     </section>
   </main>
@@ -535,7 +535,7 @@
           wasCorrect
         };
         reconcileScore(data.totalScore);
-        showResult(wasCorrect ? `🎉 Treasure claimed! +${award} doubloons` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
+        showResult(wasCorrect ? `🎉 Points Scored! +${award} doubloons` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
         updateScore(); updateProgress();
       }catch(e){
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
@@ -562,7 +562,7 @@
     function continueToMap(){
       renderClueGrid();
       if(Object.keys(completedClues).length === clueHuntData.length){
-        $('finalScore').textContent = 'Final Treasure: ' + currentScore + ' points';
+        $('finalScore').textContent = 'Final Score: ' + currentScore + ' points';
         $('completionCelebration').style.display = 'block';
       }
     }
