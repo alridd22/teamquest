@@ -1,22 +1,5 @@
-// Submit a Kindness entry -> Google Sheets `submissions` tab
-// Appends one row with a compact JSON payload; keeps AI columns for Zapier.
-
+// submit_kindness_function.js
 const { ok, error, isPreflight, getSheets, SHEET_ID } = require("./_utils.js");
-
-const SHEET = "submissions";
-const HEADERS = [
-  "Timestamp",     // A
-  "Team Code",     // B
-  "Activity",      // C
-  "Nonce",         // D
-  "Payload",       // E (JSON string)
-  "AI Status",     // F
-  "AI Attempts",   // G
-  "AI Score",      // H
-  "Final Score",   // I
-  "Idempotency",   // J
-  "Event Id"       // K
-];
 
 async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
@@ -26,14 +9,13 @@ async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
       spreadsheetId,
       requestBody: { requests: [{ addSheet: { properties: { title } } }] }
     });
+    await sheets.spreadsheets.values.update({
+      spreadsheetId,
+      range: `${title}!A1`,
+      valueInputOption: "RAW",
+      requestBody: { values: [headers] }
+    });
   }
-  // Always ensure headers on row 1 (safe & idempotent)
-  await sheets.spreadsheets.values.update({
-    spreadsheetId,
-    range: `${title}!A1`,
-    valueInputOption: "RAW",
-    requestBody: { values: [headers] }
-  });
 }
 
 module.exports.handler = async (event) => {
@@ -43,71 +25,73 @@ module.exports.handler = async (event) => {
 
     let body = {};
     try { body = JSON.parse(event.body || "{}"); }
-    catch { return error(400, "Invalid JSON body"); }
+    catch { return error(400, "Invalid JSON"); }
 
     const {
-      eventId,
-      teamCode,
-      teamName = "",
-      what = "",
-      where = "",
-      photoBase64 = "" // optional; ignored to keep Sheets small
+      eventId, teamCode, teamName,
+      what, where,
+      photoBase64 = "", photoMime = "", photoFileName = "", photoSize = 0, photoWasTruncated = 0
     } = body || {};
 
-    if (!eventId || !teamCode) {
-      return error(400, "Missing required fields: eventId and teamCode");
-    }
-    if (String(what).trim().length < 5) {
-      return error(400, "Please add a short description of what happened.");
-    }
+    if (!eventId) return error(400, "Missing eventId");
+    if (!teamCode) return error(400, "Missing teamCode");
+    if (!what || String(what).trim().length < 10) return error(400, "Please add a short description (10+ chars).");
 
     const sheets = await getSheets();
     if (!sheets) return error(500, "Spreadsheet client not available");
     const spreadsheetId = SHEET_ID;
 
-    await ensureSheetWithHeader(sheets, spreadsheetId, SHEET, HEADERS);
+    await ensureSheetWithHeader(
+      sheets, spreadsheetId, "submissions",
+      [
+        "Timestamp","Team Code","Activity","Nonce","Payload",
+        "AI Status","AI Attempts","AI Score","Final Score","Idempotency","Event Id"
+      ]
+    );
 
     const nowIso = new Date().toISOString();
+    const idempotency = `kindness:${eventId}:${teamCode}:${nowIso}`;
 
-    // Compact payload used later by scoring/Gallery
+    // Build a compact payload for Sheets cell size limits
     const payload = {
       activity: "kindness",
       text: String(what || ""),
       where: String(where || ""),
       teamName: String(teamName || ""),
-      imageUrl: "",             // Zapier can upload + fill this later
-      hasImage: !!photoBase64   // hint for automations
+      // keep image block compact; Zapier/AI can consume base64 if present
+      photo: photoBase64 ? {
+        base64: String(photoBase64),
+        mime: String(photoMime || ""),
+        fileName: String(photoFileName || ""),
+        size: Number(photoSize || 0) || 0,
+        truncated: !!photoWasTruncated
+      } : null
     };
-
-    const idem =
-      event.headers["idempotency-key"] ||
-      event.headers["Idempotency-Key"] ||
-      event.headers["IDEMPOTENCY-KEY"] ||
-      `kindness:${eventId}:${teamCode}`;
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${SHEET}!A1`,
+      range: "submissions!A1",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [[
-          nowIso,                   // Timestamp
-          teamCode,                 // Team Code
-          "kindness",               // Activity
-          "",                       // Nonce
-          JSON.stringify(payload),  // Payload
-          "PENDING",                // AI Status
-          "0",                      // AI Attempts
-          "",                       // AI Score
-          "",                       // Final Score
-          idem,                     // Idempotency
-          eventId                   // Event Id
+          nowIso,                  // Timestamp
+          teamCode,                // Team Code
+          "kindness",              // Activity
+          "",                      // Nonce
+          JSON.stringify(payload), // Payload
+          "PENDING",               // AI Status
+          "0",                     // AI Attempts
+          "",                      // AI Score
+          "",                      // Final Score (admin/manual/AI later)
+          idempotency,             // Idempotency
+          eventId || ""            // Event Id
         ]]
       }
     });
 
-    return ok({ success: true, message: "Kindness submitted." });
+    return ok({ success: true, message: "Kindness submission recorded" });
+
   } catch (e) {
     console.error("submit_kindness_function error:", e);
     return error(500, e.message || "Unexpected error");
