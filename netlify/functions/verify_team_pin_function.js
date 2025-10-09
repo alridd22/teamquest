@@ -1,5 +1,5 @@
 // /.netlify/functions/verify_team_pin_function.js
-// --- same as your latest working version, but now it also MINTS a team JWT on success ---
+// Same structure as yours + event scoping (if Event Id column exists) and tolerant matching.
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -9,7 +9,6 @@ const CORS = {
 const ok  = (b) => ({ statusCode: 200, headers: CORS, body: JSON.stringify(b) });
 const bad = (c, m) => ({ statusCode: c, headers: CORS, body: JSON.stringify({ success:false, message:m }) });
 
-// Try to use your shared utils first
 let U = null;
 try { U = require('./_utils'); } catch {}
 
@@ -24,7 +23,6 @@ function spreadsheetId() {
 }
 
 async function getSheets() {
-  // Prefer utils wiring if present
   if (U) {
     if (typeof U.getSheetsClient === 'function') return await U.getSheetsClient();
     if (typeof U.getSheets === 'function') {
@@ -37,7 +35,6 @@ async function getSheets() {
       return U.google.sheets({ version:'v4', auth: U.auth });
     }
   }
-  // Fallback: direct googleapis with broad env support
   const { google } = require('googleapis');
   let raw =
     process.env.GOOGLE_SERVICE_ACCOUNT_JSON_B64 ||
@@ -74,13 +71,14 @@ async function getSheets() {
   return google.sheets({ version:'v4', auth });
 }
 
-// ——— Flexible Teams reader (accepts many header variants) ———
-const norm = (s='') => String(s).toLowerCase().replace(/[^a-z0-9]+/g,'');
+const normKey = (s='') => String(s).toLowerCase().replace(/[^a-z0-9]+/g,'');
 const findIdx = (hdrs, names) => {
-  const H = hdrs.map(norm);
-  for (const n of names) { const i = H.indexOf(norm(n)); if (i >= 0) return i; }
+  const H = hdrs.map(normKey);
+  for (const n of names) { const i = H.indexOf(normKey(n)); if (i >= 0) return i; }
   return -1;
 };
+
+// Read Teams with optional Event Id column
 async function readTeams() {
   const id = spreadsheetId();
   if (!id) throw new Error('Missing GOOGLE_SHEET_ID / SPREADSHEET_ID');
@@ -88,40 +86,44 @@ async function readTeams() {
   const ranges = ['teams!A:Z','Teams!A:Z','TEAMS!A:Z'];
   let rows = [];
   for (const r of ranges) {
-    try { const resp = await sheets.spreadsheets.values.get({ spreadsheetId:id, range:r });
-      rows = resp.data.values || []; if (rows.length) break;
+    try {
+      const resp = await sheets.spreadsheets.values.get({ spreadsheetId:id, range:r });
+      rows = resp.data.values || [];
+      if (rows.length) break;
     } catch {}
   }
   if (!rows.length) throw new Error('No rows found in Teams sheet');
+
   const headers = rows[0];
-  const idxCode = findIdx(headers, ['teamcode','code','team_code','id','team id','team id']);
-  const idxPin  = findIdx(headers, ['pin','passcode','secret','password','access code','team pin']);
-  const idxName = findIdx(headers, ['teamname','name','team_name']);
-  if (idxCode < 0 || idxPin < 0) throw new Error('Teams sheet must include columns for teamCode and pin');
+  const idxCode  = findIdx(headers, ['team code','teamcode','code','team_code','id']);
+  const idxPin   = findIdx(headers, ['pin','team pin','passcode','secret','password','access code']);
+  const idxName  = findIdx(headers, ['team name','teamname','name','team_name']);
+  const idxEvent = findIdx(headers, ['event id','eventid']);
+  if (idxCode < 0 || idxPin < 0) throw new Error('Teams sheet must include columns for Team Code and PIN');
+
   return rows.slice(1).map(r => ({
     teamCode: (r[idxCode]||'').toString().trim(),
     teamName: idxName>=0 ? (r[idxName]||'').toString().trim() : '',
     pin:      (r[idxPin] ||'').toString().trim(),
+    eventId:  idxEvent>=0 ? (r[idxEvent]||'').toString().trim() : '' // may be blank if column absent
   })).filter(t => t.teamCode);
 }
 
-// ——— Try to mint a JWT using utils; fall back to jsonwebtoken ———
+// JWT mint (unchanged behaviour)
 async function makeTeamToken({ eventId, teamCode }) {
-  // Utilities you might already expose
   if (U) {
     if (typeof U.issueTeamToken === 'function')  return await U.issueTeamToken({ eventId, teamCode });
     if (typeof U.signTeamJWT   === 'function')   return await U.signTeamJWT({ eventId, teamCode });
     if (typeof U.signJwt       === 'function')   return U.signJwt({ eventId, teamCode, role:'team' });
     if (typeof U.makeJwt       === 'function')   return U.makeJwt({ eventId, teamCode, role:'team' });
   }
-  // Fallback: jsonwebtoken
   try {
     const jwt = require('jsonwebtoken');
     const secret = process.env.TQ_TEAM_JWT_SECRET || process.env.JWT_SECRET || process.env.SECRET;
     if (!secret) return null;
     return jwt.sign({ eventId, teamCode, role:'team' }, secret, { expiresIn:'12h' });
   } catch {
-    return null; // jsonwebtoken not installed
+    return null;
   }
 }
 
@@ -132,20 +134,28 @@ exports.handler = async (event) => {
   let body = {};
   try { body = JSON.parse(event.body || '{}'); } catch { return bad(400,'Invalid JSON'); }
 
-  const { eventId, teamCode, pin } = body || {};
-  if (!eventId || !teamCode || !pin) return bad(400,'eventId, teamCode, pin are required');
+  const rawEventId = (body.eventId || '').toString().trim();
+  const rawTeamCode = (body.teamCode || '').toString().trim();
+  const pin = (body.pin || '').toString().trim();
+  if (!rawEventId || !rawTeamCode || !pin) return bad(400,'eventId, teamCode, pin are required');
+
+  const wantedEvent = rawEventId.toUpperCase();
+  const wantedCode  = rawTeamCode.toUpperCase();
 
   try {
     const teams = await readTeams();
-    const t = teams.find(x => x.teamCode === String(teamCode).trim());
+
+    // Scope to event if the sheet provides one; otherwise allow any event
+    const candidates = teams.filter(t => !t.eventId || t.eventId.toUpperCase() === wantedEvent);
+
+    const t = candidates.find(x => x.teamCode.toUpperCase() === wantedCode);
     if (!t) return ok({ success:true, valid:false });
 
-    const valid = String(t.pin) === String(pin).trim();
+    const valid = t.pin === pin;
     if (!valid) return ok({ success:true, valid:false });
 
-    // NEW: return a token if we can mint one
-    const token = await makeTeamToken({ eventId, teamCode });
-    return ok({ success:true, valid:true, teamName: t.teamName, ...(token ? { token } : {}) });
+    const token = await makeTeamToken({ eventId: rawEventId, teamCode: rawTeamCode });
+    return ok({ success:true, valid:true, teamName: t.teamName || rawTeamCode, ...(token ? { token } : {}) });
   } catch (err) {
     console.error('verify_team_pin_function error:', err);
     return bad(500, err.message || 'Server error');
