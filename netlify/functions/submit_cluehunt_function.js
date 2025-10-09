@@ -1,7 +1,14 @@
-// submit_cluehunt_function.js
+// netlify/functions/submit_cluehunt_function.js
 const { ok, error, isPreflight, getSheets, SHEET_ID } = require("./_utils.js");
 
-/** Ensure a sheet exists (and optionally seed header) */
+/* ---------- helpers ---------- */
+
+function lcHeaders(row = []) {
+  const out = {};
+  (row || []).forEach((h, i) => (out[String(h || "").trim().toLowerCase()] = i));
+  return out;
+}
+
 async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
   const meta = await sheets.spreadsheets.get({ spreadsheetId });
   const exists = (meta.data.sheets || []).some(s => s.properties?.title === title);
@@ -10,34 +17,60 @@ async function ensureSheetWithHeader(sheets, spreadsheetId, title, headers) {
       spreadsheetId,
       requestBody: { requests: [{ addSheet: { properties: { title } } }] }
     });
-    if (headers?.length) {
+  }
+  if (headers?.length) {
+    // Merge: if header missing or shorter, write/extend it
+    const res = await sheets.spreadsheets.values.get({
+      spreadsheetId, range: `${title}!A1:Z1`
+    }).catch(() => null);
+    const cur = res?.data?.values?.[0] || [];
+    if (cur.length === 0) {
       await sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range: `${title}!A1`,
-        valueInputOption: "RAW",
-        requestBody: { values: [headers] }
+        spreadsheetId, range: `${title}!A1`,
+        valueInputOption: "RAW", requestBody: { values: [headers] }
       });
+    } else {
+      const need = headers.filter(h => !cur.includes(h));
+      if (need.length) {
+        const next = cur.concat(need);
+        await sheets.spreadsheets.values.update({
+          spreadsheetId, range: `${title}!A1`,
+          valueInputOption: "RAW", requestBody: { values: [next] }
+        });
+      }
     }
   }
 }
 
-function lcHeaders(row = []) {
-  const out = {};
-  (row || []).forEach((h, i) => (out[String(h || "").trim().toLowerCase()] = i));
-  return out;
-}
-
-/** Read a whole tab (A:Z) and return { header, rows } */
 async function readTab(sheets, spreadsheetId, title) {
   const res = await sheets.spreadsheets.values.get({
-    spreadsheetId,
-    range: `${title}!A:Z`,
+    spreadsheetId, range: `${title}!A:Z`
   }).catch(() => null);
   const values = res?.data?.values || [];
   return { header: values[0] || [], rows: values.slice(1) };
 }
 
-/** Detect Scores layout and give row builder */
+function norm(s) {
+  return String(s || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s]/g, "")
+    .replace(/\s+/g, "");
+}
+
+function toNum(v, def = 0) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : def;
+}
+
+function activityKey(raw = "") {
+  const k = String(raw || "").trim().toLowerCase();
+  if (["clue hunt", "cluehunt", "clue", "treasure", "treasure hunt"].includes(k)) return "cluehunt";
+  return null;
+}
+
+/* ---------- scores sheet compatibility ---------- */
+
 function makeScoresRowBuilder(scoresHeader) {
   const h = scoresHeader.map(x => String(x || "").trim().toLowerCase());
   const isLegacy =
@@ -52,11 +85,13 @@ function makeScoresRowBuilder(scoresHeader) {
       teamCode, activity, Number(score) || 0, status, submissionId, eventId || ""
     ]);
   }
-  // New layout fallback: Timestamp | Team Code | Activity | Score | Status | Event Id
+  // Newer layout (prepend Timestamp)
   return (teamCode, activity, score, status, submissionId, eventId) => ([
     new Date().toISOString(), teamCode, activity, Number(score) || 0, status, eventId || ""
   ]);
 }
+
+/* ---------- handler ---------- */
 
 module.exports.handler = async (event) => {
   try {
@@ -68,116 +103,187 @@ module.exports.handler = async (event) => {
     catch { return error(400, "Invalid JSON"); }
 
     const {
+      mode = "final",            // "draft" or "final"
+      eventId = "",              // strongly recommended (required for idempotency)
       teamCode,
-      teamName,
-      clueId,             // number 1..20
-      clueText,
-      userAnswer,
-      correctAnswer,
-      points,             // number (0 if wrong, 5..10 if right)
-      currentScore,       // running total client-side (for payload only)
-      wasCorrect,         // boolean
-      eventId             // optional
+      teamName = "",
+      clueId,                    // number 1..20
+      clueText = "",
+      userAnswer = "",
+      correctAnswer = "",
+      pointsIfCorrect,           // number (reward if correct)
     } = body || {};
 
-    if (!teamCode || !clueId || points == null) {
-      return error(400, "Missing required fields: teamCode, clueId, points");
+    if (!teamCode || !clueId) {
+      return error(400, "Missing required fields: teamCode, clueId");
     }
 
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
 
-    // Ensure tabs exist
+    /* ---- Draft autosave: write to separate tab, never affects score ---- */
+    if (String(mode).toLowerCase() === "draft") {
+      await ensureSheetWithHeader(
+        sheets, spreadsheetId, "cluehunt_drafts",
+        ["Timestamp", "Event Id", "Team Code", "Clue Id", "User Answer"]
+      );
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "cluehunt_drafts!A:E",
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        requestBody: { values: [[
+          new Date().toISOString(),
+          eventId || "",
+          teamCode,
+          Number(clueId) || 0,
+          String(userAnswer || "")
+        ]]}
+      });
+      return ok({ success: true, saved: true });
+    }
+
+    /* ---- Final submission (one try) ---- */
+
+    // Ensure submissions sheet has a modern header
+    const requiredCols = [
+      "Timestamp","Team Code","Team Name","Activity",
+      "Clue Id","Clue Text","User Answer","Correct Answer",
+      "Final Score","Status","Idempotency","Event Id"
+    ];
+    await ensureSheetWithHeader(sheets, spreadsheetId, "submissions", requiredCols);
+
+    // Ensure Scores sheet exists (legacy consumers)
     await ensureSheetWithHeader(
-      sheets, spreadsheetId, "submissions",
-      [
-        "Timestamp","Team Code","Activity","Nonce","Payload",
-        "AI Status","AI Attempts","AI Score","Final Score","Idempotency","Event Id"
-      ]
+      sheets, spreadsheetId, "Scores",
+      ["Team Code","Activity","Score","Status","SubmissionID","Event Id"]
     );
 
-    // Get Scores header (if absent, create with legacy order)
-    let { header: scoresHeader } = await readTab(sheets, spreadsheetId, "Scores");
-    if (!scoresHeader.length) {
-      await ensureSheetWithHeader(
-        sheets, spreadsheetId, "Scores",
-        ["Team Code","Activity","Score","Status","SubmissionID","Event Id"]
-      );
-      ({ header: scoresHeader } = await readTab(sheets, spreadsheetId, "Scores"));
+    const { header: subHeader, rows: subRows } = await readTab(sheets, spreadsheetId, "submissions");
+    const subIdx = lcHeaders(subHeader);
+
+    // Add any missing columns gracefully
+    const missing = requiredCols.filter(c => subIdx[c.toLowerCase()] == null);
+    if (missing.length) {
+      const next = subHeader.concat(missing);
+      await sheets.spreadsheets.values.update({
+        spreadsheetId, range: "submissions!A1",
+        valueInputOption: "RAW", requestBody: { values: [next] }
+      });
+      // refresh indices
+      for (const [i, h] of next.entries()) subIdx[h.toLowerCase()] = i;
     }
-    const buildScoresRow = makeScoresRowBuilder(scoresHeader);
 
-    // Build an idempotency key per team + clue
-    const idem = `clue:${eventId || ""}:${teamCode}:${clueId}`;
+    // Idempotency
+    const idem = `clue:${(eventId || "").toUpperCase()}:${teamCode.toUpperCase()}:${Number(clueId) || 0}`;
 
-    // Prevent double-scoring: if this idem already exists in Scores, bail out gracefully
-    {
-      const { header: h, rows } = await readTab(sheets, spreadsheetId, "Scores");
-      const idx = lcHeaders(h);
-      const subIdIdx = (idx["submissionid"] != null ? idx["submissionid"] : idx["idempotency"]);
-      if (subIdIdx != null) {
-        const dup = rows.some(r => (r[subIdIdx] || "") === idem);
-        if (dup) return ok({ success: true, deduped: true, message: "Clue already recorded" });
+    // Duplicate check (prefer exact clue row match; fallback to idempotency col)
+    let existing = null;
+    const iTeam  = subIdx["team code"],  iEvt = subIdx["event id"], iClue = subIdx["clue id"];
+    const iScore = subIdx["final score"], iTs = subIdx["timestamp"], iAct = subIdx["activity"];
+    const iStat  = subIdx["status"], iIdem = subIdx["idempotency"];
+
+    for (const r of subRows) {
+      const act = activityKey(r[iAct] || "");
+      if (act !== "cluehunt") continue;
+
+      const sameTeam = ((r[iTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
+      if (!sameTeam) continue;
+
+      // If Event Id column exists, enforce it; otherwise accept any
+      const sameEvent = !iEvt || ((r[iEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
+      if (!sameEvent) continue;
+
+      const sameClue = Number(r[iClue] || 0) === Number(clueId);
+      const sameIdem = iIdem != null && (r[iIdem] || "") === idem;
+
+      if (sameClue || sameIdem) {
+        existing = {
+          awarded: toNum(r[iScore], 0),
+          correct: toNum(r[iScore], 0) > 0,
+          attemptTime: r[iTs] || new Date().toISOString()
+        };
+        break;
       }
     }
 
-    const nowIso = new Date().toISOString();
+    if (existing) {
+      // Compute team total (FINAL only)
+      let total = 0;
+      for (const r of subRows) {
+        const act = activityKey(r[iAct] || "");
+        if (act !== "cluehunt") continue;
+        const sameTeam = ((r[iTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
+        if (!sameTeam) continue;
+        const sameEvent = !iEvt || ((r[iEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
+        if (!sameEvent) continue;
+        const status = ((iStat != null ? r[iStat] : "FINAL") || "FINAL").toString().toUpperCase();
+        if (status !== "FINAL") continue;
+        total += toNum(r[iScore], 0);
+      }
+      return ok({ success:true, idempotent:true, ...existing, totalScore: total });
+    }
 
-    // 1) Append detailed log to submissions
-    const payload = JSON.stringify({
-      activity: "clue",
-      clueId: Number(clueId),
-      clueText: String(clueText || ""),
-      userAnswer: String(userAnswer || ""),
-      correctAnswer: String(correctAnswer || ""),
-      points: Number(points) || 0,
-      wasCorrect: !!wasCorrect,
-      currentScore: Number(currentScore || 0),
-      teamName: teamName || "",
-      attemptTime: nowIso
-    });
+    // Evaluate correctness defensively on the server (given expected answer)
+    const correct = norm(userAnswer) && norm(userAnswer) === norm(correctAnswer);
+    const awarded = correct ? toNum(pointsIfCorrect, 0) : 0;
+    const ts = new Date().toISOString();
+
+    // Build a row aligned to detected indices
+    const subRow = [];
+    subRow[subIdx["timestamp"]]      = ts;
+    subRow[subIdx["team code"]]      = teamCode;
+    subRow[subIdx["team name"]]      = teamName || teamCode;
+    subRow[subIdx["activity"]]       = "Clue Hunt";
+    subRow[subIdx["clue id"]]        = Number(clueId);
+    subRow[subIdx["clue text"]]      = String(clueText || "");
+    subRow[subIdx["user answer"]]    = String(userAnswer || "");
+    subRow[subIdx["correct answer"]] = String(correctAnswer || "");
+    subRow[subIdx["final score"]]    = awarded;
+    subRow[subIdx["status"]]         = "FINAL";
+    subRow[subIdx["idempotency"]]    = idem;
+    if (subIdx["event id"] != null) subRow[subIdx["event id"]] = eventId || "";
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "submissions!A1",
+      range: "submissions!A:Z",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
-      requestBody: {
-        values: [[
-          nowIso,             // Timestamp
-          teamCode,           // Team Code
-          "clue",             // Activity
-          "",                 // Nonce
-          payload,            // Payload
-          "FINAL",            // AI Status
-          "0",                // AI Attempts
-          "",                 // AI Score (unused)
-          Number(points)||0,  // Final Score (this attempt)
-          idem,               // Idempotency
-          eventId || ""       // Event Id
-        ]]
-      }
+      requestBody: { values: [subRow] }
     });
 
-    // 2) Append to Scores (legacy-safe)
-    const scoresRow = buildScoresRow(
-      teamCode, "clue", Number(points) || 0, "final", idem, eventId || ""
-    );
-
+    // Legacy: also append to Scores for backwards compatibility
+    const { header: scoresHeader } = await readTab(sheets, spreadsheetId, "Scores");
+    const buildScoresRow = makeScoresRowBuilder(scoresHeader);
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: "Scores!A1",
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
-      requestBody: { values: [scoresRow] }
+      requestBody: { values: [buildScoresRow(teamCode, "clue", awarded, "final", idem, eventId || "")] }
     });
+
+    // Recompute total
+    const { rows: subRows2 } = await readTab(sheets, spreadsheetId, "submissions");
+    let totalScore = 0;
+    for (const r of subRows2) {
+      const act = activityKey(r[iAct] || "");
+      if (act !== "cluehunt") continue;
+      const sameTeam = ((r[iTeam] || "").toString().trim().toUpperCase() === teamCode.toUpperCase());
+      if (!sameTeam) continue;
+      const sameEvent = !iEvt || ((r[iEvt] || "").toString().trim().toUpperCase() === (eventId || "").toUpperCase());
+      if (!sameEvent) continue;
+      const status = ((iStat != null ? r[iStat] : "FINAL") || "FINAL").toString().toUpperCase();
+      if (status !== "FINAL") continue;
+      totalScore += toNum(r[iScore], 0);
+    }
 
     return ok({
       success: true,
-      message: "Clue recorded",
-      teamCode,
-      clueId: Number(clueId),
-      points: Number(points) || 0
+      correct,
+      awarded,
+      attemptTime: ts,
+      totalScore
     });
 
   } catch (e) {
@@ -185,4 +291,3 @@ module.exports.handler = async (event) => {
     return error(500, e.message || "Unexpected error");
   }
 };
-
