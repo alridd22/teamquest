@@ -18,114 +18,62 @@
       --shadow-soft:0 6px 18px rgba(0,0,0,.12);
       --gutter:22px;
     }
-
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0;
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      color:var(--ink);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)),
-        var(--bg);
-      background-size:cover;
-      background-position:top center;
-      background-attachment:fixed;
+      margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink);
+      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
+      background-size:cover; background-position:top center; background-attachment:fixed;
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:var(--nav-h);
     }
 
-    /* NAV (consistent with activities) */
-    .treasure-nav{
-      position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
+    /* NAV */
+    .treasure-nav{position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
-      border-bottom:1px solid rgba(255,255,255,.18);
-    }
-    .nav-container{
-      height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between;
-      max-width:1000px; margin:0 auto;
-    }
+      border-bottom:1px solid rgba(255,255,255,.18)}
+    .nav-container{height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between; max-width:1000px; margin:0 auto}
     .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    /* make the header logo non-clickable */
     .nav-logo{pointer-events:none; cursor:default;}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
-    .nav-menu{
-      position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+    .nav-menu{position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
       background:linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.72));
-      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s;
-    }
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s}
     .nav-menu.active{left:0}
-    .nav-link,.dropdown-link{
-      display:block; width:92%; max-width:360px; text-align:center;
-      text-decoration:none; color:#F7EED8; font-weight:900;
-      padding:12px 14px; border-radius:14px;
-      background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
-    }
+    .nav-link,.dropdown-link{display:block; width:92%; max-width:360px; text-align:center; text-decoration:none; color:#F7EED8; font-weight:900;
+      padding:12px 14px; border-radius:14px; background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3)}
     .nav-link:hover,.dropdown-link:hover{ background:rgba(247,238,216,.32) }
 
-    /* HERO with logo */
-    .hero{
-      min-height:220px;
-      display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-      padding:24px var(--gutter) 18px; text-align:center;
-    }
-    .brand-logo{
-      width:min(220px,68vw); height:auto; margin-bottom:8px;
-      filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35));
-    }
-    .hero-title{
-      font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px;
-      text-shadow:0 2px 6px rgba(0,0,0,.6);
-    }
+    /* HERO */
+    .hero{min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:24px var(--gutter) 18px; text-align:center}
+    .brand-logo{width:min(220px,68vw); height:auto; margin-bottom:8px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* STACK + PANEL */
-    .stack{ padding:0 var(--gutter) 28px; }
-    .panel{
-      background:var(--parchment);
-      border-radius:var(--radius-card);
-      box-shadow:var(--shadow-card);
-      padding:18px 16px;
-      border:1px solid rgba(0,0,0,.06);
-      margin:0 auto; width:100%; max-width:1100px;
-    }
-    h1{margin:0 0 6px; color:var(--ink); font-weight:900}
+    /* CONTENT */
+    .stack{ padding:0 var(--gutter) 28px }
+    .panel{background:var(--parchment); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto; max-width:1100px}
+    h1{margin:0 0 6px; font-weight:900}
     .sub{color:var(--ink-soft); margin-bottom:12px; font-weight:700}
 
-    /* Tabs */
     .tabs{display:flex;gap:10px;margin:8px 0 14px; flex-wrap:wrap}
-    .tab{
-      padding:10px 14px; border-radius:999px; border:2px solid var(--gold-deep);
-      background:linear-gradient(90deg, #FDBA2D, #F0C433); cursor:pointer; font-weight:900; color:#442812;
-      box-shadow:0 6px 14px rgba(0,0,0,.12);
-    }
+    .tab{padding:10px 14px; border-radius:999px; border:2px solid var(--gold-deep);
+      background:linear-gradient(90deg, #FDBA2D, #F0C433); cursor:pointer; font-weight:900; color:#442812; box-shadow:0 6px 14px rgba(0,0,0,.12)}
     .tab.active{filter:brightness(1.05)}
-    .tab.ghost{
-      background:var(--parchment-2); color:var(--ink); border-color:#C6A168;
-    }
+    .tab.ghost{background:var(--parchment-2); color:var(--ink); border-color:#C6A168}
 
-    /* Grid + cards */
-    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px}
     @media (max-width: 900px){.grid{grid-template-columns:1fr 1fr}}
     @media (max-width: 600px){.grid{grid-template-columns:1fr}}
 
-    .card{
-      background:var(--paper);
-      border:1px solid #ecdac7;
-      border-radius:16px;
-      padding:12px;
-      box-shadow:var(--shadow-soft);
-    }
+    .card{background:var(--paper); border:1px solid #ecdac7; border-radius:16px; padding:12px; box-shadow:var(--shadow-soft)}
     .card img{width:100%;height:200px;object-fit:cover;border-radius:12px;margin-bottom:8px;border:2px solid #e7d8c4}
     .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0 8px}
     .team{font-weight:900;color:#4a351e}
     .tag{font-weight:900;font-size:12px;border:2px dashed #C6A168;border-radius:999px;padding:4px 10px;background:#fff0d1}
     .text{margin:6px 0 0; color:#4a3a26; line-height:1.5}
 
-    .lock{
-      background:#fff7e6;border:2px dashed #d69b45;border-radius:16px;padding:18px;text-align:center;
-      font-weight:800;color:#6A5A47
-    }
+    .lock{background:#fff7e6;border:2px dashed #d69b45;border-radius:16px;padding:18px;text-align:center;font-weight:800;color:#6A5A47}
     .status{margin-top:12px;text-align:center;color:#6A5A47;font-weight:700}
   </style>
 </head>
@@ -144,7 +92,6 @@
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
       <li><a href="https://theteamquest.netlify.app/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
-      <!-- Gallery intentionally omitted on this page -->
       <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
     </ul>
   </nav>
@@ -155,7 +102,6 @@
     <div class="hero-title">Gallery</div>
   </header>
 
-  <!-- CONTENT -->
   <main class="stack">
     <section class="panel">
       <h1>🏅 Gallery</h1>
@@ -177,77 +123,100 @@
   </main>
 
   <script>
-    // Mobile nav toggle + PRESERVE ?event= on same-origin links (including logo)
+    // Mobile nav + persist ?event=
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
-      if(navToggle && navMenu){
-        navToggle.addEventListener('click', ()=> {
-          navMenu.classList.toggle('active');
-          navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰';
-        });
-        document.addEventListener('click', (e)=> {
-          const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-          if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-        });
-      }
-
-      const EVENT_ID = new URLSearchParams(location.search).get('event') || new URLSearchParams(location.search).get('eventId') || '';
-      if (!EVENT_ID) return;
-
-      const anchors = document.querySelectorAll('a.nav-link, a.dropdown-link, a.nav-logo');
-      anchors.forEach(a=>{
-        const href = a.getAttribute('href');
-        if (!href) return;
-
-        // Only touch same-origin or root-relative links
-        let u;
-        try { u = new URL(href, location.origin); } catch { return; }
-        if (u.origin !== location.origin) return;
-
-        // If the link already has event/eventId, leave it
-        if (u.searchParams.has('event') || u.searchParams.has('eventId')) return;
-
-        // Add event param, preserve other params and hash
-        u.searchParams.set('event', EVENT_ID);
-        // Keep absolute for external consistency if original was absolute; otherwise use pathname relative
-        const absolute = /^https?:\/\//i.test(href);
-        a.setAttribute('href', absolute ? u.toString() : `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active')?'✕':'☰'; });
+      document.addEventListener('click',e=>{
+        const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
+        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
       });
-
-      // Extra safety: if any nav link is clicked without event, inject it on-the-fly
-      document.getElementById('nav-menu')?.addEventListener('click', (e)=>{
-        const a = e.target.closest('a');
-        if (!a) return;
+      const qs = new URLSearchParams(location.search);
+      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+      if (!EVENT_ID) return;
+      document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
         try{
-          const u = new URL(a.href);
-          if (u.origin === location.origin && !(u.searchParams.has('event')||u.searchParams.has('eventId'))){
-            u.searchParams.set('event', EVENT_ID);
-            a.href = u.toString();
-          }
+          const u = new URL(a.getAttribute('href'), location.origin);
+          if (u.origin !== location.origin) return;
+          if (!u.searchParams.get('event')) u.searchParams.set('event', EVENT_ID);
+          a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
         }catch{}
       });
     })();
 
-    // Gallery logic (unchanged contract)
+    // ===== Gallery logic =====
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     const $ = s => document.querySelector(s);
-    let data = {limerick:[], kindness:[], published:false};
+    let data = { limerick: [], kindness: [], published: false };
 
     function esc(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
 
+    function guessMime(b64){
+      if (b64.startsWith('iVBOR')) return 'image/png';
+      if (b64.startsWith('R0lGOD')) return 'image/gif';
+      if (b64.startsWith('UklGR')) return 'image/webp';
+      return 'image/jpeg';
+    }
+
+    function normalizeItem(it){
+      const teamName =
+        it.teamName || it.team || it.crew || it.name || it.team_name || it.teamCode || 'Unknown Crew';
+      const text =
+        it.text || it.content || it.limerick || it.poem || it.what || it.description || '';
+      const evt =
+        it.eventId || it.event || it.event_id || '';
+      let imageUrl =
+        it.imageUrl || it.photoUrl || it.photo || it.image || '';
+
+      const base64 = it.photoBase64 || it.imageBase64 || '';
+      if (!imageUrl && base64 && base64.length > 50){
+        imageUrl = base64.startsWith('data:') ? base64 : `data:${guessMime(base64)};base64,${base64}`;
+      }
+      return { teamName, text, imageUrl, eventId: evt };
+    }
+
+    function normalizeResponse(j){
+      const pub =
+        (typeof j.published === 'boolean') ? j.published :
+        (j.state ? String(j.state).toLowerCase() === 'published' : false);
+
+      // Try multiple shapes
+      let lim = j.limerick || j.limericks || [];
+      let kin = j.kindness || j.kindnesses || [];
+
+      if (!Array.isArray(lim) && Array.isArray(j.items)){
+        lim = j.items.filter(x => /limerick/i.test(x.activity || x.type || ''));
+      }
+      if (!Array.isArray(kin) && Array.isArray(j.items)){
+        kin = j.items.filter(x => /kindness/i.test(x.activity || x.type || ''));
+      }
+
+      lim = (Array.isArray(lim) ? lim : []).map(normalizeItem);
+      kin = (Array.isArray(kin) ? kin : []).map(normalizeItem);
+
+      // Client-side filter by event if provided
+      if (EVENT_ID){
+        const wanted = String(EVENT_ID).trim().toUpperCase();
+        const keep = (x) => !x.eventId || String(x.eventId).trim().toUpperCase() === wanted;
+        lim = lim.filter(keep);
+        kin = kin.filter(keep);
+      }
+      return { published: !!pub, limerick: lim, kindness: kin };
+    }
+
     function cardHtml(e){
       const img = e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="evidence">` : '';
       const text = e.text ? `<div class="text">${nl2br(e.text)}</div>` : '';
-      const tag = `<span class="tag">${e.activity ? esc(e.activity) : 'submission'}</span>`;
+      const tag = `<span class="tag">${e.activity ? esc(e.activity) : (img ? 'kindness' : 'limerick')}</span>`;
       return `
         <div class="card">
           ${img}
           <div class="meta">
-            <div class="team">${esc(e.teamName || 'Unknown Crew')}</div>
+            <div class="team">${esc(e.teamName)}</div>
             ${tag}
           </div>
           ${text}
@@ -262,16 +231,15 @@
       ];
       $('#grid').innerHTML = items.length ? items.map(cardHtml).join('') :
         `<div class="lock">No submissions yet.</div>`;
-      $('#status').textContent = `Showing ${items.length} item(s)`;
+      $('#status').textContent =
+        `Limericks ${data.limerick.length} • Kindness ${data.kindness.length} • Showing ${items.length}`;
     }
 
     function setTabs(){
       document.querySelectorAll('.tab').forEach(btn=>{
         btn.addEventListener('click', ()=>{
-          document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-          document.querySelectorAll('.tab').forEach(b=>b.classList.add('ghost'));
-          btn.classList.add('active');
-          btn.classList.remove('ghost');
+          document.querySelectorAll('.tab').forEach(b=>{ b.classList.remove('active'); b.classList.add('ghost'); });
+          btn.classList.add('active'); btn.classList.remove('ghost');
           render(btn.dataset.view);
         });
       });
@@ -280,22 +248,28 @@
     async function load(){
       const base = '/.netlify/functions/get_gallery';
       const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
-      const r = await fetch(url);
-      const j = await r.json().catch(()=>({ success:false, message:'Bad JSON' }));
-      if (!r.ok || j.success === false) throw new Error(j.message || 'Failed to load gallery');
 
-      if (!j.published){
+      let j;
+      try{
+        const r = await fetch(url, { cache:'no-store' });
+        j = await r.json();
+      }catch{
+        // fallback (if function named slightly differently in deploy)
+        const alt = EVENT_ID ? `/.netlify/functions/get_gallery_function?eventId=${encodeURIComponent(EVENT_ID)}`
+                             : '/.netlify/functions/get_gallery_function';
+        const r2 = await fetch(alt, { cache:'no-store' });
+        j = await r2.json();
+      }
+
+      const norm = normalizeResponse(j);
+
+      if (!norm.published){
         $('#lock').style.display = 'block';
         $('#content').style.display = 'none';
         return;
       }
 
-      data = {
-        limerick: Array.isArray(j.limerick) ? j.limerick : [],
-        kindness: Array.isArray(j.kindness) ? j.kindness : [],
-        published: true,
-      };
-
+      data = norm;
       $('#lock').style.display = 'none';
       $('#content').style.display = 'block';
       setTabs();
