@@ -31,6 +31,7 @@
       padding-top:var(--nav-h);
     }
 
+    /* NAV */
     .treasure-nav{position:fixed;inset:0 0 auto 0;height:var(--nav-h);z-index:1000;
       backdrop-filter:saturate(120%) blur(6px);
       background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
@@ -49,10 +50,12 @@
       background:rgba(247,238,216,.22);border:1px solid rgba(255,255,255,.3)}
     .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
 
+    /* HERO */
     .hero{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:24px var(--gutter) 18px;text-align:center}
     .brand-logo{width:min(220px,68vw);height:auto;margin-bottom:8px;filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-weight:900;font-size:24px;color:#F7EED8;letter-spacing:.2px;text-shadow:0 2px 6px rgba(0,0,0,.6);font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 
+    /* LAYOUT */
     .stack{padding:0 var(--gutter) 28px}
     .card{background:linear-gradient(145deg,var(--parchment),var(--parchment-2));border-radius:var(--radius-card);
       box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);max-width:980px;margin:0 auto 18px}
@@ -61,25 +64,16 @@
     .subtle{color:var(--ink-soft);margin:0 0 10px}
     .optional{font-size:.85rem;color:var(--ink-soft);font-weight:700}
 
+    /* Inputs + select */
     label{display:block;margin:12px 6px 6px;font-weight:900;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
     .field{
       width:100%;font-size:18px;padding:14px;border:3px solid var(--gold);border-radius:16px;background:#fff;
       font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; -webkit-text-fill-color:var(--ink);
     }
     .field::placeholder{color:rgba(0,0,0,.38)}
-    .tq-select{
-      -webkit-appearance:none; -moz-appearance:none; appearance:none;
-      padding:14px 44px 14px 14px; background:#fff; color:var(--ink); -webkit-text-fill-color:var(--ink);
-      border:3px solid var(--gold); border-radius:16px; font-size:18px;
-      background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 9l6 6 6-6' fill='none' stroke='%233b2d16' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
-      background-repeat:no-repeat;background-position:right 12px center;background-size:18px 18px;
-      font-family:'Handlee', ui-rounded, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-    .tq-select:focus{outline:none; box-shadow:var(--focus)}
-    .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
-    .tq-select::-ms-expand{display:none}
     textarea.field{min-height:160px;resize:vertical}
 
+    /* Buttons (shared amber pill) */
     .btn{
       display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
       min-height:48px;padding:16px;border-radius:16px;border:3px solid #A7711F;
@@ -94,9 +88,11 @@
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .msg.err{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
 
+    /* Rules */
     .rules{border-radius:16px;padding:14px;background:linear-gradient(145deg,#f9f0db,#f2e6cf);border:1px solid rgba(0,0,0,.06)}
     .rule{padding:10px 12px;border-radius:12px;background:#f4ead1;margin:8px 0;font-weight:800;border:none}
 
+    /* Upload control */
     .field-block{margin:12px 0 18px}
     .uploader input[type="file"]{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
     .upload-cta{
@@ -107,10 +103,6 @@
     }
     .upload-cta.has-file{border-color:#2ba05f}
     .upload-meta{margin-top:8px;font-size:14px;color:var(--ink-soft);text-align:center}
-
-    .section{display:none}
-    .section.active{display:block}
-    .mt-14{margin-top:14px}
   </style>
 </head>
 <body>
@@ -140,12 +132,12 @@
 
   <main class="stack">
     <!-- SIGN-IN -->
-    <section id="secSign" class="card section active">
+    <section id="secSign" class="card">
       <h2>Sign in</h2>
       <p class="subtle">Pick your crew and enter your 4-digit PIN to continue.</p>
 
       <label for="teamSelect">Crew Name</label>
-      <select id="teamSelect" class="tq-select" required>
+      <select id="teamSelect" class="field" required>
         <option value="" disabled selected>Loading crews…</option>
       </select>
 
@@ -158,116 +150,70 @@
     </section>
 
     <!-- FORM -->
-    <section id="secForm" class="card section">
+    <section id="secForm" class="card" style="display:none">
       <label for="crewName">Crew</label>
       <div id="crewName" class="field" style="pointer-events:none;user-select:none"></div>
 
-      <div class="rules mt-14">
+      <div class="rules" style="margin-top:14px">
         <h2>Quick Rules</h2>
         <div class="rule">• Do a genuine act of kindness.</div>
         <div class="rule">• Take a clear photo of the deed or outcome.</div>
         <div class="rule">• Tell us briefly what you did and the impact.</div>
       </div>
 
-      <div class="field-block mt-14">
+      <div class="field-block">
         <div class="uploader">
           <input id="kindPhoto" type="file" accept="image/*" capture="environment">
           <label for="kindPhoto" class="upload-cta">📷 Upload photo</label>
-          <div id="uploadMeta" class="upload-meta" aria-live="polite">JPEG/PNG/WebP • Max ~20MB</div>
+          <div id="uploadMeta" class="upload-meta" aria-live="polite">JPEG/PNG/WebP</div>
         </div>
       </div>
 
       <label for="whatText">What happened?</label>
       <textarea id="whatText" class="field" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
-      <div class="subtle">Characters: <span id="countWhat">0</span></div>
 
       <label for="whereText">Where? <span class="optional">(optional)</span></label>
       <input id="whereText" class="field" placeholder="e.g., High Street, Community Centre…"/>
 
-      <button id="btnSubmit" class="btn mt-14">💛 Submit Kind Act</button>
+      <button id="btnSubmit" class="btn" style="margin-top:14px">💛 Submit Kind Act</button>
       <div id="submitMsg" class="msg"></div>
     </section>
   </main>
 
   <script>
-    const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
-
-    // NAV + ?event propagation
-    (function(){
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu   = document.getElementById('nav-menu');
-      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active') ? '✕' : '☰'; });
-      document.addEventListener('click',e=>{
-        const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
-        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
-      });
-
-      const qs = new URLSearchParams(location.search);
-      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-      if(EVENT_ID){
-        const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
-          try{
-            const u = new URL(a.getAttribute('href'), location.origin);
-            if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
-            if (!u.searchParams.get('event')){
-              u.searchParams.set('event', EVENT_ID);
-              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
-            }
-          }catch{}
-        });
-      }
-    })();
-
-    // ===== Helpers / refs
+    /* ===== Small helpers ===== */
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+    const TEAMS_PUBLIC_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTlOyDNnFwKccCdMKyTQqvr-hfwNGLzv-3h1WEG06RHsMepnhpAZvSeTBHrNgVARlK2NT9VbgYx2jWS/pub?gid=1017404807&single=true&output=csv';
+
     const $ = id => document.getElementById(id);
-
-    const teamSelect = $('teamSelect'), teamPin = $('teamPin');
-    const signMsg = $('signMsg'), submitMsg = $('submitMsg');
-    const secSign = $('secSign'), secForm = $('secForm');
-    const crewName = $('crewName');
-    const whatText = $('whatText'), countWhat = $('countWhat');
-    const whereText = $('whereText');
-    const btnSign = $('btnSign'), btnSubmit = $('btnSubmit');
-
-    function setMsg(el, text, kind='error'){ el.textContent=text; el.className='msg ' + (kind==='error'?'err':'ok'); el.style.display='block'; }
+    function esc(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
+    function setMsg(el, text, kind='err'){ el.textContent=text; el.className='msg ' + (kind==='ok'?'ok':'err'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
 
     const token = ()=> localStorage.getItem('teamToken') || '';
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
 
-    // Try multiple function names to survive deploy naming differences
-    async function callAny(names, payload){
-      let lastErr;
-      for (const name of names){
-        try{
-          const res = await fetch(`/.netlify/functions/${name}`,{
-            method:'POST',
-            headers:{
-              'Content-Type':'application/json',
-              ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
-              'Idempotency-Key': uuidv4()
-            },
-            // NOTE: no keepalive (this can cause "Failed to fetch" on mobile)
-            body: JSON.stringify(payload||{})
-          });
-          let data={}; try{ data = await res.json(); }catch{}
-          if(!res.ok || data.success===false){
-            const err = new Error((data && (data.message || data.error)) || `HTTP ${res.status}`);
-            err.code = data?.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
-            throw err;
-          }
-          return data;
-        }catch(e){
-          lastErr = e;
-        }
+    async function callFn(name, payload){
+      const res = await fetch(`/.netlify/functions/${name}`,{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
+          'Idempotency-Key': uuidv4()
+        },
+        body: JSON.stringify(payload||{})
+      });
+      let data={}; try{ data = await res.json(); }catch{}
+      if(!res.ok || data.success===false){
+        const err = new Error(data.message || `HTTP ${res.status}`);
+        err.code = data.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
+        throw err;
       }
-      throw lastErr || new Error('Network error');
+      return data;
     }
 
-    // ===== CSV (minimal) + load teams
+    /* ===== Teams via CSV ===== */
     function parseCsv(text){
       const rows=[]; let i=0,cur='',row=[],inQ=false;
       while(i<text.length){
@@ -281,10 +227,10 @@
     }
 
     async function loadTeams(){
+      const teamSelect = $('teamSelect'), signMsg = $('signMsg'), btnSign = $('btnSign');
       if (!EVENT_ID){
         teamSelect.innerHTML = `<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
-        setMsg(signMsg,'This page needs an event link (with ?event=...).','error');
-        btnSign.disabled = true; return;
+        setMsg(signMsg,'This page needs an event link (with ?event=...).'); btnSign.disabled = true; return;
       }
       teamSelect.innerHTML = `<option value="" disabled selected>Loading crews…</option>`;
       try{
@@ -309,7 +255,7 @@
         if(!teams.length) throw new Error('No crews for this event');
 
         teamSelect.innerHTML = '<option value="" disabled selected>Choose your crew…</option>' +
-          teams.map(t=>`<option value="${escapeHtml(t.teamCode)}">${escapeHtml(t.teamName)}</option>`).join('');
+          teams.map(t=>`<option value="${esc(t.teamCode)}">${esc(t.teamName)}</option>`).join('');
         clearMsg(signMsg);
         btnSign.disabled = false;
 
@@ -320,96 +266,154 @@
         }
       }catch(err){
         teamSelect.innerHTML = `<option value="" disabled selected>—</option>`;
-        setMsg(signMsg,'Unable to load crew list. Please refresh.','error');
+        setMsg($('signMsg'),'Unable to load crew list. Please refresh.');
       }
     }
 
-    // ===== Sign in
+    /* ===== Sign in ===== */
     async function signIn(){
-      clearMsg(signMsg);
-      const code = teamSelect.value;
-      const pin  = (teamPin.value||'').trim();
-      if(!code){ setMsg(signMsg,'Pick your crew from the list.','error'); return; }
-      if(!/^\d{4}$/.test(pin)){ setMsg(signMsg,'Enter your 4-digit PIN.','error'); return; }
+      clearMsg($('signMsg'));
+      const code = $('teamSelect').value;
+      const pin  = ($('teamPin').value||'').trim();
+      if(!code){ setMsg($('signMsg'),'Pick your crew from the list.'); return; }
+      if(!/^\d{4}$/.test(pin)){ setMsg($('signMsg'),'Enter your 4-digit PIN.'); return; }
 
       try{
-        const res = await callAny(['verify_team_pin_function','verify_team_pin'],{ eventId: EVENT_ID, teamCode: code, pin });
-        if(!res.success || !res.valid) return setMsg(signMsg,'That PIN doesn’t match this crew.','error');
+        const res = await callFn('verify_team_pin_function',{ eventId: EVENT_ID, teamCode: code, pin });
+        if(!res.success || !res.valid) return setMsg($('signMsg'),'That PIN doesn’t match this crew.');
 
         if(res.token) localStorage.setItem('teamToken', res.token);
         localStorage.setItem('teamCode', code);
-        localStorage.setItem('teamName', teamSelect.options[teamSelect.selectedIndex]?.textContent || res.teamName || '');
+        localStorage.setItem('teamName', $('teamSelect').options[$('teamSelect').selectedIndex]?.textContent || res.teamName || '');
 
-        crewName.textContent = localStorage.getItem('teamName') || '—';
-
-        secSign.classList.remove('active'); secSign.style.display='none';
-        secForm.classList.add('active');
+        $('crewName').textContent = localStorage.getItem('teamName') || '—';
+        $('secSign').style.display='none';
+        $('secForm').style.display='block';
       }catch(err){
-        setMsg(signMsg, err.message || 'Could not sign you in. Try again.', 'error');
+        setMsg($('signMsg'), err.message || 'Could not sign you in. Try again.');
       }
     }
-    btnSign.addEventListener('click', signIn);
-    teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
+    $('btnSign').addEventListener('click', signIn);
+    $('teamPin').addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
-    // ===== Submit Kindness
+    /* ===== Image -> base64 (size-safe) =====
+       - resizes to <= 1280px longest side
+       - exports WebP (fallback JPEG) quality 0.7
+       - if still large, reduces quality to fit MAX_CHARS
+    */
+    const MAX_BASE64_CHARS = 45000; // keep well below Sheets cell limit
+    async function fileToSafeBase64(file){
+      if (!file) return { base64:'', mime:'', fileName:'', size:0, truncated:false };
+
+      const img = await new Promise((res, rej)=>{
+        const i = new Image(); i.onload=()=>res(i); i.onerror=rej;
+        i.src = URL.createObjectURL(file);
+      });
+
+      const maxSide = 1280;
+      let {width, height} = img;
+      const scale = Math.min(1, maxSide / Math.max(width, height));
+      width = Math.round(width * scale); height = Math.round(height * scale);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      let mime = 'image/webp';
+      let q = 0.72;
+      let dataUrl = canvas.toDataURL(mime, q);
+
+      // Safari iOS might not support webp encoding; fallback to jpeg
+      if (!/^data:image\/webp/.test(dataUrl)) {
+        mime = 'image/jpeg';
+        q = 0.72;
+        dataUrl = canvas.toDataURL(mime, q);
+      }
+
+      // If still too big, reduce quality iteratively
+      while (dataUrl.length > MAX_BASE64_CHARS && q > 0.4){
+        q -= 0.08;
+        dataUrl = canvas.toDataURL(mime, q);
+      }
+
+      let base64 = dataUrl.split(',')[1] || '';
+      let truncated = false;
+
+      // Last resort: hard trim (rare)
+      if (base64.length > MAX_BASE64_CHARS){
+        base64 = base64.slice(0, MAX_BASE64_CHARS);
+        truncated = true;
+      }
+
+      return {
+        base64,
+        mime,
+        fileName: file.name || 'photo',
+        size: file.size || 0,
+        truncated
+      };
+    }
+
+    // filename hint
+    (function(){
+      const fileInput = $('kindPhoto');
+      const meta = $('uploadMeta');
+      const cta = document.querySelector('label.upload-cta');
+      fileInput?.addEventListener('change', () => {
+        const f = fileInput.files?.[0];
+        if(f){ meta.textContent = `Selected: ${f.name}`; cta.classList.add('has-file'); }
+        else { meta.textContent='JPEG/PNG/WebP'; cta.classList.remove('has-file'); }
+      });
+    })();
+
+    /* ===== Submit Kindness ===== */
     async function submitKindness(){
-      clearMsg(submitMsg);
+      clearMsg($('submitMsg'));
       const teamCode = localStorage.getItem('teamCode');
       const teamName = localStorage.getItem('teamName');
+      if(!teamCode) return setMsg($('submitMsg'),'Please sign in again.');
 
-      if(!teamCode) return setMsg(submitMsg,'Please sign in again.','error');
+      const text = ($('whatText').value||'').trim();
+      if(text.length < 10) return setMsg($('submitMsg'),'Tell us a little more about what happened.');
 
-      const text = (whatText.value||'').trim();
-      if(text.length < 5) return setMsg(submitMsg,'Tell us a little more about what happened.','error');
+      $('btnSubmit').disabled = true;
 
-      btnSubmit.disabled = true;
       try{
-        // We only send a minimal payload; no base64 (prevents mobile fetch drop).
         const file = $('kindPhoto').files?.[0] || null;
+        const photo = await fileToSafeBase64(file);
 
         const payload = {
           eventId: EVENT_ID,
           teamCode, teamName,
           what: text,
-          where: (whereText.value||'').trim(),
-          hasPhoto: !!file,
-          photoName: file ? (file.name || '') : ''
+          where: ($('whereText').value||'').trim(),
+          photoBase64: photo.base64,
+          photoMime: photo.mime,
+          photoFileName: photo.fileName,
+          photoSize: photo.size,
+          photoWasTruncated: photo.truncated ? 1 : 0
         };
 
-        await callAny(['submit_kindness_function','submit_kindness'], payload);
-        setMsg(submitMsg,'✅ Submitted! Points will be awarded after review.','ok');
-        whatText.value=''; whereText.value=''; $('kindPhoto').value='';
-        $('uploadMeta').textContent='JPEG/PNG/WebP • Max ~20MB'; document.querySelector('.upload-cta').classList.remove('has-file');
-        countWhat.textContent='0';
+        await callFn('submit_kindness_function', payload);
+        setMsg($('submitMsg'),'✅ Submitted! Points will be awarded after review.','ok');
+        $('whatText').value=''; $('whereText').value='';
+        $('kindPhoto').value=''; $('uploadMeta').textContent='JPEG/PNG/WebP'; document.querySelector('.upload-cta').classList.remove('has-file');
       }catch(e){
-        setMsg(submitMsg, e.message || 'Couldn’t submit right now. Please try again.','error');
+        if (e.code==='UNAUTHORIZED'){ setMsg($('submitMsg'),'Session expired — please sign in again.'); }
+        else if (e.code==='RATE_LIMITED'){ setMsg($('submitMsg'),'Too many submissions — please try again soon.'); }
+        else { setMsg($('submitMsg'),'Couldn’t submit right now. Please try again.'); }
       }finally{
-        btnSubmit.disabled = false;
+        $('btnSubmit').disabled = false;
       }
     }
-    btnSubmit.addEventListener('click', submitKindness);
+    $('btnSubmit').addEventListener('click', submitKindness);
 
-    // Counter + upload filename
-    whatText.addEventListener('input', ()=>{ countWhat.textContent = `${whatText.value.length}`; });
-    (function(){
-      const fileInput = document.getElementById('kindPhoto');
-      const meta = document.getElementById('uploadMeta');
-      const cta = document.querySelector('label.upload-cta');
-      if(fileInput){
-        fileInput.addEventListener('change', () => {
-          const name = fileInput.files?.[0]?.name || '';
-          if(name){ meta.textContent = `Selected: ${name}`; cta.classList.add('has-file'); }
-          else{ meta.textContent='JPEG/PNG/WebP • Max ~20MB'; cta.classList.remove('has-file'); }
-        });
-      }
-    })();
-
-    // Boot
+    /* Boot */
     loadTeams();
-
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
   </script>
 
+  <!-- Safeguard: neutralize any link behavior on the logo element -->
   <script>
     (function(){
       document.querySelectorAll('.nav-logo[href]').forEach(a=>{
