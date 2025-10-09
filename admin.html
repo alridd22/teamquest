@@ -59,7 +59,20 @@
     h2.section-title{margin:0 0 10px;font-weight:900;color:var(--ink);display:flex;align-items:center;gap:8px}
 
     /* TIMER + STATUS */
-    #timer{background:linear-gradient(180deg,#fff8ea,#fdeac7);border:3px solid var(--gold-deep);border-radius:18px;text-align:center;color:#5b3a12;font-weight:900;font-size:44px;letter-spacing:.12em;padding:22px 12px}
+    #timer{
+      background:linear-gradient(180deg,#fff8ea,#fdeac7);
+      border:3px solid var(--gold-deep);
+      border-radius:18px;
+      text-align:center;
+      color:#5b3a12;
+      font-weight:900;
+      font-size:44px;
+      letter-spacing:.12em;
+      padding:22px 12px;
+      /* keep in one line */
+      white-space:nowrap;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
     .status{margin-top:12px;display:flex;justify-content:center}
     .pill{padding:6px 12px;border-radius:999px;font-size:14px;font-weight:800;display:inline-block;border:2px solid #e3d3c2;background:#fffdf8;color:#5e4b35}
     .pill.running{background:#e6fbf1;color:#106a3e;border-color:#b8efcf}
@@ -68,7 +81,7 @@
     .pill.published{background:#e7f9ef;color:#0f6e44;border-color:#b7ebcf}
 
     /* BUTTONS */
-    button{appearance:none;border:0;border-radius:14px;padding:14px 16px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08)}
+    button{appearance:none;border:0;border-radius:14px;padding:14px 16px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.08), inset 0 -2px 0 rgba(0,0,0,.08); min-height:56px}
     .btn{background:linear-gradient(90deg,#FDBA2D,#F0C433);color:#442812;border:3px solid var(--gold-deep)}
     .btn.pause{background:#fff6e9;border:3px solid #f3d49c;color:#6b4b0a}
     .btn.end{background:#ffe9e9;border:3px solid #f5b1b1;color:#7d2323}
@@ -76,7 +89,11 @@
     .btn.publish{background:#e6fff2;border:3px solid #bfeeda;color:#0d6a40}
     .btn.secondary{background:#fffdf8;border:3px solid #e5d5c4;color:#3b2d16}
     .btn:disabled{opacity:.55;cursor:not-allowed}
-    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+
+    /* Controls: stack vertically (big tap targets) */
+    .controls{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+    @media (min-width:980px){ .controls{max-width:520px} }
+
     .grid1{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
     .sm{padding:10px 12px;font-size:14px;border-radius:12px}
 
@@ -141,7 +158,8 @@
         <div id="timer">-- : -- : --</div>
         <div class="status"><span id="statusPill" class="pill">Checking…</span></div>
 
-        <div class="grid2">
+        <!-- Stacked controls -->
+        <div class="controls">
           <button id="btnStart" class="btn">🍭 Launch</button>
           <button id="btnPause" class="btn pause">⏸ Pause</button>
           <button id="btnEnd" class="btn end">🟥 End</button>
@@ -206,8 +224,8 @@
     })();
   </script>
 
+  <!-- Functional JS -->
   <script>
-    /* ---------- Config ---------- */
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId');
     if (!EVENT_ID) alert('Missing ?event=EVT-... in the URL');
@@ -221,7 +239,7 @@
       teams: '/.netlify/functions/admin_list_teams',
       markReturn: '/.netlify/functions/admin_mark_return',
       leaderboard: '/.netlify/functions/get_leaderboard',
-      pins: '/.netlify/functions/admin_get_team_pins'   // <-- NEW
+      pins: '/.netlify/functions/admin_get_team_pins'
     };
 
     const el = {
@@ -241,7 +259,6 @@
       body: document.body
     };
 
-    /* tiny star icon used in the points pill */
     const STAR_SVG = `
       <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#b37e00"/>
@@ -309,7 +326,6 @@
       rafId=requestAnimationFrame(tick);
     }
 
-    /* fetch helpers */
     let _pollCtrl=null;
     async function fetchJSON(url, opts={}) {
       if(opts.abortPrevious && _pollCtrl) _pollCtrl.abort();
@@ -372,7 +388,6 @@
       await fetchState({force:true}); updateFinalButton();
     }
 
-    /* Leaderboard merge (totals + rank) */
     async function fetchLeaderboardTotals(){
       try{
         const url=`${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
@@ -407,7 +422,7 @@
       });
     }
 
-    /* ----- PINs (inline) ----- */
+    /* PINs (inline) */
     const SHOW_PINS_KEY='admin.showPins';
     let SHOW_PINS = localStorage.getItem(SHOW_PINS_KEY)==='1';
     const PIN_MAP = new Map();
@@ -430,9 +445,7 @@
           const pin = (p.pin ?? p.PIN ?? '').toString().trim();
           if(code && pin) PIN_MAP.set(code, pin);
         }
-      }catch(e){
-        // silent fail; list still renders without pins
-      }
+      }catch(e){ /* silent */ }
     }
 
     /* Teams */
@@ -446,9 +459,8 @@
         data = await fetchJSON(url,{headers:headers(),cache:'no-store',abortPrevious:true});
       }catch{
         if(LKG_TEAMS) renderTeams(LKG_TEAMS);
-        showReconnect(); return;
+        return;
       }
-      hideReconnect();
 
       let teams = Array.isArray(data.teams) ? data.teams : [];
       const getTotal = await fetchLeaderboardTotals();
@@ -518,7 +530,7 @@
       el.teams.querySelectorAll('.mark-btn').forEach(btn=>{
         btn.addEventListener('click',()=>handleMark(btn));
       });
-      applyPinMode(); // ensure correct visibility class
+      applyPinMode();
     }
 
     async function handleMark(btn){
@@ -573,13 +585,13 @@
     (async function init(){
       applyPinMode();
       await fetchState({force:true});
-      await fetchPins();      // <--- load PINs first
-      await loadTeams();      // renders with pins if available
+      await fetchPins();
+      await loadTeams();
       setInterval(async()=>{
         if(polling) return; polling=true;
         try{
           await fetchState();
-          await fetchPins();   // keep PINs fresh if updated
+          await fetchPins();
           await loadTeams();
         }finally{ polling=false; }
       }, 5000);
