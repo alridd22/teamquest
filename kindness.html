@@ -19,7 +19,6 @@
       --nav-h:64px; --gutter:22px;
       --radius-card:22px; --radius-sm:14px;
       --shadow-card:0 18px 40px rgba(0,0,0,.35);
-      --shadow-soft:0 8px 18px rgba(0,0,0,.18);
       --focus:0 0 0 3px rgba(21,148,210,.45);
     }
     *{box-sizing:border-box}
@@ -40,7 +39,6 @@
       border-bottom:1px solid rgba(255,255,255,.18)}
     .nav-container{max-width:1000px;margin:0 auto;height:100%;display:flex;align-items:center;justify-content:space-between;padding:0 12px}
     .nav-logo img{height:40px;width:auto;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    /* Make header logo non-clickable */
     .nav-logo{pointer-events:none;cursor:default;}
     .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
     .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
@@ -85,7 +83,7 @@
     .tq-select:focus{outline:none; box-shadow:var(--focus)}
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
     .tq-select::-ms-expand{display:none}
-    textarea.field{min-height:160px;resize:vertical}
+    textarea.field{min-height:140px;resize:vertical}
 
     /* Buttons (shared amber pill style) */
     .btn{
@@ -102,7 +100,7 @@
     .msg.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .msg.err{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
 
-    /* Rules — compact, no yellow border */
+    /* Rules — compact */
     .rules{border-radius:16px;padding:14px;background:linear-gradient(145deg,#f9f0db,#f2e6cf);border:1px solid rgba(0,0,0,.06)}
     .rule{padding:10px 12px;border-radius:12px;background:#f4ead1;margin:8px 0;font-weight:800;border:none}
 
@@ -118,12 +116,8 @@
     .upload-cta.has-file{border-color:#2ba05f}
     .upload-meta{margin-top:8px;font-size:14px;color:var(--ink-soft);text-align:center}
 
-    /* Sections */
     .section{display:none}
     .section.active{display:block}
-
-    /* Tiny utility */
-    .mt-8{margin-top:8px}
     .mt-14{margin-top:14px}
   </style>
 </head>
@@ -141,6 +135,7 @@
       <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
       <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
       <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
+      <li><a href="https://theteamquest.netlify.app/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
       <li><a href="https://theteamquest.netlify.app/leaderboard" class="dropdown-link" role="menuitem">🏆 The Leaderboard</a></li>
       <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
     </ul>
@@ -153,7 +148,6 @@
   </header>
 
   <main class="stack">
-
     <!-- SIGN-IN ONLY -->
     <section id="secSign" class="card section active">
       <h2>Sign in</h2>
@@ -174,31 +168,31 @@
 
     <!-- AFTER SIGN-IN -->
     <section id="secForm" class="card section">
-      <!-- Crew field (no green banner) -->
+      <!-- Crew field -->
       <label for="crewName">Crew</label>
       <div id="crewName" class="field" style="pointer-events:none;user-select:none"></div>
 
-      <!-- Rules first -->
+      <!-- Rules -->
       <div class="rules mt-14">
         <h2>Quick Rules</h2>
         <div class="rule">• Do a genuine act of kindness.</div>
-        <div class="rule">• A photo helps your judges see it.</div>
-        <div class="rule">• Tell us briefly what happened.</div>
+        <div class="rule">• A photo helps the judges (optional).</div>
+        <div class="rule">• Tell us what happened (optional).</div>
       </div>
 
       <!-- Upload -->
       <div class="field-block mt-14">
         <div class="uploader">
           <input id="kindPhoto" type="file" accept="image/*">
-          <label for="kindPhoto" class="upload-cta">📷 Upload photo</label>
+          <label for="kindPhoto" class="upload-cta">📷 Add photo (camera or library)</label>
           <div id="uploadMeta" class="upload-meta" aria-live="polite">JPEG/PNG/WebP • Max ~20MB</div>
         </div>
       </div>
 
       <!-- Text fields -->
-      <label for="whatText">What happened?</label>
-      <!-- no maxlength, no min-length validation -->
+      <label for="whatText">What happened? <span class="optional">(optional)</span></label>
       <textarea id="whatText" class="field" placeholder="What did you do? Who did it help? Any results or reactions?"></textarea>
+      <div class="subtle"><span id="countWhat">0</span> characters</div>
 
       <label for="whereText">Where? <span class="optional">(optional)</span></label>
       <input id="whereText" class="field" placeholder="e.g., High Street, Community Centre…"/>
@@ -249,9 +243,13 @@
     const secSign = $('secSign'), secForm = $('secForm');
     const crewName = $('crewName');
 
-    const whatText = $('whatText');
+    const whatText = $('whatText'), countWhat = $('countWhat');
     const whereText = $('whereText');
     const btnSign = $('btnSign'), btnSubmit = $('btnSubmit');
+
+    const fileInput = $('kindPhoto');
+    const uploadMeta = $('uploadMeta');
+    const uploadCta = document.querySelector('label.upload-cta');
 
     function setMsg(el, text, kind='error'){ el.textContent=text; el.className='msg ' + (kind==='error'?'err':'ok'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.style.display='none'; }
@@ -260,13 +258,14 @@
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
 
     async function callFn(name, payload){
+      const headers = {
+        'Content-Type':'application/json',
+        'Idempotency-Key': uuidv4(),
+        ...(token()? {'Authorization':`Bearer ${token()}`} : {})
+      };
       const res = await fetch(`/.netlify/functions/${name}`,{
         method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          ...(token()? {'Authorization':`Bearer ${token()}`} : {}),
-          'Idempotency-Key': uuidv4()
-        },
+        headers,
         body: JSON.stringify(payload||{}),
         keepalive:true
       });
@@ -359,15 +358,26 @@
     btnSign.addEventListener('click', signIn);
     teamPin.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
-    // ===== Uploadcare helper (same approach as Scavenger)
+    // Upload UI updates
+    fileInput.addEventListener('change', () => {
+      const name = fileInput.files?.[0]?.name || '';
+      if(name){ uploadMeta.textContent = `Selected: ${name}`; uploadCta.classList.add('has-file'); }
+      else{ uploadMeta.textContent='JPEG/PNG/WebP • Max ~20MB'; uploadCta.classList.remove('has-file'); }
+    });
+
+    // Upload to Uploadcare (same as Scavenger)
     async function uploadToUploadcare(file){
+      const okTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
+      if (!okTypes.includes(file.type)) throw new Error('Use JPEG/PNG/WebP.');
+      if (file.size > 20*1024*1024) throw new Error('Image too large (max ~20MB).');
+
       const form = new FormData();
-      form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28'); // public key
+      form.append('UPLOADCARE_PUB_KEY','e060d7b73e9b8e15de28'); // same key used in Scavenger
       form.append('file', file);
+
       const res = await fetch('https://upload.uploadcare.com/base/', { method:'POST', body:form });
       if(!res.ok) throw new Error(`Upload failed (${res.status})`);
-      const j = await res.json();
-      if(!j.file) throw new Error('No file id from uploader');
+      const j = await res.json(); if(!j.file) throw new Error('No file id');
       return `https://ucarecdn.com/${j.file}/`;
     }
 
@@ -379,64 +389,45 @@
 
       if(!teamCode) return setMsg(submitMsg,'Please sign in again.','error');
 
-      // No min-length check per your request
+      // Optional text (no minimum)
       const text = (whatText.value||'').trim();
-      const where = (whereText.value||'').trim();
 
       btnSubmit.disabled = true;
       try{
-        // Optional photo: upload if provided
+        // optional photo
         let photoUrl = '';
-        const file = $('kindPhoto').files?.[0];
-        if(file){
-          // basic client constraints (match Scavenger)
-          const ok = ['image/jpeg','image/jpg','image/png','image/webp'];
-          if(!ok.includes(file.type)) throw new Error('Use JPEG/PNG/WebP.');
-          if(file.size > 20*1024*1024) throw new Error('Image too large (max ~20MB).');
+        const file = fileInput.files?.[0];
+        if (file) {
           photoUrl = await uploadToUploadcare(file);
         }
 
-        // NOTE: backend expects `text`, not `what`
         const payload = {
           eventId: EVENT_ID,
           teamCode, teamName,
-          text,
-          where,
+          what: text,
+          where: (whereText.value||'').trim(),
           photoUrl
         };
 
         await callFn('submit_kindness_function', payload);
         setMsg(submitMsg,'✅ Submitted! Points will be awarded after review.','ok');
 
-        // reset form
+        // reset UI
         whatText.value=''; whereText.value='';
-        $('kindPhoto').value='';
-        $('uploadMeta').textContent='JPEG/PNG/WebP • Max ~20MB';
-        document.querySelector('.upload-cta').classList.remove('has-file');
+        fileInput.value=''; uploadMeta.textContent='JPEG/PNG/WebP • Max ~20MB'; uploadCta.classList.remove('has-file');
+        countWhat.textContent='0';
       }catch(e){
         if (e.code==='UNAUTHORIZED'){ setMsg(submitMsg,'Session expired — please sign in again.','error'); }
         else if (e.code==='RATE_LIMITED'){ setMsg(submitMsg,'Too many submissions — please try again soon.','error'); }
-        else if (e.code==='CLOSED'){ setMsg(submitMsg,'Submissions are closed for this event.','error'); }
-        else { setMsg(submitMsg, e.message || 'Couldn’t submit right now. Please try again.','error'); }
+        else { setMsg(submitMsg, e.message || 'Couldn’t submit right now. Please try again.', 'error'); }
       }finally{
         btnSubmit.disabled = false;
       }
     }
     btnSubmit.addEventListener('click', submitKindness);
 
-    // Filename UI
-    (function(){
-      const fileInput = document.getElementById('kindPhoto');
-      const meta = document.getElementById('uploadMeta');
-      const cta = document.querySelector('label.upload-cta');
-      if(fileInput){
-        fileInput.addEventListener('change', () => {
-          const name = fileInput.files?.[0]?.name || '';
-          if(name){ meta.textContent = `Selected: ${name}`; cta.classList.add('has-file'); }
-          else{ meta.textContent='JPEG/PNG/WebP • Max ~20MB'; cta.classList.remove('has-file'); }
-        });
-      }
-    })();
+    // Counter only (no limit)
+    whatText.addEventListener('input', ()=>{ countWhat.textContent = `${whatText.value.length}`; });
 
     // Boot
     loadTeams();
