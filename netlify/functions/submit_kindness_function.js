@@ -47,7 +47,7 @@ module.exports.handler = async (event) => {
 
     if (!eventId)  return error(400, "Missing eventId");
     if (!teamCode) return error(400, "Missing teamCode");
-    if (!what || String(what).trim().length < 10) return error(400, "Description too short");
+    if (!what || String(what).trim().length < 1) return error(400, "Description too short");
     if (!photoUrl) return error(400, "Missing photoUrl");
 
     // Normalise identifiers (fallbacks keep older clients working)
