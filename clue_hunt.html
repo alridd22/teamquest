@@ -111,7 +111,7 @@
     .progress-wrap{margin:10px 0 6px}
     .progress-line{font-family:var(--sans);font-weight:900;color:var(--ink-deep);margin-bottom:8px}
     .progress-bar{position:relative;height:34px;border:3px solid var(--gold);border-radius:16px;background:#f6e5c7;overflow:hidden}
-    .progress-fill{position:absolute;inset:0 0 0 auto;width:15%;background:linear-gradient(135deg,#a55a1f,#8b4513)}
+    .progress-fill{position:relative;height:100%;width:0;background:linear-gradient(135deg,#a55a1f,#8b4513);border-radius:12px}
     .progress-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 
     /* rules under Crew */
@@ -144,7 +144,7 @@
       background:linear-gradient(135deg,var(--red-1),var(--red-2)); border-color:#6b0000; cursor:not-allowed; color:#fff;
     }
 
-    /* clue panel */
+    /* clue panel (no clue text shown) */
     .panel{
       position:relative;background:#fff9ee;border:3px solid var(--gold);border-radius:18px;
       padding:36px 18px 18px; overflow:hidden;
@@ -155,7 +155,6 @@
       pointer-events:none; filter:drop-shadow(0 1px 1px rgba(0,0,0,.35));
     }
     .clue-title{font-family:var(--sans);font-weight:900;color:var(--ink-deep);font-size:20px;margin:2px 0 6px;text-align:center}
-    .clue-text{font-size:18px;color:#5b3a12;margin:8px 0 12px}
     .answer{width:100%;margin:10px 0 6px;font-size:20px;text-align:center}
     .result{display:none;margin:12px 0;border:3px solid;border-radius:12px;padding:14px;font-weight:900}
     .result.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
@@ -234,7 +233,6 @@
 
       <div id="clueSection" class="panel" style="display:none">
         <div class="clue-title" id="clueNumber">Clue #</div>
-        <div class="clue-text" id="clueText"></div>
         <input id="answerInput" class="tq-input answer" placeholder="Enter your answer…"/>
         <button id="submitAnswerBtn" class="btn">Submit Answer</button>
         <div id="resultMessage" class="result"></div>
@@ -396,28 +394,32 @@
     // ===== Clue engine
     let currentClue=null, completedClues={}, currentScore=0;
 
-    const clueHuntData = [
-      { id:1,  clue:"What comes after zero?",             answer:"one",       acceptableAnswers:["one","1","One"], points:6 },
-      { id:2,  clue:"What number comes after one?",       answer:"two",       acceptableAnswers:["two","2","Two"], points:5 },
-      { id:3,  clue:"What number comes after two?",       answer:"three",     acceptableAnswers:["three","3","Three"], points:8 },
-      { id:4,  clue:"What number comes after three?",     answer:"four",      acceptableAnswers:["four","4","Four"], points:7 },
-      { id:5,  clue:"What number comes after four?",      answer:"five",      acceptableAnswers:["five","5","Five"], points:9 },
-      { id:6,  clue:"What number comes after five?",      answer:"six",       acceptableAnswers:["six","6","Six"], points:5 },
-      { id:7,  clue:"What number comes after six?",       answer:"seven",     acceptableAnswers:["seven","7","Seven"], points:7 },
-      { id:8,  clue:"What number comes after seven?",     answer:"eight",     acceptableAnswers:["eight","8","Eight"], points:6 },
-      { id:9,  clue:"What number comes after eight?",     answer:"nine",      acceptableAnswers:["nine","9","Nine"], points:5 },
-      { id:10, clue:"What number comes after nine?",      answer:"ten",       acceptableAnswers:["ten","10","Ten"], points:8 },
-      { id:11, clue:"What number comes after ten?",       answer:"eleven",    acceptableAnswers:["eleven","11","Eleven"], points:10 },
-      { id:12, clue:"What number comes after eleven?",    answer:"twelve",    acceptableAnswers:["twelve","12","Twelve"], points:6 },
-      { id:13, clue:"What number comes after twelve?",    answer:"thirteen",  acceptableAnswers:["thirteen","13","Thirteen"], points:7 },
-      { id:14, clue:"What number comes after thirteen?",  answer:"fourteen",  acceptableAnswers:["fourteen","14","Fourteen"], points:5 },
-      { id:15, clue:"What number comes after fourteen?",  answer:"fifteen",   acceptableAnswers:["fifteen","15","Fifteen"], points:9 },
-      { id:16, clue:"What number comes after fifteen?",   answer:"sixteen",   acceptableAnswers:["sixteen","16","Sixteen"], points:6 },
-      { id:17, clue:"What number comes after sixteen?",   answer:"seventeen", acceptableAnswers:["seventeen","17","Seventeen"], points:8 },
-      { id:18, clue:"What number comes after seventeen?", answer:"eighteen",  acceptableAnswers:["eighteen","18","Eighteen"], points:7 },
-      { id:19, clue:"What number comes after eighteen?",  answer:"nineteen",  acceptableAnswers:["nineteen","19","Nineteen"], points:5 },
-      { id:20, clue:"What number comes after nineteen?",  answer:"twenty",    acceptableAnswers:["twenty","20","Twenty"], points:6 }
-    ];
+    /* NO CLUE TEXT STORED HERE.
+       Provide your answers/points list (id, acceptableAnswers, points) below.
+       Example row kept for structure — replace with your real data later. */
+const clueHuntData = [
+  { id: 1,  acceptableAnswers: ["george horner","georgehorner","horner"], points: 6 },
+  { id: 2,  acceptableAnswers: ["griffins","griffin"], points: 5 },
+  { id: 3,  acceptableAnswers: ["yn","y n"], points: 8 },
+  { id: 4,  acceptableAnswers: ["st mary","stmary","saint mary","st. mary"], points: 7 },
+  { id: 5,  acceptableAnswers: ["ebb and flow","ebbandflow","ebb & flow","ebb flow"], points: 9 },
+  { id: 6,  acceptableAnswers: ["xxxviii","38","thirty eight","thirty-eight"], points: 5 },
+  { id: 7,  acceptableAnswers: ["plenty"], points: 7 },
+  { id: 8,  acceptableAnswers: ["1,858","1858"], points: 6 },
+  { id: 9,  acceptableAnswers: ["lucy"], points: 5 },
+  { id: 10, acceptableAnswers: ["43","forty three","forty-three"], points: 8 },
+  { id: 11, acceptableAnswers: ["e o","eo"], points: 10 },
+  { id: 12, acceptableAnswers: ["rehtegot"], points: 6 },
+  { id: 13, acceptableAnswers: ["15","fifteen"], points: 7 },
+  { id: 14, acceptableAnswers: ["west mills","westmills"], points: 5 },
+  { id: 15, acceptableAnswers: ["1,908","1908"], points: 9 },
+  { id: 16, acceptableAnswers: ["john smith","johnsmith"], points: 6 },
+  { id: 17, acceptableAnswers: ["1996"], points: 8 },
+  { id: 18, acceptableAnswers: ["9210","9,210"], points: 7 },
+  { id: 19, acceptableAnswers: ["baigent"], points: 5 },
+  { id: 20, acceptableAnswers: ["bucklebury"], points: 6 }
+];
+
 
     function renderClueGrid(){
       const grid = $('clueGrid');
@@ -442,7 +444,6 @@
     function selectClue(clue){
       currentClue = clue;
       $('clueNumber').textContent = 'Clue ' + clue.id;
-      $('clueText').textContent = clue.clue;
       $('answerInput').value = '';
       $('resultMessage').className='result'; $('resultMessage').style.display='none';
       $('continueBtn').style.display='none';
@@ -474,9 +475,7 @@
           teamCode: localStorage.getItem('teamCode'),
           teamName: localStorage.getItem('teamName'),
           clueId: currentClue.id,
-          clueText: currentClue.clue,
           userAnswer: val,
-          correctAnswer: currentClue.answer,
           acceptableAnswers: currentClue.acceptableAnswers,
           pointsIfCorrect: currentClue.points
         });
@@ -486,12 +485,11 @@
         completedClues[currentClue.id] = {
           points: award,
           answer: val,
-          correctAnswer: currentClue.answer,
           completedAt: data.attemptTime || new Date().toISOString(),
           wasCorrect
         };
-        reconcileScore(data.totalScore, award);
-        showResult(wasCorrect ? `🎉 Points Scored! +${award} points` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
+        reconcileScore(data.totalScore);
+        showResult(wasCorrect ? `🎉 Points Scored! +${award} doubloons` : `❌ Locked!`, wasCorrect);
         updateScore(); updateProgress();
       }catch(e){
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
@@ -526,14 +524,14 @@
     function reconcileScore(serverTotal){
       const local = Object.values(completedClues).reduce((a,b)=>a+(b.points||0),0);
       const st = Number(serverTotal);
-      currentScore = Number.isFinite(st) ? Math.max(st, local) : local; // prefer whichever is higher
+      currentScore = Number.isFinite(st) ? Math.max(st, local) : local;
     }
     function updateScore(){ $('scoreDisplay').textContent = currentScore + ' points'; }
     function updateProgress(){
       const attempted = Object.keys(completedClues).length;
       const correct = Object.values(completedClues).filter(c=>c.wasCorrect).length;
       const pct = Math.max((attempted / clueHuntData.length)*100, 0);
-      $('progressFill').style.width = pct + '%';
+      document.querySelector('.progress-fill').style.width = pct + '%';
       $('progressText').textContent = `${correct}/${clueHuntData.length}`;
       $('progressLine').textContent = `${correct}/${clueHuntData.length} Solved • ${attempted} Explored`;
       document.querySelector('.progress-bar').setAttribute('aria-valuenow', correct);
@@ -563,7 +561,6 @@
               completedClues[s.clueId] = {
                 points: s.points,
                 answer: s.userAnswer,
-                correctAnswer: s.correctAnswer,
                 completedAt: s.attemptTime,
                 wasCorrect: s.points > 0
               };
