@@ -100,6 +100,7 @@ module.exports.handler = async (event) => {
       clueText,
       userAnswer,
       correctAnswer,
+      acceptableAnswers,   // NEW: optional array of synonyms
       pointsIfCorrect,     // preferred for new UI
       // backward-compat:
       points,              // old UI sent exact points (0 if wrong, 5..10 if right)
@@ -183,8 +184,14 @@ module.exports.handler = async (event) => {
       // Back-compat path – trust explicit points from legacy client
       awarded = Number(points) || 0;
       correct = awarded > 0;
-    } else if (correctAnswer != null) {
-      correct = normalize(userAnswer||"") === normalize(correctAnswer||"");
+    } else if (correctAnswer != null || Array.isArray(acceptableAnswers)) {
+      const ua = normalize(userAnswer || "");
+      const candidates = [];
+      if (correctAnswer != null) candidates.push(normalize(String(correctAnswer)));
+      if (Array.isArray(acceptableAnswers)) {
+        for (const a of acceptableAnswers) candidates.push(normalize(String(a)));
+      }
+      correct = candidates.includes(ua);
       awarded = correct ? (Number(pointsIfCorrect)||0) : 0;
     } else {
       // If we have neither, treat as zero-award
@@ -200,6 +207,7 @@ module.exports.handler = async (event) => {
       clueText: String(clueText||""),
       userAnswer: String(userAnswer||""),
       correctAnswer: String(correctAnswer||""),
+      acceptableAnswers: Array.isArray(acceptableAnswers) ? acceptableAnswers : [],
       pointsIfCorrect: Number(pointsIfCorrect)||0,
       awarded,
       correct,
