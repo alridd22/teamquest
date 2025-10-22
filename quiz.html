@@ -327,7 +327,7 @@ What changed (NO functionality changes):
       { id:7,type:'text_input',question:'What is the number of the only other month, after August (8), named after a mortal man?',correctAnswer:'7',acceptableAnswers:['7','seven','Seven','SEVEN','july','July','JULY','Jul','jul','JUL'],explanation:'Answer: 7 (July)',points:10 },
       { id:8,type:'text_input',question:'Which one-word car manufacturer uses this logo?',imageUrl:'/smart-logo.png',correctAnswer:'smart',acceptableAnswers:['smart','Smart','SMART','SmArt','sMaRt'],points:10 },
       { id:9,type:'multiple_choice',question:'Listen to this intro. Which band had a huge hit with this song?',audioUrl:'/song-intro.mp3',options:[{letter:'A',text:'Red Hot Chili Peppers'},{letter:'B',text:'The Killers'},{letter:'C',text:'The Foo Fighters'},{letter:'D',text:'Kings of Leon'}],correctAnswer:'B',points:10 },
-      { id:10,type:'multiple_choice',question:'Five friends are waiting in line to get coffee… Who is at the front of the line?',options:[{letter:'A',text:'Ross'},{letter:'B',text:'Joey'},{letter:'C',text:'Chandler'},{letter:'D',text:'Monica'},{letter:'E',text:'Rachel'}],correctAnswer:'D',points:10 }
+      { id:10,type:'multiple_choice',question:'Five friends are waiting in line to get coffee. Ross is behind Joey but not last. Chandler is behind Monica, who is in front of both Ross and Joey. Rachel is second. Who is at the front of the line?',options:[{letter:'A',text:'Ross'},{letter:'B',text:'Joey'},{letter:'C',text:'Chandler'},{letter:'D',text:'Monica'},{letter:'E',text:'Rachel'}],correctAnswer:'D',points:10 }
     ];
 
     const quizStartKey=()=>`quiz:started:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
