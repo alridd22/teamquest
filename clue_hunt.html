@@ -85,7 +85,7 @@
     }
     .tq-select:required:invalid{color:rgba(0,0,0,.5); -webkit-text-fill-color:rgba(0,0,0,.5)}
     .row{margin-bottom:12px}
-    #teamPin::placeholder{ color: rgba(0,0,0,.28); } /* fainter sample PIN */
+    #teamPin::placeholder{ color: rgba(0,0,0,.28); }
 
     .display-field{
       width:100%; padding:14px 16px; border:3px solid var(--gold); border-radius:16px;
@@ -157,14 +157,9 @@
     .clue-title{font-family:var(--sans);font-weight:900;color:var(--ink-deep);font-size:20px;margin:2px 0 6px;text-align:center}
     .clue-text{font-size:18px;color:#5b3a12;margin:8px 0 12px}
     .answer{width:100%;margin:10px 0 6px;font-size:20px;text-align:center}
-    .save-hint{font-family:var(--sans);font-size:13px;color:#6A5A47;text-align:center;margin-bottom:10px}
     .result{display:none;margin:12px 0;border:3px solid;border-radius:12px;padding:14px;font-weight:900}
     .result.ok{display:block;background:#ddffe3;border-color:#1e8f3e;color:#0c5e24}
     .result.bad{display:block;background:#ffd6db;border-color:#d22;color:#8b0000}
-
-    .statusline{font-family:var(--sans);font-size:13px;text-align:center;margin-top:6px}
-    .statusline.saving{color:#7a5a13}
-    .statusline.saved{color:#106a3e}
   </style>
 </head>
 <body>
@@ -241,9 +236,7 @@
         <div class="clue-title" id="clueNumber">Clue #</div>
         <div class="clue-text" id="clueText"></div>
         <input id="answerInput" class="tq-input answer" placeholder="Enter your answer…"/>
-        <div class="save-hint" id="saveHint">Tip: typing autosaves. Press “Submit Answer” to lock in.</div>
         <button id="submitAnswerBtn" class="btn">Submit Answer</button>
-        <div class="statusline" id="saveStatus" aria-live="polite"></div>
         <div id="resultMessage" class="result"></div>
         <button id="continueBtn" class="btn" style="display:none">🗺️ Back to Clues</button>
       </div>
@@ -289,9 +282,6 @@
     const $ = (id)=> document.getElementById(id);
     function setMsg(el, text, type){ el.textContent = text; el.className = 'msg ' + (type==='ok'?'ok':'err'); el.style.display='block'; }
     function clearMsg(el){ el.textContent=''; el.className='msg'; el.style.display='none'; }
-    const sleep = (ms)=> new Promise(r=>setTimeout(r,ms));
-    const debounce = (fn, ms)=>{ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); }; };
-
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
@@ -364,7 +354,6 @@
         clearMsg($('signinMsg'));
         $('signinBtn').disabled = false;
 
-        // If session exists, auto-select crew
         const savedCode = localStorage.getItem('teamCode');
         if (savedCode) {
           const opt = [...teamSelect.options].find(o=>o.value===savedCode);
@@ -463,39 +452,9 @@
       $('clueGridSection').style.display='none';
       $('clueSection').style.display='block';
       setTimeout(()=>$('answerInput').focus(),100);
-      updateSaveStatus(''); // reset
     }
 
     function normalize(s){ return String(s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
-
-    // ---- AUTOSAVE (draft) ----
-    const saveDraft = debounce(async ()=>{
-      if (!currentClue) return;
-      const answer = ($('answerInput').value||'').trim();
-      if (!answer) return updateSaveStatus('');
-      updateSaveStatus('saving');
-      try{
-        await callFn('submit_cluehunt_function', {
-          mode: 'draft',
-          eventId: EVENT_ID,
-          teamCode: localStorage.getItem('teamCode'),
-          clueId: currentClue.id,
-          userAnswer: answer
-        });
-        updateSaveStatus('saved');
-      }catch{
-        updateSaveStatus(''); // keep quiet on drafts
-      }
-    }, 350);
-
-    function updateSaveStatus(state){
-      const el = $('saveStatus');
-      if (state === 'saving'){ el.textContent='Saving…'; el.className='statusline saving'; }
-      else if (state === 'saved'){ el.textContent='Saved ✓'; el.className='statusline saved'; }
-      else { el.textContent=''; el.className='statusline'; }
-    }
-
-    $('answerInput').addEventListener('input', saveDraft);
 
     // ---- SUBMIT (final) ----
     let inFlightSubmit = false;
@@ -508,9 +467,6 @@
       inFlightSubmit = true;
       $('submitAnswerBtn').disabled = true;
 
-      // Local correctness (UX only); source of truth is server
-      const locallyCorrect = currentClue.acceptableAnswers.some(a => normalize(a)===normalize(val));
-
       try{
         const data = await callFn('submit_cluehunt_function', {
           mode: 'final',
@@ -521,11 +477,10 @@
           clueText: currentClue.clue,
           userAnswer: val,
           correctAnswer: currentClue.answer,
-          acceptableAnswers: currentClue.acceptableAnswers, // <— NEW
+          acceptableAnswers: currentClue.acceptableAnswers,
           pointsIfCorrect: currentClue.points
         });
 
-        // Server truth
         const award = Number(data.awarded || 0);
         const wasCorrect = !!data.correct;
         completedClues[currentClue.id] = {
@@ -535,7 +490,7 @@
           completedAt: data.attemptTime || new Date().toISOString(),
           wasCorrect
         };
-        reconcileScore(data.totalScore);
+        reconcileScore(data.totalScore, award);
         showResult(wasCorrect ? `🎉 Points Scored! +${award} doubloons` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
         updateScore(); updateProgress();
       }catch(e){
@@ -570,7 +525,8 @@
 
     function reconcileScore(serverTotal){
       const local = Object.values(completedClues).reduce((a,b)=>a+(b.points||0),0);
-      currentScore = Number.isFinite(+serverTotal) ? +serverTotal : local;
+      const st = Number(serverTotal);
+      currentScore = Number.isFinite(st) ? Math.max(st, local) : local; // prefer whichever is higher
     }
     function updateScore(){ $('scoreDisplay').textContent = currentScore + ' points'; }
     function updateProgress(){
