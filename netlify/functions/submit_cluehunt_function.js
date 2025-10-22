@@ -47,7 +47,7 @@ function makeScoresRowBuilder(scoresHeader) {
   const h = (scoresHeader || []).map(x => String(x||'').trim().toLowerCase());
   const isLegacy = h[0]==="team code" && h[1]==="activity" && h[2]==="score" && h[3]==="status";
   if (isLegacy) {
-    // Team Code | Activity | Score | Status | SubmissionID | Event Id
+    // Team Code | Activity | Score | Status | SubmissionID | Event Id (may be missing as header)
     return ({ teamCode, activity, score, status, submissionId, eventId }) => ([
       teamCode, activity, Number(score)||0, status, submissionId, eventId || ""
     ]);
@@ -66,15 +66,17 @@ async function computeTeamClueTotal(sheets, spreadsheetId, teamCode, eventId) {
   const iTeam = idx["team code"];
   const iAct  = idx["activity"];
   const iScore= idx["score"];
-  const iEvt  = idx["event id"];
+  const iEvt  = idx["event id"];            // may be undefined on legacy sheets
+  const hasEvt = iEvt != null;
   if (iTeam == null || iAct == null || iScore == null) return 0;
 
   let sum = 0;
   for (const r of rows) {
     const act = String(r[iAct] || "").trim().toLowerCase();
     const code= String(r[iTeam]||"").trim();
-    const evt = (iEvt!=null) ? String(r[iEvt]||"").trim() : "";
-    if (code === teamCode && act === "clue" && (!eventId || evt === eventId)) {
+    const evt = hasEvt ? String(r[iEvt]||"").trim() : "";
+    // If there is NO Event Id column, don't filter by event at all
+    if (code === teamCode && act === "clue" && (!hasEvt || !eventId || evt === eventId)) {
       sum += Number(r[iScore] || 0) || 0;
     }
   }
@@ -100,7 +102,7 @@ module.exports.handler = async (event) => {
       clueText,
       userAnswer,
       correctAnswer,
-      acceptableAnswers,   // NEW: optional array of synonyms
+      acceptableAnswers,   // optional array of synonyms
       pointsIfCorrect,     // preferred for new UI
       // backward-compat:
       points,              // old UI sent exact points (0 if wrong, 5..10 if right)
@@ -194,7 +196,6 @@ module.exports.handler = async (event) => {
       correct = candidates.includes(ua);
       awarded = correct ? (Number(pointsIfCorrect)||0) : 0;
     } else {
-      // If we have neither, treat as zero-award
       awarded = 0;
       correct = false;
     }
