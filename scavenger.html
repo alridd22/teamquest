@@ -1,23 +1,10 @@
 <!--
-TeamQuest – The Scavenger Hunt (UI refit • no functionality changes)
+TeamQuest – The Scavenger Hunt (UI refit • upload under item select)
 
-What changed (per designer notes + cross-activity consistency):
-• Headings use bold sans-serif; body/inputs use Handlee.
-• Removed green “Signed in” banner.
-• Crew area now matches Clue Hunt style: a sans-serif “Crew” title + a non-editable
-  parchment “display field” showing the crew name (gold border, rounded).
-• Rules chips simplified (no yellow borders, slightly tighter).
-• Upload block: removed “Upload Photo” title; centered brown button with formats text
-  underneath. Filename appears under the button when chosen.
-• “Pick what applies” → “Choose Item” (bold sans-serif).
-• Item tiles are a consistent size; image is contained and no longer clashes with the tick.
-  Tick moved to the top-right inside the tile.
-• Submit button restyled to match the gold “Claim treasure” look used elsewhere.
-• Minor spacing polish; focus states kept; touch targets ≥44px.
-
-Note: Renamed a couple of UI element IDs used only by the page script:
-  fileStatus → fileMeta  ,  crewPill → crewValue
-(Logic and endpoints unchanged.)
+Change in this version:
+• Moved the Upload block (uploadWrap) to AFTER the “Choose Item” grid, so the
+  “📷 Upload photo” button appears under the select item section.
+• All IDs, JS, and functionality remain the same.
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -55,7 +42,6 @@ Note: Renamed a couple of UI element IDs used only by the page script:
     padding-top:var(--nav-h);
   }
 
-  /* Helpers for font intent */
   .sans{font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 
   /* NAV */
@@ -65,7 +51,6 @@ Note: Renamed a couple of UI element IDs used only by the page script:
     border-bottom:1px solid rgba(255,255,255,.18)}
   .nav-container{height:100%;max-width:1000px;margin:0 auto;padding:0 12px;display:flex;align-items:center;justify-content:space-between}
   .nav-logo img{height:40px;display:block;filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-  /* MAKE LOGO NON-CLICKABLE */
   .nav-logo{pointer-events:none;cursor:default;}
   .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
   .nav-menu{position:fixed;top:var(--nav-h);left:-100%;width:100%;height:calc(100vh - var(--nav-h));
@@ -85,7 +70,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
   .card{background:linear-gradient(145deg,var(--parchment),var(--parchment-2));border-radius:var(--radius-card);box-shadow:var(--shadow-card);padding:18px 16px;border:1px solid rgba(0,0,0,.06);max-width:980px;margin:0 auto 18px}
   .title{margin:0 0 10px;font-size:22px;color:#402a12;text-align:left;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;font-weight:900}
 
-  /* Inputs & select (iOS friendly Handlee) */
+  /* Inputs & select */
   label{display:block;margin:10px 0 6px;font-weight:900;color:var(--ink);font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
   .input,.tq-select{
     width:100%;padding:14px;border:3px solid var(--gold);border-radius:16px;background:#fff;font-size:18px;
@@ -100,7 +85,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
   .tq-select:required:invalid{color:rgba(0,0,0,.5);-webkit-text-fill-color:rgba(0,0,0,.5)}
   .pin{text-align:center;letter-spacing:3px}
 
-  /* Gold action button (match “Claim treasure”) */
+  /* Gold action button */
   .btn{
     display:flex;align-items:center;justify-content:center;gap:10px;width:100%;
     padding:16px;border-radius:16px;border:3px solid #A7711F;
@@ -114,7 +99,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
   .msg.ok{display:block;background:var(--okbg);border-color:var(--ok);color:#064b06}
   .msg.err{display:block;background:var(--errbg);border-color:var(--err);color:#8B0000}
 
-  /* Signed state / rules */
+  /* Crew / rules */
   .crew-wrap{margin:2px 0 12px}
   .display-label{margin:0 0 6px;font-weight:900;color:#402a12;font-family:ui-sans-serif,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
   .display-field{background:#fff;border:3px solid var(--gold);border-radius:16px;padding:14px 16px;min-height:54px;display:flex;align-items:center;box-shadow:inset 0 1px 0 rgba(0,0,0,.04)}
@@ -181,7 +166,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
   </header>
 
   <main class="stack">
-    <!-- SIGN-IN CARD (only title + sign in) -->
+    <!-- SIGN-IN CARD -->
     <section class="card" id="secSign">
       <h2 class="title">Sign in</h2>
 
@@ -198,7 +183,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
       <div id="signMsg" class="msg" role="status" aria-live="polite"></div>
     </section>
 
-    <!-- HUNT CARD (shown after sign in) -->
+    <!-- HUNT CARD -->
     <section class="card" id="secHunt" style="display:none">
       <!-- Crew display field -->
       <div class="crew-wrap">
@@ -214,6 +199,11 @@ Note: Renamed a couple of UI element IDs used only by the page script:
       </div>
 
       <div style="height:12px"></div>
+      <div class="items-title">Choose Item</div>
+      <div class="grid" id="itemsGrid"></div>
+
+      <!-- MOVED: Upload block now sits UNDER the select item section -->
+      <div style="height:12px"></div>
       <div class="uploadWrap">
         <div id="drop" class="drop">
           <button type="button" class="uploadBtn handlee" id="pickBtn">📷 Upload photo</button>
@@ -222,10 +212,6 @@ Note: Renamed a couple of UI element IDs used only by the page script:
           <small class="handlee" style="display:block;margin-top:6px">JPEG/PNG/WebP • Max ~20MB</small>
         </div>
       </div>
-
-      <div style="height:12px"></div>
-      <div class="items-title">Choose Item</div>
-      <div class="grid" id="itemsGrid"></div>
 
       <div class="submitRow">
         <button id="submitBtn" class="btn" style="max-width:320px">Submit find</button>
@@ -334,7 +320,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
       }
     }
 
-    // ===== Sign in (unchanged function contract)
+    // ===== Sign in
     async function signIn(){
       clearMsg(signMsg);
       const teamCode = (teamSelect.value||'').trim();
@@ -423,7 +409,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
       });
     }
 
-    // ===== Upload (unchanged flow; just different status target)
+    // ===== Upload
     pickBtn.addEventListener('click', ()=> fileInput.click());
     fileInput.addEventListener('change', ()=>{
       const f = fileInput.files && fileInput.files[0];
@@ -445,7 +431,7 @@ Note: Renamed a couple of UI element IDs used only by the page script:
       return `https://ucarecdn.com/${j.file}/`;
     }
 
-    // ===== Submit (unchanged payload to Netlify)
+    // ===== Submit
     submitBtn.addEventListener('click', onSubmit);
 
     function chosenLabels(){
@@ -527,7 +513,6 @@ Note: Renamed a couple of UI element IDs used only by the page script:
 
     // ===== Boot
     (function boot(){
-      // restore session if present
       try{
         const raw = localStorage.getItem(keyFor('team'));
         if(raw){
