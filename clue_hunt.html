@@ -394,32 +394,29 @@
     // ===== Clue engine
     let currentClue=null, completedClues={}, currentScore=0;
 
-    /* NO CLUE TEXT STORED HERE.
-       Provide your answers/points list (id, acceptableAnswers, points) below.
-       Example row kept for structure — replace with your real data later. */
-const clueHuntData = [
-  { id: 1,  acceptableAnswers: ["george horner","georgehorner","horner"], points: 6 },
-  { id: 2,  acceptableAnswers: ["griffins","griffin"], points: 5 },
-  { id: 3,  acceptableAnswers: ["yn","y n"], points: 8 },
-  { id: 4,  acceptableAnswers: ["st mary","stmary","saint mary","st. mary"], points: 7 },
-  { id: 5,  acceptableAnswers: ["ebb and flow","ebbandflow","ebb & flow","ebb flow"], points: 9 },
-  { id: 6,  acceptableAnswers: ["xxxviii","38","thirty eight","thirty-eight"], points: 5 },
-  { id: 7,  acceptableAnswers: ["plenty"], points: 7 },
-  { id: 8,  acceptableAnswers: ["1,858","1858"], points: 6 },
-  { id: 9,  acceptableAnswers: ["lucy"], points: 5 },
-  { id: 10, acceptableAnswers: ["43","forty three","forty-three"], points: 8 },
-  { id: 11, acceptableAnswers: ["e o","eo"], points: 10 },
-  { id: 12, acceptableAnswers: ["rehtegot"], points: 6 },
-  { id: 13, acceptableAnswers: ["15","fifteen"], points: 7 },
-  { id: 14, acceptableAnswers: ["west mills","westmills"], points: 5 },
-  { id: 15, acceptableAnswers: ["1,908","1908"], points: 9 },
-  { id: 16, acceptableAnswers: ["john smith","johnsmith"], points: 6 },
-  { id: 17, acceptableAnswers: ["1996"], points: 8 },
-  { id: 18, acceptableAnswers: ["9210","9,210"], points: 7 },
-  { id: 19, acceptableAnswers: ["baigent"], points: 5 },
-  { id: 20, acceptableAnswers: ["bucklebury"], points: 6 }
-];
-
+    // Canonical answers (from your table) + fuzzy synonyms + points
+    const clueHuntData = [
+      { id: 1,  correctAnswer: "George Horner", acceptableAnswers: ["george horner","georgehorner","horner"], points: 6 },
+      { id: 2,  correctAnswer: "Griffins",      acceptableAnswers: ["griffins","griffin"], points: 5 },
+      { id: 3,  correctAnswer: "YN",            acceptableAnswers: ["yn","y n"], points: 8 },
+      { id: 4,  correctAnswer: "St Mary",       acceptableAnswers: ["st mary","stmary","saint mary","st. mary"], points: 7 },
+      { id: 5,  correctAnswer: "Ebb and Flow",  acceptableAnswers: ["ebb and flow","ebbandflow","ebb & flow","ebb flow"], points: 9 },
+      { id: 6,  correctAnswer: "XXXVIII",       acceptableAnswers: ["xxxviii","38","thirty eight","thirty-eight"], points: 5 },
+      { id: 7,  correctAnswer: "Plenty",        acceptableAnswers: ["plenty"], points: 7 },
+      { id: 8,  correctAnswer: "1,858",         acceptableAnswers: ["1,858","1858"], points: 6 },
+      { id: 9,  correctAnswer: "Lucy",          acceptableAnswers: ["lucy"], points: 5 },
+      { id: 10, correctAnswer: "43",            acceptableAnswers: ["43","forty three","forty-three"], points: 8 },
+      { id: 11, correctAnswer: "E O",           acceptableAnswers: ["e o","eo"], points: 10 },
+      { id: 12, correctAnswer: "REHTEGOT",      acceptableAnswers: ["rehtegot"], points: 6 },
+      { id: 13, correctAnswer: "15",            acceptableAnswers: ["15","fifteen"], points: 7 },
+      { id: 14, correctAnswer: "West Mills",    acceptableAnswers: ["west mills","westmills"], points: 5 },
+      { id: 15, correctAnswer: "1,908",         acceptableAnswers: ["1,908","1908"], points: 9 },
+      { id: 16, correctAnswer: "John Smith",    acceptableAnswers: ["john smith","johnsmith"], points: 6 },
+      { id: 17, correctAnswer: "1996",          acceptableAnswers: ["1996"], points: 8 },
+      { id: 18, correctAnswer: "9210",          acceptableAnswers: ["9210","9,210"], points: 7 },
+      { id: 19, correctAnswer: "Baigent",       acceptableAnswers: ["baigent"], points: 5 },
+      { id: 20, correctAnswer: "Bucklebury",    acceptableAnswers: ["bucklebury"], points: 6 }
+    ];
 
     function renderClueGrid(){
       const grid = $('clueGrid');
@@ -476,7 +473,8 @@ const clueHuntData = [
           teamName: localStorage.getItem('teamName'),
           clueId: currentClue.id,
           userAnswer: val,
-          acceptableAnswers: currentClue.acceptableAnswers,
+          correctAnswer: currentClue.correctAnswer,          // canonical (for logging + candidate)
+          acceptableAnswers: currentClue.acceptableAnswers,  // synonyms for fuzzy match
           pointsIfCorrect: currentClue.points
         });
 
@@ -489,7 +487,12 @@ const clueHuntData = [
           wasCorrect
         };
         reconcileScore(data.totalScore);
-        showResult(wasCorrect ? `🎉 Points Scored! +${award} doubloons` : `❌ Locked!`, wasCorrect);
+        showResult(
+          wasCorrect
+            ? `🎉 Points scored! +${award} points`
+            : `❌ Locked! Correct answer: ${currentClue.correctAnswer}`,
+          wasCorrect
+        );
         updateScore(); updateProgress();
       }catch(e){
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
