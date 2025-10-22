@@ -1,13 +1,6 @@
 <!-- TeamQuest • Limerick (visual refinements + auto-expanding textarea)
-Changes:
-• Labels/titles use sans-serif; inputs/selects/textarea use Handlee.
-• Removed green “Signed in” banner.
-• “Crew” now shown as parchment field (label + white field with gold border).
-• Rules shown as compact chips (darker than card background).
-• Placeholders made lighter; “(optional)” rendered smaller.
-• Submit button restyled to shared amber pill and larger text.
-• NEW: Limerick textarea auto-expands to fit content (no scrollbars).
-• Kept all IDs and JS hooks the same; endpoints and logic unchanged.
+Notes for this version:
+• Removed example text from the limerick textarea (no placeholder).
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -176,7 +169,7 @@ Changes:
 
     <!-- STEP 2: Everything else AFTER sign-in -->
     <section class="signed-only">
-      <!-- Crew field (no green banner) -->
+      <!-- Crew field -->
       <div class="card">
         <label for="crewName">Crew</label>
         <div id="crewName" class="field" style="pointer-events:none;user-select:none">—</div>
@@ -196,7 +189,6 @@ Changes:
       <form id="limerickForm" class="card" novalidate>
         <div style="margin-bottom:10px">
           <label for="topic">Topic</label>
-          <!-- CHANGED: input -> dropdown; ID unchanged to keep functionality identical -->
           <select id="topic" class="tq-select">
             <option value="" selected disabled>Choose a topic…</option>
             <option value="Pirates &amp; Treasure">Pirates &amp; Treasure</option>
@@ -210,7 +202,8 @@ Changes:
 
         <div style="margin-bottom:10px">
           <label for="limerick">Your limerick</label>
-          <textarea id="limerick" class="field" maxlength="500" placeholder="There once was a crew bold and keen…"></textarea>
+          <!-- placeholder removed per request -->
+          <textarea id="limerick" class="field" maxlength="500"></textarea>
           <div class="help"><span id="charCount">0</span>/500 characters</div>
         </div>
 
@@ -391,7 +384,6 @@ Changes:
       const limEl = $('#limerick');
       const cntEl = $('#charCount');
       limEl?.addEventListener('input',()=>{ cntEl.textContent = (limEl.value||'').length; });
-      // Safe to call before sign-in; will run again after it becomes visible
       autoGrow(limEl);
 
       // Submit limerick
