@@ -491,7 +491,7 @@
           wasCorrect
         };
         reconcileScore(data.totalScore, award);
-        showResult(wasCorrect ? `🎉 Points Scored! +${award} doubloons` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
+        showResult(wasCorrect ? `🎉 Points Scored! +${award} points` : `❌ Locked! Correct answer: ${currentClue.answer} (worth ${currentClue.points})`, wasCorrect);
         updateScore(); updateProgress();
       }catch(e){
         if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
