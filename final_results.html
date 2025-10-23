@@ -1,5 +1,7 @@
 <!--
-TeamQuest • Final Leaderboard — no timer, no freeze, no "Returned" dimming
+TeamQuest • Final Leaderboard — updated to prevent stale data:
+• Requires ?event=… in URL (shows message if missing)
+• Cache-busting & no-store fetch of /get_leaderboard
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -333,10 +335,13 @@ TeamQuest • Final Leaderboard — no timer, no freeze, no "Returned" dimming
     }
 
     async function loadBoard(){
-      const boardUrl = EVENT_ID
-        ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
-        : '/.netlify/functions/get_leaderboard';
-
+      if (!EVENT_ID) {
+        rowsEl.innerHTML = `<div class="state">Missing ?event=… in the URL, so we can’t show this event’s final leaderboard.</div>`;
+        updatedEl.textContent = 'Loaded — --:--:--';
+        return;
+      }
+      const t = Date.now(); // cache-buster
+      const boardUrl = `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}&t=${t}`;
       try{
         const boardRes = await fetch(boardUrl, { cache:'no-store' });
         const board = await boardRes.json();
