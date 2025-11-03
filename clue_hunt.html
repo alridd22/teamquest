@@ -211,15 +211,15 @@
       <div id="teamInfo" class="display-field" aria-live="polite">—</div>
 
       <div class="progress-wrap" aria-live="polite">
-        <div class="progress-line" id="progressLine">0/20 Solved • 0 Explored</div>
-        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0">
+        <div class="progress-line" id="progressLine">0/19 Solved • 0 Explored</div>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="19" aria-valuenow="0">
           <div id="progressFill" class="progress-fill"></div>
-          <div class="progress-text" id="progressText">0/20</div>
+          <div class="progress-text" id="progressText">0/19</div>
         </div>
       </div>
 
       <div class="rules">
-        <div class="rule-chip">• 20 clues • one try each</div>
+        <div class="rule-chip">• 19 clues • one try each</div>
         <div class="rule-chip">• Hidden reward per clue (5–10)</div>
         <div class="rule-chip">• Come and go anytime — progress saves</div>
       </div>
@@ -394,29 +394,42 @@
     // ===== Clue engine
     let currentClue=null, completedClues={}, currentScore=0;
 
-    // Canonical answers (from your table) + fuzzy synonyms + points
+    // ---- 19 clues with preset points (sum = 130) ----
     const clueHuntData = [
-      { id: 1,  correctAnswer: "George Horner", acceptableAnswers: ["george horner","georgehorner","horner"], points: 6 },
-      { id: 2,  correctAnswer: "Griffins",      acceptableAnswers: ["griffins","griffin"], points: 5 },
-      { id: 3,  correctAnswer: "YN",            acceptableAnswers: ["yn","y n"], points: 8 },
-      { id: 4,  correctAnswer: "St Mary",       acceptableAnswers: ["st mary","stmary","saint mary","st. mary"], points: 7 },
-      { id: 5,  correctAnswer: "Ebb and Flow",  acceptableAnswers: ["ebb and flow","ebbandflow","ebb & flow","ebb flow"], points: 9 },
-      { id: 6,  correctAnswer: "XXXVIII",       acceptableAnswers: ["xxxviii","38","thirty eight","thirty-eight"], points: 5 },
-      { id: 7,  correctAnswer: "Plenty",        acceptableAnswers: ["plenty"], points: 7 },
-      { id: 8,  correctAnswer: "1,858",         acceptableAnswers: ["1,858","1858"], points: 6 },
-      { id: 9,  correctAnswer: "Lucy",          acceptableAnswers: ["lucy"], points: 5 },
-      { id: 10, correctAnswer: "43",            acceptableAnswers: ["43","forty three","forty-three"], points: 8 },
-      { id: 11, correctAnswer: "E O",           acceptableAnswers: ["e o","eo"], points: 10 },
-      { id: 12, correctAnswer: "REHTEGOT",      acceptableAnswers: ["rehtegot"], points: 6 },
-      { id: 13, correctAnswer: "15",            acceptableAnswers: ["15","fifteen"], points: 7 },
-      { id: 14, correctAnswer: "West Mills",    acceptableAnswers: ["west mills","westmills"], points: 5 },
-      { id: 15, correctAnswer: "1,908",         acceptableAnswers: ["1,908","1908"], points: 9 },
-      { id: 16, correctAnswer: "John Smith",    acceptableAnswers: ["john smith","johnsmith"], points: 6 },
-      { id: 17, correctAnswer: "1996",          acceptableAnswers: ["1996"], points: 8 },
-      { id: 18, correctAnswer: "9210",          acceptableAnswers: ["9210","9,210"], points: 7 },
-      { id: 19, correctAnswer: "Baigent",       acceptableAnswers: ["baigent"], points: 5 },
-      { id: 20, correctAnswer: "Bucklebury",    acceptableAnswers: ["bucklebury"], points: 6 }
+      { id: 1,  correctAnswer: "R",        acceptableAnswers: ["r"],                                     points: 6 },
+      { id: 2,  correctAnswer: "9,218",    acceptableAnswers: ["9218","9,218"],                          points: 8 },
+      { id: 3,  correctAnswer: "Compy",    acceptableAnswers: ["compy"],                                 points: 9 },
+      { id: 4,  correctAnswer: "Rogues",   acceptableAnswers: ["rogues","rogue"],                        points: 6 },
+      { id: 5,  correctAnswer: "T",        acceptableAnswers: ["t"],                                     points: 5 },
+      { id: 6,  correctAnswer: "H M P",    acceptableAnswers: ["hmp","h m p","h.m.p"],                   points: 7 },
+      { id: 7,  correctAnswer: "18",       acceptableAnswers: ["18","eighteen"],                         points: 6 },
+      { id: 8,  correctAnswer: "11",       acceptableAnswers: ["11","eleven"],                           points: 5 },
+      { id: 9,  correctAnswer: "AQUATIC",  acceptableAnswers: ["aquatic"],                               points: 10 },
+      { id: 10, correctAnswer: "Funeral",  acceptableAnswers: ["funeral","funerals"],                    points: 8 },
+      { id: 11, correctAnswer: "Pye",      acceptableAnswers: ["pye"],                                   points: 7 },
+      { id: 12, correctAnswer: "Sara",     acceptableAnswers: ["sara","sarah"],                          points: 5 },
+      { id: 13, correctAnswer: "35",       acceptableAnswers: ["35","thirty five","thirty-five"],        points: 6 },
+      { id: 14, correctAnswer: "76",       acceptableAnswers: ["76","seventy six","seventy-six"],        points: 7 },
+      { id: 15, correctAnswer: "17",       acceptableAnswers: ["17","seventeen"],                        points: 5 },
+      { id: 16, correctAnswer: "1,344",    acceptableAnswers: ["1344","1,344"],                          points: 9 },
+      { id: 17, correctAnswer: "40",       acceptableAnswers: ["40","forty"],                            points: 6 },
+      { id: 18, correctAnswer: "Heber",    acceptableAnswers: ["heber"],                                 points: 7 },
+      { id: 19, correctAnswer: "Mercers",  acceptableAnswers: ["mercers","mercer"],                      points: 8 },
     ];
+
+    const TOTAL_CLUES = clueHuntData.length;
+
+    // Apply dynamic counts to UI on load
+    (function applyDynamicCounts(){
+      const pl = $('progressLine'); if (pl) pl.textContent = `0/${TOTAL_CLUES} Solved • 0 Explored`;
+      const pb = document.querySelector('.progress-bar'); if (pb) pb.setAttribute('aria-valuemax', String(TOTAL_CLUES));
+      const pt = $('progressText'); if (pt) pt.textContent = `0/${TOTAL_CLUES}`;
+      const rulesWrap = document.querySelector('.rules');
+      if (rulesWrap){
+        const first = rulesWrap.querySelector('.rule-chip');
+        if (first) first.textContent = `• ${TOTAL_CLUES} clues • one try each`;
+      }
+    })();
 
     function renderClueGrid(){
       const grid = $('clueGrid');
@@ -473,8 +486,8 @@
           teamName: localStorage.getItem('teamName'),
           clueId: currentClue.id,
           userAnswer: val,
-          correctAnswer: currentClue.correctAnswer,          // canonical (for logging + candidate)
-          acceptableAnswers: currentClue.acceptableAnswers,  // synonyms for fuzzy match
+          correctAnswer: currentClue.correctAnswer,
+          acceptableAnswers: currentClue.acceptableAnswers,
           pointsIfCorrect: currentClue.points
         });
 
@@ -533,10 +546,10 @@
     function updateProgress(){
       const attempted = Object.keys(completedClues).length;
       const correct = Object.values(completedClues).filter(c=>c.wasCorrect).length;
-      const pct = Math.max((attempted / clueHuntData.length)*100, 0);
+      const pct = Math.max((attempted / TOTAL_CLUES)*100, 0);
       document.querySelector('.progress-fill').style.width = pct + '%';
-      $('progressText').textContent = `${correct}/${clueHuntData.length}`;
-      $('progressLine').textContent = `${correct}/${clueHuntData.length} Solved • ${attempted} Explored`;
+      $('progressText').textContent = `${correct}/${TOTAL_CLUES}`;
+      $('progressLine').textContent = `${correct}/${TOTAL_CLUES} Solved • ${attempted} Explored`;
       document.querySelector('.progress-bar').setAttribute('aria-valuenow', correct);
     }
 
