@@ -61,6 +61,25 @@ exports.handler = async (event) => {
 
     let outByTeam = new Map();
 
+    // Helper to ensure a team aggregate object exists
+    const ensureTeam = (codeRaw) => {
+      const teamCode = norm(codeRaw);
+      if (!teamCode) return null;
+      if (!outByTeam.has(teamCode)) {
+        outByTeam.set(teamCode, {
+          teamCode,
+          teamName: "",
+          kindness: 0,
+          limerick: 0,
+          scavenger: 0,
+          cluehunt: 0,
+          quiz: 0,
+          total: 0,
+        });
+      }
+      return outByTeam.get(teamCode);
+    };
+
     if (subRows.length) {
       const header = subRows[0] || [];
       const idx = indexHeaders(header);
@@ -74,53 +93,49 @@ exports.handler = async (event) => {
       const iIdem  = idx["idempotency"] ?? idx["submissionid"];
       const iEvt   = idx["event id"] ?? idx["eventid"];
 
-      // Deduplicate by Idempotency using MAX Final Score (tie-break by latest timestamp)
-      const idemBest = new Map(); // idemKey -> {score, ts, row}
+      // For non-scavenger activities: deduplicate by Idempotency using best Final Score
+      const idemBest = new Map(); // idemKey -> {score, ts, bucket, teamCode}
+
       for (let r = 1; r < subRows.length; r++) {
         const row = subRows[r] || [];
+
         const status = lower(row[iStat] || "");
         if (!status.includes("final")) continue;
 
         if (eventIdFilter && upper(row[iEvt] || "") !== eventIdFilter) continue;
 
-        const code = upper(row[iCode] || "");
         const bucket = activityKey(row[iAct]);
-        if (!code || !bucket) continue;
+        if (!bucket) continue;
+
+        const teamCode = norm(row[iCode] || "");
+        if (!teamCode) continue;
 
         const score = num(row[iFinal]);
         const ts = new Date(row[iTs] || 0).getTime() || 0;
 
-        // Prefer Idempotency; if absent, synthesize a unique key
+        // ---- Scavenger: sum ALL final submissions (no idempotency dedupe) ----
+        if (bucket === "scavenger") {
+          const agg = ensureTeam(teamCode);
+          if (!agg) continue;
+          agg.scavenger += score;
+          agg.total += score;
+          continue;
+        }
+
+        // ---- Everything else: best-per-idempotency as before ----
         const rawIdem = norm(row[iIdem] || "");
-        const idemKey = rawIdem || `NOIDEM:${code}:${bucket}:${ts}`;
+        const idemKey = rawIdem || `NOIDEM:${teamCode}:${bucket}`;
 
         const prev = idemBest.get(idemKey);
         if (!prev || score > prev.score || (score === prev.score && ts >= prev.ts)) {
-          idemBest.set(idemKey, { score, ts, row });
+          idemBest.set(idemKey, { score, ts, bucket, teamCode });
         }
       }
 
-      // Aggregate per team/activity
-      outByTeam = new Map();
-      for (const { row, score } of idemBest.values()) {
-        const teamCode = norm(row[iCode] || "");
-        if (!teamCode) continue;
-        const bucket = activityKey(row[iAct]);
-        if (!bucket) continue;
-
-        if (!outByTeam.has(teamCode)) {
-          outByTeam.set(teamCode, {
-            teamCode,
-            teamName: "",
-            kindness: 0,
-            limerick: 0,
-            scavenger: 0,
-            cluehunt: 0,
-            quiz: 0,
-            total: 0,
-          });
-        }
-        const agg = outByTeam.get(teamCode);
+      // Apply non-scavenger aggregated scores into outByTeam
+      for (const { score, bucket, teamCode } of idemBest.values()) {
+        const agg = ensureTeam(teamCode);
+        if (!agg) continue;
         agg[bucket] += score;
         agg.total += score;
       }
