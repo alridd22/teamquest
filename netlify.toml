@@ -8,6 +8,10 @@
   external_node_modules = ["google-auth-library","googleapis","jsonwebtoken"]
   included_files = ["netlify/functions/sa_key.json"]
 
+# run retry_all_ai_cron every 3 minutes
+[functions."retry_all_ai_cron"]
+  schedule = "*/3 * * * *"
+
 [[headers]]
   for = "/.netlify/functions/*"
   [headers.values]
@@ -15,6 +19,3 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Headers = "Content-Type, Authorization, X-Admin-Secret"
     Access-Control-Allow-Methods = "GET, POST, OPTIONS"
-
-
-
