@@ -21,11 +21,11 @@ function indexHeaders(row = []) {
   return idx;
 }
 
-// Generic Zap webhook caller (same as before)
 async function postToZapHook(url, data, submissionId) {
   if (!url) return { ok: false, err: "Missing ZAP_KINDNESS_HOOK" };
   const waits = [0, 800, 3000];
   let lastErr = "unknown";
+
   for (let i = 0; i < waits.length; i++) {
     if (waits[i]) await new Promise((r) => setTimeout(r, waits[i]));
     try {
@@ -63,7 +63,10 @@ function isKindnessActivity(raw) {
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
-    if (event.httpMethod !== "POST") return error(405, "POST only");
+
+    if (event.httpMethod !== "POST") {
+      return error(405, "POST only");
+    }
 
     let body = {};
     try {
@@ -94,12 +97,12 @@ module.exports.handler = async (event) => {
     const header = values[0] || [];
     const idx = indexHeaders(header);
 
-    const iTs      = idx["timestamp"];
-    const iTeam    = idx["team code"] ?? idx["team"];
-    const iAct     = idx["activity"];
-    const iNonce   = idx["nonce"];
-    const iPayload = idx["payload"];
-    const iStatus  = idx["ai status"] ?? idx["status"];
+    const iTs       = idx["timestamp"];
+    const iTeam     = idx["team code"] ?? idx["team"];
+    const iAct      = idx["activity"];
+    const iNonce    = idx["nonce"];
+    const iPayload  = idx["payload"];
+    const iStatus   = idx["ai status"] ?? idx["status"];
     const iAttempts = idx["ai attempts"] ?? idx["attempts"];
     const iScore    = idx["ai score"] ?? idx["score"];
     const iFinal    = idx["final score"];
@@ -123,7 +126,6 @@ module.exports.handler = async (event) => {
 
     const candidates = [];
 
-    // ---- find stale KINDNESS rows ---------------------------------
     for (let r = 1; r < values.length; r++) {
       const row = values[r] || [];
 
@@ -164,7 +166,6 @@ module.exports.handler = async (event) => {
       });
     }
 
-    // ---- resend original payload for each candidate ---------------
     let retried = 0;
     const results = [];
 
@@ -172,8 +173,11 @@ module.exports.handler = async (event) => {
       const teamCode   = norm(row[iTeam] || "");
       const eventIdRow = norm(row[iEvent] || "");
       const nonce      = norm(row[iNonce] || "");
+      const timestamp  = iTs != null ? row[iTs] || new Date().toISOString() : new Date().toISOString();
+      const idemVal    = iIdem != null ? row[iIdem] || "" : "";
       const payloadStr = row[iPayload] || "";
 
+      // Rebuild the original payload from the JSON stored in "Payload"
       let payloadObj = {};
       try {
         if (payloadStr) payloadObj = JSON.parse(payloadStr);
@@ -181,23 +185,49 @@ module.exports.handler = async (event) => {
         payloadObj = { rawPayload: payloadStr };
       }
 
-      // Use the original submissionId/idempotency if present
-      const originalSubmissionId =
-        norm(payloadObj.submissionId || row[iIdem] || nonce || "");
+      // Extract the key fields that the Zap expects at top-level
+      const teamName = payloadObj.teamName || payloadObj.team || teamCode;
+      const photoUrl =
+        payloadObj.photoUrl ||
+        payloadObj.photo_url ||
+        payloadObj.photo ||
+        "";
+      const description =
+        payloadObj.description ||
+        payloadObj.text ||
+        "";
+      const where =
+        payloadObj.where ||
+        payloadObj.location ||
+        "";
 
-      // Reconstruct the *original* webhook body + a few helper flags.
-      const resendPayload = {
-        ...payloadObj,                 // original fields: activity, eventId, teamCode, teamName, photoUrl, description, where, idempotency, submissionId, etc.
-        retry: true,                   // let the Zap know this came from the watchdog
-        sheetRow: rowIndex + 1,        // handy for debugging inside the Zap if you want it
+      // Keep the same submission key shape as the original submit_kindness_function
+      const submissionId = payloadObj.submissionId || idemVal || `kindness-${teamCode}-${nonce}`;
+
+      const postBody = {
+        activity: "kindness",
+        eventId: eventIdRow,
+        teamCode,
+        teamName,
+        timestamp,
+        nonce,
+        submissionId,
+        idempotency: idemVal,
+        photoUrl,
+        description,
+        where,
         sheetId: SHEET_ID,
         worksheet: "submissions",
+        payload: payloadObj,
+        retry: true,
       };
+
+      const submissionKey = `retry-kindness-${teamCode}-${nonce || rowIndex}`;
 
       const post = await postToZapHook(
         hook,
-        resendPayload,
-        originalSubmissionId || `retry-kindness-${teamCode}-${nonce || rowIndex}`
+        postBody,
+        submissionKey
       );
 
       const attempts = num(row[iAttempts] || 0) + 1;
@@ -207,21 +237,19 @@ module.exports.handler = async (event) => {
 
       const rowNum = rowIndex + 1;
 
-      // keep existing score/final/idempotency/event columns as-is
       const scoreVal = iScore != null ? row[iScore] || "" : "";
       const finalVal = iFinal != null ? row[iFinal] || "" : "";
-      const idemVal  = iIdem  != null ? row[iIdem]  || "" : "";
-      const evtVal   = iEvent != null ? row[iEvent] || "" : "";
+      const evtVal   = iEvent != null ? row[iEvent] || "" : eventIdRow;
 
       const newSegment = [
-        newStatus,
-        attempts,
-        scoreVal,
-        finalVal,
-        idemVal,
-        evtVal,
-        lastAttemptAt,
-        zapErr,
+        newStatus,      // F: AI Status
+        attempts,       // G: AI Attempts
+        scoreVal,       // H: AI Score
+        finalVal,       // I: Final Score
+        idemVal,        // J: Idempotency
+        evtVal,         // K: Event Id
+        lastAttemptAt,  // L: Last Attempt At
+        zapErr,         // M: Zap Error
       ];
 
       await sheets.spreadsheets.values.update({
