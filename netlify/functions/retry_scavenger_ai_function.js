@@ -6,25 +6,32 @@ const {
   isPreflight,
   getSheets,
   SHEET_ID,
-  indexByHeader,
 } = require("./_utils.js");
-
-// --- helpers ---------------------------------------------------------------
 
 const lower = (s) => String(s ?? "").trim().toLowerCase();
 const norm  = (s) => String(s ?? "").trim();
 const num   = (v) => (Number.isFinite(+v) ? +v : 0);
 
-// Same robust webhook post as in submit_scavenger_function
+// Local header indexer (lowercased keys)
+function indexHeaders(row = []) {
+  const idx = {};
+  row.forEach((h, i) => {
+    const key = String(h || "").trim().toLowerCase();
+    if (key) idx[key] = i;
+  });
+  return idx;
+}
+
+// Same robust webhook post as submit_scavenger_function
 async function postToZapHook(url, data, submissionId) {
   if (!url) return { ok: false, err: "Missing ZAP_SCAVENGER_HOOK" };
-  const waits = [0, 800, 3000]; // ms backoff
+  const waits = [0, 800, 3000];
   let lastErr = "unknown";
   for (let i = 0; i < waits.length; i++) {
     if (waits[i]) await new Promise((r) => setTimeout(r, waits[i]));
     try {
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000); // 10s
+      const timer = setTimeout(() => controller.abort(), 10000);
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -55,8 +62,6 @@ function isScavengerActivity(raw) {
   );
 }
 
-// --------------------------------------------------------------------------
-
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
@@ -72,12 +77,11 @@ module.exports.handler = async (event) => {
       return error(400, "Invalid JSON body");
     }
 
-    // Optional filters / knobs
     const filterEventId = norm(body.eventId || body.event || "");
     const filterTeam    = norm(body.teamCode || body.team || "");
-    const maxAgeSeconds = num(body.maxAgeSeconds) || 120; // how "stale" before retry
-    const maxAttempts   = num(body.maxAttempts)   || 3;   // cap on retries
-    const limit         = num(body.limit)         || 50;  // max rows retried per call
+    const maxAgeSeconds = num(body.maxAgeSeconds) || 120;
+    const maxAttempts   = num(body.maxAttempts)   || 3;
+    const limit         = num(body.limit)         || 50;
 
     const sheets = await getSheets();
     const spreadsheetId = SHEET_ID;
@@ -93,12 +97,12 @@ module.exports.handler = async (event) => {
     }
 
     const header = values[0] || [];
-    const idx = indexByHeader(values);
+    const idx = indexHeaders(header);
 
-    const iTs    = idx["timestamp"];
-    const iTeam  = idx["team code"] ?? idx["team"];
-    const iAct   = idx["activity"];
-    const iNonce = idx["nonce"];
+    const iTs      = idx["timestamp"];
+    const iTeam    = idx["team code"] ?? idx["team"];
+    const iAct     = idx["activity"];
+    const iNonce   = idx["nonce"];
     const iPayload = idx["payload"];
     const iStatus  = idx["ai status"] ?? idx["status"];
     const iAttempts = idx["ai attempts"] ?? idx["attempts"];
@@ -124,7 +128,6 @@ module.exports.handler = async (event) => {
 
     const candidates = [];
 
-    // Pick candidates
     for (let r = 1; r < values.length; r++) {
       const row = values[r] || [];
 
@@ -137,7 +140,7 @@ module.exports.handler = async (event) => {
 
       const statusRaw = row[iStatus] || "";
       const status = lower(statusRaw);
-      if (status.includes("final")) continue; // already processed fully
+      if (status.includes("final")) continue;
 
       const attempts = num(row[iAttempts] || 0);
       if (attempts >= maxAttempts) continue;
@@ -151,10 +154,8 @@ module.exports.handler = async (event) => {
         "";
       const lastTs = new Date(lastTsStr).getTime() || 0;
       const age = now - lastTs;
-      if (age < maxAgeMs) continue; // not stale enough yet
+      if (age < maxAgeMs) continue;
 
-      // We also want to distinguish between PROCESSING and ERROR but
-      // both are eligible to retry once stale.
       candidates.push({ rowIndex: r, row });
       if (candidates.length >= limit) break;
     }
@@ -180,7 +181,6 @@ module.exports.handler = async (event) => {
       try {
         if (payloadStr) payloadObj = JSON.parse(payloadStr);
       } catch {
-        // If payload JSON is corrupt, we can still send minimal context
         payloadObj = { rawPayload: payloadStr };
       }
 
@@ -194,7 +194,7 @@ module.exports.handler = async (event) => {
           teamCode,
           teamName: payloadObj.teamName || "",
           timestamp: new Date().toISOString(),
-          nonce: nonce,
+          nonce,
           idempotency: row[iIdem] || "",
           submissionId,
           sheetId: SHEET_ID,
@@ -205,37 +205,28 @@ module.exports.handler = async (event) => {
         submissionId
       );
 
-      // Update row: bump attempts, set status / last_attempt_at / zap_error
       const attempts = num(row[iAttempts] || 0) + 1;
       const newStatus = post.ok ? "PROCESSING" : "ERROR";
       const lastAttemptAt = new Date().toISOString();
       const zapErr = post.ok ? "" : String(post.err).slice(0, 200);
 
-      // Build F..M row using existing values where we don’t want to change them
-      const rowNum = rowIndex + 1; // 1-based including header
-      const newSegment = [];
+      const rowNum = rowIndex + 1;
 
       const scoreVal = iScore != null ? row[iScore] || "" : "";
       const finalVal = iFinal != null ? row[iFinal] || "" : "";
       const idemVal  = iIdem  != null ? row[iIdem]  || "" : "";
       const evtVal   = iEvent != null ? row[iEvent] || "" : "";
 
-      // F  AI Status
-      newSegment.push(newStatus);
-      // G  AI Attempts
-      newSegment.push(attempts);
-      // H  AI Score
-      newSegment.push(scoreVal);
-      // I  Final Score
-      newSegment.push(finalVal);
-      // J  Idempotency
-      newSegment.push(idemVal);
-      // K  Event Id
-      newSegment.push(evtVal);
-      // L  Last Attempt At
-      newSegment.push(lastAttemptAt);
-      // M  Zap Error
-      newSegment.push(zapErr);
+      const newSegment = [
+        newStatus,
+        attempts,
+        scoreVal,
+        finalVal,
+        idemVal,
+        evtVal,
+        lastAttemptAt,
+        zapErr,
+      ];
 
       await sheets.spreadsheets.values.update({
         spreadsheetId,
