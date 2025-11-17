@@ -12,17 +12,15 @@ const lower = (s) => String(s ?? "").trim().toLowerCase();
 const norm  = (s) => String(s ?? "").trim();
 const num   = (v) => (Number.isFinite(+v) ? +v : 0);
 
-// Local header indexer (lowercased keys)
 function indexHeaders(row = []) {
   const idx = {};
   row.forEach((h, i) => {
     const key = String(h || "").trim().toLowerCase();
     if (key) idx[key] = i;
   });
-  return idx;
+    return idx;
 }
 
-// Same robust webhook post as submit_scavenger_function
 async function postToZapHook(url, data, submissionId) {
   if (!url) return { ok: false, err: "Missing ZAP_SCAVENGER_HOOK" };
   const waits = [0, 800, 3000];
@@ -99,12 +97,12 @@ module.exports.handler = async (event) => {
     const header = values[0] || [];
     const idx = indexHeaders(header);
 
-    const iTs      = idx["timestamp"];
-    const iTeam    = idx["team code"] ?? idx["team"];
-    const iAct     = idx["activity"];
-    const iNonce   = idx["nonce"];
-    const iPayload = idx["payload"];
-    const iStatus  = idx["ai status"] ?? idx["status"];
+    const iTs       = idx["timestamp"];
+    const iTeam     = idx["team code"] ?? idx["team"];
+    const iAct      = idx["activity"];
+    const iNonce    = idx["nonce"];
+    const iPayload  = idx["payload"];
+    const iStatus   = idx["ai status"] ?? idx["status"];
     const iAttempts = idx["ai attempts"] ?? idx["attempts"];
     const iScore    = idx["ai score"] ?? idx["score"];
     const iFinal    = idx["final score"];
@@ -172,9 +170,9 @@ module.exports.handler = async (event) => {
     const results = [];
 
     for (const { rowIndex, row } of candidates) {
-      const teamCode = norm(row[iTeam] || "");
+      const teamCode   = norm(row[iTeam] || "");
       const eventIdRow = norm(row[iEvent] || "");
-      const nonce = norm(row[iNonce] || "");
+      const nonce      = norm(row[iNonce] || "");
       const payloadStr = row[iPayload] || "";
 
       let payloadObj = {};
