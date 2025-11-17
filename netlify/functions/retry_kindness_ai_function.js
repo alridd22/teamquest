@@ -169,38 +169,51 @@ module.exports.handler = async (event) => {
     const results = [];
 
     for (const { rowIndex, row } of candidates) {
-      const teamCode = norm(row[iTeam] || "");
+      const teamCode   = norm(row[iTeam] || "");
       const eventIdRow = norm(row[iEvent] || "");
-      const nonce = norm(row[iNonce] || "");
+      const nonce      = norm(row[iNonce] || "");
       const payloadStr = row[iPayload] || "";
 
       let payloadObj = {};
       try {
         if (payloadStr) payloadObj = JSON.parse(payloadStr);
       } catch {
+        // If payload is corrupted, still send *something* so you can see it in Zap logs
         payloadObj = { rawPayload: payloadStr };
       }
 
+      // Use original timestamp if present; fall back to "now"
+      const originalTs =
+        (iTs != null && row[iTs]) ? row[iTs] : new Date().toISOString();
+
+      const idemVal = iIdem != null ? (row[iIdem] || "") : "";
+
       const submissionId = `retry-kindness-${teamCode}-${nonce || rowIndex}`;
 
-      const post = await postToZapHook(
-        hook,
-        {
-          activity: "kindness",
-          eventId: eventIdRow,
-          teamCode,
-          teamName: payloadObj.teamName || "",
-          timestamp: new Date().toISOString(),
-          nonce,
-          idempotency: row[iIdem] || "",
-          submissionId,
+      // 🔑 KEY CHANGE:
+      // Recreate the original body shape by spreading payloadObj
+      // back onto the top level, then add meta under `_meta` and `retry`.
+      const zapBody = {
+        // original payload fields (text, photoUrl, activity, etc.)
+        ...payloadObj,
+
+        // minimal top-level meta (won't break anything if unused)
+        teamCode,
+        eventId: eventIdRow,
+        timestamp: originalTs,
+
+        // retry metadata tucked away
+        retry: true,
+        _meta: {
           sheetId: SHEET_ID,
           worksheet: "submissions",
-          payload: payloadObj,
-          retry: true,
+          nonce,
+          idempotency: idemVal,
+          submissionId,
         },
-        submissionId
-      );
+      };
+
+      const post = await postToZapHook(hook, zapBody, submissionId);
 
       const attempts = num(row[iAttempts] || 0) + 1;
       const newStatus = post.ok ? "PROCESSING" : "ERROR";
@@ -209,9 +222,9 @@ module.exports.handler = async (event) => {
 
       const rowNum = rowIndex + 1;
 
+      // Preserve existing score / final / idempotency / event columns
       const scoreVal = iScore != null ? row[iScore] || "" : "";
       const finalVal = iFinal != null ? row[iFinal] || "" : "";
-      const idemVal  = iIdem  != null ? row[iIdem]  || "" : "";
       const evtVal   = iEvent != null ? row[iEvent] || "" : "";
 
       const newSegment = [
