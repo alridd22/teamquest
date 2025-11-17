@@ -21,15 +21,19 @@ function indexHeaders(row = []) {
   return idx;
 }
 
+// Robust webhook post with retries/backoff
 async function postToZapHook(url, data, submissionId) {
   if (!url) return { ok: false, err: "Missing ZAP_LIMERICK_HOOK" };
+
   const waits = [0, 800, 3000];
   let lastErr = "unknown";
+
   for (let i = 0; i < waits.length; i++) {
     if (waits[i]) await new Promise((r) => setTimeout(r, waits[i]));
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 10000);
+
       const res = await fetch(url, {
         method: "POST",
         headers: {
@@ -39,14 +43,17 @@ async function postToZapHook(url, data, submissionId) {
         body: JSON.stringify(data),
         signal: controller.signal,
       });
+
       const txt = await res.text();
       clearTimeout(timer);
+
       if (res.ok) return { ok: true };
       lastErr = `Zap ${res.status} ${txt?.slice(0, 200) || ""}`.trim();
     } catch (e) {
       lastErr = e && e.message ? e.message : String(e);
     }
   }
+
   return { ok: false, err: lastErr };
 }
 
@@ -62,10 +69,7 @@ function isLimerickActivity(raw) {
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
-
-    if (event.httpMethod !== "POST") {
-      return error(405, "POST only");
-    }
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
     let body = {};
     try {
@@ -96,12 +100,12 @@ module.exports.handler = async (event) => {
     const header = values[0] || [];
     const idx = indexHeaders(header);
 
-    const iTs      = idx["timestamp"];
-    const iTeam    = idx["team code"] ?? idx["team"];
-    const iAct     = idx["activity"];
-    const iNonce   = idx["nonce"];
-    const iPayload = idx["payload"];
-    const iStatus  = idx["ai status"] ?? idx["status"];
+    const iTs       = idx["timestamp"];
+    const iTeam     = idx["team code"] ?? idx["team"];
+    const iAct      = idx["activity"];
+    const iNonce    = idx["nonce"];
+    const iPayload  = idx["payload"];
+    const iStatus   = idx["ai status"] ?? idx["status"];
     const iAttempts = idx["ai attempts"] ?? idx["attempts"];
     const iScore    = idx["ai score"] ?? idx["score"];
     const iFinal    = idx["final score"];
@@ -169,9 +173,9 @@ module.exports.handler = async (event) => {
     const results = [];
 
     for (const { rowIndex, row } of candidates) {
-      const teamCode = norm(row[iTeam] || "");
+      const teamCode   = norm(row[iTeam] || "");
       const eventIdRow = norm(row[iEvent] || "");
-      const nonce = norm(row[iNonce] || "");
+      const nonce      = norm(row[iNonce] || "");
       const payloadStr = row[iPayload] || "";
 
       let payloadObj = {};
@@ -183,6 +187,7 @@ module.exports.handler = async (event) => {
 
       const submissionId = `retry-limerick-${teamCode}-${nonce || rowIndex}`;
 
+      // Shape mirrors the original webhook payload
       const post = await postToZapHook(
         hook,
         {
@@ -196,7 +201,7 @@ module.exports.handler = async (event) => {
           submissionId,
           sheetId: SHEET_ID,
           worksheet: "submissions",
-          payload: payloadObj,
+          payload: payloadObj, // { limerick, topic, teamName, ... }
           retry: true,
         },
         submissionId
