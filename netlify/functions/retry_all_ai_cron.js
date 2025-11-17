@@ -1,7 +1,7 @@
 // netlify/functions/retry_all_ai_cron.js
 
 const BASE_URL =
-  process.env.URL || "https://theteamquest.netlify.app"; // adjust if needed
+  process.env.URL || "https://theteamquest.netlify.app"; // hard-code if needed
 
 async function callRetry(path, payload) {
   const url = `${BASE_URL}${path}`;
@@ -34,9 +34,9 @@ async function callRetry(path, payload) {
 
 exports.handler = async () => {
   const payload = {
-    maxAgeSeconds: 120,
-    maxAttempts: 3,
-    limit: 50,
+    maxAgeSeconds: 120, // "stale" threshold
+    maxAttempts: 3,     // don’t hammer permanently broken rows
+    limit: 50,          // safety cap
   };
 
   const paths = [
@@ -55,9 +55,4 @@ exports.handler = async () => {
     statusCode: 200,
     body: JSON.stringify({ ok: true, ran: paths.length, results }),
   };
-};
-
-// Run every 3 minutes
-exports.config = {
-  schedule: "*/3 * * * *",
 };
