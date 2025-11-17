@@ -387,24 +387,45 @@ Change in this version:
       }catch{}
     }
 
-    // ===== Tiles
+    // ===== Tiles (updated: only one selectable at a time)
     function renderTiles(){
       const done = getDoneSet();
       itemsGrid.innerHTML = '';
-      ITEMS.forEach(it=>{
+
+      ITEMS.forEach(it => {
         const isDone = done.has(it.id);
         const label = document.createElement('label');
         label.className = 'tile' + (isDone ? ' disabled' : '');
         label.innerHTML = `
-          <span class="tick"><input type="checkbox" ${isDone?'disabled':''} data-id="${it.id}" value="${escapeHtml(it.title)}"></span>
-          ${isDone?'<span class="badge">Submitted</span>':''}
+          <span class="tick">
+            <input type="checkbox" ${isDone ? 'disabled' : ''} data-id="${it.id}" value="${escapeHtml(it.title)}">
+          </span>
+          ${isDone ? '<span class="badge">Submitted</span>' : ''}
           <img src="${escapeHtml(it.img)}" alt="">
           <div class="cap handlee">${escapeHtml(it.title)}</div>
         `;
-        label.addEventListener('change', ()=>{
+
+        // Radio-style behaviour: only one item can be selected at once
+        label.addEventListener('change', () => {
           const cb = label.querySelector('input[type=checkbox]');
-          if(cb && !cb.disabled){ label.classList.toggle('selected', cb.checked); }
+          if (!cb || cb.disabled) return;
+
+          if (cb.checked) {
+            // Uncheck all other checkboxes and clear their 'selected' class
+            itemsGrid.querySelectorAll('.tile input[type=checkbox]').forEach(other => {
+              if (other !== cb) {
+                other.checked = false;
+                const tile = other.closest('.tile');
+                if (tile) tile.classList.remove('selected');
+              }
+            });
+            label.classList.add('selected');
+          } else {
+            // Allow deselecting the currently selected tile
+            label.classList.remove('selected');
+          }
         });
+
         itemsGrid.appendChild(label);
       });
     }
