@@ -1,14 +1,3 @@
-<!--
-TeamQuest – The Quiz Challenge (UI refinements – 2025-10-06)
-
-What changed (NO functionality changes):
-• Crew display on the “Ready” screen restyled to match Clue Hunt: sans-serif title + parchment input-style box (gold border). Removed dotted/brown pill.
-• “Get ready” panel: removed heavy border; bullet points are individual compact chips slightly darker than background.
-• Increased button label sizes (“Begin the Quiz”, “Next question”); consistent gold button style.
-• Labels above inputs (sign-in) are sans-serif; placeholders slightly fainter; added comfortable spacing above Sign In button.
-• Explanation box shown after answering (e.g., “Answer: Towel”) no longer has a border – soft background only.
-• Minor polish: consistent typography, 44px+ touch targets, accessible focus states, no markup/JS logic changes.
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -242,12 +231,21 @@ What changed (NO functionality changes):
       if(!EVENT_ID) return;
       const needs=['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
       document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
-        try{const u=new URL(a.getAttribute('href'),location.origin);
+        try{
+          const u=new URL(a.getAttribute('href'),location.origin);
           if(!needs.some(p=>u.pathname.endsWith(p))) return;
-          if(!u.searchParams.get('event')){u.searchParams.set('event',EVENT_ID);a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);}
+          if(!u.searchParams.get('event')){
+            u.searchParams.set('event',EVENT_ID);
+            a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+          }
         }catch{}
       });
-      const lb=$('btnLeaderboard'); if(lb){const u=new URL('/leaderboard',location.origin);u.searchParams.set('event',EVENT_ID);lb.addEventListener('click',()=>location.href=`${u.pathname}?${u.searchParams.toString()}`);}
+      const lb=$('btnLeaderboard');
+      if(lb){
+        const u=new URL('/leaderboard',location.origin);
+        u.searchParams.set('event',EVENT_ID);
+        lb.addEventListener('click',()=>location.href=`${u.pathname}?${u.searchParams.toString()}`);
+      }
     })();
 
     function setMsg(el,t,type){el.textContent=t;el.className='msg '+(type==='error'?'error':'ok');el.style.display='block'}
@@ -256,9 +254,22 @@ What changed (NO functionality changes):
     function uuidv4(){return URL.createObjectURL(new Blob()).split('/').pop();}
     async function callFn(name,payload={},method='POST'){
       const url='/.netlify/functions/'+name+(method==='GET'?('?'+new URLSearchParams(payload)):'');
-      const res=await fetch(url,{method,headers:{'Content-Type':'application/json',...(token()?{'Authorization':`Bearer ${token()}`}:{}),'Idempotency-Key':uuidv4()},body:method==='GET'?undefined:JSON.stringify(payload),keepalive:true});
+      const res=await fetch(url,{
+        method,
+        headers:{
+          'Content-Type':'application/json',
+          ...(token()?{'Authorization':`Bearer ${token()}`}:{}),
+          'Idempotency-Key':uuidv4()
+        },
+        body:method==='GET'?undefined:JSON.stringify(payload),
+        keepalive:true
+      });
       let data={};try{data=await res.json();}catch{}
-      if(!res.ok||data.success===false){const err=new Error((data&&(data.error||data.message))||('HTTP '+res.status));err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');throw err;}
+      if(!res.ok||data.success===false){
+        const err=new Error((data&&(data.error||data.message))||('HTTP '+res.status));
+        err.code=data.code||(res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
+        throw err;
+      }
       return data;
     }
 
@@ -267,25 +278,45 @@ What changed (NO functionality changes):
       const rows=[];let i=0,cur='',row=[],inQ=false;
       while(i<text.length){
         const c=text[i];
-        if(c==='\"'){if(inQ&&text[i+1]==='\"'){cur+='\"';i+=2;continue;}inQ=!inQ;i++;continue;}
-        if(!inQ&&(c===','||c==='\n'||c==='\r')){row.push(cur);cur='';if(c!==','){if(row.length)rows.push(row);row=[];}i++;continue;}
+        if(c==='\"'){
+          if(inQ&&text[i+1]==='\"'){cur+='\"';i+=2;continue;}
+          inQ=!inQ;i++;continue;
+        }
+        if(!inQ&&(c===','||c==='\n'||c==='\r')){
+          row.push(cur);cur='';
+          if(c!==','){if(row.length)rows.push(row);row=[];}
+          i++;continue;
+        }
         cur+=c;i++;
       }
-      if(cur.length||row.length){row.push(cur);rows.push(row);} return rows;
+      if(cur.length||row.length){row.push(cur);rows.push(row);}
+      return rows;
     }
     async function loadTeams(){
-      if(!EVENT_ID){teamSelect.innerHTML=`<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;setMsg(signMsg,'This page needs an event link (with ?event=...).','error');$('btnSign').disabled=true;return;}
+      if(!EVENT_ID){
+        teamSelect.innerHTML=`<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
+        setMsg(signMsg,'This page needs an event link (with ?event=...).','error');
+        $('btnSign').disabled=true;
+        return;
+      }
       teamSelect.innerHTML='<option value="" disabled selected>Loading crews…</option>';
       try{
         const res=await fetch(`${TEAMS_PUBLIC_CSV}&t=${Date.now()}`,{cache:'no-store'});
         if(!res.ok) throw new Error('Could not fetch teams CSV');
-        const rows=parseCsv(await res.text()); if(!rows.length) throw new Error('Empty teams CSV');
+        const rows=parseCsv(await res.text());
+        if(!rows.length) throw new Error('Empty teams CSV');
         const header=rows[0].map(h=>String(h||'').trim().toLowerCase());
         const idx=n=>header.indexOf(n.toLowerCase());
         const iCode=idx('team code'), iName=idx('team name'), iEvent=idx('event id');
         if(iCode===-1||iEvent===-1) throw new Error('CSV missing required headers');
         const wanted=String(EVENT_ID).toUpperCase();
-        const teams=rows.slice(1).map(r=>({teamCode:String(r[iCode]||'').trim(),teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),eventId:String(r[iEvent]||'').trim().toUpperCase()})).filter(t=>t.teamCode&&t.eventId===wanted).sort((a,b)=>a.teamName.localeCompare(b.teamName));
+        const teams=rows.slice(1).map(r=>({
+          teamCode:String(r[iCode]||'').trim(),
+          teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
+          eventId:String(r[iEvent]||'').trim().toUpperCase()
+        }))
+        .filter(t=>t.teamCode&&t.eventId===wanted)
+        .sort((a,b)=>a.teamName.localeCompare(b.teamName));
         if(!teams.length) throw new Error('No teams for this event');
         teamSelect.innerHTML='<option value="" disabled selected>Choose your crew…</option>'+teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
         clearMsg(signMsg);
@@ -298,7 +329,8 @@ What changed (NO functionality changes):
     /* Sign-in -> Ready */
     async function signin(){
       clearMsg(signMsg);
-      const code=teamSelect.value; const pin=(teamPin.value||'').trim();
+      const code=teamSelect.value;
+      const pin=(teamPin.value||'').trim();
       if(!code) return setMsg(signMsg,'Pick your crew from the list.','error');
       if(!/^\d{4}$/.test(pin)) return setMsg(signMsg,'Enter your 4-digit PIN.','error');
       try{
@@ -309,9 +341,21 @@ What changed (NO functionality changes):
         localStorage.setItem('teamName',teamSelect.options[teamSelect.selectedIndex]?.textContent||res.teamName||'');
         setMsg(signMsg,'Signed in.','ok');
         $('readyTeam').textContent=localStorage.getItem('teamName')||'—';
-        $('secSign').classList.remove('active'); $('secReady').classList.add('active');
-        if(localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); $('btnAccept').disabled=true; }
-      }catch(err){ setMsg(signMsg,((''+err.message).includes('404'))?'Sign-in service is off. Ask the host to enable verify_team_pin_function.':(err.message||'Could not sign you in. Try again.'),'error'); }
+        $('secSign').classList.remove('active');
+        $('secReady').classList.add('active');
+        if(localStorage.getItem(quizDoneKey())){
+          setMsg(readyMsg,'You’ve already completed the quiz for this event.','error');
+          $('btnAccept').disabled=true;
+        }
+      }catch(err){
+        setMsg(
+          signMsg,
+          ((''+err.message).includes('404'))
+            ? 'Sign-in service is off. Ask the host to enable verify_team_pin_function.'
+            : (err.message||'Could not sign you in. Try again.'),
+          'error'
+        );
+      }
     }
     $('btnSign').addEventListener('click',signin);
     teamPin.addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSign').click();});
@@ -333,40 +377,80 @@ What changed (NO functionality changes):
     const quizStartKey=()=>`quiz:started:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
     const quizDoneKey =()=>`quiz:done:${EVENT_ID}:${localStorage.getItem('teamCode')||''}`;
 
-    let currentTeam={code:'',name:''}; let qIndex=0, timeLeft=15, timerId=null; const answers=[];
+    let currentTeam={code:'',name:''};
+    let qIndex=0, timeLeft=15, timerId=null;
+    const answers=[];
 
     $('btnAccept').addEventListener('click', startQuizFlow);
-    $('btnNextQ').addEventListener('click', ()=>{ $('btnNextQ').style.display='none'; if(qIndex<quizQuestions.length-1){ qIndex++; showQuestion(); } else { finishQuiz(); } });
+    $('btnNextQ').addEventListener('click', ()=>{
+      $('btnNextQ').style.display='none';
+      if(qIndex<quizQuestions.length-1){
+        qIndex++;
+        showQuestion();
+      } else {
+        finishQuiz();
+      }
+    });
 
     async function startQuizFlow(){
       clearMsg(readyMsg);
-      if(localStorage.getItem(quizDoneKey())){ setMsg(readyMsg,'You’ve already completed the quiz for this event. Ask an admin if you need a reset.','error'); return; }
+      if(localStorage.getItem(quizDoneKey())){
+        setMsg(readyMsg,'You’ve already completed the quiz for this event.','error');
+        $('btnAccept').disabled=true;
+        return;
+      }
       try{
-        await callFn('start_quiz_function',{eventId:EVENT_ID,teamCode:localStorage.getItem('teamCode'),teamName:localStorage.getItem('teamName'),quizStartTime:new Date().toISOString()});
+        await callFn('start_quiz_function',{
+          eventId:EVENT_ID,
+          teamCode:localStorage.getItem('teamCode'),
+          teamName:localStorage.getItem('teamName'),
+          quizStartTime:new Date().toISOString()
+        });
         localStorage.setItem(quizStartKey(),'1');
         $('quizTeam').textContent=localStorage.getItem('teamName')||'';
-        $('secReady').classList.remove('active'); $('secQuiz').classList.add('active');
-        currentTeam={code:localStorage.getItem('teamCode'),name:localStorage.getItem('teamName')};
-        qIndex=0; answers.length=0; showQuestion();
+        $('secReady').classList.remove('active');
+        $('secQuiz').classList.add('active');
+        currentTeam={
+          code:localStorage.getItem('teamCode'),
+          name:localStorage.getItem('teamName')
+        };
+        qIndex=0;
+        answers.length=0;
+        showQuestion();
       }catch(e){
-        if(e.code==='DUPLICATE') setMsg(readyMsg,'Your crew has already started the quiz on another device. You can’t start again.','error');
-        else if(e.code==='CLOSED') setMsg(readyMsg,'Quiz is closed for this event.','error');
-        else setMsg(readyMsg,'Couldn’t start the quiz. Please try again.','error');
+        if(e.code==='ALREADY_COMPLETED'){
+          setMsg(readyMsg,'You’ve already completed the quiz for this event.','error');
+          $('btnAccept').disabled=true;
+        }else if(e.code==='DUPLICATE'){
+          setMsg(readyMsg,'Your crew has already started the quiz on another device. You can’t start again.','error');
+        }else if(e.code==='CLOSED'){
+          setMsg(readyMsg,'Quiz is closed for this event.','error');
+        }else{
+          setMsg(readyMsg,'Couldn’t start the quiz. Please try again.','error');
+        }
       }
     }
 
     function showQuestion(){
       const q=quizQuestions[qIndex];
       $('qCount').textContent=`Riddle ${qIndex+1} of ${quizQuestions.length}`;
-      timeLeft=15; updateTimer(); startTimer();
+      timeLeft=15;
+      updateTimer();
+      startTimer();
       $('btnNextQ').style.display='none';
 
-      let html=`<div style="font-weight:900;color:#654321;margin-bottom:12px">${q.question}</div>`;
-      if(q.audioUrl){ html+=`<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0"><source src="${q.audioUrl}" type="audio/mpeg"></audio>`; }
-      if(q.imageUrl){ html+=`<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`; }
+      let html=`<div style="font-weight:900;color:#654321;margin-bottom:12px;font-size:22px;line-height:1.35">${q.question}</div>`;
+      if(q.audioUrl){
+        html+=`<audio id="qAud" controls preload="auto" style="width:100%;margin:12px 0"><source src="${q.audioUrl}" type="audio/mpeg"></audio>`;
+      }
+      if(q.imageUrl){
+        html+=`<img src="${q.imageUrl}" alt="" style="max-width:100%;border-radius:12px;border:3px solid #DAA520;margin:12px 0">`;
+      }
 
       if(q.type==='multiple_choice'){
-        q.options.forEach(o=>{ html+=`<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`; });
+        q.options.forEach(o=>{
+          html+=`<div class="opt" data-letter="${o.letter}"><strong>${o.letter}.</strong> ${o.text}</div>`;
+        });
       }else{
         html+=`<input id="textAns" class="textAnswer" placeholder="Type your answer…" maxlength="50">`;
         html+=`<button id="btnSubmitText" class="btn" style="margin-top:12px" type="button">Submit</button>`;
@@ -375,7 +459,11 @@ What changed (NO functionality changes):
 
       if(q.type==='multiple_choice'){
         document.querySelectorAll('.opt').forEach(el=>{
-          el.addEventListener('click',()=>{ document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel')); el.classList.add('sel'); submitAnswer(el.dataset.letter); });
+          el.addEventListener('click',()=>{
+            document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
+            el.classList.add('sel');
+            submitAnswer(el.dataset.letter);
+          });
         });
       }else{
         $('btnSubmitText').addEventListener('click', ()=> submitAnswer());
@@ -383,13 +471,29 @@ What changed (NO functionality changes):
       $('qAud')?.play().catch(()=>{});
     }
 
-    function startTimer(){ clearInterval(timerId); timerId=setInterval(()=>{ timeLeft--; updateTimer(); if(timeLeft<=0){ submitAnswer(''); } },1000); }
-    function updateTimer(){ $('timer').textContent=timeLeft; const pct=(timeLeft/15)*360; $('timer').style.background=`conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`; }
-    function normalize(s){ return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,''); }
+    function startTimer(){
+      clearInterval(timerId);
+      timerId=setInterval(()=>{
+        timeLeft--;
+        updateTimer();
+        if(timeLeft<=0){
+          submitAnswer('');
+        }
+      },1000);
+    }
+    function updateTimer(){
+      $('timer').textContent=timeLeft;
+      const pct=(timeLeft/15)*360;
+      $('timer').style.background=`conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`;
+    }
+    function normalize(s){
+      return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'');
+    }
 
     function submitAnswer(choice){
       clearInterval(timerId);
-      const q=quizQuestions[qIndex]; let correct=false;
+      const q=quizQuestions[qIndex];
+      let correct=false;
 
       if(q.type==='multiple_choice'){
         correct=(choice===q.correctAnswer);
@@ -399,16 +503,37 @@ What changed (NO functionality changes):
           else if(el.classList.contains('sel') && !correct) el.classList.add('bad');
           el.style.pointerEvents='none';
         });
+
+        // If incorrect MCQ, show correct letter + option text (e.g. "C. Yak")
+        if(!correct){
+          const correctOption=q.options?.find(o=>o.letter===q.correctAnswer);
+          const correctLabel=correctOption ? `${correctOption.letter}. ${correctOption.text}` : q.correctAnswer;
+          $('qcard').insertAdjacentHTML(
+            'beforeend',
+            `<div class="fb bad">❌ Incorrect! The correct answer is: ${correctLabel}</div>`
+          );
+        }
       }else{
         const user=normalize($('textAns')?.value||'');
         if(q.acceptableAnswers?.length) correct=q.acceptableAnswers.some(a=>normalize(a)===user);
         else correct=normalize(q.correctAnswer)===user;
-        $('textAns').disabled=true; $('btnSubmitText').disabled=true;
+        $('textAns').disabled=true;
+        $('btnSubmitText').disabled=true;
         const pretty=(q.explanation && q.explanation.replace(/^Answer:\s*/i,'').trim())||q.correctAnswer;
-        $('qcard').insertAdjacentHTML('beforeend',`<div class="fb ${correct?'ok':'bad'}">${correct?'✅ Correct!':'Unlucky! The correct answer is: '+pretty}</div>`);
+        $('qcard').insertAdjacentHTML(
+          'beforeend',
+          `<div class="fb ${correct?'ok':'bad'}">${correct?'✅ Correct!':'Unlucky! The correct answer is: '+pretty}</div>`
+        );
       }
 
-      answers.push({questionId:q.id,userAnswer:choice||($('textAns')?.value||''),correctAnswer:q.correctAnswer,isCorrect:correct,points:correct?q.points:0,timeLeft});
+      answers.push({
+        questionId:q.id,
+        userAnswer:choice||($('textAns')?.value||''),
+        correctAnswer:q.correctAnswer,
+        isCorrect:correct,
+        points:correct?q.points:0,
+        timeLeft
+      });
 
       if(q.explanation && q.type==='multiple_choice'){
         $('qcard').insertAdjacentHTML('beforeend',`<div class="explain">${q.explanation}</div>`);
@@ -420,21 +545,49 @@ What changed (NO functionality changes):
     window.submitAnswer=submitAnswer;
 
     async function finishQuiz(){
-      $('secQuiz').classList.remove('active'); $('doneTeam').textContent=localStorage.getItem('teamName')||''; $('secDone').classList.add('active');
-      const correct=answers.filter(a=>a.isCorrect).length; const points=answers.reduce((s,a)=>s+a.points,0);
+      $('secQuiz').classList.remove('active');
+      $('doneTeam').textContent=localStorage.getItem('teamName')||'';
+      $('secDone').classList.add('active');
+      const correct=answers.filter(a=>a.isCorrect).length;
+      const points=answers.reduce((s,a)=>s+a.points,0);
       $('scoreLine').textContent=`Score: ${correct}/${quizQuestions.length} — Points earned: ${points}`;
-      $('breakdown').innerHTML=answers.map((a,i)=>{const q=quizQuestions[i];return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0"><div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div><div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">${a.isCorrect?'✓ +'+a.points:'✗ 0'}</div></div>`;}).join('');
+      $('breakdown').innerHTML=answers.map((a,i)=>{
+        const q=quizQuestions[i];
+        return `<div style="display:flex;justify-content:space-between;border-bottom:1px solid #DAA520;padding:8px 0">
+          <div>Riddle ${i+1}: ${q.question.slice(0,60)}…</div>
+          <div style="font-weight:900;color:${a.isCorrect?'#1e8f3e':'#b00020'}">
+            ${a.isCorrect?'✓ +'+a.points:'✗ 0'}
+          </div>
+        </div>`;
+      }).join('');
 
       clearMsg(submitMsg);
       try{
-        await callFn('submit_quiz_function',{eventId:EVENT_ID,teamCode:currentTeam.code,teamName:currentTeam.name,totalScore:points,questionsCorrect:correct,totalQuestions:quizQuestions.length,completionTime:new Date().toISOString(),answers});
-        localStorage.setItem(quizDoneKey(),'1'); setMsg(submitMsg,'🎉 Points successfully added to your score!','ok');
+        await callFn('submit_quiz_function',{
+          eventId:EVENT_ID,
+          teamCode:currentTeam.code,
+          teamName:currentTeam.name,
+          totalScore:points,
+          questionsCorrect:correct,
+          totalQuestions:quizQuestions.length,
+          completionTime:new Date().toISOString(),
+          answers
+        });
+        localStorage.setItem(quizDoneKey(),'1');
+        setMsg(submitMsg,'🎉 Points successfully added to your score!','ok');
       }catch(e){
-        if(e.code==='DUPLICATE'){localStorage.setItem(quizDoneKey(),'1');setMsg(submitMsg,'Already recorded for this crew/event.','ok');}
-        else if(e.code==='CLOSED'){setMsg(submitMsg,'Quiz submissions are closed for this event.','error');}
-        else if(e.code==='UNAUTHORIZED'){setMsg(submitMsg,'Your sign-in expired. Please sign in again.','error');}
-        else if(e.code==='RATE_LIMITED'){setMsg(submitMsg,'Too many attempts—please wait and try again.','error');}
-        else{setMsg(submitMsg,'Couldn’t record points. (Saved locally.)','error');}
+        if(e.code==='DUPLICATE'){
+          localStorage.setItem(quizDoneKey(),'1');
+          setMsg(submitMsg,'Already recorded for this crew/event.','ok');
+        }else if(e.code==='CLOSED'){
+          setMsg(submitMsg,'Quiz submissions are closed for this event.','error');
+        }else if(e.code==='UNAUTHORIZED'){
+          setMsg(submitMsg,'Your sign-in expired. Please sign in again.','error');
+        }else if(e.code==='RATE_LIMITED'){
+          setMsg(submitMsg,'Too many attempts—please wait and try again.','error');
+        }else{
+          setMsg(submitMsg,'Couldn’t record points. (Saved locally.)','error');
+        }
       }
     }
 
