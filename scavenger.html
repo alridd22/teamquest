@@ -511,20 +511,18 @@ Change in this version:
       }
     }
 
-// ===== Boot
-(function boot(){
-  // Scavenger: always require a fresh sign-in.
-  signedTeam = null;
-  crewValue.textContent = '—';
-  secSign.style.display = 'block';
-  secHunt.style.display = 'none';
-
-  loadCrews().then(() => {
-    // Just render tiles; locks will sync after sign-in.
-    renderTiles();
-  });
-})();
-
+    // ===== Boot
+    (function boot(){
+      try{
+        const raw = localStorage.getItem(keyFor('team'));
+        if(raw){
+          const t = JSON.parse(raw);
+          if(t && t.code && t.name){ signedTeam = { code:t.code, name:t.name }; crewValue.textContent = t.name; secSign.style.display='none'; secHunt.style.display='block'; }
+        }
+      }catch{}
+      loadCrews().then(()=>{ if(signedTeam) syncLocksFromServer().then(renderTiles); else renderTiles(); });
+    })();
+  </script>
 
   <!-- Neutralize any link behavior on the logo element -->
   <script>
