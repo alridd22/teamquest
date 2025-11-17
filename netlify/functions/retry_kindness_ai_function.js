@@ -21,6 +21,7 @@ function indexHeaders(row = []) {
   return idx;
 }
 
+// Generic Zap webhook caller (same as before)
 async function postToZapHook(url, data, submissionId) {
   if (!url) return { ok: false, err: "Missing ZAP_KINDNESS_HOOK" };
   const waits = [0, 800, 3000];
@@ -62,10 +63,7 @@ function isKindnessActivity(raw) {
 module.exports.handler = async (event) => {
   try {
     if (isPreflight(event)) return ok({});
-
-    if (event.httpMethod !== "POST") {
-      return error(405, "POST only");
-    }
+    if (event.httpMethod !== "POST") return error(405, "POST only");
 
     let body = {};
     try {
@@ -125,6 +123,7 @@ module.exports.handler = async (event) => {
 
     const candidates = [];
 
+    // ---- find stale KINDNESS rows ---------------------------------
     for (let r = 1; r < values.length; r++) {
       const row = values[r] || [];
 
@@ -165,6 +164,7 @@ module.exports.handler = async (event) => {
       });
     }
 
+    // ---- resend original payload for each candidate ---------------
     let retried = 0;
     const results = [];
 
@@ -178,42 +178,27 @@ module.exports.handler = async (event) => {
       try {
         if (payloadStr) payloadObj = JSON.parse(payloadStr);
       } catch {
-        // If payload is corrupted, still send *something* so you can see it in Zap logs
         payloadObj = { rawPayload: payloadStr };
       }
 
-      // Use original timestamp if present; fall back to "now"
-      const originalTs =
-        (iTs != null && row[iTs]) ? row[iTs] : new Date().toISOString();
+      // Use the original submissionId/idempotency if present
+      const originalSubmissionId =
+        norm(payloadObj.submissionId || row[iIdem] || nonce || "");
 
-      const idemVal = iIdem != null ? (row[iIdem] || "") : "";
-
-      const submissionId = `retry-kindness-${teamCode}-${nonce || rowIndex}`;
-
-      // 🔑 KEY CHANGE:
-      // Recreate the original body shape by spreading payloadObj
-      // back onto the top level, then add meta under `_meta` and `retry`.
-      const zapBody = {
-        // original payload fields (text, photoUrl, activity, etc.)
-        ...payloadObj,
-
-        // minimal top-level meta (won't break anything if unused)
-        teamCode,
-        eventId: eventIdRow,
-        timestamp: originalTs,
-
-        // retry metadata tucked away
-        retry: true,
-        _meta: {
-          sheetId: SHEET_ID,
-          worksheet: "submissions",
-          nonce,
-          idempotency: idemVal,
-          submissionId,
-        },
+      // Reconstruct the *original* webhook body + a few helper flags.
+      const resendPayload = {
+        ...payloadObj,                 // original fields: activity, eventId, teamCode, teamName, photoUrl, description, where, idempotency, submissionId, etc.
+        retry: true,                   // let the Zap know this came from the watchdog
+        sheetRow: rowIndex + 1,        // handy for debugging inside the Zap if you want it
+        sheetId: SHEET_ID,
+        worksheet: "submissions",
       };
 
-      const post = await postToZapHook(hook, zapBody, submissionId);
+      const post = await postToZapHook(
+        hook,
+        resendPayload,
+        originalSubmissionId || `retry-kindness-${teamCode}-${nonce || rowIndex}`
+      );
 
       const attempts = num(row[iAttempts] || 0) + 1;
       const newStatus = post.ok ? "PROCESSING" : "ERROR";
@@ -222,9 +207,10 @@ module.exports.handler = async (event) => {
 
       const rowNum = rowIndex + 1;
 
-      // Preserve existing score / final / idempotency / event columns
+      // keep existing score/final/idempotency/event columns as-is
       const scoreVal = iScore != null ? row[iScore] || "" : "";
       const finalVal = iFinal != null ? row[iFinal] || "" : "";
+      const idemVal  = iIdem  != null ? row[iIdem]  || "" : "";
       const evtVal   = iEvent != null ? row[iEvent] || "" : "";
 
       const newSegment = [
