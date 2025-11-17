@@ -387,7 +387,7 @@ Change in this version:
       }catch{}
     }
 
-    // ===== Tiles (updated: only one selectable at a time)
+    // ===== Tiles (radio-style: only one selectable at a time)
     function renderTiles(){
       const done = getDoneSet();
       itemsGrid.innerHTML = '';
@@ -405,26 +405,26 @@ Change in this version:
           <div class="cap handlee">${escapeHtml(it.title)}</div>
         `;
 
-        // Radio-style behaviour: only one item can be selected at once
-        label.addEventListener('change', () => {
-          const cb = label.querySelector('input[type=checkbox]');
-          if (!cb || cb.disabled) return;
+        const cb = label.querySelector('input[type=checkbox]');
 
-          if (cb.checked) {
-            // Uncheck all other checkboxes and clear their 'selected' class
-            itemsGrid.querySelectorAll('.tile input[type=checkbox]').forEach(other => {
-              if (other !== cb) {
-                other.checked = false;
-                const tile = other.closest('.tile');
-                if (tile) tile.classList.remove('selected');
-              }
-            });
-            label.classList.add('selected');
-          } else {
-            // Allow deselecting the currently selected tile
-            label.classList.remove('selected');
-          }
-        });
+        if (cb && !cb.disabled) {
+          cb.addEventListener('change', () => {
+            if (cb.checked) {
+              // Uncheck all others and clear their selected class
+              itemsGrid.querySelectorAll('.tile input[type=checkbox]').forEach(other => {
+                if (other !== cb) {
+                  other.checked = false;
+                  const tile = other.closest('.tile');
+                  if (tile) tile.classList.remove('selected');
+                }
+              });
+              label.classList.add('selected');
+            } else {
+              // Allow deselecting the single chosen tile
+              label.classList.remove('selected');
+            }
+          });
+        }
 
         itemsGrid.appendChild(label);
       });
