@@ -106,7 +106,7 @@
     .fb{margin-top:12px;padding:10px;border-radius:10px;font-weight:900}
     .fb.ok{background:#ddffe3;color:#0c5e24}
     .fb.bad{background:#ffd6db;color:#7a0010}
-    /* remove previous borders on explanation blocks */
+    /* explanation blocks */
     .explain{margin-top:12px;padding:10px;border:none;border-radius:10px;background:#fff9ee;font-weight:700}
 
     /* Next button bigger text */
@@ -292,6 +292,7 @@
       if(cur.length||row.length){row.push(cur);rows.push(row);}
       return rows;
     }
+
     async function loadTeams(){
       if(!EVENT_ID){
         teamSelect.innerHTML=`<option value="" disabled selected>Add ?event=YOUR_EVENT_ID to the URL</option>`;
@@ -305,18 +306,29 @@
         if(!res.ok) throw new Error('Could not fetch teams CSV');
         const rows=parseCsv(await res.text());
         if(!rows.length) throw new Error('Empty teams CSV');
+
         const header=rows[0].map(h=>String(h||'').trim().toLowerCase());
         const idx=n=>header.indexOf(n.toLowerCase());
-        const iCode=idx('team code'), iName=idx('team name'), iEvent=idx('event id');
-        if(iCode===-1||iEvent===-1) throw new Error('CSV missing required headers');
+        const iCode=idx('team code');
+        const iName=idx('team name');
+        const iEvent=idx('event id'); // may be -1 (optional)
+
+        if(iCode===-1) throw new Error('CSV missing Team Code header');
+
         const wanted=String(EVENT_ID).toUpperCase();
-        const teams=rows.slice(1).map(r=>({
+
+        const teamsRaw=rows.slice(1).map(r=>({
           teamCode:String(r[iCode]||'').trim(),
           teamName:String((iName>-1?r[iName]:'')||r[iCode]||'').trim(),
-          eventId:String(r[iEvent]||'').trim().toUpperCase()
-        }))
-        .filter(t=>t.teamCode&&t.eventId===wanted)
-        .sort((a,b)=>a.teamName.localeCompare(b.teamName));
+          eventId:iEvent>-1 ? String(r[iEvent]||'').trim().toUpperCase() : ''
+        })).filter(t=>t.teamCode);
+
+        // If Event Id column exists, filter by it; otherwise show all teams
+        const teams=(iEvent>-1
+          ? teamsRaw.filter(t=>t.eventId===wanted)
+          : teamsRaw
+        ).sort((a,b)=>a.teamName.localeCompare(b.teamName));
+
         if(!teams.length) throw new Error('No teams for this event');
         teamSelect.innerHTML='<option value="" disabled selected>Choose your crew…</option>'+teams.map(t=>`<option value="${t.teamCode}">${t.teamName}</option>`).join('');
         clearMsg(signMsg);
@@ -360,7 +372,7 @@
     $('btnSign').addEventListener('click',signin);
     teamPin.addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSign').click();});
 
-    /* Quiz (original questions) */
+    /* Quiz questions */
     const quizQuestions=[
       { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[{letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',points:10 },
       { id:2,type:'multiple_choice',question:'What is the meaning of the word: Gambado?',options:[{letter:'A',text:'Colourful Hat'},{letter:'B',text:'Native of Gambia'},{letter:'C',text:'Prank'},{letter:'D',text:'Foolish bet'}],correctAnswer:'C',points:10 },
@@ -504,7 +516,7 @@
           el.style.pointerEvents='none';
         });
 
-        // If incorrect MCQ, show correct letter + option text (e.g. "C. Yak")
+        // Incorrect MCQ feedback: letter + option text (e.g. "B. Towel")
         if(!correct){
           const correctOption=q.options?.find(o=>o.letter===q.correctAnswer);
           const correctLabel=correctOption ? `${correctOption.letter}. ${correctOption.text}` : q.correctAnswer;
@@ -535,24 +547,26 @@
         timeLeft
       });
 
-     if(q.type==='multiple_choice'){
-    const correctOption = q.options.find(o => o.letter === q.correctAnswer);
-    const correctLabel = correctOption
-        ? `${correctOption.letter}. ${correctOption.text}`
-        : q.correctAnswer;
+      // Explanation / correct answer block
+      if(q.type==='multiple_choice'){
+        const correctOption=q.options?.find(o=>o.letter===q.correctAnswer);
+        const correctLabel=correctOption ? `${correctOption.letter}. ${correctOption.text}` : q.correctAnswer;
 
-    // If explanation exists, append the letter + final answer
-    if(q.explanation){
-        $('qcard').insertAdjacentHTML(
+        if(q.explanation){
+          $('qcard').insertAdjacentHTML(
             'beforeend',
             `<div class="explain">Correct answer: ${correctLabel}<br>${q.explanation}</div>`
-        );
-    } else {
-        // No explanation; still show the correct answer
-        $('qcard').insertAdjacentHTML(
+          );
+        }else{
+          $('qcard').insertAdjacentHTML(
             'beforeend',
             `<div class="explain">Correct answer: ${correctLabel}</div>`
-        );
+          );
+        }
+      }
+
+      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next Question':'See results';
+      $('btnNextQ').style.display='block';
     }
     window.submitAnswer=submitAnswer;
 
