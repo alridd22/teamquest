@@ -535,12 +535,24 @@
         timeLeft
       });
 
-      if(q.explanation && q.type==='multiple_choice'){
-        $('qcard').insertAdjacentHTML('beforeend',`<div class="explain">${q.explanation}</div>`);
-      }
+     if(q.type==='multiple_choice'){
+    const correctOption = q.options.find(o => o.letter === q.correctAnswer);
+    const correctLabel = correctOption
+        ? `${correctOption.letter}. ${correctOption.text}`
+        : q.correctAnswer;
 
-      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next Question':'See results';
-      $('btnNextQ').style.display='block';
+    // If explanation exists, append the letter + final answer
+    if(q.explanation){
+        $('qcard').insertAdjacentHTML(
+            'beforeend',
+            `<div class="explain">Correct answer: ${correctLabel}<br>${q.explanation}</div>`
+        );
+    } else {
+        // No explanation; still show the correct answer
+        $('qcard').insertAdjacentHTML(
+            'beforeend',
+            `<div class="explain">Correct answer: ${correctLabel}</div>`
+        );
     }
     window.submitAnswer=submitAnswer;
 
