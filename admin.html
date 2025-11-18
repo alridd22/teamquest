@@ -384,31 +384,61 @@
       await fetchState({force:true}); updateFinalButton();
     }
 
+    // ===== Last-good caches =====
+    let LKG_TEAMS = null;
+    let LKG_TOTALS = null;
+    const inFlight = new Set();
+
     async function fetchLeaderboardTotals(){
       try{
-        const url=`${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
-        const data=await fetchJSON(url,{headers:headers()});
-        const rows=data.leaderboard || data.rows || data.teams || [];
-        const map=new Map();
-        for(const t of rows){
-          const code=(t.teamCode||t.code||'').toString().trim().toUpperCase();
-          const name=(t.teamName||t.name||t.team||'').toString().trim().toUpperCase();
-          const k=Number(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness ?? 0);
-          const l=Number(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick ?? 0);
-          const s=Number(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger ?? 0);
-          const c=Number(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt ?? 0);
-          const q=Number(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz ?? 0);
-          const total=Number.isFinite(+t.total)?+t.total:(k+l+s+c+q);
-          if(code) map.set(`CODE:${code}`, total);
-          if(name) map.set(`NAME:${name}`, total);
+        const url = `${endpoints.leaderboard}?eventId=${encodeURIComponent(EVENT_ID)}`;
+        const data = await fetchJSON(url, { headers: headers() });
+        const rows = data.leaderboard || data.rows || data.teams || [];
+        const map  = new Map();
+
+        for (const t of rows){
+          const code = (t.teamCode || t.code || '').toString().trim().toUpperCase();
+          const name = (t.teamName || t.name || t.team || '').toString().trim().toUpperCase();
+
+          const k = Number(t.kindness  ?? t.scores?.kindness  ?? t.activities?.kindness  ?? 0);
+          const l = Number(t.limerick  ?? t.scores?.limerick  ?? t.activities?.limerick  ?? 0);
+          const s = Number(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger ?? 0);
+          const c = Number(t.cluehunt  ?? t.scores?.cluehunt  ?? t.activities?.cluehunt  ?? 0);
+          const q = Number(t.quiz      ?? t.scores?.quiz      ?? t.activities?.quiz      ?? 0);
+
+          const total = Number.isFinite(+t.total) ? +t.total : (k + l + s + c + q);
+
+          if (code) map.set(`CODE:${code}`, total);
+          if (name) map.set(`NAME:${name}`, total);
         }
+
+        // only overwrite last-good if this call actually returned something
+        if (map.size > 0) {
+          LKG_TOTALS = map;
+        }
+
+        const useMap = map.size > 0 ? map : (LKG_TOTALS || new Map());
+
         return (team)=>{
-          const code=(team.teamCode||'').toString().trim().toUpperCase();
-          const name=(team.teamName||'').toString().trim().toUpperCase();
-          return map.get(`CODE:${code}`) ?? map.get(`NAME:${name}`) ?? 0;
+          const code = (team.teamCode || '').toString().trim().toUpperCase();
+          const name = (team.teamName || '').toString().trim().toUpperCase();
+          return useMap.get(`CODE:${code}`) ?? useMap.get(`NAME:${name}`) ?? 0;
         };
-      }catch{ return ()=>0; }
+      } catch {
+        // on error, fall back to last-good totals if we have them
+        if (LKG_TOTALS && LKG_TOTALS.size > 0) {
+          const map = LKG_TOTALS;
+          return (team)=>{
+            const code = (team.teamCode || '').toString().trim().toUpperCase();
+            const name = (team.teamName || '').toString().trim().toUpperCase();
+            return map.get(`CODE:${code}`) ?? map.get(`NAME:${name}`) ?? 0;
+          };
+        }
+        // very first load and no cache yet
+        return () => 0;
+      }
     }
+
     function addRanks(items, scoreKey='total'){
       let lastScore=null,lastRank=0;
       items.forEach((it,idx)=>{
@@ -445,9 +475,6 @@
     }
 
     /* Teams */
-    let LKG_TEAMS=null;
-    const inFlight=new Set();
-
     async function loadTeams(){
       let data;
       try{
@@ -459,6 +486,14 @@
       }
 
       let teams = Array.isArray(data.teams) ? data.teams : [];
+
+      // If this poll says "no teams" but we previously had some,
+      // treat it as a glitch and keep the last-known-good view.
+      if ((!teams || teams.length === 0) && LKG_TEAMS && LKG_TEAMS.length > 0) {
+        renderTeams(LKG_TEAMS);
+        return;
+      }
+
       const getTotal = await fetchLeaderboardTotals();
       teams = teams.map(t=>({ ...t, total: getTotal(t) || 0 }));
 
