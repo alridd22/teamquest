@@ -127,10 +127,16 @@
     (function(){
       const navToggle = document.getElementById('nav-toggle');
       const navMenu   = document.getElementById('nav-menu');
-      navToggle?.addEventListener('click',()=>{ navMenu.classList.toggle('active'); navToggle.textContent = navMenu.classList.contains('active')?'✕':'☰'; });
+      navToggle?.addEventListener('click',()=>{ 
+        navMenu.classList.toggle('active'); 
+        navToggle.textContent = navMenu.classList.contains('active')?'✕':'☰'; 
+      });
       document.addEventListener('click',e=>{
         const inside = navToggle.contains(e.target)||navMenu.contains(e.target);
-        if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
+        if(!inside && navMenu.classList.contains('active')){ 
+          navMenu.classList.remove('active'); 
+          navToggle.textContent='☰'; 
+        }
       });
       const qs = new URLSearchParams(location.search);
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
@@ -144,15 +150,22 @@
         }catch{}
       });
     })();
+  </script>
 
-    // ===== Gallery logic =====
+  <!-- Gallery logic with LKG protection -->
+  <script>
     const qs = new URLSearchParams(location.search);
     const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
 
     const $ = s => document.querySelector(s);
-    let data = { limerick: [], kindness: [], published: false };
 
-    function esc(s){ return String(s||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    let data = { limerick: [], kindness: [] };
+
+    function esc(s){ 
+      return String(s||'').replace(/[&<>"']/g, m => (
+        {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+      )); 
+    }
     function nl2br(s){ return esc(s).replace(/\n/g,'<br>'); }
 
     function guessMime(b64){
@@ -174,7 +187,9 @@
 
       const base64 = it.photoBase64 || it.imageBase64 || '';
       if (!imageUrl && base64 && base64.length > 50){
-        imageUrl = base64.startsWith('data:') ? base64 : `data:${guessMime(base64)};base64,${base64}`;
+        imageUrl = base64.startsWith('data:')
+          ? base64
+          : `data:${guessMime(base64)};base64,${base64}`;
       }
       return { teamName, text, imageUrl, eventId: evt };
     }
@@ -184,7 +199,6 @@
         (typeof j.published === 'boolean') ? j.published :
         (j.state ? String(j.state).toLowerCase() === 'published' : false);
 
-      // Try multiple shapes
       let lim = j.limerick || j.limericks || [];
       let kin = j.kindness || j.kindnesses || [];
 
@@ -198,14 +212,14 @@
       lim = (Array.isArray(lim) ? lim : []).map(normalizeItem);
       kin = (Array.isArray(kin) ? kin : []).map(normalizeItem);
 
-      // Client-side filter by event if provided
       if (EVENT_ID){
         const wanted = String(EVENT_ID).trim().toUpperCase();
         const keep = (x) => !x.eventId || String(x.eventId).trim().toUpperCase() === wanted;
         lim = lim.filter(keep);
         kin = kin.filter(keep);
       }
-      return { published: !!pub, limerick: lim, kindness: kin };
+
+      return { published: pub, limerick: lim, kindness: kin };
     }
 
     function cardHtml(e){
@@ -229,8 +243,9 @@
         ...(view==='kindness' ? [] : data.limerick.map(x => ({...x, activity:'limerick'}))),
         ...(view==='limerick' ? [] : data.kindness.map(x => ({...x, activity:'kindness'}))),
       ];
-      $('#grid').innerHTML = items.length ? items.map(cardHtml).join('') :
-        `<div class="lock">No submissions yet.</div>`;
+      $('#grid').innerHTML = items.length
+        ? items.map(cardHtml).join('')
+        : `<div class="lock">No submissions yet.</div>`;
       $('#status').textContent =
         `Limericks ${data.limerick.length} • Kindness ${data.kindness.length} • Showing ${items.length}`;
     }
@@ -238,48 +253,84 @@
     function setTabs(){
       document.querySelectorAll('.tab').forEach(btn=>{
         btn.addEventListener('click', ()=>{
-          document.querySelectorAll('.tab').forEach(b=>{ b.classList.remove('active'); b.classList.add('ghost'); });
-          btn.classList.add('active'); btn.classList.remove('ghost');
+          document.querySelectorAll('.tab').forEach(b=>{
+            b.classList.remove('active');
+            b.classList.add('ghost');
+          });
+          btn.classList.add('active');
+          btn.classList.remove('ghost');
           render(btn.dataset.view);
         });
       });
     }
 
-    async function load(){
-      const base = '/.netlify/functions/get_gallery';
-      const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
+    /* ==========================================================
+       LKG SNAPSHOT: prevents blanking / re-locking on bad polls
+       ========================================================== */
 
+    let LKG_STATE = null; // { published, limerick, kindness }
+    let LKG_TS = 0;
+
+    async function fetchGallery(){
+      const callAt = Date.now();
       let j;
-      try{
+
+      try {
+        const base = '/.netlify/functions/get_gallery';
+        const url = EVENT_ID ? `${base}?eventId=${encodeURIComponent(EVENT_ID)}` : base;
         const r = await fetch(url, { cache:'no-store' });
         j = await r.json();
-      }catch{
-        // fallback (if function named slightly differently in deploy)
-        const alt = EVENT_ID ? `/.netlify/functions/get_gallery_function?eventId=${encodeURIComponent(EVENT_ID)}`
-                             : '/.netlify/functions/get_gallery_function';
-        const r2 = await fetch(alt, { cache:'no-store' });
-        j = await r2.json();
+      } catch {
+        try {
+          const alt = EVENT_ID
+            ? `/.netlify/functions/get_gallery_function?eventId=${encodeURIComponent(EVENT_ID)}`
+            : '/.netlify/functions/get_gallery_function';
+          const r2 = await fetch(alt, { cache:'no-store' });
+          j = await r2.json();
+        } catch {
+          // complete failure: keep whatever LKG we have
+          return;
+        }
       }
 
       const norm = normalizeResponse(j);
 
-      if (!norm.published){
+      // ignore malformed responses
+      if (!norm || typeof norm.published !== 'boolean') return;
+
+      // stale-response guard
+      if (callAt < LKG_TS) return;
+
+      LKG_STATE = norm;
+      LKG_TS = callAt;
+
+      applyGalleryState();
+    }
+
+    function applyGalleryState(){
+      if (!LKG_STATE) return;
+
+      if (!LKG_STATE.published){
+        // not published yet -> show lock, hide content
         $('#lock').style.display = 'block';
         $('#content').style.display = 'none';
         return;
       }
 
-      data = norm;
+      // published -> unlock and keep it unlocked
+      data = LKG_STATE;
+
       $('#lock').style.display = 'none';
       $('#content').style.display = 'block';
       setTabs();
       render('both');
     }
 
-    load().catch(err=>{
-      $('#lock').style.display = 'block';
-      $('#lock').textContent = '⚠️ ' + (err.message || 'Unable to load gallery');
-    });
+    // Initial load
+    fetchGallery().then(applyGalleryState);
+
+    // Poll every 6 seconds
+    setInterval(fetchGallery, 6000);
   </script>
 
   <!-- Safeguard: neutralize any link behavior on the logo element -->
