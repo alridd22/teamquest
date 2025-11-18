@@ -1,5 +1,5 @@
 <!--
-TeamQuest • Leaderboard — returned teams dimmed + green Returned badge
+TeamQuest • Leaderboard — returned teams dimmed + green Returned badge + cached last-good scores
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -392,6 +392,9 @@ TeamQuest • Leaderboard — returned teams dimmed + green Returned badge
     }
 
     // -------- LEADERBOARD RENDER --------
+    let lastLeaderboard = null;   // last good non-empty list
+    let hasEverLoaded    = false; // to distinguish first load vs hiccups
+
     function normalise(data){
       const list = data.leaderboard || data.rows || data.teams || [];
       return list.map(t => {
@@ -443,9 +446,15 @@ TeamQuest • Leaderboard — returned teams dimmed + green Returned badge
       freezeBanner.classList.toggle('hidden', !frozen);
 
       if (!Array.isArray(list) || list.length===0){
-        rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
+        // If we've never successfully loaded anything, show the empty state.
+        if (!hasEverLoaded) {
+          rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
+        }
+        // If we *have* loaded before, we keep the existing board rendered
+        // and just update the timestamp message in loadBoard().
         return;
       }
+
       rowsEl.innerHTML = list.map((t,i)=>rowTemplate(t,i,frozen)).join('');
 
       rowsEl.querySelectorAll('.row').forEach(row=>{
@@ -501,11 +510,35 @@ TeamQuest • Leaderboard — returned teams dimmed + green Returned badge
           return info ? { ...t, ...info } : t;
         });
 
+        if (!Array.isArray(list) || list.length === 0) {
+          // If we already have a last good leaderboard, *don't* blank the board,
+          // just update the timestamp with a hint that we're using cached scores.
+          if (lastLeaderboard && lastLeaderboard.length > 0) {
+            updatedEl.textContent = `Last updated — ${nowClock()} (connection hiccup, showing last scores)`;
+            return;
+          }
+          // First load and nothing there – show empty state.
+          hasEverLoaded = true;
+          lastLeaderboard = [];
+          render(list);
+          updatedEl.textContent = `Last updated — ${nowClock()}`;
+          return;
+        }
+
+        // Success path: cache and render
+        lastLeaderboard = list;
+        hasEverLoaded = true;
         render(list);
         updatedEl.textContent = `Last updated — ${nowClock()}`;
       }catch(e){
-        rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
-        updatedEl.textContent = `Last updated — ${nowClock()}`;
+        // On error: if we have a previous good board, keep it and just tweak the message.
+        if (lastLeaderboard && lastLeaderboard.length > 0) {
+          render(lastLeaderboard);
+          updatedEl.textContent = `Last updated — ${nowClock()} (connection issue, showing last scores)`;
+        } else {
+          rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
+          updatedEl.textContent = `Last updated — ${nowClock()}`;
+        }
       }
     }
 
