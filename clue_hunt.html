@@ -259,16 +259,16 @@
         if(!inside && navMenu.classList.contains('active')){ navMenu.classList.remove('active'); navToggle.textContent='☰'; }
       });
 
-      const qs = new URLSearchParams(location.search);
-      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-      if (EVENT_ID){
+      const qsNav = new URLSearchParams(location.search);
+      const EVENT_ID_NAV = qsNav.get('event') || qsNav.get('eventId') || '';
+      if (EVENT_ID_NAV){
         const needsEvent = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
         document.querySelectorAll('a.nav-link, a.dropdown-link, .nav-logo').forEach(a=>{
           try{
             const u = new URL(a.getAttribute('href'), location.origin);
             if (!needsEvent.some(p => u.pathname.endsWith(p))) return;
             if (!u.searchParams.get('event')){
-              u.searchParams.set('event', EVENT_ID);
+              u.searchParams.set('event', EVENT_ID_NAV);
               a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
             }
           }catch{}
@@ -285,6 +285,7 @@
 
     const token = ()=> localStorage.getItem('teamToken') || '';
     function uuidv4(){ return URL.createObjectURL(new Blob()).split('/').pop(); }
+
     async function callFn(name, payload){
       const res = await fetch(`/.netlify/functions/${name}`, {
         method:'POST',
@@ -296,9 +297,11 @@
         body: JSON.stringify(payload||{}),
         keepalive:true
       });
-      let data={}; try{ data = await res.json(); }catch{}
+      let data={};
+      try{ data = await res.json(); }catch{}
       if(!res.ok || data.success===false){
-        const err = new Error(data.message || `HTTP ${res.status}`);
+        const msg = (data && (data.message || data.error)) || `HTTP ${res.status}`;
+        const err = new Error(msg);
         err.code = data.code || (res.status===401?'UNAUTHORIZED':res.status===409?'DUPLICATE':res.status===429?'RATE_LIMITED':'ERROR');
         throw err;
       }
@@ -475,6 +478,15 @@
       if(!val){ showResult('Please enter an answer.', false); return; }
       if(!currentClue){ showResult('No clue selected.', false); return; }
 
+      // Guard: ensure we still have a signed-in crew
+      const teamCode = localStorage.getItem('teamCode');
+      const teamName = localStorage.getItem('teamName') || '';
+      if (!teamCode){
+        showResult('Your crew is not signed in on this device. Please refresh the page and sign in again to continue.', false);
+        $('submitAnswerBtn').disabled = false;
+        return;
+      }
+
       inFlightSubmit = true;
       $('submitAnswerBtn').disabled = true;
 
@@ -482,8 +494,8 @@
         const data = await callFn('submit_cluehunt_function', {
           mode: 'final',
           eventId: EVENT_ID,
-          teamCode: localStorage.getItem('teamCode'),
-          teamName: localStorage.getItem('teamName'),
+          teamCode: teamCode,
+          teamName: teamName,
           clueId: currentClue.id,
           userAnswer: val,
           correctAnswer: currentClue.correctAnswer,
@@ -508,9 +520,15 @@
         );
         updateScore(); updateProgress();
       }catch(e){
-        if (e.code==='UNAUTHORIZED') showResult('Session expired — sign in again.', false);
-        else if (e.code==='CLOSED') showResult('Submissions are closed for this event.', false);
-        else showResult('Could not submit. Please try again.', false);
+        if (e.code==='UNAUTHORIZED') {
+          showResult('Session expired — please sign in again on this device.', false);
+        } else if (e.code==='CLOSED') {
+          showResult('Submissions are closed for this event.', false);
+        } else if (e.message && e.message.includes('teamCode and clueId')) {
+          showResult('We couldn’t submit that answer because your crew is no longer signed in. Please refresh the page and sign in again.', false);
+        } else {
+          showResult('Could not submit your answer. Please check your connection and try again.', false);
+        }
       } finally {
         $('submitAnswerBtn').style.display='none';
         $('continueBtn').style.display='block';
