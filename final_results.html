@@ -1,7 +1,5 @@
 <!--
-TeamQuest • Final Leaderboard — updated to prevent stale data:
-• Requires ?event=… in URL (shows message if missing)
-• Cache-busting & no-store fetch of /get_leaderboard
+TeamQuest • Final Leaderboard — with loading spinner
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -166,7 +164,35 @@ TeamQuest • Final Leaderboard — updated to prevent stale data:
       .points .num{font-size:14px}
     }
 
-    .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
+    .state{
+      color:var(--panel-ink);
+      background:rgba(255,255,255,.06);
+      border:1px dashed rgba(255,255,255,.25);
+      border-radius:12px;
+      padding:14px;
+      text-align:center;
+
+      /* centre + allow spinner */
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      min-height:120px;
+    }
+
+    .spinner{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      border:4px solid rgba(255,255,255,.3);
+      border-top-color:#FFE39B;
+      animation:spin .9s linear infinite;
+    }
+
+    @keyframes spin{
+      to{transform:rotate(360deg);}
+    }
   </style>
 </head>
 <body>
@@ -201,7 +227,10 @@ TeamQuest • Final Leaderboard — updated to prevent stale data:
   <main class="stack">
     <section class="board" aria-live="polite">
       <div id="rows" class="rows">
-        <div class="state">Loading…</div>
+        <div class="state">
+          <div class="spinner"></div>
+          <div>Loading final scores…</div>
+        </div>
       </div>
     </section>
 
@@ -340,6 +369,15 @@ TeamQuest • Final Leaderboard — updated to prevent stale data:
         updatedEl.textContent = 'Loaded — --:--:--';
         return;
       }
+
+      // Show spinner while we fetch
+      rowsEl.innerHTML = `
+        <div class="state">
+          <div class="spinner"></div>
+          <div>Loading final scores…</div>
+        </div>
+      `;
+
       const t = Date.now(); // cache-buster
       const boardUrl = `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}&t=${t}`;
       try{
