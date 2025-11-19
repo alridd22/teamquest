@@ -1,222 +1,111 @@
-<!--
-TeamQuest • Leaderboard — returned teams dimmed + green Returned badge + cached last-good scores
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
   <meta name="theme-color" content="#2A1F18">
   <title>TeamQuest - Leaderboard</title>
+
   <style>
     :root{
       --bg:url("/TQ%20Web%20extended%20background-100.jpg");
-      --ink:#2E2114;
-      --panel:#22170E; --panel-ink:#FFF3D9;
-      --gold:#FFE39B;   --gold-border:#CFB06D;
-      --silver:#EEEEEE; --silver-border:#BFBFC0;
-      --bronze:#F7D2B5; --bronze-border:#B2703D;
-      --focus:#1594d2;
-      --shadow:0 12px 28px rgba(0,0,0,.26);
-
-      --ret-bg:#eaf8ff; --ret-border:#bfe8ff; --ret-ink:#0a4c68; /* (unused now) */
-      --pill-ok-bg:#e6fbf1; --pill-ok-ink:#106a3e; --pill-ok-b:#b8efcf;
-      --pill-warn-bg:#fff6e9; --pill-warn-ink:#7a5a13; --pill-warn-b:#f1d093;
-      --pill-end-bg:#fdeeee; --pill-end-ink:#8b1f1f; --pill-end-b:#f1b3b3;
-      --pill-pub-bg:#e7f9ef; --pill-pub-ink:#0f6e44; --pill-pub-b:#b7ebcf; /* green */
+      --ink:#2E2114; --ink-soft:#6A5A47;
+      --parchment:#F7EED8; --parchment-2:#F3E6CF; --paper:#FFFDF8;
+      --gold:#F0C433; --gold-deep:#A7711F;
+      --ok:#1F6E38; --okbg:#CFF2DA;
+      --warn:#C26A00; --warnbg:#FFEAC2;
+      --danger:#8B1F1F; --dangerbg:#FBD4D4;
+      --nav-h:64px;
+      --radius-card:22px; --radius-sm:14px;
+      --shadow-card:0 18px 40px rgba(0,0,0,.35);
+      --shadow-soft:0 6px 18px rgba(0,0,0,.12);
+      --gutter:22px;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; color:var(--ink);
-      font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
+      margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif; color:var(--ink);
+      background:linear-gradient(180deg, rgba(0,0,0,.24), rgba(0,0,0,.45)), var(--bg);
       background-size:cover; background-position:top center; background-attachment:fixed;
       -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
-      padding-top:64px;
+      padding-top:var(--nav-h);
     }
 
     /* NAV */
-    .treasure-nav{
-      position:fixed; inset:0 0 auto 0; height:64px; z-index:1000;
+    .treasure-nav{position:fixed; top:0; left:0; right:0; z-index:1000; height:var(--nav-h);
       backdrop-filter:saturate(120%) blur(6px);
-      background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.15));
-      border-bottom:1px solid rgba(255,255,255,.18);
-    }
-    .nav-container{
-      height:100%; max-width:1280px; margin:0 auto; padding:0 12px;
-      display:flex; align-items:center; justify-content:space-between;
-    }
-    .nav-logo img{height:38px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
-    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.5rem;cursor:pointer;line-height:1;padding:8px}
-    .nav-toggle:focus-visible{outline:3px solid var(--focus); border-radius:10px}
-    .nav-menu{
-      position:fixed; top:64px; left:-100%; width:100%; height:calc(100vh - 64px);
-      background:linear-gradient(180deg,rgba(0,0,0,.85),rgba(0,0,0,.72));
-      display:flex; flex-direction:column; align-items:center; gap:10px; padding:16px 14px; transition:left .25s;
-    }
+      background:linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.15));
+      border-bottom:1px solid rgba(255,255,255,.18);}
+    .nav-container{height:100%; padding:0 12px; display:flex; align-items:center; justify-content:space-between; max-width:1000px; margin:0 auto}
+    .nav-logo img{height:40px; width:auto; display:block; filter:drop-shadow(0 3px 10px rgba(0,0,0,.5))}
+    .nav-toggle{background:none;border:none;color:#F7EED8;font-size:1.6rem;cursor:pointer}
+    .nav-menu{position:fixed; top:var(--nav-h); left:-100%; width:100%; height:calc(100vh - var(--nav-h));
+      background:linear-gradient(180deg, rgba(0,0,0,.85), rgba(0,0,0,.72));
+      display:flex; flex-direction:column; align-items:center; gap:14px; padding:18px 14px; transition:left .25s}
     .nav-menu.active{left:0}
-    .nav-link,.dropdown-link{
-      display:block; width:92%; max-width:360px; text-align:center; text-decoration:none;
-      color:#F7EED8; font-weight:800; padding:10px 12px; border-radius:12px;
-      background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
-    }
-    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
-    .nav-link:focus-visible,.dropdown-link:focus-visible{outline:3px solid var(--focus)}
+    .nav-link,.dropdown-link{display:block; width:92%; max-width:360px; text-align:center; text-decoration:none; color:#F7EED8; font-weight:900;
+      padding:12px 14px; border-radius:14px; background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3)}
+    .nav-link:hover,.dropdown-link:hover{ background:rgba(247,238,216,.32) }
 
     /* HERO */
-    .hero{min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 8px 12px; text-align:center}
-    .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
-    .hero-title{font-weight:900; font-size:24px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
+    .hero{min-height:220px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:24px var(--gutter) 18px; text-align:center}
+    .brand-logo{width:min(220px,68vw); height:auto; margin-bottom:8px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
+    .hero-title{font-weight:900; font-size:22px; color:#F7EED8; letter-spacing:.2px; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
-    /* TIMER STRIP */
-    .timer-strip{
-      max-width:1280px; margin:0 auto 10px; padding:10px 12px;
-      display:flex; align-items:center; justify-content:center; gap:10px;
-      color:#f3e7d0;
+    /* CONTENT */
+    .stack{ padding:0 var(--gutter) 28px }
+    .panel{background:var(--parchment); border-radius:var(--radius-card); box-shadow:var(--shadow-card); padding:18px 16px; border:1px solid rgba(0,0,0,.06); margin:0 auto; max-width:1100px}
+    h1{margin:0 0 6px; font-weight:900}
+    .sub{color:var(--ink-soft); margin-bottom:12px; font-weight:700}
+
+    .status-strip{
+      border-radius:16px;
+      padding:12px 14px;
+      margin:10px 0 14px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:800;
     }
-    .timer-box{
-      background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.24);
-      border-radius:14px; padding:10px 14px; font-weight:900; letter-spacing:.12em; font-size:20px;
-      color:#FFF3D9; min-width:220px; text-align:center;
-    }
-    .pill{
-      padding:6px 10px; border-radius:999px; font-size:13px; font-weight:800; display:inline-block;
-      border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.12); color:#fff;
-    }
-    .pill.running{background:var(--pill-ok-bg); color:var(--pill-ok-ink); border-color:var(--pill-ok-b)}
-    .pill.paused{background:var(--pill-warn-bg); color:var(--pill-warn-ink); border-color:var(--pill-warn-b)}
-    .pill.ended{background:var(--pill-end-bg); color:var(--pill-end-ink); border-color:var(--pill-end-b)}
-    .pill.published{background:var(--pill-pub-bg); color:var(--pill-pub-ink); border-color:var(--pill-pub-b)}
+    .status-running{background:var(--okbg); color:var(--ok); border:2px solid #79c095}
+    .status-final{background:#e7f9ef; color:#0f6e44; border:2px solid #b7ebcf}
+    .status-final-stretch{background:var(--warnbg); color:var(--warn); border:2px solid #f3c277}
+    .status-pre{background:#f3ecde; color:#6A5A47; border:2px solid #ddcfb5}
+    .status-ended{background:var(--dangerbg); color:var(--danger); border:2px solid #e19a9a}
 
-    /* FREEZE BANNER */
-    .freeze-banner{
-      max-width:1280px; margin:0 auto 8px; padding:8px 12px; text-align:center;
-      color:#ffe7b8; font-weight:800;
-    }
+    .status-strip .time{font-variant-numeric:tabular-nums;letter-spacing:.06em}
 
-    /* BOARD */
-    .board{
-      width:100%; max-width:1280px; margin:0 auto; padding:8px 6px 10px;
-      background:var(--panel); color:#fff; border-radius:22px; box-shadow:var(--shadow);
-    }
-    .rows{padding:8px 2px 4px}
+    .meta-bar{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:14px;color:var(--ink-soft);font-weight:700}
 
-    /* ROW */
-    .row{
-      border-radius:18px; margin:8px 4px; padding:8px;
-      background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.12);
-      overflow:hidden; cursor:pointer; transition:opacity .18s ease, filter .18s ease;
-    }
-    .row.gold{background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%); border:1px solid var(--gold-border)}
-    .row.silver{background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border)}
-    .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
-    .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
+    /* TABLE */
+    .table-wrap{overflow:auto; border-radius:18px; box-shadow:var(--shadow-soft); background:var(--paper); border:1px solid #ecdac7}
+    table{width:100%; border-collapse:collapse; min-width:520px}
+    thead{background:#f3e4cd}
+    th,td{padding:10px 10px; text-align:left; border-bottom:1px solid #ead5be; font-size:14px}
+    th{font-weight:900; color:#4a351e; white-space:nowrap}
+    tbody tr:nth-child(even){background:#fffaf2}
+    tbody tr:nth-child(odd){background:#fffdf8}
+    tbody tr.highlight{background:#fff1c4}
+    .rank{font-weight:900; text-align:center; width:56px}
+    .team-name{font-weight:900}
+    .code{font-size:12px;color:#8b7a64}
+    .points{font-weight:900;text-align:right}
+    .activity{font-variant-numeric:tabular-nums;text-align:right;font-size:13px}
+    .pill-small{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:999px;font-size:11px;border:1px solid #dcc3a0;background:#f8ecda;color:#6A5A47}
+    .empty-state{padding:20px;text-align:center;font-weight:800;color:#6A5A47}
 
-    /* Returned styling: dim more + subtle grayscale */
-    .row.returned{
-      opacity:.78;
-      filter: grayscale(.45) saturate(.9) brightness(.98);
-    }
-
-    /* GRID (2 rows so we can place the Returned badge under points) */
-    .row-inner{
-      position:relative; z-index:1;
-      display:grid;
-      grid-template-columns:56px 1fr 100px 44px;
-      grid-template-rows:auto auto;
-      grid-template-areas:
-        "rank name points toggle"
-        "rank name ret    toggle";
-      gap:6px; align-items:center;
-    }
-
-    .rank{
-      grid-area:rank; width:56px; height:48px;
-      display:flex; align-items:center; justify-content:center;
-      border-radius:12px; font-weight:800; font-size:16px; color:#3b2a16;
-      border:2px solid #cfb06d; background:linear-gradient(180deg,#ffe39b,#e7b844);
-    }
-    .silver .rank{background:linear-gradient(180deg,#eeeeee,#cfcfd0); border-color:#bfbfc0; color:#3b3b3b}
-    .bronze .rank{background:linear-gradient(180deg,#f4c097,#d18a54); border-color:#b2703d; color:#3b2a16}
-
-    .team{
-      grid-area:name;
-      font-weight:700;
-      color:#2f2216;
-      font-size:17px;
-      line-height:1.12;
-      display:-webkit-box; -webkit-line-clamp:2; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
-      padding-right:2px;
-    }
-
-    .points{
-      grid-area:points;
-      justify-self:end; min-width:84px; height:36px; padding:0 8px; border-radius:12px;
-      display:inline-flex; align-items:center; justify-content:center; gap:6px;
-      font-weight:800; color:#3b2a16; border:2px solid #b37e00;
-      background:linear-gradient(135deg,#f8d27b,#d5a243);
-    }
-    .star{width:18px; height:18px}
-    .points .num{font-size:15px; line-height:1}
-
-    /* Returned badge under points — now green */
-    .ret-badge{
-      grid-area:ret;
-      justify-self:end;
-      font-weight:800; font-size:11px; letter-spacing:.2px;
-      padding:4px 8px; border-radius:999px;
-      background:var(--pill-pub-bg); color:var(--pill-pub-ink); border:1px solid var(--pill-pub-b);
-    }
-
-    .toggle{
-      grid-area:toggle;
-      width:38px; height:38px; min-width:38px; border-radius:999px; border:2px solid #cdbb9c;
-      background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
-      justify-self:end;
-    }
-    .chev{width:16px; height:16px; transition:transform .18s ease}
-    .row.open .chev{transform:rotate(180deg)}
-    .toggle:focus-visible{outline:3px solid var(--focus)}
-    .toggle:active{transform:translateY(1px)}
-
-    /* Breakdown */
-    .break{position:relative; z-index:1; overflow:hidden; max-height:0; transition:max-height .26s ease; margin:6px 2px 0; border-radius:12px; border:1px solid #ead7b9; background:#fff}
-    .row.open .break{max-height:420px}
-    .detail{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px solid #f0e3cc; font-weight:700; color:#4a341e; background:#fff7e6; font-size:14px}
-    .detail:last-child{border-bottom:0; border-radius:0 0 12px 12px}
-    .detail:first-child{border-radius:12px 12px 0 0}
-    .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-    .detail .val{font-weight:800}
-
-    .updated{margin:10px auto 0; color:#f0e3cc; font-weight:700; text-align:center; font-size:13px; max-width:1280px}
-
-    @media (max-width:520px){
-      .row-inner{
-        grid-template-columns:56px 1fr 84px 44px;
-        grid-template-rows:auto auto;
-        grid-template-areas:
-          "rank name points toggle"
-          "rank name ret    toggle";
-      }
-      .rank{width:56px; height:48px; font-size:16px}
-      .team{font-size:16.5px}
-      .points{min-width:78px; height:34px; padding:0 8px}
-      .points .num{font-size:14px}
-    }
-
-    .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
-    .hidden{display:none !important}
+    .footer-note{margin-top:10px;font-size:13px;color:#8b7a64;text-align:right}
   </style>
 </head>
 <body>
   <!-- NAV -->
   <nav class="treasure-nav" id="treasure-nav">
     <div class="nav-container">
+      <!-- Logo is non-clickable here to avoid people accidentally leaving -->
       <div class="nav-logo" aria-label="TeamQuest">
         <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
       </div>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu">☰</button>
     </div>
     <ul class="nav-menu" id="nav-menu" role="menu">
       <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
@@ -231,328 +120,347 @@ TeamQuest • Leaderboard — returned teams dimmed + green Returned badge + cac
   <!-- HERO -->
   <header class="hero">
     <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
-    <div class="hero-title">Leaderboard</div>
+    <div class="hero-title">The Leaderboard</div>
   </header>
 
-  <!-- TIMER STRIP -->
-  <div class="timer-strip">
-    <span id="statusPill" class="pill">Checking…</span>
-    <div id="timer" class="timer-box">-- : -- : --</div>
-  </div>
-
-  <div id="freezeBanner" class="freeze-banner hidden">Final stretch — scores hidden. They’ll be revealed when results are published.</div>
-
-  <!-- CONTENT -->
   <main class="stack">
-    <section class="board" aria-live="polite">
-      <div id="rows" class="rows">
-        <div class="state">Loading…</div>
+    <section class="panel">
+      <h1>🏆 Live Scores</h1>
+      <div class="sub">Totals from all activities across the Quest.</div>
+
+      <div id="statusStrip" class="status-strip status-pre">
+        <span id="statusText">Checking event status…</span>
+        <span id="statusTime" class="time"></span>
+      </div>
+
+      <div class="meta-bar">
+        <div id="metaLeft">Updating…</div>
+        <div id="metaRight">Last refresh: —</div>
+      </div>
+
+      <div class="table-wrap" id="tableWrap">
+        <div class="empty-state" id="emptyState">Loading leaderboard…</div>
+        <table id="boardTable" style="display:none">
+          <thead>
+            <tr>
+              <th class="rank">Rank</th>
+              <th>Team</th>
+              <th class="points">Total</th>
+              <th class="activity">Kindness</th>
+              <th class="activity">Limerick</th>
+              <th class="activity">Scavenger</th>
+              <th class="activity">Clue Hunt</th>
+              <th class="activity">Quiz</th>
+            </tr>
+          </thead>
+          <tbody id="boardBody"></tbody>
+        </table>
+      </div>
+
+      <div class="footer-note" id="footerNote">
+        Live view. Scores may update as the host finalises points.
       </div>
     </section>
-
-    <div id="updated" class="updated">Last updated — --:--:--</div>
   </main>
 
   <script>
-    // Nav + persist ?event=
+    /* NAV + keep ?event= on links */
     (function(){
-      const navToggle = document.getElementById('nav-toggle');
-      const navMenu   = document.getElementById('nav-menu');
-      if(navToggle && navMenu){
-        navToggle.addEventListener('click', ()=> {
-          const open = !navMenu.classList.contains('active');
-          navMenu.classList.toggle('active');
-          navToggle.textContent = open ? '✕' : '☰';
-          navToggle.setAttribute('aria-expanded', String(open));
-        });
-        document.addEventListener('click', (e)=> {
-          const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
-          if(!inside && navMenu.classList.contains('active')){
-            navMenu.classList.remove('active');
-            navToggle.textContent='☰';
-            navToggle.setAttribute('aria-expanded', 'false');
-          }
-        });
-      }
-      const qs = new URLSearchParams(location.search);
-      const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
-      if (EVENT_ID){
-        const needs = ['/clue_hunt','/scavenger','/quiz','/limerick','/kindness','/leaderboard','/gallery'];
-        document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
-          try{
-            const u = new URL(a.getAttribute('href'), location.origin);
-            if (!needs.some(p=>u.pathname.endsWith(p))) return;
-            if (!u.searchParams.get('event')){
-              u.searchParams.set('event', EVENT_ID);
-              a.setAttribute('href', `${u.pathname}?${u.searchParams.toString()}${u.hash}`);
-            }
-          }catch{}
-        });
-      }
+      const navToggle=document.getElementById('nav-toggle');
+      const navMenu=document.getElementById('nav-menu');
+      navToggle?.addEventListener('click',()=>{navMenu.classList.toggle('active');navToggle.textContent=navMenu.classList.contains('active')?'✕':'☰';});
+      document.addEventListener('click',e=>{
+        const inside=navToggle.contains(e.target)||navMenu.contains(e.target);
+        if(!inside && navMenu.classList.contains('active')){navMenu.classList.remove('active');navToggle.textContent='☰';}
+      });
+
+      const qs=new URLSearchParams(location.search);
+      const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
+      if(!EVENT_ID) return;
+
+      document.querySelectorAll('a.nav-link, a.dropdown-link').forEach(a=>{
+        try{
+          const u=new URL(a.getAttribute('href'),location.origin);
+          if(u.origin!==location.origin) return;
+          if(!u.searchParams.get('event')) u.searchParams.set('event',EVENT_ID);
+          a.setAttribute('href',`${u.pathname}?${u.searchParams.toString()}${u.hash}`);
+        }catch{}
+      });
     })();
 
-    // -------- STATE / TIMER --------
-    const qs = new URLSearchParams(location.search);
-    const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
+    // ===== Core leaderboard logic =====
+    const qs=new URLSearchParams(location.search);
+    const EVENT_ID=qs.get('event')||qs.get('eventId')||'';
 
-    const statusPill = document.getElementById('statusPill');
-    const timerEl = document.getElementById('timer');
-    const freezeBanner = document.getElementById('freezeBanner');
+    const statusStrip=document.getElementById('statusStrip');
+    const statusText=document.getElementById('statusText');
+    const statusTime=document.getElementById('statusTime');
+    const metaLeft=document.getElementById('metaLeft');
+    const metaRight=document.getElementById('metaRight');
+    const emptyState=document.getElementById('emptyState');
+    const boardTable=document.getElementById('boardTable');
+    const boardBody=document.getElementById('boardBody');
+    const footerNote=document.getElementById('footerNote');
 
-    const rowsEl = document.getElementById('rows');
-    const updatedEl = document.getElementById('updated');
+    let LKG_LEADERBOARD=null;
+    let LKG_STATE=null;
+    let lastStateUpdate=0;
+    let inPoll=false;
+    let rafId=null;
 
-    const num = v => Number.isFinite(+v) ? +v : 0;
-    const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    function fmtTimeRemaining(ms){
+      if(!ms || ms<=0) return '00:00';
+      const total=Math.floor(ms/1000);
+      const m=String(Math.floor(total/60)).padStart(2,'0');
+      const s=String(total%60).padStart(2,'0');
+      return `${m}:${s}`;
+    }
 
-    const STAR_SVG = `
-      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#fff"/>
-        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="none" stroke="#b37e00" stroke-width="1.6"/>
-      </svg>`;
-    const CHEV_SVG = `
-      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>`;
-
-    const normState = (s='') => {
-      const v = (s || '').toString().trim().toLowerCase();
-      if (['published'].includes(v)) return 'published';
-      if (['running','started','start','active'].includes(v)) return 'running';
-      if (['paused','pause'].includes(v)) return 'paused';
-      if (['ended','end','stopped','stop','complete','completed','finished'].includes(v)) return 'ended';
-      if (['notstarted','idle','ready','pending','draft',''].includes(v)) return 'notstarted';
+    function normState(s=''){
+      const v=(s||'').toString().trim().toLowerCase();
+      if(['published'].includes(v)) return 'published';
+      if(['running','started','start','active'].includes(v)) return 'running';
+      if(['paused','pause'].includes(v)) return 'paused';
+      if(['ended','end','stopped','stop','complete','completed','finished'].includes(v)) return 'ended';
+      if(['notstarted','idle','ready','pending',''].includes(v)) return 'notstarted';
       return 'unknown';
-    };
-
-    const fmt = (ms) => {
-      if (ms < 0) ms = 0;
-      const t = Math.floor(ms/1000);
-      const hh = String(Math.floor(t/3600)).padStart(2,'0');
-      const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
-      const ss = String(t%60).padStart(2,'0');
-      return `${hh} : ${mm} : ${ss}`;
-    };
-
-    let eventState = { state:'unknown', endsAt:null, remainingMs:0, lastUpdateAt:0 };
-    let rafId = null;
-
-    function setStatusPill(state){
-      const s = normState(state);
-      statusPill.className = 'pill ' + (
-        s==='running' ? 'running' : s==='paused' ? 'paused' : s==='ended' ? 'ended' : s==='published' ? 'published' : ''
-      );
-      statusPill.textContent =
-        s==='running'   ? 'Running'   :
-        s==='paused'    ? 'Paused'    :
-        s==='ended'     ? 'Ended'     :
-        s==='published' ? 'Published' : 'Not Started';
     }
 
-    function tick(){
-      cancelAnimationFrame(rafId);
-      const s = normState(eventState.state);
-      let displayMs = 0;
-      if (s === 'running' && eventState.endsAt){
-        displayMs = new Date(eventState.endsAt).getTime() - Date.now();
-        eventState.remainingMs = displayMs;
-      } else if (s === 'paused'){
-        displayMs = Math.max(0, eventState.remainingMs || 0);
-      } else {
-        displayMs = Math.max(0, eventState.remainingMs || 0);
-      }
-      timerEl.textContent = fmt(displayMs);
-      rafId = requestAnimationFrame(tick);
-    }
+    function updateStatusStrip(stateObj){
+      const s=normState(stateObj?.state);
+      const remainingMs = stateObj?.remainingMs ?? null;
+      statusStrip.className='status-strip';
+      statusTime.textContent='';
 
-    async function fetchEventState(){
-      if (!EVENT_ID) return;
-      try{
-        const res = await fetch(`/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`, {cache:'no-store'});
-        if (!res.ok) return;
-        const data = await res.json().catch(()=>null);
-        if (!data) return;
-        const s = normState(data.state);
-        let remainingMs = 0;
-        if (typeof data.remainingMs === 'number')       remainingMs = data.remainingMs;
-        else if (typeof data.remainingSec === 'number') remainingMs = Math.max(0, Math.floor(data.remainingSec*1000));
-        else if (s === 'running' && data.endsAt)        remainingMs = new Date(data.endsAt).getTime() - Date.now();
-
-        eventState = { ...eventState, state:s, endsAt:data.endsAt || null, remainingMs:Math.max(0, remainingMs), lastUpdateAt:Date.now() };
-        setStatusPill(s);
-        tick();
-      }catch{}
-    }
-
-    function shouldFreeze(){
-      const s = normState(eventState.state);
-      if (s === 'published') return false;
-      const ms = Math.max(0, eventState.remainingMs || 0);
-      return ms <= 15 * 60 * 1000; // 15 minutes
-    }
-
-    // -------- LEADERBOARD RENDER --------
-    let lastLeaderboard = null;   // last good non-empty list
-    let hasEverLoaded    = false; // to distinguish first load vs hiccups
-
-    function normalise(data){
-      const list = data.leaderboard || data.rows || data.teams || [];
-      return list.map(t => {
-        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
-        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
-        const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
-        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
-        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
-        const total = num(t.total ?? (k+l+s+c+q));
-        const teamCode = (t.teamCode || t.code || '').toString().trim();
-        const name = t.teamName || t.name || t.team || teamCode || '—';
-        return { name, teamCode, k, l, s, c, q, total };
-      }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
-    }
-
-    function detailLine(label, val, frozen){
-      const v = frozen ? '—' : (Number.isFinite(val) ? val : '--');
-      return `<div class="detail"><div class="label">${escapeHtml(label)}</div><div class="val">${v}</div></div>`;
-    }
-
-    function rowTemplate(t, i, frozen){
-      const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-      const retClass = t.returned ? 'returned' : '';
-      const pointsHtml = frozen ? '—' : `<span class="num">${t.total}</span>`;
-      return `
-        <div class="row ${rankClass} ${retClass}" role="button" tabindex="0" aria-expanded="false" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
-          <div class="row-inner">
-            <div class="rank" aria-hidden="true">${i+1}</div>
-            <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
-            <div class="points" aria-label="Total points for ${escapeAttr(t.name)}">
-              ${STAR_SVG}${pointsHtml}
-            </div>
-            ${t.returned ? `<div class="ret-badge" aria-label="Returned">Returned</div>` : ``}
-            <button class="toggle" aria-label="Toggle breakdown for ${escapeAttr(t.name)}" aria-expanded="false" type="button">${CHEV_SVG}</button>
-          </div>
-          <div class="break" aria-hidden="true">
-            ${detailLine('The Clue Hunt', t.c, frozen)}
-            ${detailLine('The Quiz', t.q, frozen)}
-            ${detailLine('The Scavenger Hunt', t.s, frozen)}
-            ${detailLine('The Kindness Challenge', t.k, frozen)}
-            ${detailLine('The Limerick Challenge', t.l, frozen)}
-          </div>
-        </div>
-      `;
-    }
-
-    function render(list){
-      const frozen = shouldFreeze();
-      freezeBanner.classList.toggle('hidden', !frozen);
-
-      if (!Array.isArray(list) || list.length===0){
-        // If we've never successfully loaded anything, show the empty state.
-        if (!hasEverLoaded) {
-          rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
-        }
-        // If we *have* loaded before, we keep the existing board rendered
-        // and just update the timestamp message in loadBoard().
+      if(s==='published'){
+        statusStrip.classList.add('status-final');
+        statusText.textContent='Final results – the Quest is complete.';
+        footerNote.textContent='Final results locked in by your host.';
         return;
       }
 
-      rowsEl.innerHTML = list.map((t,i)=>rowTemplate(t,i,frozen)).join('');
+      if(s==='ended'){
+        statusStrip.classList.add('status-ended');
+        statusText.textContent='Time\'s up! Scores are being finalised.';
+        footerNote.textContent='Results may move slightly as the host applies final penalties/adjustments.';
+        return;
+      }
 
-      rowsEl.querySelectorAll('.row').forEach(row=>{
-        const btn = row.querySelector('.toggle');
-        const br  = row.querySelector('.break');
+      if(s==='notstarted' || s==='unknown'){
+        statusStrip.classList.add('status-pre');
+        statusText.textContent='Your Quest has not started yet.';
+        statusTime.textContent = '';
+        footerNote.textContent='Once your host starts the event, live scores will appear here.';
+        return;
+      }
 
-        function toggle(open){
-          const willOpen = (typeof open==='boolean') ? open : !row.classList.contains('open');
-          row.classList.toggle('open', willOpen);
-          row.setAttribute('aria-expanded', String(willOpen));
-          btn?.setAttribute('aria-expanded', String(willOpen));
-          br?.setAttribute('aria-hidden', String(!willOpen));
+      if(s==='paused'){
+        statusStrip.classList.add('status-pre');
+        statusText.textContent='The event is currently paused.';
+        if(typeof remainingMs==='number') statusTime.textContent=`Time remaining: ${fmtTimeRemaining(remainingMs)}`;
+        footerNote.textContent='Scores are frozen while the event is paused.';
+        return;
+      }
+
+      // running
+      statusStrip.classList.add('status-running');
+      footerNote.textContent='Live view. Scores may change as new activities are scored.';
+
+      let isFinalStretch=false;
+      if(typeof remainingMs==='number' && remainingMs>0){
+        const mins=remainingMs/60000;
+        if(mins<=15){ // final 15 minutes only
+          isFinalStretch=true;
         }
+      }
 
-        btn?.addEventListener('click', e=>{ e.stopPropagation(); toggle(); });
-        row.addEventListener('click', ()=> toggle());
-        row.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(); } });
+      if(isFinalStretch){
+        statusStrip.classList.remove('status-running');
+        statusStrip.classList.add('status-final-stretch');
+        statusText.textContent='⚠️ Final stretch – last minutes of the Quest!';
+      }else{
+        statusText.textContent='The Quest is underway – scores updating live.';
+      }
+      if(typeof remainingMs==='number' && remainingMs>0){
+        statusTime.textContent=`Time remaining: ${fmtTimeRemaining(remainingMs)}`;
+      }else{
+        statusTime.textContent='';
+      }
+    }
+
+    function addRanks(arr){
+      let lastScore=null, lastRank=0;
+      arr.forEach((t,idx)=>{
+        const s=t.total ?? 0;
+        if(s===lastScore){
+          t.rank=lastRank;
+        }else{
+          t.rank=idx+1;
+          lastRank=t.rank;
+          lastScore=s;
+        }
       });
     }
 
-    async function loadBoard(){
-      const boardUrl = EVENT_ID
-        ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
-        : '/.netlify/functions/get_leaderboard';
-      const returnsUrl = EVENT_ID
-        ? `/.netlify/functions/get_returns_public?eventId=${encodeURIComponent(EVENT_ID)}`
-        : null;
-
-      try{
-        const [boardRes, retRes] = await Promise.all([
-          fetch(boardUrl, { cache:'no-store' }),
-          returnsUrl ? fetch(returnsUrl, { cache:'no-store' }) : Promise.resolve(null)
-        ]);
-
-        const board = await boardRes.json();
-        const ret   = retRes ? await retRes.json() : { returns: [] };
-
-        // map of returned flags
-        const retMap = new Map();
-        for (const r of (ret.returns || [])) {
-          const code = (r.teamCode||"").toString().trim().toUpperCase();
-          const name = (r.teamName||"").toString().trim().toUpperCase();
-          const mark = { returned: !!r.returned || !!r.returnedAt, returnedAt: r.returnedAt || "" };
-          if (code) retMap.set(`C:${code}`, mark);
-          if (name) retMap.set(`N:${name}`, mark);
-        }
-
-        // normalise leaderboard (keeps your scoring), then merge flags
-        const list = normalise(board).map(t => {
-          const codeKey = `C:${(t.teamCode||"").toString().trim().toUpperCase()}`;
-          const nameKey = `N:${(t.name||"").toString().trim().toUpperCase()}`;
-          const info = retMap.get(codeKey) || retMap.get(nameKey);
-          return info ? { ...t, ...info } : t;
-        });
-
-        if (!Array.isArray(list) || list.length === 0) {
-          // If we already have a last good leaderboard, *don't* blank the board,
-          // just update the timestamp with a hint that we're using cached scores.
-          if (lastLeaderboard && lastLeaderboard.length > 0) {
-            updatedEl.textContent = `Last updated — ${nowClock()} (connection hiccup, showing last scores)`;
-            return;
-          }
-          // First load and nothing there – show empty state.
-          hasEverLoaded = true;
-          lastLeaderboard = [];
-          render(list);
-          updatedEl.textContent = `Last updated — ${nowClock()}`;
+    function renderLeaderboard(data, {fromCache=false} = {}){
+      if(!data || !Array.isArray(data) || data.length===0){
+        // If we have never had data, show a clean empty state
+        if(!LKG_LEADERBOARD){
+          boardTable.style.display='none';
+          emptyState.style.display='block';
+          emptyState.textContent = 'No scores yet. Once teams start submitting, they will appear here.';
+          metaLeft.textContent = 'Teams: 0';
           return;
         }
+        // If we *have* a last-known-good, keep showing it and don’t blank
+        data = LKG_LEADERBOARD;
+      }
 
-        // Success path: cache and render
-        lastLeaderboard = list;
-        hasEverLoaded = true;
-        render(list);
-        updatedEl.textContent = `Last updated — ${nowClock()}`;
+      boardBody.innerHTML='';
+      boardTable.style.display='table';
+      emptyState.style.display='none';
+
+      const rows = data.map(t => {
+        const teamName = t.teamName || t.name || t.team || t.teamCode || 'Unnamed crew';
+        const teamCode = t.teamCode || '';
+        const total = Number.isFinite(+t.total) ? +t.total : 0;
+        const kindness = Number(t.kindness ?? t.scores?.kindness ?? 0) || 0;
+        const limerick = Number(t.limerick ?? t.scores?.limerick ?? 0) || 0;
+        const scavenger = Number(t.scavenger ?? t.scores?.scavenger ?? 0) || 0;
+        const cluehunt = Number(t.cluehunt ?? t.scores?.cluehunt ?? 0) || 0;
+        const quiz = Number(t.quiz ?? t.scores?.quiz ?? 0) || 0;
+        return { teamName, teamCode, total, kindness, limerick, scavenger, cluehunt, quiz };
+      });
+
+      rows.sort((a,b)=> b.total - a.total || a.teamName.localeCompare(b.teamName));
+      addRanks(rows);
+
+      rows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML = `
+          <td class="rank">#${r.rank}</td>
+          <td>
+            <div class="team-name">${r.teamName}</div>
+            ${r.teamCode ? `<div class="code">Code: ${r.teamCode}</div>` : ''}
+          </td>
+          <td class="points">${r.total}</td>
+          <td class="activity">${r.kindness}</td>
+          <td class="activity">${r.limerick}</td>
+          <td class="activity">${r.scavenger}</td>
+          <td class="activity">${r.cluehunt}</td>
+          <td class="activity">${r.quiz}</td>
+        `;
+        boardBody.appendChild(tr);
+      });
+
+      const totalTeams = rows.length;
+      const zeroScore = rows.filter(r => r.total===0).length;
+      const scoringTeams = totalTeams - zeroScore;
+      metaLeft.textContent = `Teams: ${totalTeams} • On the board: ${scoringTeams}`;
+
+      if(fromCache){
+        footerNote.textContent = 'Showing last known scores (connection hiccup).';
+      }
+    }
+
+    async function fetchJSON(url, opts = {}){
+      const res = await fetch(url, {...opts, cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return await res.json();
+    }
+
+    async function pollState(){
+      try{
+        const url = EVENT_ID
+          ? `/.netlify/functions/get_event_state?eventId=${encodeURIComponent(EVENT_ID)}`
+          : `/.netlify/functions/get_event_state`;
+        const callAt=Date.now();
+        const data = await fetchJSON(url);
+        if(!data || Object.keys(data).length===0) return;
+
+        if(callAt < lastStateUpdate) return; // stale
+
+        const sObj = {
+          state: data.state || (data.running?'running':data.ended?'ended':data.published?'published':'unknown'),
+          remainingMs: typeof data.remainingMs==='number'
+            ? data.remainingMs
+            : (typeof data.remainingSec==='number' ? Math.max(0,Math.floor(data.remainingSec*1000)) : null)
+        };
+        LKG_STATE = sObj;
+        lastStateUpdate = callAt;
+        updateStatusStrip(sObj);
       }catch(e){
-        // On error: if we have a previous good board, keep it and just tweak the message.
-        if (lastLeaderboard && lastLeaderboard.length > 0) {
-          render(lastLeaderboard);
-          updatedEl.textContent = `Last updated — ${nowClock()} (connection issue, showing last scores)`;
-        } else {
-          rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
-          updatedEl.textContent = `Last updated — ${nowClock()}`;
+        // Keep last state; don’t flip anything wildly on error
+      }
+    }
+
+    async function pollLeaderboard(){
+      let fresh=null;
+      try{
+        const url = EVENT_ID
+          ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
+          : `/.netlify/functions/get_leaderboard`;
+        const data = await fetchJSON(url);
+        const list = data.leaderboard || data.rows || data.teams || [];
+        if(Array.isArray(list) && list.length){
+          fresh = list;
+          LKG_LEADERBOARD = list; // update last-known-good only on non-empty
+          renderLeaderboard(list, {fromCache:false});
+          metaRight.textContent = 'Last refresh: just now';
+        }else{
+          // No rows – don’t blank if we already had something
+          if(LKG_LEADERBOARD){
+            renderLeaderboard(LKG_LEADERBOARD, {fromCache:true});
+            metaRight.textContent = 'Last refresh: (cached – waiting for data)';
+          }else{
+            renderLeaderboard([], {fromCache:false});
+            metaRight.textContent = 'Last refresh: awaiting first scores';
+          }
+        }
+      }catch(e){
+        // On error, keep showing whatever we had
+        if(LKG_LEADERBOARD){
+          renderLeaderboard(LKG_LEADERBOARD, {fromCache:true});
+          metaRight.textContent = 'Last refresh: connection issue (showing cached scores)';
+        }else{
+          emptyState.style.display='block';
+          emptyState.textContent='Unable to load leaderboard. Please try again in a moment.';
+          boardTable.style.display='none';
         }
       }
     }
 
-    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-    function escapeAttr(s){ return String(s).replace(/"/g,'&quot;'); }
+    async function pollLoop(){
+      if(inPoll) return;
+      inPoll=true;
+      try{
+        await Promise.all([pollState(), pollLeaderboard()]);
+      }finally{
+        inPoll=false;
+      }
+    }
 
-    // keep fresh when tab is visible
-    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ fetchEventState(); loadBoard(); } });
+    // Optional: soft countdown tick for status time if running
+    function softTick(){
+      if(LKG_STATE && typeof LKG_STATE.remainingMs==='number'){
+        const s = normState(LKG_STATE.state);
+        if(s==='running' || s==='paused'){
+          LKG_STATE.remainingMs = Math.max(0, LKG_STATE.remainingMs - 1000);
+          updateStatusStrip(LKG_STATE);
+        }
+      }
+      rafId = requestAnimationFrame(softTick);
+    }
 
-    // initial + intervals
-    fetchEventState();
-    loadBoard();
-    setInterval(fetchEventState, 5000);
-    setInterval(loadBoard, 10000);
+    (async function init(){
+      if(!EVENT_ID){
+        statusText.textContent='Missing event link. Ask your host to share the correct leaderboard URL.';
+        statusStrip.className='status-strip status-pre';
+      }
+      await pollLoop();
+      setInterval(pollLoop, 5000);
+      rafId = requestAnimationFrame(softTick);
+    })();
   </script>
 </body>
 </html>
