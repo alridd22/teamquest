@@ -254,13 +254,16 @@
     function uuidv4(){return URL.createObjectURL(new Blob()).split('/').pop();}
     async function callFn(name,payload={},method='POST'){
       const url='/.netlify/functions/'+name+(method==='GET'?('?'+new URLSearchParams(payload)):'');
+
+      const headers={
+        'Content-Type':'application/json',
+        ...(token()?{'Authorization':`Bearer ${token()}`}:{}),
+        'Idempotency-Key':uuidv4()
+      };
+
       const res=await fetch(url,{
         method,
-        headers:{
-          'Content-Type':'application/json',
-          ...(token()?{'Authorization':`Bearer ${token()}`}:{}),
-          'Idempotency-Key':uuidv4()
-        },
+        headers,
         body:method==='GET'?undefined:JSON.stringify(payload),
         keepalive:true
       });
@@ -360,7 +363,7 @@
     $('btnSign').addEventListener('click',signin);
     teamPin.addEventListener('keydown',e=>{if(e.key==='Enter')$('btnSign').click();});
 
-    /* Quiz (original questions) */
+    /* Quiz questions */
     const quizQuestions=[
       { id:1,type:'multiple_choice',question:'What 3 letter animal makes this noise?',audioUrl:'/animal-sound',options:[{letter:'A',text:'Pig'},{letter:'B',text:'Cow'},{letter:'C',text:'Yak'},{letter:'D',text:'Elk'}],correctAnswer:'C',points:10 },
       { id:2,type:'multiple_choice',question:'What is the meaning of the word: Gambado?',options:[{letter:'A',text:'Colourful Hat'},{letter:'B',text:'Native of Gambia'},{letter:'C',text:'Prank'},{letter:'D',text:'Foolish bet'}],correctAnswer:'C',points:10 },
@@ -380,6 +383,11 @@
     let currentTeam={code:'',name:''};
     let qIndex=0, timeLeft=15, timerId=null;
     const answers=[];
+
+    // New per-question state so players can change answers until time runs out
+    let currentChoice=null;       // letter for MC (A/B/C/D/...)
+    let currentTextAnswer='';     // live text for text_input
+    let questionLocked=false;     // once graded, can't change
 
     $('btnAccept').addEventListener('click', startQuizFlow);
     $('btnNextQ').addEventListener('click', ()=>{
@@ -433,11 +441,18 @@
 
     function showQuestion(){
       const q=quizQuestions[qIndex];
+
+      // Reset per-question state
+      currentChoice=null;
+      currentTextAnswer='';
+      questionLocked=false;
+      clearInterval(timerId);
+      $('btnNextQ').style.display='none';
+
       $('qCount').textContent=`Riddle ${qIndex+1} of ${quizQuestions.length}`;
       timeLeft=15;
       updateTimer();
       startTimer();
-      $('btnNextQ').style.display='none';
 
       let html=`<div style="font-weight:900;color:#654321;margin-bottom:12px;font-size:22px;line-height:1.35">${q.question}</div>`;
       if(q.audioUrl){
@@ -460,14 +475,31 @@
       if(q.type==='multiple_choice'){
         document.querySelectorAll('.opt').forEach(el=>{
           el.addEventListener('click',()=>{
+            if(questionLocked) return;
+            // allow changing answer: last selected option before time runs out is final
             document.querySelectorAll('.opt').forEach(x=>x.classList.remove('sel'));
             el.classList.add('sel');
-            submitAnswer(el.dataset.letter);
+            currentChoice=el.dataset.letter||null;
           });
         });
       }else{
-        $('btnSubmitText').addEventListener('click', ()=> submitAnswer());
+        const textEl=$('textAns');
+        const submitBtn=$('btnSubmitText');
+        if(textEl){
+          textEl.addEventListener('input',()=>{
+            if(questionLocked) return;
+            currentTextAnswer=textEl.value;
+          });
+        }
+        if(submitBtn){
+          submitBtn.addEventListener('click',()=>{
+            if(questionLocked) return;
+            // lock/grade immediately on submit, but timer will still visually tick to 0
+            lockAndGradeQuestion();
+          });
+        }
       }
+
       $('qAud')?.play().catch(()=>{});
     }
 
@@ -475,36 +507,49 @@
       clearInterval(timerId);
       timerId=setInterval(()=>{
         timeLeft--;
+        if(timeLeft<0) timeLeft=0;
         updateTimer();
         if(timeLeft<=0){
-          submitAnswer('');
+          clearInterval(timerId);
+          // When timer hits 0, lock whatever the last selection / text is
+          lockAndGradeQuestion();
         }
       },1000);
     }
+
     function updateTimer(){
       $('timer').textContent=timeLeft;
       const pct=(timeLeft/15)*360;
       $('timer').style.background=`conic-gradient(${timeLeft<=3?'#DC143C':timeLeft<=5?'#FF8C00':'#F0C433'} ${pct}deg, #F7EED8 ${pct}deg)`;
     }
+
     function normalize(s){
       return (s||'').toLowerCase().trim().replace(/[^\w\s]/g,'').replace(/\s+/g,'');
     }
 
-    function submitAnswer(choice){
+    function lockAndGradeQuestion(){
+      if(questionLocked) return;
+      questionLocked=true;
       clearInterval(timerId);
+
       const q=quizQuestions[qIndex];
       let correct=false;
 
       if(q.type==='multiple_choice'){
-        correct=(choice===q.correctAnswer);
+        const chosen=currentChoice; // may be null if they never picked
+        correct=(chosen===q.correctAnswer);
+
         document.querySelectorAll('.opt').forEach(el=>{
           const lett=el.dataset.letter;
-          if(lett===q.correctAnswer) el.classList.add('good');
-          else if(el.classList.contains('sel') && !correct) el.classList.add('bad');
+          if(lett===q.correctAnswer){
+            el.classList.add('good');
+          }
+          if(lett===chosen && !correct){
+            el.classList.add('bad');
+          }
           el.style.pointerEvents='none';
         });
 
-        // If incorrect MCQ, show correct letter + option text (e.g. "C. Yak")
         if(!correct){
           const correctOption=q.options?.find(o=>o.letter===q.correctAnswer);
           const correctLabel=correctOption ? `${correctOption.letter}. ${correctOption.text}` : q.correctAnswer;
@@ -514,11 +559,18 @@
           );
         }
       }else{
-        const user=normalize($('textAns')?.value||'');
-        if(q.acceptableAnswers?.length) correct=q.acceptableAnswers.some(a=>normalize(a)===user);
-        else correct=normalize(q.correctAnswer)===user;
-        $('textAns').disabled=true;
-        $('btnSubmitText').disabled=true;
+        const textEl=$('textAns');
+        const submitBtn=$('btnSubmitText');
+        const answerStr=currentTextAnswer || (textEl?.value||'');
+        if(textEl) textEl.disabled=true;
+        if(submitBtn) submitBtn.disabled=true;
+
+        if(q.acceptableAnswers?.length){
+          correct=q.acceptableAnswers.some(a=>normalize(a)===normalize(answerStr));
+        }else{
+          correct=normalize(q.correctAnswer)===normalize(answerStr);
+        }
+
         const pretty=(q.explanation && q.explanation.replace(/^Answer:\s*/i,'').trim())||q.correctAnswer;
         $('qcard').insertAdjacentHTML(
           'beforeend',
@@ -526,9 +578,14 @@
         );
       }
 
+      // Record answer once, using last selection / text at lock time
+      const userAns = q.type==='multiple_choice'
+        ? (currentChoice || '')
+        : (currentTextAnswer || ($('textAns')?.value||''));
+
       answers.push({
         questionId:q.id,
-        userAnswer:choice||($('textAns')?.value||''),
+        userAnswer:userAns,
         correctAnswer:q.correctAnswer,
         isCorrect:correct,
         points:correct?q.points:0,
@@ -539,10 +596,9 @@
         $('qcard').insertAdjacentHTML('beforeend',`<div class="explain">${q.explanation}</div>`);
       }
 
-      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next Question':'See results';
+      $('btnNextQ').textContent=(qIndex<quizQuestions.length-1)?'Next question':'See results';
       $('btnNextQ').style.display='block';
     }
-    window.submitAnswer=submitAnswer;
 
     async function finishQuiz(){
       $('secQuiz').classList.remove('active');
