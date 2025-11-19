@@ -515,12 +515,36 @@
 
     function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));}
 
+    /* ===== Forced-return cache (to mask slow writes) ===== */
+    const FORCED_RETURNS = new Map(); // teamCodeKey -> { returned, expires }
+
+    function setForcedReturn(teamCodeKey, returned, ms = 9000) {
+      FORCED_RETURNS.set(teamCodeKey, {
+        returned: !!returned,
+        expires: Date.now() + ms
+      });
+    }
+
+    function getForcedReturn(teamCodeKey) {
+      const f = FORCED_RETURNS.get(teamCodeKey);
+      if (!f) return null;
+      if (Date.now() > f.expires) {
+        FORCED_RETURNS.delete(teamCodeKey);
+        return null;
+      }
+      return f.returned;
+    }
+
     function renderTeams(teams){
       el.teams.innerHTML = teams.map(t=>{
         const name = (t.teamName || t.name || 'Unnamed crew');
         const code = t.teamCode || t.code || '';
         const codeKey = String(code).trim().toUpperCase();
-        const returned = !!(t.returned || t.hasReturned || t.returnedAt);
+
+        let returned = !!(t.returned || t.hasReturned || t.returnedAt);
+        const forced = getForcedReturn(codeKey);
+        if (forced !== null) returned = forced;
+
         const total = Number.isFinite(+t.total)? +t.total : 0;
         const rank = t.rank || '-';
         const penalty = Number(t.penalty || 0) || 0;
@@ -659,7 +683,9 @@
         setMarkButtonsDisabled(true);
 
         const isUndo = action === 'undoReturn';
-        setTeamReturnedUI(teamCode, !isUndo); // optimistic
+        // optimistic local override
+        setForcedReturn(teamCode, !isUndo);
+        setTeamReturnedUI(teamCode, !isUndo);
 
         const payload = {
           eventId: EVENT_ID,
@@ -676,9 +702,12 @@
             body: JSON.stringify(payload),
             headers: hdrs
           });
-          await loadTeams(); // reconcile once
+          await loadTeams(); // reconcile once with backend
+          FORCED_RETURNS.delete(teamCode); // backend now source of truth for this team
         } catch (e) {
-          setTeamReturnedUI(teamCode, isUndo); // revert
+          // revert local override + UI
+          setForcedReturn(teamCode, isUndo);
+          setTeamReturnedUI(teamCode, isUndo);
           alert(e.message || 'Network error. Please try again.');
         } finally {
           setMarkButtonsDisabled(false);
@@ -724,7 +753,7 @@
       setInterval(async()=>{
         if(polling) return; polling=true;
         try{
-          if (Date.now() < (window.pollingPausedUntil || 0)) return; // respect pause window
+          if (Date.now() < pollingPausedUntil) return; // respect pause window
           await fetchState();
           await fetchPins();
           await loadTeams();
