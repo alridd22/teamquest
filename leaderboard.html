@@ -16,10 +16,10 @@
       --focus:#1594d2;
       --shadow:0 12px 28px rgba(0,0,0,.26);
 
-      --pill-ok-bg:#e6fbf1; --pill-ok-ink:#106a3e; --pill-ok-b:#b8efcf;
+      --pill-ok-bg:#e6fbf1;   --pill-ok-ink:#106a3e;   --pill-ok-b:#b8efcf;
       --pill-warn-bg:#fff6e9; --pill-warn-ink:#7a5a13; --pill-warn-b:#f1d093;
-      --pill-end-bg:#fdeeee; --pill-end-ink:#8b1f1f; --pill-end-b:#f1b3b3;
-      --pill-pub-bg:#e7f9ef; --pill-pub-ink:#0f6e44; --pill-pub-b:#b7ebcf;
+      --pill-end-bg:#fdeeee;  --pill-end-ink:#8b1f1f;  --pill-end-b:#f1b3b3;
+      --pill-pub-bg:#e7f9ef;  --pill-pub-ink:#0f6e44;  --pill-pub-b:#b7ebcf;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
@@ -28,6 +28,7 @@
       font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       background:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.45)),var(--bg);
       background-size:cover; background-position:top center; background-attachment:fixed;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
       padding-top:64px;
     }
 
@@ -55,9 +56,10 @@
       color:#F7EED8; font-weight:800; padding:10px 12px; border-radius:12px;
       background:rgba(247,238,216,.22); border:1px solid rgba(255,255,255,.3);
     }
+    .nav-link:hover,.dropdown-link:hover{background:rgba(247,238,216,.32)}
 
     /* HERO */
-    .hero{min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 8px 12px}
+    .hero{min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding:16px 8px 12px; text-align:center}
     .brand-logo{width:min(210px,64vw); height:auto; margin-bottom:4px; filter:drop-shadow(0 2px 0 rgba(0,0,0,.25)) drop-shadow(0 10px 24px rgba(0,0,0,.35))}
     .hero-title{font-weight:900; font-size:24px; color:#F7EED8; text-shadow:0 2px 6px rgba(0,0,0,.6)}
 
@@ -69,11 +71,11 @@
     }
     .timer-box{
       background:rgba(0,0,0,.28); border:1px solid rgba(255,255,255,.24);
-      border-radius:14px; padding:10px 14px; font-weight:900; font-size:20px;
+      border-radius:14px; padding:10px 14px; font-weight:900; letter-spacing:.12em; font-size:20px;
       color:#FFF3D9; min-width:220px; text-align:center;
     }
     .pill{
-      padding:6px 10px; border-radius:999px; font-size:13px; font-weight:800;
+      padding:6px 10px; border-radius:999px; font-size:13px; font-weight:800; display:inline-block;
       border:2px solid rgba(255,255,255,.35); background:rgba(255,255,255,.12); color:#fff;
     }
     .pill.running{background:var(--pill-ok-bg); color:var(--pill-ok-ink); border-color:var(--pill-ok-b)}
@@ -81,10 +83,9 @@
     .pill.ended{background:var(--pill-end-bg); color:var(--pill-end-ink); border-color:var(--pill-end-b)}
     .pill.published{background:var(--pill-pub-bg); color:var(--pill-pub-ink); border-color:var(--pill-pub-b)}
 
-    /* FREEZE BANNER */
     .freeze-banner{
-      max-width:1280px; margin:0 auto 8px; padding:8px 12px;
-      text-align:center; color:#ffe7b8; font-weight:800;
+      max-width:1280px; margin:0 auto 8px; padding:8px 12px; text-align:center;
+      color:#ffe7b8; font-weight:800;
     }
 
     /* BOARD */
@@ -94,25 +95,20 @@
     }
     .rows{padding:8px 2px 4px}
 
-    /* ROW */
+    /* ROWS */
     .row{
       border-radius:18px; margin:8px 4px; padding:8px;
       background:#fff; position:relative; box-shadow:0 8px 16px rgba(0,0,0,.12);
-      overflow:hidden; cursor:pointer;
+      overflow:hidden; cursor:pointer; transition:opacity .18s ease, filter .18s ease;
     }
-    .row.returned{opacity:.78; filter:grayscale(.45) brightness(.98)}
-    .row.gold{
-      background:linear-gradient(180deg,var(--gold),#E7B844 100%); border:1px solid var(--gold-border)
-    }
-    .row.silver{
-      background:linear-gradient(180deg,var(--silver),#CFCFD0 100%); border:1px solid var(--silver-border)
-    }
-    .row.bronze{
-      background:linear-gradient(180deg,var(--bronze),#D18A54 100%); border:1px solid var(--bronze-border)
-    }
-    .row::before{
-      content:""; position:absolute; inset:6px; border-radius:12px;
-      background:#fff; opacity:.9; pointer-events:none;
+    .row.gold{background:linear-gradient(180deg,var(--gold),#F0C433 38%, #E7B844 100%); border:1px solid var(--gold-border)}
+    .row.silver{background:linear-gradient(180deg,var(--silver),#D9D9DA 38%, #CFCFD0 100%); border:1px solid var(--silver-border)}
+    .row.bronze{background:linear-gradient(180deg,var(--bronze),#E9B48A 38%, #D18A54 100%); border:1px solid var(--bronze-border)}
+    .row::before{content:""; position:absolute; inset:6px; border-radius:12px; background:#fff; opacity:.9; pointer-events:none}
+
+    .row.returned{
+      opacity:.78;
+      filter: grayscale(.45) saturate(.9) brightness(.98);
     }
 
     .row-inner{
@@ -122,59 +118,127 @@
       grid-template-rows:auto auto;
       grid-template-areas:
         "rank name points toggle"
-        "rank name ret toggle";
+        "rank name ret    toggle";
       gap:6px; align-items:center;
     }
 
-    .rank{grid-area:rank; width:56px; height:48px; display:flex; align-items:center; justify-content:center;
+    .rank{
+      grid-area:rank; width:56px; height:48px;
+      display:flex; align-items:center; justify-content:center;
       border-radius:12px; font-weight:800; font-size:16px; color:#3b2a16;
       border:2px solid #cfb06d; background:linear-gradient(180deg,#ffe39b,#e7b844);
     }
+    .silver .rank{background:linear-gradient(180deg,#eeeeee,#cfcfd0); border-color:#bfbfc0; color:#3b3b3b}
+    .bronze .rank{background:linear-gradient(180deg,#f4c097,#d18a54); border-color:#b2703d; color:#3b2a16}
+
     .team{
-      grid-area:name; font-weight:700; color:#2f2216; font-size:17px; line-height:1.12;
-      display:-webkit-box; -webkit-line-clamp:2; overflow:hidden;
+      grid-area:name;
+      font-weight:700;
+      color:#2f2216;
+      font-size:17px;
+      line-height:1.12;
+      display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+      padding-right:2px;
     }
 
     .points{
-      grid-area:points; justify-self:end; min-width:84px; height:36px; padding:0 8px;
-      border-radius:12px;
+      grid-area:points;
+      justify-self:end; min-width:84px; height:36px; padding:0 8px; border-radius:12px;
       display:inline-flex; align-items:center; justify-content:center; gap:6px;
       font-weight:800; color:#3b2a16; border:2px solid #b37e00;
       background:linear-gradient(135deg,#f8d27b,#d5a243);
     }
+    .star{width:18px; height:18px}
+    .points .num{font-size:15px; line-height:1}
 
     .ret-badge{
-      grid-area:ret; justify-self:end; font-weight:800; font-size:11px; padding:4px 8px;
-      border-radius:999px; background:var(--pill-pub-bg); color:var(--pill-pub-ink);
-      border:1px solid var(--pill-pub-b);
+      grid-area:ret;
+      justify-self:end;
+      font-weight:800; font-size:11px; letter-spacing:.2px;
+      padding:4px 8px; border-radius:999px;
+      background:var(--pill-pub-bg); color:var(--pill-pub-ink); border:1px solid var(--pill-pub-b);
     }
 
     .toggle{
-      grid-area:toggle; width:38px; height:38px; border-radius:999px; border:2px solid #cdbb9c;
-      background:#fff; display:flex; align-items:center; justify-content:center;
+      grid-area:toggle;
+      width:38px; height:38px; min-width:38px; border-radius:999px; border:2px solid #cdbb9c;
+      background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer;
+      justify-self:end;
     }
-
     .chev{width:16px; height:16px; transition:transform .18s ease}
     .row.open .chev{transform:rotate(180deg)}
 
-    .break{
-      position:relative; z-index:1; overflow:hidden;
-      max-height:0; transition:max-height .26s ease;
-      margin:6px 2px 0; border-radius:12px; border:1px solid #ead7b9; background:#fff;
-    }
+    .break{position:relative; z-index:1; overflow:hidden; max-height:0; transition:max-height .26s ease; margin:6px 2px 0; border-radius:12px; border:1px solid #ead7b9; background:#fff}
     .row.open .break{max-height:420px}
+    .detail{display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center; padding:8px 10px; border-bottom:1px solid #f0e3cc; font-weight:700; color:#4a341e; background:#fff7e6; font-size:14px}
+    .detail:last-child{border-bottom:0; border-radius:0 0 12px 12px}
+    .detail:first-child{border-radius:12px 12px 0 0}
+    .detail .label{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .detail .val{font-weight:800}
 
-    .detail{
-      display:grid; grid-template-columns:1fr auto; gap:10px; align-items:center;
-      padding:8px 10px; border-bottom:1px solid #f0e3cc;
-      font-weight:700; color:#4a341e; background:#fff7e6; font-size:14px
+    .updated{margin:10px auto 0; color:#f0e3cc; font-weight:700; text-align:center; font-size:13px; max-width:1280px}
+
+    @media (max-width:520px){
+      .row-inner{
+        grid-template-columns:56px 1fr 84px 44px;
+        grid-template-rows:auto auto;
+        grid-template-areas:
+          "rank name points toggle"
+          "rank name ret    toggle";
+      }
+      .team{font-size:16.5px}
+      .points{min-width:78px; height:34px}
+      .points .num{font-size:14px}
     }
 
-    .updated{margin:10px auto 0; color:#f0e3cc; text-align:center; font-size:13px}
-
+    .state{color:var(--panel-ink); background:rgba(255,255,255,.06); border:1px dashed rgba(255,255,255,.25); border-radius:12px; padding:14px; text-align:center}
+    .hidden{display:none !important}
   </style>
 </head>
 <body>
+  <!-- NAV -->
+  <nav class="treasure-nav" id="treasure-nav">
+    <div class="nav-container">
+      <div class="nav-logo" aria-label="TeamQuest">
+        <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest Logo">
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+    </div>
+    <ul class="nav-menu" id="nav-menu" role="menu">
+      <li><a href="https://theteamquest.netlify.app/clue_hunt" class="nav-link" role="menuitem">💎 The Treasure Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/scavenger" class="nav-link" role="menuitem">🔍 The Scavenger Hunt</a></li>
+      <li><a href="https://theteamquest.netlify.app/quiz" class="nav-link" role="menuitem">⏰ The Timed Quiz</a></li>
+      <li><a href="https://theteamquest.netlify.app/limerick" class="nav-link" role="menuitem">📝 The Limerick Challenge</a></li>
+      <li><a href="https://theteamquest.netlify.app/kindness" class="nav-link" role="menuitem">💖 Kindness</a></li>
+      <li><a href="https://theteamquest.netlify.app/gallery" class="dropdown-link" role="menuitem">📸 The Gallery</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <header class="hero">
+    <img src="/Team%20Quest%20Logo-01.png" alt="TeamQuest" class="brand-logo" width="640" height="480">
+    <div class="hero-title">Leaderboard</div>
+  </header>
+
+  <!-- TIMER STRIP -->
+  <div class="timer-strip">
+    <span id="statusPill" class="pill">Checking…</span>
+    <div id="timer" class="timer-box">-- : -- : --</div>
+  </div>
+
+  <div id="freezeBanner" class="freeze-banner hidden">
+    Final stretch — scores hidden. They’ll be revealed when results are published.
+  </div>
+
+  <main class="stack">
+    <section class="board" aria-live="polite">
+      <div id="rows" class="rows">
+        <div class="state">Loading…</div>
+      </div>
+    </section>
+    <div id="updated" class="updated">Last updated — --:--:--</div>
+  </main>
+
   <!-- NAV + persist ?event= -->
   <script>
     (function(){
@@ -185,16 +249,17 @@
           const open = !navMenu.classList.contains('active');
           navMenu.classList.toggle('active');
           navToggle.textContent = open ? '✕' : '☰';
+          navToggle.setAttribute('aria-expanded', String(open));
         });
         document.addEventListener('click', (e)=> {
           const inside = navToggle.contains(e.target) || navMenu.contains(e.target);
           if(!inside && navMenu.classList.contains('active')){
             navMenu.classList.remove('active');
             navToggle.textContent='☰';
+            navToggle.setAttribute('aria-expanded', 'false');
           }
         });
       }
-
       const qs = new URLSearchParams(location.search);
       const EVENT_ID = qs.get('event') || qs.get('eventId') || '';
       if (EVENT_ID){
@@ -224,30 +289,36 @@
     const rowsEl       = document.getElementById('rows');
     const updatedEl    = document.getElementById('updated');
 
-    const num = v => Number.isFinite(+v) ? +v : 0;
+    const num      = v => Number.isFinite(+v) ? +v : 0;
     const nowClock = () => new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
-    /* ---------- SVG ---------- */
     const STAR_SVG = `
-      <svg class="star" viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#fff"/>
-      <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="none" stroke="#b37e00" stroke-width="1.6"/></svg>`;
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="#fff"/>
+        <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3L12 17.8l-5.6 2.9 1.1-6.3-4.6-4.5 6.3-.9L12 2.8z" fill="none" stroke="#b37e00" stroke-width="1.6"/>
+      </svg>`;
     const CHEV_SVG = `
-      <svg class="chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2"/></svg>`;
+      <svg class="chev" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6" fill="none" stroke="#3b2a16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
 
-    /* ---------- TIMER LOGIC ---------- */
+    /* ---------- TIMER ---------- */
     const normState = (s='') => {
       const v = (s||'').toLowerCase().trim();
       if (v==='published') return 'published';
-      if (['running','active','started'].includes(v)) return 'running';
-      if (['paused','pause'].includes(v)) return 'paused';
+      if (['running','started','active'].includes(v)) return 'running';
+      if (['paused','pause'].includes(v))            return 'paused';
       if (['ended','finished','complete','stopped'].includes(v)) return 'ended';
       return 'notstarted';
     };
 
-    const fmt = (ms) => {
+    const fmt = ms => {
       if (ms < 0) ms = 0;
       const t = Math.floor(ms/1000);
-      return `${String(Math.floor(t/3600)).padStart(2,'0')} : ${String(Math.floor((t%3600)/60)).padStart(2,'0')} : ${String(t%60).padStart(2,'0')}`;
+      const hh = String(Math.floor(t/3600)).padStart(2,'0');
+      const mm = String(Math.floor((t%3600)/60)).padStart(2,'0');
+      const ss = String(t%60).padStart(2,'0');
+      return `${hh} : ${mm} : ${ss}`;
     };
 
     let eventState = { state:'unknown', endsAt:null, remainingMs:0 };
@@ -257,28 +328,29 @@
       const s = normState(state);
       statusPill.className = 'pill ' + (
         s==='running'   ? 'running' :
-        s==='paused'    ? 'paused' :
-        s==='ended'     ? 'ended' :
+        s==='paused'    ? 'paused'  :
+        s==='ended'     ? 'ended'   :
         s==='published' ? 'published' : ''
       );
       statusPill.textContent =
-        s==='running'   ? 'Running' :
-        s==='paused'    ? 'Paused' :
-        s==='ended'     ? 'Ended' :
+        s==='running'   ? 'Running'   :
+        s==='paused'    ? 'Paused'    :
+        s==='ended'     ? 'Ended'     :
         s==='published' ? 'Published' : 'Not Started';
     }
 
     function tick(){
       cancelAnimationFrame(rafId);
       const s = normState(eventState.state);
-      let ms = 0;
+      let ms;
 
       if (s === 'running' && eventState.endsAt){
         ms = new Date(eventState.endsAt).getTime() - Date.now();
         eventState.remainingMs = ms;
       } else {
-        ms = Math.max(0, eventState.remainingMs);
+        ms = Math.max(0, eventState.remainingMs || 0);
       }
+
       timerEl.textContent = fmt(ms);
       rafId = requestAnimationFrame(tick);
     }
@@ -297,7 +369,7 @@
         if (typeof data.remainingMs === 'number') {
           remainingMs = data.remainingMs;
         } else if (typeof data.remainingSec === 'number') {
-          remainingMs = Math.max(0, Math.floor(data.remainingSec * 1000));
+          remainingMs = Math.max(0, Math.floor(data.remainingSec*1000));
         } else if (s === 'running' && data.endsAt) {
           remainingMs = new Date(data.endsAt).getTime() - Date.now();
         }
@@ -315,55 +387,65 @@
 
     function shouldFreeze(){
       const s = normState(eventState.state);
-      if (s === 'published') return false;
-      return Math.max(0, eventState.remainingMs) <= 15 * 60 * 1000;
+      if (s !== 'running') return false;          // only freeze while actually running
+      const ms = Math.max(0, eventState.remainingMs || 0);
+      return ms <= 15 * 60 * 1000;               // last 15 mins only
     }
 
     /* ---------- LEADERBOARD ---------- */
     let lastLeaderboard = null;
+    let hasEverLoaded    = false;
 
     function normalise(board){
       const list = board.leaderboard || board.rows || board.teams || [];
-
       return list.map(t => {
-        const k = num(t.kindness ?? t.scores?.kindness ?? t.activities?.kindness);
-        const l = num(t.limerick ?? t.scores?.limerick ?? t.activities?.limerick);
+        const k = num(t.kindness  ?? t.scores?.kindness  ?? t.activities?.kindness);
+        const l = num(t.limerick  ?? t.scores?.limerick  ?? t.activities?.limerick);
         const s = num(t.scavenger ?? t.scores?.scavenger ?? t.activities?.scavenger);
-        const c = num(t.cluehunt ?? t.scores?.cluehunt ?? t.activities?.cluehunt);
-        const q = num(t.quiz ?? t.scores?.quiz ?? t.activities?.quiz);
+        const c = num(t.cluehunt  ?? t.scores?.cluehunt  ?? t.activities?.cluehunt);
+        const q = num(t.quiz      ?? t.scores?.quiz      ?? t.activities?.quiz);
         const total = num(t.total ?? (k+l+s+c+q));
 
-        const name = t.teamName || t.name || t.team || '—';
+        const teamCode = (t.teamCode || t.code || '').toString().trim();
+        const name =
+          t.teamName || t.name || t.teamDisplayName || t.team || teamCode || '—';
 
-        return { name, k, l, s, c, q, total };
+        return { name, teamCode, k, l, s, c, q, total };
       }).sort((a,b)=> b.total - a.total || a.name.localeCompare(b.name));
     }
 
-    function detail(label, val, frozen){
+    function detailLine(label, val, frozen){
+      const v = frozen ? '—' : (Number.isFinite(val) ? val : '--');
       return `
         <div class="detail">
           <div class="label">${escapeHtml(label)}</div>
-          <div class="val">${frozen ? '—' : (Number.isFinite(val) ? val : '--')}</div>
+          <div class="val">${v}</div>
         </div>`;
     }
 
     function rowTemplate(t, i, frozen){
       const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+      const retClass  = t.returned ? 'returned' : '';
+      const pointsHtml = frozen ? '—' : t.total;
       return `
-        <div class="row ${rankClass}" tabindex="0">
+        <div class="row ${rankClass} ${retClass}" role="button" tabindex="0">
           <div class="row-inner">
             <div class="rank">${i+1}</div>
-            <div class="team">${escapeHtml(t.name)}</div>
-            <div class="points">${STAR_SVG}<span class="num">${frozen?'—':t.total}</span></div>
-            <button class="toggle" type="button">${CHEV_SVG}</button>
+            <div class="team" title="${escapeAttr(t.name)}">${escapeHtml(t.name)}</div>
+            <div class="points">
+              ${STAR_SVG}<span class="num">${pointsHtml}</span>
+            </div>
+            ${t.returned ? `<div class="ret-badge">Returned</div>` : ``}
+            <button class="toggle" type="button" aria-label="Toggle breakdown for ${escapeAttr(t.name)}">
+              ${CHEV_SVG}
+            </button>
           </div>
-
-          <div class="break">
-            ${detail('The Clue Hunt', t.c, frozen)}
-            ${detail('The Quiz', t.q, frozen)}
-            ${detail('The Scavenger Hunt', t.s, frozen)}
-            ${detail('The Kindness Challenge', t.k, frozen)}
-            ${detail('The Limerick Challenge', t.l, frozen)}
+          <div class="break" aria-hidden="true">
+            ${detailLine('The Clue Hunt',         t.c, frozen)}
+            ${detailLine('The Quiz',              t.q, frozen)}
+            ${detailLine('The Scavenger Hunt',    t.s, frozen)}
+            ${detailLine('The Kindness Challenge',t.k, frozen)}
+            ${detailLine('The Limerick Challenge',t.l, frozen)}
           </div>
         </div>`;
     }
@@ -372,7 +454,12 @@
       const frozen = shouldFreeze();
       freezeBanner.classList.toggle('hidden', !frozen);
 
-      if (!list || !list.length) return;
+      if (!Array.isArray(list) || !list.length){
+        if (!hasEverLoaded){
+          rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
+        }
+        return;
+      }
 
       rowsEl.innerHTML = list.map((t,i)=>rowTemplate(t,i,frozen)).join('');
 
@@ -380,59 +467,94 @@
         const toggle = row.querySelector('.toggle');
         const br     = row.querySelector('.break');
 
-        function openClose(){
-          const open = !row.classList.contains('open');
+        function setOpen(open){
           row.classList.toggle('open', open);
+          br.setAttribute('aria-hidden', open ? 'false' : 'true');
         }
 
         row.addEventListener('click', e=>{
           if (e.target.closest('.toggle')) return;
-          openClose();
+          setOpen(!row.classList.contains('open'));
         });
 
         toggle.addEventListener('click', e=>{
           e.stopPropagation();
-          openClose();
+          setOpen(!row.classList.contains('open'));
+        });
+
+        row.addEventListener('keydown', e=>{
+          if (e.key==='Enter' || e.key===' '){
+            e.preventDefault();
+            setOpen(!row.classList.contains('open'));
+          }
         });
       });
     }
 
     async function loadBoard(){
-      const url = EVENT_ID
+      const boardUrl   = EVENT_ID
         ? `/.netlify/functions/get_leaderboard?eventId=${encodeURIComponent(EVENT_ID)}`
         : '/.netlify/functions/get_leaderboard';
+      const returnsUrl = EVENT_ID
+        ? `/.netlify/functions/get_returns_public?eventId=${encodeURIComponent(EVENT_ID)}`
+        : null;
 
       try{
-        const r = await fetch(url, {cache:'no-store'});
-        const board = await r.json();
-        const list = normalise(board);
+        const [boardRes, retRes] = await Promise.all([
+          fetch(boardUrl, {cache:'no-store'}),
+          returnsUrl ? fetch(returnsUrl, {cache:'no-store'}) : Promise.resolve(null)
+        ]);
 
-        if (!list.length){
-          if (lastLeaderboard){
+        const board = await boardRes.json();
+        const ret   = retRes ? await retRes.json() : { returns: [] };
+
+        const retMap = new Map();
+        for (const r of (ret.returns || [])){
+          const code = (r.teamCode||'').toString().trim().toUpperCase();
+          const name = (r.teamName||'').toString().trim().toUpperCase();
+          const mark = { returned: !!r.returned || !!r.returnedAt, returnedAt: r.returnedAt || '' };
+          if (code) retMap.set(`C:${code}`, mark);
+          if (name) retMap.set(`N:${name}`, mark);
+        }
+
+        const list = normalise(board).map(t => {
+          const codeKey = `C:${(t.teamCode||'').toString().trim().toUpperCase()}`;
+          const nameKey = `N:${(t.name||'').toString().trim().toUpperCase()}`;
+          const info = retMap.get(codeKey) || retMap.get(nameKey);
+          return info ? { ...t, ...info } : t;
+        });
+
+        if (!Array.isArray(list) || list.length === 0){
+          if (lastLeaderboard && lastLeaderboard.length){
             render(lastLeaderboard);
-            updatedEl.textContent = `Last updated — ${nowClock()} (cached)`;
+            updatedEl.textContent = `Last updated — ${nowClock()} (connection hiccup, showing last scores)`;
             return;
           }
-          rowsEl.innerHTML = `<div class="state">No teams yet.</div>`;
+          hasEverLoaded = true;
+          lastLeaderboard = [];
+          render(list);
+          updatedEl.textContent = `Last updated — ${nowClock()}`;
           return;
         }
 
         lastLeaderboard = list;
+        hasEverLoaded = true;
         render(list);
         updatedEl.textContent = `Last updated — ${nowClock()}`;
-      }catch{
-        if (lastLeaderboard){
+      }catch(e){
+        if (lastLeaderboard && lastLeaderboard.length){
           render(lastLeaderboard);
-          updatedEl.textContent = `Last updated — ${nowClock()} (offline)`;
+          updatedEl.textContent = `Last updated — ${nowClock()} (connection issue, showing last scores)`;
         } else {
-          rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard.</div>`;
+          rowsEl.innerHTML = `<div class="state">Couldn’t load leaderboard. Please try again.</div>`;
+          updatedEl.textContent = `Last updated — ${nowClock()}`;
         }
       }
     }
 
     function escapeHtml(s){return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+    function escapeAttr(s){return String(s).replace(/"/g,'&quot;');}
 
-    /* ---------- REFRESH ---------- */
     document.addEventListener('visibilitychange', ()=>{
       if (!document.hidden){
         fetchEventState();
