@@ -162,7 +162,6 @@ Notes for this version:
       </div>
       <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
         <button id="signInBtn" class="btn">Sign In</button>
-        <button id="reloadCrews" class="btn small" type="button">↻ Reload crews</button>
       </div>
       <div id="signMsg" class="message"></div>
     </section>
@@ -227,7 +226,6 @@ Notes for this version:
       const teamSelect = $('#teamSelect');
       const pinInput   = $('#pinInput');
       const signBtn    = $('#signInBtn');
-      const reloadBtn  = $('#reloadCrews');
       const signMsg    = $('#signMsg');
       const root       = document.getElementById('appRoot');
 
@@ -409,7 +407,6 @@ Notes for this version:
 
       // Wire + init
       signBtn.addEventListener('click', signIn);
-      reloadBtn.addEventListener('click', loadCrews);
       pinInput.addEventListener('keydown', e=>{ if(e.key==='Enter') signIn(); });
 
       loadCrews();
